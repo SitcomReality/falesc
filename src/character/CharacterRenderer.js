@@ -12,8 +12,7 @@ export class CharacterRenderer {
         // Configs
         const s = c.scale;
         const outline = SHAPES.OUTLINE_THICKNESS * s;
-        const bodyW = SHAPES.BODY_WIDTH * s;
-        const bodyH = SHAPES.BODY_HEIGHT * s * c.variations.bodyHeight;
+        const bodyBaseH = SHAPES.BODY_HEIGHT * s * c.variations.bodyHeight;
         const headR = SHAPES.HEAD_RADIUS * s;
         const limbW = SHAPES.LIMB_WIDTH * s;
         const limbH = SHAPES.LIMB_HEIGHT * s;
@@ -33,9 +32,16 @@ export class CharacterRenderer {
         const viewSideFactor = Math.abs(sinA);
         const viewFrontFactor = 1.0 - viewSideFactor;
 
+        // Perspective shortening for torso when leaning and facing front/back.
+        const rawTorsoTilt = c.torsoTilt || 0;
+        const torsoLeanAmount = Math.abs(rawTorsoTilt);
+        const torsoPerspectiveScale = 1 - torsoLeanAmount * viewFrontFactor * 0.15;
+        const bodyH = bodyBaseH * torsoPerspectiveScale;
+
         // Limb Positioning (Sliding)
         // At Front view (cos=1), limbs are at max width (+/- bodyW/2)
         // At Side view (cos=0), limbs are centered (0)
+        const bodyW = SHAPES.BODY_WIDTH * s;
         const armXOffset = (bodyW / 2) * cosA;
         const legXOffset = (6 * s) * cosA;
 
@@ -109,7 +115,8 @@ export class CharacterRenderer {
         // Flip torso tilt sign depending on which side is facing the viewer.
         // When facing right (sinA >= 0) keep positive tilt, when facing left invert it.
         const sideSign = sinA >= 0 ? 1 : -1;
-        const tTilt = (c.torsoTilt || 0) * sideSign;
+        const visualTorsoTilt = rawTorsoTilt * viewSideFactor;
+        const tTilt = visualTorsoTilt * sideSign;
         const cosT = Math.cos(tTilt);
         const sinT = Math.sin(tTilt);
 
@@ -176,7 +183,7 @@ export class CharacterRenderer {
             lShoulder.y + (leftIsFar ? farLimbLift : 0),
             limbW * 0.8,
             lArmLen,
-            lArmAng + tTilt, // Add torso tilt (now flipped correctly) to arm angle
+            lArmAng + tTilt, // Add torso tilt (now view-attenuated and flipped correctly) to arm angle
             c.colors.arms,
             outline
         );
@@ -188,7 +195,7 @@ export class CharacterRenderer {
             rShoulder.y + (rightIsFar ? farLimbLift : 0),
             limbW * 0.8,
             rArmLen,
-            rArmAng + tTilt, // Add torso tilt (now flipped correctly) to arm angle
+            rArmAng + tTilt, // Add torso tilt (now view-attenuated and flipped correctly) to arm angle
             c.colors.arms,
             outline
         );
