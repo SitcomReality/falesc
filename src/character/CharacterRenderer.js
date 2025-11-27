@@ -40,10 +40,9 @@ export class CharacterRenderer {
         const legXOffset = (6 * s) * cosA;
 
         // Z-Sorting Weights
-        // We need explicit order: FarArm < FarLeg < Body < NearLeg < NearArm
-        // (lower zIndex = farther, higher zIndex = nearer to camera)
-        
-        // Corrected labelling: Lower values are "Far", Higher values are "Near"
+        // We need explicit order: visually-correct motion/facing with:
+        // FarArm (back) < FarLeg < Body < NearLeg < NearArm (front)
+        // Note: numerically lower zIndex is rendered behind in Pixi.
         let zFarArm = 10;
         let zFarLeg = 20;
         let zBody = 30;
@@ -51,25 +50,24 @@ export class CharacterRenderer {
         let zNearArm = 50;
 
         if (sinA >= 0) {
-            // Right is Near (facing Right, so Right side is closer to camera)
-            // Left is Far (Background)
-            c.leftArm.zIndex = zFarArm;
-            c.leftLeg.zIndex = zFarLeg;
-            c.bodyG.zIndex = zBody;
-            c.rightLeg.zIndex = zNearLeg;
-            c.rightArm.zIndex = zNearArm;
-        } else {
-            // Left is Near (facing Left, so Left side is closer to camera)
-            // Right is Far (Background)
+            // Facing Right: left limbs are visually nearer, right limbs are visually farther
             c.leftArm.zIndex = zNearArm;
             c.leftLeg.zIndex = zNearLeg;
             c.bodyG.zIndex = zBody;
             c.rightLeg.zIndex = zFarLeg;
             c.rightArm.zIndex = zFarArm;
+        } else {
+            // Facing Left: right limbs are visually nearer, left limbs are visually farther
+            c.leftArm.zIndex = zFarArm;
+            c.leftLeg.zIndex = zFarLeg;
+            c.bodyG.zIndex = zBody;
+            c.rightLeg.zIndex = zNearLeg;
+            c.rightArm.zIndex = zNearArm;
         }
 
         // Determine which limbs are on the far side for vertical offset
-        const leftIsFar = (sinA >= 0);  // when facing right, left side is farther
+        // "Far" = visually behind (lower zIndex set above).
+        const leftIsFar = (sinA < 0);   // when facing Left, left side is farther
         const rightIsFar = !leftIsFar;
         // Far-side limbs lift up to 2 units, scaled by character scale and side-view factor
         // Negative Y is "Up" in screen space, so this raises the far limbs slightly higher.
@@ -116,9 +114,6 @@ export class CharacterRenderer {
         // This ensures arms move with torso but can be Z-sorted independently
         const getShoulderPos = (sideSign) => {
             // sideSign: -1 for Left, 1 for Right
-            // If sideSign matches facing direction logic? 
-            // Previous logic: Right arm used +armXOffset, Left arm used -armXOffset
-            
             const lx = sideSign * armXOffset; 
             const ly = armRelY;
 
