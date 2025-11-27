@@ -43,32 +43,36 @@ export class CharacterRenderer {
         // We need explicit order: FarArm < FarLeg < Body < NearLeg < NearArm
         // (lower zIndex = farther, higher zIndex = nearer to camera)
         
-        let zFarArm = 50;
-        let zFarLeg = 40;
+        // Corrected labelling: Lower values are "Far", Higher values are "Near"
+        let zFarArm = 10;
+        let zFarLeg = 20;
         let zBody = 30;
-        let zNearLeg = 20;
-        let zNearArm = 10;
+        let zNearLeg = 40;
+        let zNearArm = 50;
 
         if (sinA >= 0) {
-            // Right is Near
+            // Right is Near (facing Right, so Right side is closer to camera)
+            // Left is Far (Background)
             c.leftArm.zIndex = zFarArm;
             c.leftLeg.zIndex = zFarLeg;
             c.bodyG.zIndex = zBody;
             c.rightLeg.zIndex = zNearLeg;
             c.rightArm.zIndex = zNearArm;
         } else {
-            // Left is Near
-            c.rightArm.zIndex = zFarArm;
-            c.rightLeg.zIndex = zFarLeg;
-            c.bodyG.zIndex = zBody;
-            c.leftLeg.zIndex = zNearLeg;
+            // Left is Near (facing Left, so Left side is closer to camera)
+            // Right is Far (Background)
             c.leftArm.zIndex = zNearArm;
+            c.leftLeg.zIndex = zNearLeg;
+            c.bodyG.zIndex = zBody;
+            c.rightLeg.zIndex = zFarLeg;
+            c.rightArm.zIndex = zFarArm;
         }
 
         // Determine which limbs are on the far side for vertical offset
         const leftIsFar = (sinA >= 0);  // when facing right, left side is farther
         const rightIsFar = !leftIsFar;
         // Far-side limbs lift up to 2 units, scaled by character scale and side-view factor
+        // Negative Y is "Up" in screen space, so this raises the far limbs slightly higher.
         const farLimbLift = -2 * s * viewSideFactor;
 
         // --- ANIMATION PERSPECTIVE ---
