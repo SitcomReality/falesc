@@ -38,32 +38,29 @@ export class CharacterRenderer {
         const legXOffset = (6 * s) * cosA;
 
         // Z-Sorting Weights
-        // Depth is proportional to sin(angle). 
-        // Right side (+x) is "Near" when facing Right (sin=1).
-        const depthScale = 20; // Max depth range units
-        const rightLimbZ = depthScale * sinA;
-        const leftLimbZ = -depthScale * sinA;
-        const bodyZ = 0;
+        // We need explicit order: FarArm < FarLeg < Body < NearLeg < NearArm
+        // Right side is "Near" when facing Right (sinA >= 0).
+        
+        let zFarArm = 10;
+        let zFarLeg = 20;
+        let zBody = 30;
+        let zNearLeg = 40;
+        let zNearArm = 50;
 
-        // Apply Z-Indices
-        // Base Z for body is 100 to avoid negative confusion
-        c.bodyG.zIndex = 100 + bodyZ;
-
-        // Arms slightly outside/above legs usually
-        // If sinA >= 0 the right side is the near side (right limbs should be in front), 
-        // so put the far-side arm behind its leg. Otherwise left side is near.
         if (sinA >= 0) {
-            // right = near: right arm above right leg, left arm behind left leg
-            c.rightArm.zIndex = 1;
-            c.rightLeg.zIndex = 100 + rightLimbZ;
-            c.leftArm.zIndex = -1;
-            c.leftLeg.zIndex = 100 + leftLimbZ;
+            // Right is Near
+            c.leftArm.zIndex = zFarArm;
+            c.leftLeg.zIndex = zFarLeg;
+            c.bodyG.zIndex = zBody;
+            c.rightLeg.zIndex = zNearLeg;
+            c.rightArm.zIndex = zNearArm;
         } else {
-            // left = near: left arm above left leg, right arm behind right leg
-            c.leftArm.zIndex = 1;
-            c.leftLeg.zIndex = 100 + leftLimbZ;
-            c.rightArm.zIndex = -1;
-            c.rightLeg.zIndex = 100 + rightLimbZ;
+            // Left is Near
+            c.rightArm.zIndex = zFarArm;
+            c.rightLeg.zIndex = zFarLeg;
+            c.bodyG.zIndex = zBody;
+            c.leftLeg.zIndex = zNearLeg;
+            c.leftArm.zIndex = zNearArm;
         }
 
         // Determine which limbs are on the far side for vertical offset
@@ -104,6 +101,31 @@ export class CharacterRenderer {
         // Calculate arm attachment Y relative to hip (bodyG pivot)
         const armRelY = armBaseY - hipY; 
 
+        // Torso Rotation Helpers
+        const tTilt = c.torsoTilt || 0;
+        const cosT = Math.cos(tTilt);
+        const sinT = Math.sin(tTilt);
+
+        // Calculate Shoulder Positions in World Space (relative to graphics container)
+        // This ensures arms move with torso but can be Z-sorted independently
+        const getShoulderPos = (sideSign) => {
+            // sideSign: -1 for Left, 1 for Right
+            // If sideSign matches facing direction logic? 
+            // Previous logic: Right arm used +armXOffset, Left arm used -armXOffset
+            
+            const lx = sideSign * armXOffset; 
+            const ly = armRelY;
+
+            // Rotate (lx, ly) by tTilt around (0,0) which is Hip
+            const rx = lx * cosT - ly * sinT;
+            const ry = lx * sinT + ly * cosT;
+
+            return { x: hipX + rx, y: hipY + ry };
+        };
+
+        const lShoulder = getShoulderPos(-1);
+        const rShoulder = getShoulderPos(1);
+
         // --- SHADOW ---
         const shadow = c.shadow;
         shadow.clear();
@@ -138,39 +160,14 @@ export class CharacterRenderer {
             outline
         );
 
-        // Calculate arm rotation and position based on torso tilt (theta).
-        // Arms are now direct children of c.graphics for Z-ordering control.
-        const theta = c.torsoTilt || 0;
-        const cosT = Math.cos(theta);
-        const sinT = Math.sin(theta);
-        
-        // Helper function to calculate rotated arm position relative to character pivot (0, 0).
-        // xOffset is the lateral distance from center.
-        const calculateRotatedArmPosition = (xOffset, isFar) => {
-            const P_rel_X = xOffset;
-            // P_rel_Y is vertical offset from hip (hipY) + far limb lift adjustment
-            const P_rel_Y = armRelY + (isFar ? farLimbLift : 0); 
-            
-            // Rotate P_rel (position relative to hip pivot) and translate by hip position (hipX, hipY)
-            const armX = hipX + P_rel_X * cosT - P_rel_Y * sinT;
-            const armY = hipY + P_rel_X * sinT + P_rel_Y * cosT;
-            return { x: armX, y: armY };
-        }
-
-        const leftArmPos = calculateRotatedArmPosition(-armXOffset, leftIsFar);
-        const rightArmPos = calculateRotatedArmPosition(armXOffset, rightIsFar);
-
-        const lArmRot = lArmAng + theta;
-        const rArmRot = rArmAng + theta;
-
         // Left arm
         this.drawLimbShape(
             c.leftArm,
-            leftArmPos.x, // Absolute X position relative to character pivot
-            leftArmPos.y, // Absolute Y position relative to character pivot
+            lShoulder.x,
+            lShoulder.y + (leftIsFar ? farLimbLift : 0),
             limbW * 0.8,
             lArmLen,
-            lArmRot, // Angle includes torso tilt
+            lArmAng + tTilt, // Add torso tilt to arm angle
             c.colors.arms,
             outline
         );
@@ -178,11 +175,11 @@ export class CharacterRenderer {
         // Right arm
         this.drawLimbShape(
             c.rightArm,
-            rightArmPos.x, // Absolute X position relative to character pivot
-            rightArmPos.y, // Absolute Y position relative to character pivot
+            rShoulder.x,
+            rShoulder.y + (rightIsFar ? farLimbLift : 0),
             limbW * 0.8,
             rArmLen,
-            rArmRot, // Angle includes torso tilt
+            rArmAng + tTilt, // Add torso tilt to arm angle
             c.colors.arms,
             outline
         );
