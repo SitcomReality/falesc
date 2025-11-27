@@ -30,14 +30,14 @@ export class NPCController {
         const roll = Math.random();
         
         if (roll < 0.25) {
-            // Idle for a bit
-            this.changeState('IDLE', 1.5 + Math.random() * 2.0);
+            // Idle for a bit (longer, calmer)
+            this.changeState('IDLE', 3.0 + Math.random() * 3.0); // 3–6 seconds
         } else if (roll < 0.40) {
-            // Inspect ground
-            this.changeState('BEND', 1.0 + Math.random() * 1.5);
+            // Inspect ground (longer)
+            this.changeState('BEND', 2.0 + Math.random() * 2.0); // 2–4 seconds
         } else {
-            // Wander somewhere
-            this.changeState('WANDER', 2.0 + Math.random() * 4.0);
+            // Wander somewhere (much longer)
+            this.changeState('WANDER', 5.0 + Math.random() * 5.0); // 5–10 seconds
         }
     }
 
@@ -49,16 +49,18 @@ export class NPCController {
 
         if (newState === 'IDLE') {
             c.state = ANIMATION_STATES.IDLE;
-            c.speed = 0.1; // Slow animation speed for breathing
+            // Slower, gentler idle animation
+            c.speed = 0.07;
         } else if (newState === 'BEND') {
             c.state = ANIMATION_STATES.BEND;
-            c.speed = 0.1; 
+            // Slightly slower bend animation
+            c.speed = 0.07; 
         } else if (newState === 'WANDER') {
             // 30% chance to Run, 70% walk
             const run = Math.random() > 0.7;
             c.state = run ? ANIMATION_STATES.RUN : ANIMATION_STATES.WALK;
-            // Set Animation Speed
-            c.speed = run ? 0.25 : 0.15; 
+            // Reduced animation speed for calmer motion
+            c.speed = run ? 0.18 : 0.10; 
             
             // Pick a random direction
             c.facing = Math.random() * Math.PI * 2;
@@ -68,9 +70,8 @@ export class NPCController {
     move(dt) {
         const c = this.character;
         
-        // Determine movement speed based on animation state
-        // Base pixels per frame (approx)
-        const baseSpeed = c.state === ANIMATION_STATES.RUN ? 5 : 2; 
+        // Determine movement speed based on animation state (slower overall)
+        const baseSpeed = c.state === ANIMATION_STATES.RUN ? 2.5 : 1.0; 
         
         // Move
         c.x += Math.cos(c.facing) * baseSpeed;
