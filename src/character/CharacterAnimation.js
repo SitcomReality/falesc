@@ -56,7 +56,9 @@ export class CharacterAnimation {
             // Make running noticeably bouncy: ~5 units rise at stride apex
             // Speed up the run cycle so the visual stride completes faster relative to movement
             c.bobOffset = Math.abs(Math.sin(t * 0.45)) * 5;
-            c.torsoTilt = 0;
+            // Tilt torso forward slightly while running (~half of the bend max tilt)
+            // This gives a subtle forward lean to match running posture.
+            c.torsoTilt = 0.45;
 
             // Run Cycle (More aggressive angles)
             const legAmp = 1.2;
