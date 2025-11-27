@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import { PALETTES } from './constants.js';
 import { CharacterAnimation } from './character/CharacterAnimation.js';
 import { CharacterRenderer } from './character/CharacterRenderer.js';
+import { ANIMATION_STATES } from './constants.js';
 
 export class Character {
     constructor(x, y) {
@@ -15,7 +16,8 @@ export class Character {
         this.colors = this.getRandomPalette();
 
         // Animation State
-        this.state = null; // Global state comes from outside (GameApp)
+        // Defaults, can be overridden by AI or App
+        this.state = ANIMATION_STATES.IDLE; 
         this.frame = Math.random() * 100; // Random start frame for variety
         this.speed = 0.1;
         this.bobOffset = 0;
@@ -68,9 +70,17 @@ export class Character {
         return { ...p };
     }
 
-    update(deltaTime, globalSpeed, globalState) {
+    update(deltaTime) {
+        // Sync graphics container to data position
+        this.graphics.x = this.x;
+        this.graphics.y = this.y;
+        this.shadow.x = this.x;
+        this.shadow.y = this.y;
+
         // Delegate to animation module for time-based updates
-        this.animation.update(deltaTime, globalSpeed, globalState);
+        // Uses internal this.speed and this.state which are set by AI or App
+        this.animation.update(deltaTime, this.speed, this.state);
+        
         // Delegate to renderer module for drawing
         this.renderer.draw();
     }

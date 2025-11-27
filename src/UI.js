@@ -21,21 +21,27 @@ export class SandboxUI {
             removeOne: () => game.removeCharacters(1),
             clear: () => game.clearAll(),
             randomizeColors: () => game.randomizeAllColors(),
-            count: 0 // Display only
+            count: 0, // Display only
+            useAI: false
         };
 
         // Animation Controls
         const folderAnim = this.gui.addFolder('Animation');
-        folderAnim.add(params, 'state', Object.values(ANIMATION_STATES)).name('Action').onChange(v => {
+        
+        folderAnim.add(params, 'useAI').name('Enable AI').onChange(v => {
+            game.settings.useAI = v;
+        });
+
+        folderAnim.add(params, 'state', Object.values(ANIMATION_STATES)).name('Action (Manual)').onChange(v => {
             game.settings.animationState = v;
         });
-        folderAnim.add(params, 'speed', 0, 3).name('Speed').onChange(v => {
+        folderAnim.add(params, 'speed', 0, 3).name('Speed (Manual)').onChange(v => {
             game.settings.globalSpeed = v;
         });
         
         // Rotation Control
         params.rotation = 90; 
-        folderAnim.add(params, 'rotation', 0, 360).name('Rotation').onChange(v => {
+        folderAnim.add(params, 'rotation', 0, 360).name('Rotation (Manual)').onChange(v => {
             game.settings.globalRotation = v * (Math.PI / 180);
         });
 

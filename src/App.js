@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import { Character } from './Character.js';
 import { SandboxUI } from './UI.js';
 import { ANIMATION_STATES } from './constants.js';
+import { CrowdManager } from './ai/CrowdManager.js';
 
 class GameApp {
     constructor() {
@@ -27,9 +28,13 @@ class GameApp {
         this.app.stage.addChild(this.shadowLayer);
         this.app.stage.addChild(this.characterLayer);
 
+        // AI System
+        this.crowdManager = new CrowdManager(this.app);
+
         // Sandbox Settings
         this.settings = {
             count: 0,
+            useAI: false,
             animationState: ANIMATION_STATES.WALK,
             globalSpeed: 1.0,
             globalScale: 1.0,
@@ -61,6 +66,8 @@ class GameApp {
         char.scale = this.settings.globalScale;
         
         this.characters.push(char);
+        this.crowdManager.register(char);
+
         this.characterLayer.addChild(char.graphics);
         this.shadowLayer.addChild(char.shadow);
         
@@ -71,6 +78,9 @@ class GameApp {
         for(let i=0; i<amount; i++) {
             if(this.characters.length === 0) break;
             const char = this.characters.pop();
+            
+            this.crowdManager.unregister(char);
+
             this.characterLayer.removeChild(char.graphics);
             this.shadowLayer.removeChild(char.shadow);
             char.destroy();
@@ -97,6 +107,11 @@ class GameApp {
     update(delta) {
         // Ticker delta is in frames (1 = 60fps). 
         
+        // AI Update
+        if (this.settings.useAI) {
+            this.crowdManager.update(delta);
+        }
+
         // Sort by Y for simple depth effect
         // Only sort every 10 frames to save perf if we have many characters
         if (this.app.ticker.lastTime % 10 === 0) {
@@ -104,11 +119,25 @@ class GameApp {
         }
 
         this.characters.forEach(char => {
-            // Apply Global settings dynamically
+            // Apply Global settings dynamically ONLY if AI is disabled
+            // If AI is enabled, the AI Controller handles state/speed/facing logic
+            
+            if (!this.settings.useAI) {
+                // Manual Override Mode
+                char.facing = this.settings.globalRotation;
+                char.state = this.settings.animationState;
+                // Note: Animation module uses char.speed. 
+                // We'll map globalSpeed (0..3) to a reasonable animation speed (0.1 base)
+                // Actually CharacterAnimation logic multiplies char.speed * globalSpeed arg.
+                // But now we moved to char.update(delta).
+                // So we set char.speed to match what the animation module expects.
+                char.speed = 0.1 * this.settings.globalSpeed;
+            } 
+            
+            // Always apply scale globally for now (or could be individual)
             char.scale = this.settings.globalScale;
-            // Update facing from global settings (could be individualized later)
-            char.facing = this.settings.globalRotation;
-            char.update(delta, this.settings.globalSpeed, this.settings.animationState);
+
+            char.update(delta);
         });
     }
 }
