@@ -108,6 +108,7 @@ export class Character {
     draw() {
         const g = this.graphics;
         g.clear();
+        g.removeChildren(); // remove previous limb children so we don't leak graphics
 
         // Configs
         const s = this.scale;
@@ -166,17 +167,19 @@ export class Character {
     }
 
     drawLimb(g, x, y, w, h, angle, color, outline) {
-        g.save(); // Save matrix
-        g.position.set(x, y);
-        g.rotation = angle;
+        // Create a temporary Graphics for limb so we can set position/rotation independently.
+        const limbG = new PIXI.Graphics();
+        limbG.position.set(x, y);
+        limbG.rotation = angle;
 
-        g.lineStyle(outline, 0x000000, 1, 0.5);
-        g.beginFill(color);
-        // Pivot is top center of limb
-        g.drawRoundedRect(-w/2, 0, w, h, w/2);
-        g.endFill();
+        limbG.lineStyle(outline, 0x000000, 1, 0.5);
+        limbG.beginFill(color);
+        // Pivot is top center of limb: draw from ( -w/2, 0 )
+        limbG.drawRoundedRect(-w/2, 0, w, h, w/2);
+        limbG.endFill();
 
-        g.restore(); // Restore matrix
+        // Add as a child of the main graphics container so it inherits global transforms/position
+        g.addChild(limbG);
     }
 
     destroy() {
