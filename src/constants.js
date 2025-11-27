@@ -19,5 +19,5 @@ export const ANIMATION_STATES = {
     IDLE: 'IDLE',
     WALK: 'WALK',
     RUN: 'RUN',
-    PICKUP: 'PICKUP'
+    BEND: 'BEND'
 };

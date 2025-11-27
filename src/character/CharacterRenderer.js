@@ -98,6 +98,8 @@ export class CharacterRenderer {
         // Base attachment Y positions
         const legBaseY = centerY + bodyH / 2 - 2 * s;
         const armBaseY = centerY - bodyH / 4;
+        const hipX = centerX;
+        const hipY = legBaseY; // top of legs, bottom-center of torso
 
         // --- SHADOW ---
         const shadow = c.shadow;
@@ -157,21 +159,26 @@ export class CharacterRenderer {
             outline
         );
 
-        // --- BODY + HEAD (reuse bodyG) ---
+        // --- BODY + HEAD (reuse bodyG), rotated around hip joint ---
         const bodyG = c.bodyG;
         bodyG.clear();
+
+        // Position the body container at the hip and rotate the whole torso/head
+        bodyG.position.set(hipX, hipY);
+        bodyG.rotation = c.torsoTilt || 0;
 
         // Body
         bodyG.lineStyle(outline, 0x000000, 1, 0.5); // Outer alignment
         bodyG.beginFill(c.colors.body);
-        bodyG.drawRoundedRect(centerX - bodyW / 2, centerY - bodyH / 2, bodyW, bodyH, 4 * s);
+        // Draw torso so that hip is at bottom-center of this rect
+        bodyG.drawRoundedRect(-bodyW / 2, -bodyH, bodyW, bodyH, 4 * s);
 
-        // Fake Shadow under body
+        // Fake Shadow under body (near the hip)
         bodyG.lineStyle(0);
         bodyG.beginFill(0x000000, 0.2); // Semi transparent shadow
         bodyG.drawRect(
-            centerX - bodyW / 2 + outline,
-            centerY + bodyH / 2 - 6 * s,
+            -bodyW / 2 + outline,
+            -6 * s,
             bodyW - outline * 2,
             4 * s
         );
@@ -180,12 +187,12 @@ export class CharacterRenderer {
         // Head
         bodyG.lineStyle(outline, 0x000000, 1, 0.5);
         bodyG.beginFill(c.colors.head);
-        bodyG.drawCircle(centerX, centerY - bodyH / 2 - headR + 4 * s, headR);
+        bodyG.drawCircle(0, -bodyH - headR + 4 * s, headR);
 
         // Highlight on head
         bodyG.lineStyle(0);
         bodyG.beginFill(0xFFFFFF, 0.3);
-        bodyG.drawCircle(centerX - headR / 3, centerY - bodyH / 2 - headR, headR / 3);
+        bodyG.drawCircle(-headR / 3, -bodyH - headR, headR / 3);
         bodyG.endFill();
     }
 

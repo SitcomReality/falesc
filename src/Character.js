@@ -19,6 +19,7 @@ export class Character {
         this.frame = Math.random() * 100; // Random start frame for variety
         this.speed = 0.1;
         this.bobOffset = 0;
+        this.torsoTilt = 0; // Radians, rotation of torso around hip joint
 
         // Procedural Variation (slight differences in limb lengths)
         this.variations = {

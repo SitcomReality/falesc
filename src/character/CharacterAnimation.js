@@ -23,6 +23,7 @@ export class CharacterAnimation {
         if (state === ANIMATION_STATES.IDLE) {
             // Breathing / Bobbing
             c.bobOffset = Math.sin(t * 0.05) * 2;
+            c.torsoTilt = 0;
             c.angles.leftLeg = 0;
             c.angles.rightLeg = 0;
             c.angles.leftArm = Math.sin(t * 0.05) * 0.1;
@@ -30,6 +31,7 @@ export class CharacterAnimation {
         } 
         else if (state === ANIMATION_STATES.WALK) {
             c.bobOffset = Math.abs(Math.sin(t * 0.2)) * 4; // Bob up and down
+            c.torsoTilt = 0;
 
             // Walk Cycle
             const legAmp = 0.6;
@@ -43,6 +45,7 @@ export class CharacterAnimation {
         } 
         else if (state === ANIMATION_STATES.RUN) {
             c.bobOffset = Math.abs(Math.sin(t * 0.3)) * 6;
+            c.torsoTilt = 0;
 
             // Run Cycle (More aggressive angles)
             const legAmp = 1.2;
@@ -54,29 +57,29 @@ export class CharacterAnimation {
             c.angles.leftArm = Math.sin(t * 0.3 + Math.PI) * armAmp;
             c.angles.rightArm = Math.sin(t * 0.3) * armAmp;
         } 
-        else if (state === ANIMATION_STATES.PICKUP) {
-            // Fixed bending pose, with a slight ongoing tremble
-            
-            // Lower the body significantly to simulate bending/squatting
-            c.bobOffset = 18; 
+        else if (state === ANIMATION_STATES.BEND) {
+            // Bend forward to pick something up, torso rotates from hips
+            const cycle = (Math.sin(t * 0.1) + 1) * 0.5; // 0..1
+            const maxTilt = 0.9; // radians, about 50 degrees forward
+            c.bobOffset = 0;
+            c.torsoTilt = cycle * maxTilt;
 
-            // Arms extended forward/down
-            const armAngle = 1.6; // ~91.7 degrees, pointing towards the ground
+            // Slight knee bend
+            const legBendBase = 0.3;
+            const legBendOsc = 0.1 * Math.sin(t * 0.2);
+            c.angles.leftLeg = legBendBase + legBendOsc;
+            c.angles.rightLeg = legBendBase - legBendOsc;
 
-            // Slight movement/tremble
-            const tremble = Math.sin(t * 0.4) * 0.05; 
-
-            c.angles.leftArm = armAngle + tremble;
-            c.angles.rightArm = armAngle - tremble;
-
-            // Legs slightly bent backward (negative rotation)
-            const legBend = -0.1; 
-            c.angles.leftLeg = legBend;
-            c.angles.rightLeg = legBend;
-        }
+            // Arms reaching down toward the ground
+            const reachBase = 1.2; // arms mostly down
+            const reachSwing = 0.2 * Math.sin(t * 0.2 + Math.PI);
+            c.angles.leftArm = reachBase + reachSwing;
+            c.angles.rightArm = reachBase - reachSwing;
+        } 
         else {
             // Fallback to idle-like behavior for unknown states
             c.bobOffset = 0;
+            c.torsoTilt = 0;
         }
     }
 }
