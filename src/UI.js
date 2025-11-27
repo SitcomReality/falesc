@@ -31,7 +31,13 @@ export class SandboxUI {
         });
         folderAnim.add(params, 'speed', 0, 3).name('Speed').onChange(v => {
             game.settings.globalSpeed = v;
-        });        
+        });
+        
+        // Rotation Control
+        params.rotation = 90; 
+        folderAnim.add(params, 'rotation', 0, 360).name('Rotation').onChange(v => {
+            game.settings.globalRotation = v * (Math.PI / 180);
+        });
 
         // Appearance Controls
         const folderLook = this.gui.addFolder('Appearance');

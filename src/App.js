@@ -33,6 +33,7 @@ class GameApp {
             animationState: ANIMATION_STATES.WALK,
             globalSpeed: 1.0,
             globalScale: 1.0,
+            globalRotation: Math.PI / 2, // Default side view
         };
 
         // Initialize UI
@@ -105,6 +106,8 @@ class GameApp {
         this.characters.forEach(char => {
             // Apply Global settings dynamically
             char.scale = this.settings.globalScale;
+            // Update facing from global settings (could be individualized later)
+            char.facing = this.settings.globalRotation;
             char.update(delta, this.settings.globalSpeed, this.settings.animationState);
         });
     }

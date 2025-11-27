@@ -9,7 +9,7 @@ export class Character {
 
         // Visual properties
         this.scale = 1;
-        this.direction = 1; // 1 = right, -1 = left
+        this.facing = Math.PI / 2; // Radians. 0 = Front, PI/2 = Right
         this.colors = this.getRandomPalette();
 
         // Animation State
@@ -136,6 +136,65 @@ export class Character {
         const centerX = 0;
         const centerY = -20 * s - this.bobOffset; // Lift body up
 
+        // --- FACING LOGIC ---
+        // 0 = Front, PI/2 = Right, PI = Back, 3PI/2 = Left
+        const cosA = Math.cos(this.facing);
+        const sinA = Math.sin(this.facing);
+
+        // View Factor: 1.0 = Side View, 0.0 = Front/Back View
+        const viewSideFactor = Math.abs(sinA);
+        const viewFrontFactor = 1.0 - viewSideFactor;
+
+        // Limb Positioning (Sliding)
+        // At Front view (cos=1), limbs are at max width (+/- bodyW/2)
+        // At Side view (cos=0), limbs are centered (0)
+        const armXOffset = (bodyW / 2) * cosA;
+        const legXOffset = (6 * s) * cosA;
+
+        // Z-Sorting Weights
+        // Depth is proportional to sin(angle). 
+        // Right side (+x) is "Near" when facing Right (sin=1).
+        const depthScale = 20; // Max depth range units
+        const rightLimbZ = depthScale * sinA;
+        const leftLimbZ = -depthScale * sinA;
+        const bodyZ = 0;
+
+        // Apply Z-Indices
+        // Base Z for body is 100 to avoid negative confusion
+        this.bodyG.zIndex = 100 + bodyZ;
+        
+        // Arms slightly outside/above legs usually
+        this.rightArm.zIndex = 100 + rightLimbZ + 1;
+        this.rightLeg.zIndex = 100 + rightLimbZ;
+        
+        this.leftArm.zIndex = 100 + leftLimbZ + 1;
+        this.leftLeg.zIndex = 100 + leftLimbZ;
+
+
+        // --- ANIMATION PERSPECTIVE ---
+        // Flatten the rotation arc when facing front (it becomes vertical movement/scaling)
+        // We keep 20% rotation even at front view so it's not totally stiff
+        const rotScale = 0.2 + (0.8 * viewSideFactor);
+
+        // Shorten limbs when they swing "towards" camera in front view
+        const getShortenedLen = (baseLen, angle) => {
+             const swingAmt = Math.abs(angle); 
+             // Shorten proportional to swing angle * frontness
+             const shortenAmt = swingAmt * viewFrontFactor * 0.3;
+             return baseLen * (1.0 - shortenAmt);
+        };
+
+        const rArmLen = getShortenedLen(limbH * this.variations.armLength, this.angles.rightArm);
+        const lArmLen = getShortenedLen(limbH * this.variations.armLength, this.angles.leftArm);
+        const rLegLen = getShortenedLen(limbH * this.variations.legLength, this.angles.rightLeg);
+        const lLegLen = getShortenedLen(limbH * this.variations.legLength, this.angles.leftLeg);
+
+        const rArmAng = this.angles.rightArm * rotScale;
+        const lArmAng = this.angles.leftArm * rotScale;
+        const rLegAng = this.angles.rightLeg * rotScale;
+        const lLegAng = this.angles.leftLeg * rotScale;
+
+
         // --- SHADOW ---
         const shadow = this.shadow;
         shadow.clear();
@@ -145,16 +204,15 @@ export class Character {
         shadow.drawEllipse(0, shadowYOffset, bodyW * 0.9, 6 * s);
         shadow.endFill();
 
-        // --- LIMBS: reuse existing graphics objects ---
-
+        // --- DRAW LIMBS ---
         // Left leg
         this.drawLimbShape(
             this.leftLeg,
-            centerX - 6 * s,
+            centerX - legXOffset,
             centerY + bodyH / 2 - 2 * s,
             limbW,
-            limbH * this.variations.legLength,
-            this.angles.leftLeg,
+            lLegLen,
+            lLegAng,
             this.colors.legs,
             outline
         );
@@ -162,11 +220,11 @@ export class Character {
         // Right leg
         this.drawLimbShape(
             this.rightLeg,
-            centerX + 6 * s,
+            centerX + legXOffset,
             centerY + bodyH / 2 - 2 * s,
             limbW,
-            limbH * this.variations.legLength,
-            this.angles.rightLeg,
+            rLegLen,
+            rLegAng,
             this.colors.legs,
             outline
         );
@@ -174,11 +232,11 @@ export class Character {
         // Left arm
         this.drawLimbShape(
             this.leftArm,
-            centerX - bodyW / 2,
+            centerX - armXOffset,
             centerY - bodyH / 4,
             limbW * 0.8,
-            limbH * this.variations.armLength,
-            this.angles.leftArm,
+            lArmLen,
+            lArmAng,
             this.colors.arms,
             outline
         );
@@ -186,11 +244,11 @@ export class Character {
         // Right arm
         this.drawLimbShape(
             this.rightArm,
-            centerX + bodyW / 2,
+            centerX + armXOffset,
             centerY - bodyH / 4,
             limbW * 0.8,
-            limbH * this.variations.armLength,
-            this.angles.rightArm,
+            rArmLen,
+            rArmAng,
             this.colors.arms,
             outline
         );
@@ -225,24 +283,6 @@ export class Character {
         bodyG.beginFill(0xFFFFFF, 0.3);
         bodyG.drawCircle(centerX - headR / 3, centerY - bodyH / 2 - headR, headR / 3);
         bodyG.endFill();
-
-        // --- LAYERING BASED ON FACING DIRECTION USING zIndex ---
-        // 1 = facing right: right limbs are "far"; -1 = facing left: left limbs are "far"
-        if (this.direction === -1) {
-            // Facing left: left side is farther, draw behind body
-            this.leftLeg.zIndex = 0;   // far leg behind body
-            this.leftArm.zIndex = 1;   // far arm behind body
-            bodyG.zIndex = 2;          // torso + head
-            this.rightLeg.zIndex = 3;  // near leg in front
-            this.rightArm.zIndex = 4;  // near arm in front
-        } else {
-            // Facing right (default): right side is farther
-            this.rightLeg.zIndex = 0;  // far leg behind body
-            this.rightArm.zIndex = 1;  // far arm behind body
-            bodyG.zIndex = 2;          // torso + head
-            this.leftLeg.zIndex = 3;   // near leg in front
-            this.leftArm.zIndex = 4;   // near arm in front
-        }
     }
 
     drawLimbShape(graphics, x, y, w, h, angle, color, outline) {
