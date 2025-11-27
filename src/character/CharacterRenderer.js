@@ -20,7 +20,9 @@ export class CharacterRenderer {
 
         // --- CENTER OF CHARACTER ---
         const centerX = 0;
-        const centerY = -20 * s - c.bobOffset; // Lift body up
+        // Base center Y (ground anchored) - bobOffset raises the visible body above this base.
+        const baseCenterY = -20 * s;
+        const centerY = baseCenterY - c.bobOffset; // Lift body up visually while keeping a ground reference
 
         // --- FACING LOGIC ---
         // 0 = Front, PI/2 = Right, PI = Back, 3PI/2 = Left
@@ -130,7 +132,8 @@ export class CharacterRenderer {
         const shadow = c.shadow;
         shadow.clear();
         // Move shadow down roughly by the leg length so it sits under the feet
-        const shadowYOffset = centerY + bodyH / 2 + (limbH * c.variations.legLength) - 2 * s;
+        // Keep shadow anchored to the ground (ignore bobOffset) so it doesn't rise with the body
+        const shadowYOffset = baseCenterY + bodyH / 2 + (limbH * c.variations.legLength) - 2 * s;
         shadow.beginFill(0x000000);
         shadow.drawEllipse(0, shadowYOffset, bodyW * 0.9, 6 * s);
         shadow.endFill();

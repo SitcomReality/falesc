@@ -53,7 +53,8 @@ export class CharacterAnimation {
             c.angles.rightArm = Math.sin(t * freq) * armAmp;
         } 
         else if (state === ANIMATION_STATES.RUN) {
-            c.bobOffset = Math.abs(Math.sin(t * 0.3)) * 6;
+            // Make running noticeably bouncy: ~5 units rise at stride apex
+            c.bobOffset = Math.abs(Math.sin(t * 0.3)) * 5;
             c.torsoTilt = 0;
 
             // Run Cycle (More aggressive angles)
