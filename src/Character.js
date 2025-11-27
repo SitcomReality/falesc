@@ -17,7 +17,9 @@ export class Character {
 
         // Animation State
         // Defaults, can be overridden by AI or App
-        this.state = ANIMATION_STATES.IDLE; 
+        this._state = ANIMATION_STATES.IDLE;
+        this.stateTime = 0;
+        
         this.frame = Math.random() * 100; // Random start frame for variety
         this.speed = 0.1;
         this.bobOffset = 0;
@@ -62,6 +64,17 @@ export class Character {
         // Helper modules
         this.animation = new CharacterAnimation(this);
         this.renderer = new CharacterRenderer(this);
+    }
+
+    get state() {
+        return this._state;
+    }
+
+    set state(newState) {
+        if (this._state !== newState) {
+            this._state = newState;
+            this.stateTime = 0;
+        }
     }
 
     getRandomPalette() {

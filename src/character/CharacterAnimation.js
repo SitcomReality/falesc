@@ -8,6 +8,9 @@ export class CharacterAnimation {
     update(deltaTime, globalSpeed, globalState) {
         const c = this.character;
 
+        // Update state timer
+        c.stateTime += deltaTime * globalSpeed;
+
         // Update frame counter
         const stateSpeedMultiplier = globalState === ANIMATION_STATES.RUN ? 2.0 : 1.0;
         c.frame += (c.speed * globalSpeed * stateSpeedMultiplier) * deltaTime;
@@ -35,18 +38,19 @@ export class CharacterAnimation {
             c.angles.rightArm = idleRArm;
         } 
         else if (state === ANIMATION_STATES.WALK) {
-            c.bobOffset = Math.abs(Math.sin(t * 0.2)) * 4; // Bob up and down
+            c.bobOffset = Math.abs(Math.sin(t * 0.5)) * 4; // Bob up and down
             c.torsoTilt = 0;
 
             // Walk Cycle
-            const legAmp = 0.6;
-            const armAmp = 0.4;
+            const legAmp = 0.8;
+            const armAmp = 0.6;
+            const freq = 0.5; // Increased from 0.2 to reduce sliding look
 
-            c.angles.leftLeg = Math.sin(t * 0.2) * legAmp;
-            c.angles.rightLeg = Math.sin(t * 0.2 + Math.PI) * legAmp;
+            c.angles.leftLeg = Math.sin(t * freq) * legAmp;
+            c.angles.rightLeg = Math.sin(t * freq + Math.PI) * legAmp;
 
-            c.angles.leftArm = Math.sin(t * 0.2 + Math.PI) * armAmp;
-            c.angles.rightArm = Math.sin(t * 0.2) * armAmp;
+            c.angles.leftArm = Math.sin(t * freq + Math.PI) * armAmp;
+            c.angles.rightArm = Math.sin(t * freq) * armAmp;
         } 
         else if (state === ANIMATION_STATES.RUN) {
             c.bobOffset = Math.abs(Math.sin(t * 0.3)) * 6;
@@ -64,7 +68,17 @@ export class CharacterAnimation {
         } 
         else if (state === ANIMATION_STATES.BEND) {
             // Bend forward to pick something up, torso rotates from hips
-            const cycle = (Math.sin(t * 0.1) + 1) * 0.5; // 0..1
+            
+            // Calculate cycle from stateTime (0 -> PI) based on c.speed
+            // c.speed must be set to (PI / duration) by the controller
+            const phase = c.stateTime * c.speed;
+            
+            // Clamp phase so we don't loop or bounce incorrectly if we overshoot duration
+            // But allow it to hold the end pose if needed (though it goes back to 0)
+            const clampedPhase = Math.max(0, Math.min(Math.PI, phase));
+            
+            const cycle = Math.sin(clampedPhase); // 0 -> 1 -> 0
+            
             const maxTilt = 0.9; // radians, about 50 degrees forward
             
             // Interpolate from IDLE bob (idleBob) to 0 (at max bend)
@@ -74,7 +88,8 @@ export class CharacterAnimation {
 
             // Slight knee bend (Interpolate from 0 to target bend)
             const legBendBase = 0.3;
-            const legBendOsc = 0.1 * Math.sin(t * 0.2);
+            // Use stateTime for oscillation to ensure it's smooth
+            const legBendOsc = 0.1 * Math.sin(c.stateTime * 4); 
             const targetLegAngleL = legBendBase + legBendOsc;
             const targetLegAngleR = legBendBase - legBendOsc;
             
@@ -83,7 +98,7 @@ export class CharacterAnimation {
 
             // Arms reaching down toward the ground (Interpolate from IDLE arm swing to BEND arm swing)
             const reachBase = -0.6; // arms mostly down and forward relative to tilted torso
-            const reachSwing = 0.2 * Math.sin(t * 0.2 + Math.PI);
+            const reachSwing = 0.2 * Math.sin(c.stateTime * 4 + Math.PI);
             const targetArmAngleL = reachBase + reachSwing;
             const targetArmAngleR = reachBase - reachSwing;
             

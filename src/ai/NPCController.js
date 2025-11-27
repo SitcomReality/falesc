@@ -13,6 +13,10 @@ export const NPC_PARAMS = {
     walkSpeed: 20,               // Movement speed multiplier when walking
     runSpeed: 40,                // Movement speed multiplier when running
     turnSpeed: 4.0,              // Rotation speed (radians per second)
+    
+    wanderTurnChance: 0.5,       // Probability to add a curve to the path
+    wanderTurnMax: 1.0,          // Max rotational velocity (radians/sec) when wandering
+    
     calmFactor: 2,              // Dampening applied to animation speed to make motion calmer
     decisionNoise: 0.15,          // Random noise added to timers (fraction)
     boundaryPadding: 50,          // Padding from screen edge before bouncing
@@ -29,6 +33,7 @@ export class NPCController {
         
         // Initialize target to current facing so they don't snap immediately
         this.targetFacing = character.facing || 0;
+        this.currentTurnRate = 0;
 
         // Initial random state, scaled by brainSpeed
         this.decideNextAction();
@@ -71,6 +76,7 @@ export class NPCController {
     changeState(newState, duration) {
         this.state = newState;
         this.timer = duration;
+        this.currentTurnRate = 0;
         
         const c = this.character;
 
@@ -80,23 +86,36 @@ export class NPCController {
             c.speed = 0.07 * NPC_PARAMS.calmFactor;
         } else if (newState === 'BEND') {
             c.state = ANIMATION_STATES.BEND;
-            // Slightly slower bend animation
-            c.speed = 0.07 * NPC_PARAMS.calmFactor; 
+            // Set speed so that (speed * duration) = PI
+            // This ensures exactly one down-up cycle over the duration
+            c.speed = Math.PI / duration; 
         } else if (newState === 'WANDER') {
             // Use configured run chance
             const run = Math.random() < NPC_PARAMS.runChance;
             c.state = run ? ANIMATION_STATES.RUN : ANIMATION_STATES.WALK;
+            
             // Map to configured speeds
-            c.speed = run ? NPC_PARAMS.runSpeed * 0.1 : NPC_PARAMS.walkSpeed * 0.1; 
+            // Increased walk scalar to prevent sliding look (0.1 -> 0.3)
+            c.speed = run ? NPC_PARAMS.runSpeed * 0.1 : NPC_PARAMS.walkSpeed * 0.3; 
             
             // Pick a random target direction
             this.targetFacing = Math.random() * Math.PI * 2;
+
+            // Optional: Curved movement
+            if (Math.random() < NPC_PARAMS.wanderTurnChance) {
+                this.currentTurnRate = (Math.random() * 2 - 1) * NPC_PARAMS.wanderTurnMax;
+            }
         }
     }
 
     move(dt) {
         const c = this.character;
         
+        // Continuous turning (curve the path)
+        if (this.currentTurnRate !== 0) {
+            this.targetFacing += this.currentTurnRate * dt;
+        }
+
         // 1. Rotate character towards targetFacing
         const diff = this.shortestAngleDist(c.facing, this.targetFacing);
         const turnAmount = NPC_PARAMS.turnSpeed * dt;
@@ -145,6 +164,9 @@ export class NPCController {
              // Must update both current and target to preserve turn intention relative to new path
              c.facing = -c.facing;
              this.targetFacing = -this.targetFacing;
+             // Don't flip turnRate; a left turn is still a left turn relative to new heading? 
+             // Actually, geometrically, if reflecting, the chirality might swap. 
+             // But simpler to leave it, they will just spiral the other way relative to world.
         }
         if (bouncedY) {
             // Reflect across horizontal: angle -> PI - angle
