@@ -164,11 +164,21 @@ export class Character {
         this.bodyG.zIndex = 100 + bodyZ;
         
         // Arms slightly outside/above legs usually
-        this.rightArm.zIndex = 100 + rightLimbZ + 1;
-        this.rightLeg.zIndex = 100 + rightLimbZ;
-        
-        this.leftArm.zIndex = 100 + leftLimbZ + 1;
-        this.leftLeg.zIndex = 100 + leftLimbZ;
+        // If sinA >= 0 the right side is the near side (right limbs should be in front),
+        // so put the far-side arm behind its leg. Otherwise left side is near.
+        if (sinA >= 0) {
+            // right = near: right arm above right leg, left arm behind left leg
+            this.rightArm.zIndex = 100 + rightLimbZ + 1;
+            this.rightLeg.zIndex = 100 + rightLimbZ;
+            this.leftArm.zIndex = 100 + leftLimbZ - 1;
+            this.leftLeg.zIndex = 100 + leftLimbZ;
+        } else {
+            // left = near: left arm above left leg, right arm behind right leg
+            this.leftArm.zIndex = 100 + leftLimbZ + 1;
+            this.leftLeg.zIndex = 100 + leftLimbZ;
+            this.rightArm.zIndex = 100 + rightLimbZ - 1;
+            this.rightLeg.zIndex = 100 + rightLimbZ;
+        }
 
 
         // --- ANIMATION PERSPECTIVE ---
