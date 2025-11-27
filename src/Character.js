@@ -205,6 +205,16 @@ export class Character {
         const lLegAng = this.angles.leftLeg * rotScale;
 
 
+        // --- FAR-SIDE LIFT ---
+        // Raise the far-side hip/shoulder up to 2 units (scaled) when facing more front/back.
+        // Determine which side is far: if sinA >= 0, left is far; else right is far.
+        const maxLift = 2 * s; // max 2 units (scaled)
+        // viewFrontFactor = 1.0 when front/back, 0 when side
+        const liftAmount = viewFrontFactor * maxLift;
+        const leftLift = (sinA >= 0) ? liftAmount : 0;
+        const rightLift = (sinA < 0) ? liftAmount : 0;
+
+
         // --- SHADOW ---
         const shadow = this.shadow;
         shadow.clear();
@@ -219,7 +229,7 @@ export class Character {
         this.drawLimbShape(
             this.leftLeg,
             centerX - legXOffset,
-            centerY + bodyH / 2 - 2 * s,
+            centerY + bodyH / 2 - 2 * s - leftLift,
             limbW,
             lLegLen,
             lLegAng,
@@ -231,7 +241,7 @@ export class Character {
         this.drawLimbShape(
             this.rightLeg,
             centerX + legXOffset,
-            centerY + bodyH / 2 - 2 * s,
+            centerY + bodyH / 2 - 2 * s - rightLift,
             limbW,
             rLegLen,
             rLegAng,
@@ -243,7 +253,7 @@ export class Character {
         this.drawLimbShape(
             this.leftArm,
             centerX - armXOffset,
-            centerY - bodyH / 4,
+            centerY - bodyH / 4 - leftLift,
             limbW * 0.8,
             lArmLen,
             lArmAng,
@@ -255,7 +265,7 @@ export class Character {
         this.drawLimbShape(
             this.rightArm,
             centerX + armXOffset,
-            centerY - bodyH / 4,
+            centerY - bodyH / 4 - rightLift,
             limbW * 0.8,
             rArmLen,
             rArmAng,
