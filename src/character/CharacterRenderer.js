@@ -138,39 +138,14 @@ export class CharacterRenderer {
             outline
         );
 
-        // Calculate arm rotation and position based on torso tilt (theta).
-        // Arms are now direct children of c.graphics for Z-ordering control.
-        const theta = c.torsoTilt || 0;
-        const cosT = Math.cos(theta);
-        const sinT = Math.sin(theta);
-        
-        // Helper function to calculate rotated arm position relative to character pivot (0, 0).
-        // xOffset is the lateral distance from center.
-        const calculateRotatedArmPosition = (xOffset, isFar) => {
-            const P_rel_X = xOffset;
-            // P_rel_Y is vertical offset from hip (hipY) + far limb lift adjustment
-            const P_rel_Y = armRelY + (isFar ? farLimbLift : 0); 
-            
-            // Rotate P_rel (position relative to hip pivot) and translate by hip position (hipX, hipY)
-            const armX = hipX + P_rel_X * cosT - P_rel_Y * sinT;
-            const armY = hipY + P_rel_X * sinT + P_rel_Y * cosT;
-            return { x: armX, y: armY };
-        }
-
-        const leftArmPos = calculateRotatedArmPosition(-armXOffset, leftIsFar);
-        const rightArmPos = calculateRotatedArmPosition(armXOffset, rightIsFar);
-
-        const lArmRot = lArmAng + theta;
-        const rArmRot = rArmAng + theta;
-
         // Left arm
         this.drawLimbShape(
             c.leftArm,
-            leftArmPos.x, // Absolute X position relative to character pivot
-            leftArmPos.y, // Absolute Y position relative to character pivot
+            - armXOffset, // Position relative to bodyG pivot
+            armRelY + (leftIsFar ? farLimbLift : 0),
             limbW * 0.8,
             lArmLen,
-            lArmRot, // Angle includes torso tilt
+            lArmAng,
             c.colors.arms,
             outline
         );
@@ -178,11 +153,11 @@ export class CharacterRenderer {
         // Right arm
         this.drawLimbShape(
             c.rightArm,
-            rightArmPos.x, // Absolute X position relative to character pivot
-            rightArmPos.y, // Absolute Y position relative to character pivot
+            + armXOffset, // Position relative to bodyG pivot
+            armRelY + (rightIsFar ? farLimbLift : 0),
             limbW * 0.8,
             rArmLen,
-            rArmRot, // Angle includes torso tilt
+            rArmAng,
             c.colors.arms,
             outline
         );
