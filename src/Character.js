@@ -180,6 +180,11 @@ export class Character {
             this.rightLeg.zIndex = 100 + rightLimbZ;
         }
 
+        // Determine which limbs are on the far side for vertical offset
+        const leftIsFar = (sinA >= 0);  // when facing right, left side is farther
+        const rightIsFar = !leftIsFar;
+        // Far-side limbs lift up to 2 units, scaled by character scale and side-view factor
+        const farLimbLift = -2 * s * viewSideFactor;
 
         // --- ANIMATION PERSPECTIVE ---
         // Flatten the rotation arc when facing front (it becomes vertical movement/scaling)
@@ -204,16 +209,9 @@ export class Character {
         const rLegAng = this.angles.rightLeg * rotScale;
         const lLegAng = this.angles.leftLeg * rotScale;
 
-
-        // --- FAR-SIDE LIFT ---
-        // Raise the far-side hip/shoulder up to 2 units (scaled) when facing more front/back.
-        // Determine which side is far: if sinA >= 0, left is far; else right is far.
-        const maxLift = 2 * s; // max 2 units (scaled)
-        // viewFrontFactor = 1.0 when front/back, 0 when side
-        const liftAmount = viewFrontFactor * maxLift;
-        const leftLift = (sinA >= 0) ? liftAmount : 0;
-        const rightLift = (sinA < 0) ? liftAmount : 0;
-
+        // Base attachment Y positions
+        const legBaseY = centerY + bodyH / 2 - 2 * s;
+        const armBaseY = centerY - bodyH / 4;
 
         // --- SHADOW ---
         const shadow = this.shadow;
@@ -229,7 +227,7 @@ export class Character {
         this.drawLimbShape(
             this.leftLeg,
             centerX - legXOffset,
-            centerY + bodyH / 2 - 2 * s - leftLift,
+            legBaseY + (leftIsFar ? farLimbLift : 0),
             limbW,
             lLegLen,
             lLegAng,
@@ -241,7 +239,7 @@ export class Character {
         this.drawLimbShape(
             this.rightLeg,
             centerX + legXOffset,
-            centerY + bodyH / 2 - 2 * s - rightLift,
+            legBaseY + (rightIsFar ? farLimbLift : 0),
             limbW,
             rLegLen,
             rLegAng,
@@ -253,7 +251,7 @@ export class Character {
         this.drawLimbShape(
             this.leftArm,
             centerX - armXOffset,
-            centerY - bodyH / 4 - leftLift,
+            armBaseY + (leftIsFar ? farLimbLift : 0),
             limbW * 0.8,
             lArmLen,
             lArmAng,
@@ -265,7 +263,7 @@ export class Character {
         this.drawLimbShape(
             this.rightArm,
             centerX + armXOffset,
-            centerY - bodyH / 4 - rightLift,
+            armBaseY + (rightIsFar ? farLimbLift : 0),
             limbW * 0.8,
             rArmLen,
             rArmAng,
