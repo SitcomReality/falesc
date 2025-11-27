@@ -138,6 +138,10 @@ export class CharacterRenderer {
         shadow.drawEllipse(0, shadowYOffset, bodyW * 0.9, 6 * s);
         shadow.endFill();
 
+        // Publish a stable "ground Y" for the character so external systems can sort by ground level.
+        // shadow.position.y is c.shadow.y (set from Character.update), so the world-space ground Y is:
+        c.groundY = c.shadow.y + shadowYOffset;
+        
         // --- DRAW LIMBS ---
         // Left leg
         this.drawLimbShape(

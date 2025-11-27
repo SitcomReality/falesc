@@ -71,6 +71,9 @@ class GameApp {
         this.characterLayer.addChild(char.graphics);
         this.shadowLayer.addChild(char.shadow);
         
+        // Ensure initial zIndex exists so sortChildren can use it
+        char.graphics.zIndex = char.groundY || char.y;
+
         this.settings.count = this.characters.length;
     }
 
@@ -115,9 +118,10 @@ class GameApp {
 
         // Sort by Y for simple depth effect
         // Only sort every 10 frames to save perf if we have many characters
-        if (this.app.ticker.lastTime % 10 === 0) {
-            this.characterLayer.children.sort((a, b) => a.y - b.y);
-        }
+        // Update characters and publish each character's graphics.zIndex from renderer-provided groundY,
+        // then use Pixi's sortChildren to order by zIndex (ground-level).
+        // We throttle sortChildren to every ~10 frames for perf.
+        const shouldSort = Math.floor(this.app.ticker.lastTime / (1000 / 60)) % 10 === 0;
 
         this.characters.forEach(char => {
             // Apply Global settings dynamically ONLY if AI is disabled
@@ -140,7 +144,15 @@ class GameApp {
 
             // Pass seconds to character update (animations expect time in seconds)
             char.update(dtSeconds);
+
+            // Use the renderer-computed groundY as zIndex so sorting respects 'shadow height'.
+            // Fallback to character y if groundY is not yet available.
+            char.graphics.zIndex = typeof char.groundY === 'number' ? char.groundY : char.y;
         });
+
+        if (shouldSort) {
+            this.characterLayer.sortChildren();
+        }
     }
 }
 
