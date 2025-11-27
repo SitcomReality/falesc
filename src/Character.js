@@ -122,8 +122,11 @@ export class Character {
         // --- SHADOW ---
         const shadow = this.shadow;
         shadow.clear();
+        // Position shadow under the character's feet using the same centerY/bodyH used for drawing the body,
+        // so the shadow follows bobbing and scale correctly.
+        const shadowYOffset = centerY + bodyH / 2 + 4 * s; // just below the bottom of the body
         shadow.beginFill(0x000000);
-        shadow.drawEllipse(0, SHAPES.LIMB_HEIGHT * s + 15 * s, bodyW, 6 * s);
+        shadow.drawEllipse(0, shadowYOffset, bodyW * 0.9, 6 * s);
         shadow.endFill();
 
         // --- CENTER OF CHARACTER ---
