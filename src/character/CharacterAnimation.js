@@ -71,7 +71,7 @@ export class CharacterAnimation {
             c.angles.rightLeg = legBendBase - legBendOsc;
 
             // Arms reaching down toward the ground
-            const reachBase = 1.2; // arms mostly down
+            const reachBase = -0.6; // arms mostly down and forward relative to tilted torso
             const reachSwing = 0.2 * Math.sin(t * 0.2 + Math.PI);
             c.angles.leftArm = reachBase + reachSwing;
             c.angles.rightArm = reachBase - reachSwing;

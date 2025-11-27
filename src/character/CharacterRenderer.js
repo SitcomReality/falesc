@@ -54,15 +54,15 @@ export class CharacterRenderer {
         // so put the far-side arm behind its leg. Otherwise left side is near.
         if (sinA >= 0) {
             // right = near: right arm above right leg, left arm behind left leg
-            c.rightArm.zIndex = 100 + rightLimbZ + 1;
+            c.rightArm.zIndex = 1;
             c.rightLeg.zIndex = 100 + rightLimbZ;
-            c.leftArm.zIndex = 100 + leftLimbZ - 1;
+            c.leftArm.zIndex = -1;
             c.leftLeg.zIndex = 100 + leftLimbZ;
         } else {
             // left = near: left arm above left leg, right arm behind right leg
-            c.leftArm.zIndex = 100 + leftLimbZ + 1;
+            c.leftArm.zIndex = 1;
             c.leftLeg.zIndex = 100 + leftLimbZ;
-            c.rightArm.zIndex = 100 + rightLimbZ - 1;
+            c.rightArm.zIndex = -1;
             c.rightLeg.zIndex = 100 + rightLimbZ;
         }
 
@@ -101,6 +101,9 @@ export class CharacterRenderer {
         const hipX = centerX;
         const hipY = legBaseY; // top of legs, bottom-center of torso
 
+        // Calculate arm attachment Y relative to hip (bodyG pivot)
+        const armRelY = armBaseY - hipY; 
+
         // --- SHADOW ---
         const shadow = c.shadow;
         shadow.clear();
@@ -138,8 +141,8 @@ export class CharacterRenderer {
         // Left arm
         this.drawLimbShape(
             c.leftArm,
-            centerX - armXOffset,
-            armBaseY + (leftIsFar ? farLimbLift : 0),
+            - armXOffset, // Position relative to bodyG pivot
+            armRelY + (leftIsFar ? farLimbLift : 0),
             limbW * 0.8,
             lArmLen,
             lArmAng,
@@ -150,8 +153,8 @@ export class CharacterRenderer {
         // Right arm
         this.drawLimbShape(
             c.rightArm,
-            centerX + armXOffset,
-            armBaseY + (rightIsFar ? farLimbLift : 0),
+            + armXOffset, // Position relative to bodyG pivot
+            armRelY + (rightIsFar ? farLimbLift : 0),
             limbW * 0.8,
             rArmLen,
             rArmAng,

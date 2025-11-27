@@ -47,9 +47,14 @@ export class Character {
 
         this.graphics.addChild(this.leftLeg);
         this.graphics.addChild(this.rightLeg);
-        this.graphics.addChild(this.leftArm);
-        this.graphics.addChild(this.rightArm);
+        // this.graphics.addChild(this.leftArm);
+        // this.graphics.addChild(this.rightArm);
         this.graphics.addChild(this.bodyG);
+
+        // Arms are children of bodyG so they rotate with the torso tilt
+        this.bodyG.sortableChildren = true;
+        this.bodyG.addChild(this.leftArm);
+        this.bodyG.addChild(this.rightArm);
 
         // Shadow (simple ellipse texture could be faster, but we'll draw it)
         this.shadow = new PIXI.Graphics();
