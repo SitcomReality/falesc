@@ -209,7 +209,7 @@ export class Character {
         const shadow = this.shadow;
         shadow.clear();
         // Move shadow down roughly by the leg length so it sits under the feet
-        const shadowYOffset = centerY + bodyH / 2 + (limbH * this.variations.legLength) + 2 * s;
+        const shadowYOffset = centerY + bodyH / 2 + (limbH * this.variations.legLength) - 2 * s;
         shadow.beginFill(0x000000);
         shadow.drawEllipse(0, shadowYOffset, bodyW * 0.9, 6 * s);
         shadow.endFill();
