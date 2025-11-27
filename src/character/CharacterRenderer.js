@@ -41,11 +41,11 @@ export class CharacterRenderer {
         // We need explicit order: FarArm < FarLeg < Body < NearLeg < NearArm
         // Right side is "Near" when facing Right (sinA >= 0).
         
-        let zFarArm = 10;
-        let zFarLeg = 20;
+        let zFarArm = 50;
+        let zFarLeg = 40;
         let zBody = 30;
-        let zNearLeg = 40;
-        let zNearArm = 50;
+        let zNearLeg = 20;
+        let zNearArm = 10;
 
         if (sinA >= 0) {
             // Right is Near
