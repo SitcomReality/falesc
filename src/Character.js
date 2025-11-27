@@ -32,6 +32,21 @@ export class Character {
         this.graphics = new PIXI.Container();
         this.graphics.x = x;
         this.graphics.y = y;
+        // Enable internal child sorting so we can control draw order with zIndex
+        this.graphics.sortableChildren = true;
+
+        // Pre-create limb and body graphics so we can reuse them each frame
+        this.leftLeg = new PIXI.Graphics();
+        this.rightLeg = new PIXI.Graphics();
+        this.leftArm = new PIXI.Graphics();
+        this.rightArm = new PIXI.Graphics();
+        this.bodyG = new PIXI.Graphics();
+
+        this.graphics.addChild(this.leftLeg);
+        this.graphics.addChild(this.rightLeg);
+        this.graphics.addChild(this.leftArm);
+        this.graphics.addChild(this.rightArm);
+        this.graphics.addChild(this.bodyG);
 
         // Shadow (simple ellipse texture could be faster, but we'll draw it)
         this.shadow = new PIXI.Graphics();
@@ -107,8 +122,6 @@ export class Character {
 
     draw() {
         const g = this.graphics;
-        // Container: remove previous parts
-        g.removeChildren();
 
         // Configs
         const s = this.scale;
@@ -126,16 +139,17 @@ export class Character {
         // --- SHADOW ---
         const shadow = this.shadow;
         shadow.clear();
-        // Position shadow under the character's feet using the same centerY/bodyH used for drawing the body,
-        // so the shadow follows bobbing and scale correctly.
         // Move shadow down roughly by the leg length so it sits under the feet
         const shadowYOffset = centerY + bodyH / 2 + (limbH * this.variations.legLength) + 2 * s;
         shadow.beginFill(0x000000);
         shadow.drawEllipse(0, shadowYOffset, bodyW * 0.9, 6 * s);
         shadow.endFill();
 
-        // Pre-create limb graphics so we can control draw order
-        const leftLeg = this.drawLimb(
+        // --- LIMBS: reuse existing graphics objects ---
+
+        // Left leg
+        this.drawLimbShape(
+            this.leftLeg,
             centerX - 6 * s,
             centerY + bodyH / 2 - 2 * s,
             limbW,
@@ -145,7 +159,9 @@ export class Character {
             outline
         );
 
-        const rightLeg = this.drawLimb(
+        // Right leg
+        this.drawLimbShape(
+            this.rightLeg,
             centerX + 6 * s,
             centerY + bodyH / 2 - 2 * s,
             limbW,
@@ -155,7 +171,9 @@ export class Character {
             outline
         );
 
-        const leftArm = this.drawLimb(
+        // Left arm
+        this.drawLimbShape(
+            this.leftArm,
             centerX - bodyW / 2,
             centerY - bodyH / 4,
             limbW * 0.8,
@@ -165,7 +183,9 @@ export class Character {
             outline
         );
 
-        const rightArm = this.drawLimb(
+        // Right arm
+        this.drawLimbShape(
+            this.rightArm,
             centerX + bodyW / 2,
             centerY - bodyH / 4,
             limbW * 0.8,
@@ -175,8 +195,9 @@ export class Character {
             outline
         );
 
-        // --- BODY + HEAD AS ONE GRAPHICS ---
-        const bodyG = new PIXI.Graphics();
+        // --- BODY + HEAD (reuse bodyG) ---
+        const bodyG = this.bodyG;
+        bodyG.clear();
 
         // Body
         bodyG.lineStyle(outline, 0x000000, 1, 0.5); // Outer alignment
@@ -205,43 +226,45 @@ export class Character {
         bodyG.drawCircle(centerX - headR / 3, centerY - bodyH / 2 - headR, headR / 3);
         bodyG.endFill();
 
-        // --- LAYERING BASED ON FACING DIRECTION ---
+        // --- LAYERING BASED ON FACING DIRECTION USING zIndex ---
         // 1 = facing right: right limbs are "far"; -1 = facing left: left limbs are "far"
         if (this.direction === -1) {
             // Facing left: left side is farther, draw behind body
-            g.addChild(leftLeg);   // far leg behind body
-            g.addChild(leftArm);   // far arm behind body
-            g.addChild(bodyG);     // torso + head
-            g.addChild(rightLeg);  // near leg in front
-            g.addChild(rightArm);  // near arm in front
+            this.leftLeg.zIndex = 0;   // far leg behind body
+            this.leftArm.zIndex = 1;   // far arm behind body
+            bodyG.zIndex = 2;          // torso + head
+            this.rightLeg.zIndex = 3;  // near leg in front
+            this.rightArm.zIndex = 4;  // near arm in front
         } else {
             // Facing right (default): right side is farther
-            g.addChild(rightLeg);  // far leg behind body
-            g.addChild(rightArm);  // far arm behind body
-            g.addChild(bodyG);     // torso + head
-            g.addChild(leftLeg);   // near leg in front
-            g.addChild(leftArm);   // near arm in front
+            this.rightLeg.zIndex = 0;  // far leg behind body
+            this.rightArm.zIndex = 1;  // far arm behind body
+            bodyG.zIndex = 2;          // torso + head
+            this.leftLeg.zIndex = 3;   // near leg in front
+            this.leftArm.zIndex = 4;   // near arm in front
         }
     }
 
-    drawLimb(x, y, w, h, angle, color, outline) {
-        // Create a Graphics for this limb
-        const limbG = new PIXI.Graphics();
-        limbG.position.set(x, y);
-        limbG.rotation = angle;
+    drawLimbShape(graphics, x, y, w, h, angle, color, outline) {
+        graphics.clear();
+        graphics.position.set(x, y);
+        graphics.rotation = angle;
 
-        limbG.lineStyle(outline, 0x000000, 1, 0.5);
-        limbG.beginFill(color);
+        graphics.lineStyle(outline, 0x000000, 1, 0.5);
+        graphics.beginFill(color);
         // Pivot is top center of limb: draw from ( -w/2, 0 )
-        limbG.drawRoundedRect(-w / 2, 0, w, h, w / 2);
-        limbG.endFill();
-
-        // Return limb graphics so caller can decide layering order
-        return limbG;
+        graphics.drawRoundedRect(-w / 2, 0, w, h, w / 2);
+        graphics.endFill();
     }
 
     destroy() {
-        this.graphics.destroy();
+        // Destroy the container and all child graphics to free GPU/CPU resources
+        this.graphics.destroy({ children: true });
         this.shadow.destroy();
+        this.leftLeg = null;
+        this.rightLeg = null;
+        this.leftArm = null;
+        this.rightArm = null;
+        this.bodyG = null;
     }
 }
