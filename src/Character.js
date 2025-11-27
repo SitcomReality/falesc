@@ -119,19 +119,19 @@ export class Character {
         const limbW = SHAPES.LIMB_WIDTH * s;
         const limbH = SHAPES.LIMB_HEIGHT * s;
 
+        // --- CENTER OF CHARACTER ---
+        const centerX = 0;
+        const centerY = -20 * s - this.bobOffset; // Lift body up
+
         // --- SHADOW ---
         const shadow = this.shadow;
         shadow.clear();
         // Position shadow under the character's feet using the same centerY/bodyH used for drawing the body,
         // so the shadow follows bobbing and scale correctly.
-        const shadowYOffset = centerY + bodyH / 2 + 4 * s; // just below the bottom of the body
+        const shadowYOffset = centerY + bodyH / 2 + 2 * s; // moved closer to feet
         shadow.beginFill(0x000000);
         shadow.drawEllipse(0, shadowYOffset, bodyW * 0.9, 6 * s);
         shadow.endFill();
-
-        // --- CENTER OF CHARACTER ---
-        const centerX = 0;
-        const centerY = -20 * s - this.bobOffset; // Lift body up
 
         // Pre-create limb graphics so we can control draw order
         const leftLeg = this.drawLimb(
