@@ -106,7 +106,10 @@ export class CharacterRenderer {
         const armRelY = armBaseY - hipY; 
 
         // Torso Rotation Helpers
-        const tTilt = c.torsoTilt || 0;
+        // Flip torso tilt sign depending on which side is facing the viewer.
+        // When facing right (sinA >= 0) keep positive tilt, when facing left invert it.
+        const sideSign = sinA >= 0 ? 1 : -1;
+        const tTilt = (c.torsoTilt || 0) * sideSign;
         const cosT = Math.cos(tTilt);
         const sinT = Math.sin(tTilt);
 
@@ -173,7 +176,7 @@ export class CharacterRenderer {
             lShoulder.y + (leftIsFar ? farLimbLift : 0),
             limbW * 0.8,
             lArmLen,
-            lArmAng + tTilt, // Add torso tilt to arm angle
+            lArmAng + tTilt, // Add torso tilt (now flipped correctly) to arm angle
             c.colors.arms,
             outline
         );
@@ -185,7 +188,7 @@ export class CharacterRenderer {
             rShoulder.y + (rightIsFar ? farLimbLift : 0),
             limbW * 0.8,
             rArmLen,
-            rArmAng + tTilt, // Add torso tilt to arm angle
+            rArmAng + tTilt, // Add torso tilt (now flipped correctly) to arm angle
             c.colors.arms,
             outline
         );
@@ -196,7 +199,7 @@ export class CharacterRenderer {
 
         // Position the body container at the hip and rotate the whole torso/head
         bodyG.position.set(hipX, hipY);
-        bodyG.rotation = c.torsoTilt || 0;
+        bodyG.rotation = tTilt;
 
         // Body
         bodyG.lineStyle(outline, 0x000000, 1, 0.5); // Outer alignment
