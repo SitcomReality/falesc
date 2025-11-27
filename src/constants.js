@@ -18,5 +18,6 @@ export const SHAPES = {
 export const ANIMATION_STATES = {
     IDLE: 'IDLE',
     WALK: 'WALK',
-    RUN: 'RUN'
+    RUN: 'RUN',
+    PICKUP: 'PICKUP'
 };

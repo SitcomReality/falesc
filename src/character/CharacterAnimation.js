@@ -53,7 +53,28 @@ export class CharacterAnimation {
 
             c.angles.leftArm = Math.sin(t * 0.3 + Math.PI) * armAmp;
             c.angles.rightArm = Math.sin(t * 0.3) * armAmp;
-        } else {
+        } 
+        else if (state === ANIMATION_STATES.PICKUP) {
+            // Fixed bending pose, with a slight ongoing tremble
+            
+            // Lower the body significantly to simulate bending/squatting
+            c.bobOffset = 18; 
+
+            // Arms extended forward/down
+            const armAngle = 1.6; // ~91.7 degrees, pointing towards the ground
+
+            // Slight movement/tremble
+            const tremble = Math.sin(t * 0.4) * 0.05; 
+
+            c.angles.leftArm = armAngle + tremble;
+            c.angles.rightArm = armAngle - tremble;
+
+            // Legs slightly bent backward (negative rotation)
+            const legBend = -0.1; 
+            c.angles.leftLeg = legBend;
+            c.angles.rightLeg = legBend;
+        }
+        else {
             // Fallback to idle-like behavior for unknown states
             c.bobOffset = 0;
         }
