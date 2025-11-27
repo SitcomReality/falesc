@@ -131,11 +131,20 @@ export class Character {
         const centerX = 0;
         const centerY = -20 * s - this.bobOffset; // Lift body up
 
-        // --- LEGS ---
-        // Left Leg
-        this.drawLimb(g, centerX - 6 * s, centerY + bodyH/2, limbW, limbH * this.variations.legLength, this.angles.leftLeg, this.colors.legs, outline);
-        // Right Leg
-        this.drawLimb(g, centerX + 6 * s, centerY + bodyH/2, limbW, limbH * this.variations.legLength, this.angles.rightLeg, this.colors.legs, outline);
+        // Determine which side is "far" based on facing direction.
+        // direction: 1 = facing right (far side = right), -1 = facing left (far side = left)
+        const farIsLeft = this.direction === -1;
+
+        // Draw far-side limbs first so they appear behind the body.
+        if (farIsLeft) {
+            // Far: Left Leg & Left Arm
+            this.drawLimb(g, centerX - 6 * s, centerY + bodyH/2, limbW, limbH * this.variations.legLength, this.angles.leftLeg, this.colors.legs, outline);
+            this.drawLimb(g, centerX - bodyW/2, centerY - bodyH/4, limbW * 0.8, limbH * this.variations.armLength, this.angles.leftArm, this.colors.arms, outline);
+        } else {
+            // Far: Right Leg & Right Arm
+            this.drawLimb(g, centerX + 6 * s, centerY + bodyH/2, limbW, limbH * this.variations.legLength, this.angles.rightLeg, this.colors.legs, outline);
+            this.drawLimb(g, centerX + bodyW/2, centerY - bodyH/4, limbW * 0.8, limbH * this.variations.armLength, this.angles.rightArm, this.colors.arms, outline);
+        }
 
         // --- BODY ---
         g.lineStyle(outline, 0x000000, 1, 0.5); // Outer alignment
@@ -148,11 +157,16 @@ export class Character {
         g.drawRect(centerX - bodyW/2 + outline, centerY + bodyH/2 - 6*s, bodyW - outline*2, 4*s);
         g.endFill();
 
-        // --- ARMS ---
-        // Left Arm (Behind body if needed, but here simple layering)
-        this.drawLimb(g, centerX - bodyW/2, centerY - bodyH/4, limbW * 0.8, limbH * this.variations.armLength, this.angles.leftArm, this.colors.arms, outline);
-        // Right Arm
-        this.drawLimb(g, centerX + bodyW/2, centerY - bodyH/4, limbW * 0.8, limbH * this.variations.armLength, this.angles.rightArm, this.colors.arms, outline);
+        // Draw near-side limbs after the body so they appear in front.
+        if (farIsLeft) {
+            // Near: Right Leg & Right Arm
+            this.drawLimb(g, centerX + 6 * s, centerY + bodyH/2, limbW, limbH * this.variations.legLength, this.angles.rightLeg, this.colors.legs, outline);
+            this.drawLimb(g, centerX + bodyW/2, centerY - bodyH/4, limbW * 0.8, limbH * this.variations.armLength, this.angles.rightArm, this.colors.arms, outline);
+        } else {
+            // Near: Left Leg & Left Arm
+            this.drawLimb(g, centerX - 6 * s, centerY + bodyH/2, limbW, limbH * this.variations.legLength, this.angles.leftLeg, this.colors.legs, outline);
+            this.drawLimb(g, centerX - bodyW/2, centerY - bodyH/4, limbW * 0.8, limbH * this.variations.armLength, this.angles.leftArm, this.colors.arms, outline);
+        }
 
         // --- HEAD ---
         g.lineStyle(outline, 0x000000, 1, 0.5);
