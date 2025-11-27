@@ -133,7 +133,7 @@ export class Character {
         // Pre-create limb graphics so we can control draw order
         const leftLeg = this.drawLimb(
             centerX - 6 * s,
-            centerY + bodyH / 2,
+            centerY + bodyH / 2 - 2 * s,
             limbW,
             limbH * this.variations.legLength,
             this.angles.leftLeg,
@@ -143,7 +143,7 @@ export class Character {
 
         const rightLeg = this.drawLimb(
             centerX + 6 * s,
-            centerY + bodyH / 2,
+            centerY + bodyH / 2 - 2 * s,
             limbW,
             limbH * this.variations.legLength,
             this.angles.rightLeg,
