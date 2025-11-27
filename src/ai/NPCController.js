@@ -1,5 +1,23 @@
 import { ANIMATION_STATES } from '../constants.js';
 
+// Tweakable NPC parameters (editable via host UI when available)
+export const NPC_PARAMS = {
+    brainSpeed: 1.0,               // How quickly the NPC decision timer scales (higher = faster decisions)
+    idleDurationMin: 3.0,         // Idle state minimum duration (seconds)
+    idleDurationMax: 6.0,         // Idle state maximum duration (seconds)
+    bendDurationMin: 2.0,         // Bend/inspect state minimum duration (seconds)
+    bendDurationMax: 4.0,         // Bend/inspect state maximum duration (seconds)
+    wanderDurationMin: 5.0,       // Wander state minimum duration (seconds)
+    wanderDurationMax: 10.0,      // Wander state maximum duration (seconds)
+    runChance: 0.30,              // Chance to run when starting a wander (0..1)
+    walkSpeed: 1.0,               // Movement speed multiplier when walking
+    runSpeed: 2.5,                // Movement speed multiplier when running
+    calmFactor: 0.9,              // Dampening applied to animation speed to make motion calmer
+    decisionNoise: 0.15,          // Random noise added to timers (fraction)
+    boundaryPadding: 50,          // Padding from screen edge before bouncing
+    movementEnabled: true         // Master toggle — if false, NPCs won't move
+};
+
 export class NPCController {
     constructor(character, screenBounds) {
         this.character = character;
@@ -8,12 +26,14 @@ export class NPCController {
         this.timer = 0;
         this.state = 'IDLE'; 
         
-        // Initial random state
+        // Initial random state, scaled by brainSpeed
         this.decideNextAction();
     }
 
     update(dt) {
-        this.timer -= dt;
+        // Scale time by brainSpeed so host UI can speed up or slow down decision pacing
+        const scaledDt = dt * NPC_PARAMS.brainSpeed;
+        this.timer -= scaledDt;
         
         // State transition check
         if (this.timer <= 0) {
@@ -21,23 +41,26 @@ export class NPCController {
         }
 
         // Behavior Logic
-        if (this.state === 'WANDER') {
+        if (this.state === 'WANDER' && NPC_PARAMS.movementEnabled) {
             this.move(dt);
         }
     }
 
     decideNextAction() {
+        // Add a bit of noise so NPCs don't all sync perfectly
         const roll = Math.random();
-        
         if (roll < 0.25) {
             // Idle for a bit (longer, calmer)
-            this.changeState('IDLE', 3.0 + Math.random() * 3.0); // 3–6 seconds
+            const dur = NPC_PARAMS.idleDurationMin + Math.random() * (NPC_PARAMS.idleDurationMax - NPC_PARAMS.idleDurationMin);
+            this.changeState('IDLE', dur * (1 + (Math.random() - 0.5) * NPC_PARAMS.decisionNoise));
         } else if (roll < 0.40) {
-            // Inspect ground (longer)
-            this.changeState('BEND', 2.0 + Math.random() * 2.0); // 2–4 seconds
+            // Inspect ground (bend)
+            const dur = NPC_PARAMS.bendDurationMin + Math.random() * (NPC_PARAMS.bendDurationMax - NPC_PARAMS.bendDurationMin);
+            this.changeState('BEND', dur * (1 + (Math.random() - 0.5) * NPC_PARAMS.decisionNoise));
         } else {
-            // Wander somewhere (much longer)
-            this.changeState('WANDER', 5.0 + Math.random() * 5.0); // 5–10 seconds
+            // Wander somewhere
+            const dur = NPC_PARAMS.wanderDurationMin + Math.random() * (NPC_PARAMS.wanderDurationMax - NPC_PARAMS.wanderDurationMin);
+            this.changeState('WANDER', dur * (1 + (Math.random() - 0.5) * NPC_PARAMS.decisionNoise));
         }
     }
 
@@ -50,17 +73,17 @@ export class NPCController {
         if (newState === 'IDLE') {
             c.state = ANIMATION_STATES.IDLE;
             // Slower, gentler idle animation
-            c.speed = 0.07;
+            c.speed = 0.07 * NPC_PARAMS.calmFactor;
         } else if (newState === 'BEND') {
             c.state = ANIMATION_STATES.BEND;
             // Slightly slower bend animation
-            c.speed = 0.07; 
+            c.speed = 0.07 * NPC_PARAMS.calmFactor; 
         } else if (newState === 'WANDER') {
-            // 30% chance to Run, 70% walk
-            const run = Math.random() > 0.7;
+            // Use configured run chance
+            const run = Math.random() < NPC_PARAMS.runChance;
             c.state = run ? ANIMATION_STATES.RUN : ANIMATION_STATES.WALK;
-            // Reduced animation speed for calmer motion
-            c.speed = run ? 0.18 : 0.10; 
+            // Map to configured speeds
+            c.speed = run ? NPC_PARAMS.runSpeed * 0.1 : NPC_PARAMS.walkSpeed * 0.1; 
             
             // Pick a random direction
             c.facing = Math.random() * Math.PI * 2;
@@ -70,15 +93,15 @@ export class NPCController {
     move(dt) {
         const c = this.character;
         
-        // Determine movement speed based on animation state (slower overall)
-        const baseSpeed = c.state === ANIMATION_STATES.RUN ? 2.5 : 1.0; 
+        // Determine movement speed based on animation state using configured values
+        const baseSpeed = c.state === ANIMATION_STATES.RUN ? NPC_PARAMS.runSpeed : NPC_PARAMS.walkSpeed; 
         
-        // Move
-        c.x += Math.cos(c.facing) * baseSpeed;
-        c.y += Math.sin(c.facing) * baseSpeed;
+        // Move (scale by dt to be framerate independent)
+        c.x += Math.cos(c.facing) * baseSpeed * dt;
+        c.y += Math.sin(c.facing) * baseSpeed * dt;
 
         // Bounds Checking (Bounce)
-        const pad = 50;
+        const pad = NPC_PARAMS.boundaryPadding;
         let bounced = false;
 
         if (c.x < pad) {
