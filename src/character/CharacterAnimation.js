@@ -42,7 +42,7 @@ export class CharacterAnimation {
             c.torsoTilt = 0;
 
             // Walk Cycle
-            const legAmp = 0.8;
+            const legAmp = 0.5;
             const armAmp = 0.6;
             const freq = 0.5; // Increased from 0.2 to reduce sliding look
 
