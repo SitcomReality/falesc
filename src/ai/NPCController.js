@@ -3,16 +3,16 @@ import { ANIMATION_STATES } from '../constants.js';
 // Tweakable NPC parameters (editable via host UI when available)
 export const NPC_PARAMS = {
     brainSpeed: 1.0,               // How quickly the NPC decision timer scales (higher = faster decisions)
-    idleDurationMin: 25,         // Idle state minimum duration (seconds)
-    idleDurationMax: 100,         // Idle state maximum duration (seconds)
-    bendDurationMin: 20,         // Bend/inspect state minimum duration (seconds)
-    bendDurationMax: 60,         // Bend/inspect state maximum duration (seconds)
-    wanderDurationMin: 25,       // Wander state minimum duration (seconds)
-    wanderDurationMax: 120,      // Wander state maximum duration (seconds)
+    idleDurationMin: 5,         // Idle state minimum duration (seconds)
+    idleDurationMax: 15,         // Idle state maximum duration (seconds)
+    bendDurationMin: 2,         // Bend/inspect state minimum duration (seconds)
+    bendDurationMax: 8,         // Bend/inspect state maximum duration (seconds)
+    wanderDurationMin: 5,       // Wander state minimum duration (seconds)
+    wanderDurationMax: 25,      // Wander state maximum duration (seconds)
     runChance: 0.30,              // Chance to run when starting a wander (0..1)
-    walkSpeed: 0.8,               // Movement speed multiplier when walking
-    runSpeed: 2,                // Movement speed multiplier when running
-    calmFactor: 4,              // Dampening applied to animation speed to make motion calmer
+    walkSpeed: 20,               // Movement speed multiplier when walking
+    runSpeed: 40,                // Movement speed multiplier when running
+    calmFactor: 2,              // Dampening applied to animation speed to make motion calmer
     decisionNoise: 0.15,          // Random noise added to timers (fraction)
     boundaryPadding: 50,          // Padding from screen edge before bouncing
     movementEnabled: true         // Master toggle — if false, NPCs won't move
