@@ -28,8 +28,8 @@ export class Character {
         // Limb Angles (radians)
         this.angles = { leftLeg: 0, rightLeg: 0, leftArm: 0, rightArm: 0 };
 
-        // Pixi Graphics
-        this.graphics = new PIXI.Graphics();
+        // Pixi container for character parts
+        this.graphics = new PIXI.Container();
         this.graphics.x = x;
         this.graphics.y = y;
 
@@ -107,8 +107,8 @@ export class Character {
 
     draw() {
         const g = this.graphics;
-        g.clear();
-        g.removeChildren(); // remove previous limb children so we don't leak graphics
+        // Container: remove previous parts
+        g.removeChildren();
 
         // Configs
         const s = this.scale;
@@ -126,62 +126,102 @@ export class Character {
         shadow.drawEllipse(0, SHAPES.LIMB_HEIGHT * s + 15 * s, bodyW, 6 * s);
         shadow.endFill();
 
-        // --- DRAWING CHARACTER ---
-        // Center of character logic
+        // --- CENTER OF CHARACTER ---
         const centerX = 0;
         const centerY = -20 * s - this.bobOffset; // Lift body up
 
-        // Determine which side is "far" based on facing direction.
-        // direction: 1 = facing right (far side = right), -1 = facing left (far side = left)
-        const farIsLeft = this.direction === -1;
+        // Pre-create limb graphics so we can control draw order
+        const leftLeg = this.drawLimb(
+            centerX - 6 * s,
+            centerY + bodyH / 2,
+            limbW,
+            limbH * this.variations.legLength,
+            this.angles.leftLeg,
+            this.colors.legs,
+            outline
+        );
 
-        // Draw far-side limbs first so they appear behind the body.
-        if (farIsLeft) {
-            // Far: Left Leg & Left Arm
-            this.drawLimb(g, centerX - 6 * s, centerY + bodyH/2, limbW, limbH * this.variations.legLength, this.angles.leftLeg, this.colors.legs, outline);
-            this.drawLimb(g, centerX - bodyW/2, centerY - bodyH/4, limbW * 0.8, limbH * this.variations.armLength, this.angles.leftArm, this.colors.arms, outline);
-        } else {
-            // Far: Right Leg & Right Arm
-            this.drawLimb(g, centerX + 6 * s, centerY + bodyH/2, limbW, limbH * this.variations.legLength, this.angles.rightLeg, this.colors.legs, outline);
-            this.drawLimb(g, centerX + bodyW/2, centerY - bodyH/4, limbW * 0.8, limbH * this.variations.armLength, this.angles.rightArm, this.colors.arms, outline);
-        }
+        const rightLeg = this.drawLimb(
+            centerX + 6 * s,
+            centerY + bodyH / 2,
+            limbW,
+            limbH * this.variations.legLength,
+            this.angles.rightLeg,
+            this.colors.legs,
+            outline
+        );
 
-        // --- BODY ---
-        g.lineStyle(outline, 0x000000, 1, 0.5); // Outer alignment
-        g.beginFill(this.colors.body);
-        g.drawRoundedRect(centerX - bodyW/2, centerY - bodyH/2, bodyW, bodyH, 4 * s);
+        const leftArm = this.drawLimb(
+            centerX - bodyW / 2,
+            centerY - bodyH / 4,
+            limbW * 0.8,
+            limbH * this.variations.armLength,
+            this.angles.leftArm,
+            this.colors.arms,
+            outline
+        );
+
+        const rightArm = this.drawLimb(
+            centerX + bodyW / 2,
+            centerY - bodyH / 4,
+            limbW * 0.8,
+            limbH * this.variations.armLength,
+            this.angles.rightArm,
+            this.colors.arms,
+            outline
+        );
+
+        // --- BODY + HEAD AS ONE GRAPHICS ---
+        const bodyG = new PIXI.Graphics();
+
+        // Body
+        bodyG.lineStyle(outline, 0x000000, 1, 0.5); // Outer alignment
+        bodyG.beginFill(this.colors.body);
+        bodyG.drawRoundedRect(centerX - bodyW / 2, centerY - bodyH / 2, bodyW, bodyH, 4 * s);
 
         // Fake Shadow under body
-        g.lineStyle(0);
-        g.beginFill(0x000000, 0.2); // Semi transparent shadow
-        g.drawRect(centerX - bodyW/2 + outline, centerY + bodyH/2 - 6*s, bodyW - outline*2, 4*s);
-        g.endFill();
+        bodyG.lineStyle(0);
+        bodyG.beginFill(0x000000, 0.2); // Semi transparent shadow
+        bodyG.drawRect(
+            centerX - bodyW / 2 + outline,
+            centerY + bodyH / 2 - 6 * s,
+            bodyW - outline * 2,
+            4 * s
+        );
+        bodyG.endFill();
 
-        // Draw near-side limbs after the body so they appear in front.
-        if (farIsLeft) {
-            // Near: Right Leg & Right Arm
-            this.drawLimb(g, centerX + 6 * s, centerY + bodyH/2, limbW, limbH * this.variations.legLength, this.angles.rightLeg, this.colors.legs, outline);
-            this.drawLimb(g, centerX + bodyW/2, centerY - bodyH/4, limbW * 0.8, limbH * this.variations.armLength, this.angles.rightArm, this.colors.arms, outline);
-        } else {
-            // Near: Left Leg & Left Arm
-            this.drawLimb(g, centerX - 6 * s, centerY + bodyH/2, limbW, limbH * this.variations.legLength, this.angles.leftLeg, this.colors.legs, outline);
-            this.drawLimb(g, centerX - bodyW/2, centerY - bodyH/4, limbW * 0.8, limbH * this.variations.armLength, this.angles.leftArm, this.colors.arms, outline);
-        }
-
-        // --- HEAD ---
-        g.lineStyle(outline, 0x000000, 1, 0.5);
-        g.beginFill(this.colors.head);
-        g.drawCircle(centerX, centerY - bodyH/2 - headR + 4*s, headR);
+        // Head
+        bodyG.lineStyle(outline, 0x000000, 1, 0.5);
+        bodyG.beginFill(this.colors.head);
+        bodyG.drawCircle(centerX, centerY - bodyH / 2 - headR + 4 * s, headR);
 
         // Highlight on head
-        g.lineStyle(0);
-        g.beginFill(0xFFFFFF, 0.3);
-        g.drawCircle(centerX - headR/3, centerY - bodyH/2 - headR, headR/3);
-        g.endFill();
+        bodyG.lineStyle(0);
+        bodyG.beginFill(0xFFFFFF, 0.3);
+        bodyG.drawCircle(centerX - headR / 3, centerY - bodyH / 2 - headR, headR / 3);
+        bodyG.endFill();
+
+        // --- LAYERING BASED ON FACING DIRECTION ---
+        // 1 = facing right: right limbs are "far"; -1 = facing left: left limbs are "far"
+        if (this.direction === -1) {
+            // Facing left: left side is farther, draw behind body
+            g.addChild(leftLeg);   // far leg behind body
+            g.addChild(leftArm);   // far arm behind body
+            g.addChild(bodyG);     // torso + head
+            g.addChild(rightLeg);  // near leg in front
+            g.addChild(rightArm);  // near arm in front
+        } else {
+            // Facing right (default): right side is farther
+            g.addChild(rightLeg);  // far leg behind body
+            g.addChild(rightArm);  // far arm behind body
+            g.addChild(bodyG);     // torso + head
+            g.addChild(leftLeg);   // near leg in front
+            g.addChild(leftArm);   // near arm in front
+        }
     }
 
-    drawLimb(g, x, y, w, h, angle, color, outline) {
-        // Create a temporary Graphics for limb so we can set position/rotation independently.
+    drawLimb(x, y, w, h, angle, color, outline) {
+        // Create a Graphics for this limb
         const limbG = new PIXI.Graphics();
         limbG.position.set(x, y);
         limbG.rotation = angle;
@@ -189,11 +229,11 @@ export class Character {
         limbG.lineStyle(outline, 0x000000, 1, 0.5);
         limbG.beginFill(color);
         // Pivot is top center of limb: draw from ( -w/2, 0 )
-        limbG.drawRoundedRect(-w/2, 0, w, h, w/2);
+        limbG.drawRoundedRect(-w / 2, 0, w, h, w / 2);
         limbG.endFill();
 
-        // Add as a child of the main graphics container so it inherits global transforms/position
-        g.addChild(limbG);
+        // Return limb graphics so caller can decide layering order
+        return limbG;
     }
 
     destroy() {
