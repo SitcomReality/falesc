@@ -25,6 +25,7 @@ export class CrowdManager {
 
     update(dt) {
         // Update all active AI controllers
+        // dt is now in seconds (game ticker delta converted in App)
         for (const controller of this.controllers.values()) {
             controller.update(dt);
         }

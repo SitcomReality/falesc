@@ -105,11 +105,12 @@ class GameApp {
     }
 
     update(delta) {
-        // Ticker delta is in frames (1 = 60fps). 
-        
+        // Convert ticker delta (frames) to seconds for consistent timing across systems
+        const dtSeconds = delta / 60;
+
         // AI Update
         if (this.settings.useAI) {
-            this.crowdManager.update(delta);
+            this.crowdManager.update(dtSeconds);
         }
 
         // Sort by Y for simple depth effect
@@ -137,7 +138,8 @@ class GameApp {
             // Always apply scale globally for now (or could be individual)
             char.scale = this.settings.globalScale;
 
-            char.update(delta);
+            // Pass seconds to character update (animations expect time in seconds)
+            char.update(dtSeconds);
         });
     }
 }
