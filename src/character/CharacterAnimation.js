@@ -58,7 +58,7 @@ export class CharacterAnimation {
             c.bobOffset = Math.abs(Math.sin(t * 0.45)) * 5;
             // Tilt torso forward slightly while running (~half of the bend max tilt)
             // This gives a subtle forward lean to match running posture.
-            c.torsoTilt = 0.45;
+            c.torsoTilt = 0.30;
 
             // Run Cycle (More aggressive angles)
             const legAmp = 1.2;
