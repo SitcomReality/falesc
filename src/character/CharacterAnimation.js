@@ -54,18 +54,21 @@ export class CharacterAnimation {
         } 
         else if (state === ANIMATION_STATES.RUN) {
             // Make running noticeably bouncy: ~5 units rise at stride apex
-            c.bobOffset = Math.abs(Math.sin(t * 0.3)) * 5;
+            // Speed up the run cycle so the visual stride completes faster relative to movement
+            c.bobOffset = Math.abs(Math.sin(t * 0.45)) * 5;
             c.torsoTilt = 0;
 
             // Run Cycle (More aggressive angles)
             const legAmp = 1.2;
             const armAmp = 0.9;
 
-            c.angles.leftLeg = Math.sin(t * 0.3) * legAmp;
-            c.angles.rightLeg = Math.sin(t * 0.3 + Math.PI) * legAmp;
+            // Increase frequency to make the run animation cadence feel quicker
+            const runFreq = 0.45;
+            c.angles.leftLeg = Math.sin(t * runFreq) * legAmp;
+            c.angles.rightLeg = Math.sin(t * runFreq + Math.PI) * legAmp;
 
-            c.angles.leftArm = Math.sin(t * 0.3 + Math.PI) * armAmp;
-            c.angles.rightArm = Math.sin(t * 0.3) * armAmp;
+            c.angles.leftArm = Math.sin(t * runFreq + Math.PI) * armAmp;
+            c.angles.rightArm = Math.sin(t * runFreq) * armAmp;
         } 
         else if (state === ANIMATION_STATES.BEND) {
             // Bend forward to pick something up, torso rotates from hips
