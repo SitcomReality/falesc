@@ -12,6 +12,7 @@ export const NPC_PARAMS = {
     runChance: 0.30,              // Chance to run when starting a wander (0..1)
     walkSpeed: 20,               // Movement speed multiplier when walking
     runSpeed: 40,                // Movement speed multiplier when running
+    turnSpeed: 4.0,              // Rotation speed (radians per second)
     calmFactor: 2,              // Dampening applied to animation speed to make motion calmer
     decisionNoise: 0.15,          // Random noise added to timers (fraction)
     boundaryPadding: 50,          // Padding from screen edge before bouncing
@@ -26,6 +27,9 @@ export class NPCController {
         this.timer = 0;
         this.state = 'IDLE'; 
         
+        // Initialize target to current facing so they don't snap immediately
+        this.targetFacing = character.facing || 0;
+
         // Initial random state, scaled by brainSpeed
         this.decideNextAction();
     }
@@ -85,48 +89,74 @@ export class NPCController {
             // Map to configured speeds
             c.speed = run ? NPC_PARAMS.runSpeed * 0.1 : NPC_PARAMS.walkSpeed * 0.1; 
             
-            // Pick a random direction
-            c.facing = Math.random() * Math.PI * 2;
+            // Pick a random target direction
+            this.targetFacing = Math.random() * Math.PI * 2;
         }
     }
 
     move(dt) {
         const c = this.character;
         
-        // Determine movement speed based on animation state using configured values
+        // 1. Rotate character towards targetFacing
+        const diff = this.shortestAngleDist(c.facing, this.targetFacing);
+        const turnAmount = NPC_PARAMS.turnSpeed * dt;
+
+        if (Math.abs(diff) <= turnAmount) {
+            c.facing = this.targetFacing;
+        } else {
+            c.facing += Math.sign(diff) * turnAmount;
+        }
+
+        // Normalize facing to 0..2PI
+        c.facing = (c.facing % (Math.PI * 2));
+        if (c.facing < 0) c.facing += Math.PI * 2;
+
+        // 2. Move Forward based on CURRENT facing
+        // Coordinate alignment: 0 = Front/Down, PI/2 = Right
         const baseSpeed = c.state === ANIMATION_STATES.RUN ? NPC_PARAMS.runSpeed : NPC_PARAMS.walkSpeed; 
         
-        // Move (scale by dt to be framerate independent)
-        c.x += Math.cos(c.facing) * baseSpeed * dt;
-        c.y += Math.sin(c.facing) * baseSpeed * dt;
+        // Use sin for X and cos for Y to align with Renderer's "0 = Front" orientation
+        c.x += Math.sin(c.facing) * baseSpeed * dt;
+        c.y += Math.cos(c.facing) * baseSpeed * dt;
 
         // Bounds Checking (Bounce)
         const pad = NPC_PARAMS.boundaryPadding;
-        let bounced = false;
+        let bouncedX = false;
+        let bouncedY = false;
 
         if (c.x < pad) {
             c.x = pad;
-            c.facing = Math.PI - c.facing;
-            bounced = true;
+            bouncedX = true;
         } else if (c.x > this.bounds.width - pad) {
             c.x = this.bounds.width - pad;
-            c.facing = Math.PI - c.facing;
-            bounced = true;
+            bouncedX = true;
         }
 
         if (c.y < pad) {
             c.y = pad;
-            c.facing = -c.facing;
-            bounced = true;
+            bouncedY = true;
         } else if (c.y > this.bounds.height - pad) {
             c.y = this.bounds.height - pad;
-            c.facing = -c.facing;
-            bounced = true;
+            bouncedY = true;
         }
 
-        if (bounced) {
-             // Normalize angle 0-2PI
-             c.facing = (c.facing + Math.PI * 2) % (Math.PI * 2);
+        if (bouncedX) {
+             // Reflect across vertical: angle -> -angle
+             // Must update both current and target to preserve turn intention relative to new path
+             c.facing = -c.facing;
+             this.targetFacing = -this.targetFacing;
         }
+        if (bouncedY) {
+            // Reflect across horizontal: angle -> PI - angle
+            c.facing = Math.PI - c.facing;
+            this.targetFacing = Math.PI - this.targetFacing;
+        }
+    }
+
+    shortestAngleDist(from, to) {
+        let diff = to - from;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        return diff;
     }
 }
