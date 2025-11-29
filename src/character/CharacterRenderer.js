@@ -33,7 +33,9 @@ export class CharacterRenderer {
         const bodyBaseH = SHAPES.BODY_HEIGHT * c.variations.bodyHeight;
         const headR = SHAPES.HEAD_RADIUS;
         const limbW = SHAPES.LIMB_WIDTH;
-        const limbHArm = SHAPES.LIMB_HEIGHT * c.variations.armLength;
+        // Increase arm length by ~2 units minimum to widen shoulders/arms visually
+        // We add 2 units to the computed arm length so variations still apply but arms are longer.
+        const limbHArm = SHAPES.LIMB_HEIGHT * c.variations.armLength + 2;
         const limbHLeg = SHAPES.LIMB_HEIGHT * c.variations.legLength;
         const bodyW = SHAPES.BODY_WIDTH;
         const outline = SHAPES.OUTLINE_THICKNESS;
