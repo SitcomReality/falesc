@@ -170,7 +170,11 @@ export class CharacterRenderer {
         const torsoPerspectiveScale = 1 - torsoLeanAmount * viewFrontFactor * 0.15;
 
         // Limb Positioning (Sliding)
-        const armXOffset = (bodyW / 2) * cosA;
+        // Make shoulders wider: include half limb width plus a tiny padding so when facing front/back
+        // the inner edge of the arm touches the torso's outer edge.
+        const shoulderPadding = 2 * s;
+        const armHalfWidth = limbW / 2;
+        const armXOffset = (bodyW / 2 + armHalfWidth + shoulderPadding) * cosA;
         const legXOffset = (6 * s) * cosA;
 
         // Z-Sorting Weights
