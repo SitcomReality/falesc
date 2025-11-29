@@ -3,6 +3,7 @@ import { Character } from './Character.js';
 import { SandboxUI } from './UI.js';
 import { ANIMATION_STATES } from './constants.js';
 import { CrowdManager } from './ai/CrowdManager.js';
+import { Camera } from './Camera.js';
 
 class GameApp {
     constructor() {
@@ -18,6 +19,10 @@ class GameApp {
         });
         document.body.appendChild(this.app.view);
 
+        // World Container (Camera Target)
+        this.worldContainer = new PIXI.Container();
+        this.app.stage.addChild(this.worldContainer);
+
         // Containers (Layers)
         this.shadowLayer = new PIXI.Container();
         this.characterLayer = new PIXI.Container();
@@ -25,8 +30,9 @@ class GameApp {
         // Z-Index sorting enabled
         this.characterLayer.sortableChildren = true;
 
-        this.app.stage.addChild(this.shadowLayer);
-        this.app.stage.addChild(this.characterLayer);
+        // Add layers to World instead of Stage
+        this.worldContainer.addChild(this.shadowLayer);
+        this.worldContainer.addChild(this.characterLayer);
 
         // AI System
         this.crowdManager = new CrowdManager(this.app);
@@ -44,18 +50,24 @@ class GameApp {
         // Initialize UI
         this.ui = new SandboxUI(this);
 
+        // Camera System
+        this.camera = new Camera(
+            this.app, 
+            this.worldContainer, 
+            (x, y) => this.addCharacter(x, y) // On Tap Handler
+        );
+
         // Initial Character
         this.addCharacter(window.innerWidth / 2, window.innerHeight / 2);
-
-        // Event Listeners
-        this.app.view.addEventListener('pointerdown', (e) => this.onPointerDown(e));
         
         // Game Loop
         this.app.ticker.add((delta) => this.update(delta));
     }
 
     addCharacter(x, y) {
-        // Clamp to screen bounds slightly
+        // Clamp to screen bounds slightly (World Bounds)
+        // Note: With camera, we treat the initial screen size as the "World Size"
+        // characters are clamped to this area so they don't wander off into infinity.
         const padding = 50;
         const cx = Math.max(padding, Math.min(this.app.screen.width - padding, x));
         const cy = Math.max(padding, Math.min(this.app.screen.height - padding, y));
@@ -101,15 +113,12 @@ class GameApp {
         });
     }
 
-    onPointerDown(e) {
-        // Only add if not interacting with UI (simplified check)
-        // If clicking on canvas, add a character
-        this.addCharacter(e.clientX, e.clientY);
-    }
-
     update(delta) {
         // Convert ticker delta (frames) to seconds for consistent timing across systems
         const dtSeconds = delta / 60;
+
+        // Update Camera
+        this.camera.update(dtSeconds);
 
         // AI Update
         if (this.settings.useAI) {
