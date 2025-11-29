@@ -48,12 +48,15 @@ export class Character {
         this.leftArm = new PIXI.Graphics();
         this.rightArm = new PIXI.Graphics();
         this.bodyG = new PIXI.Graphics();
+        // Separate head for independent z-index / transform
+        this.headG = new PIXI.Graphics();
 
         this.graphics.addChild(this.leftLeg);
         this.graphics.addChild(this.rightLeg);
         this.graphics.addChild(this.leftArm);
         this.graphics.addChild(this.rightArm);
         this.graphics.addChild(this.bodyG);
+        this.graphics.addChild(this.headG);
 
         // Shadow (simple ellipse texture could be faster, but we'll draw it)
         this.shadow = new PIXI.Graphics();
@@ -90,6 +93,10 @@ export class Character {
         this.shadow.x = this.x;
         this.shadow.y = this.y;
 
+        // Apply global scale via container transforms (geometry is drawn at scale 1)
+        this.graphics.scale.set(this.scale);
+        this.shadow.scale.set(this.scale);
+
         // Delegate to animation module for time-based updates
         // Uses internal this.speed and this.state which are set by AI or App
         // Pass a neutral globalSpeed (1.0) so the animation system uses the character's
@@ -110,6 +117,7 @@ export class Character {
         this.leftArm = null;
         this.rightArm = null;
         this.bodyG = null;
+        this.headG = null;
 
         this.animation = null;
         this.renderer = null;

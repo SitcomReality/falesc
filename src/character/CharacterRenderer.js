@@ -3,24 +3,156 @@ import { SHAPES } from '../constants.js';
 export class CharacterRenderer {
     constructor(character) {
         this.character = character;
+
+        // Cached geometry / palette state
+        this.initialized = false;
+        this.lastPaletteSignature = null;
+
+        // Layout constants in unscaled local space
+        this.baseCenterY = -20; // matches previous baseCenterY with s = 1
+        this.shadowOffsetY = 0; // will be computed in init per character
+    }
+
+    getPaletteSignature() {
+        const c = this.character.colors;
+        return `${c.head}_${c.body}_${c.legs}_${c.arms}`;
+    }
+
+    init() {
+        const c = this.character;
+        const paletteSig = this.getPaletteSignature();
+
+        // If already initialized with same palette, skip re-draw
+        if (this.initialized && paletteSig === this.lastPaletteSignature) {
+            return;
+        }
+
+        this.initialized = true;
+        this.lastPaletteSignature = paletteSig;
+
+        const bodyBaseH = SHAPES.BODY_HEIGHT * c.variations.bodyHeight;
+        const headR = SHAPES.HEAD_RADIUS;
+        const limbW = SHAPES.LIMB_WIDTH;
+        const limbHArm = SHAPES.LIMB_HEIGHT * c.variations.armLength;
+        const limbHLeg = SHAPES.LIMB_HEIGHT * c.variations.legLength;
+        const bodyW = SHAPES.BODY_WIDTH;
+        const outline = SHAPES.OUTLINE_THICKNESS;
+
+        // Clear and draw static limb geometry once (scale 1)
+        const drawLimb = (graphics, limbHeight) => {
+            graphics.clear();
+            graphics.lineStyle(outline, 0x000000, 1, 0.5);
+            graphics.beginFill(c.colors.legs); // default; arms will be recolored
+            graphics.drawRoundedRect(-limbW / 2, 0, limbW, limbHeight, limbW / 2);
+            graphics.endFill();
+            // Pivot at top center
+            graphics.position.set(0, 0);
+            graphics.rotation = 0;
+            graphics.scale.set(1, 1);
+        };
+
+        // Legs use legs color
+        drawLimb(c.leftLeg, limbHLeg);
+        drawLimb(c.rightLeg, limbHLeg);
+
+        // Arms use arms color (override fill)
+        c.leftArm.clear();
+        c.leftArm.lineStyle(outline, 0x000000, 1, 0.5);
+        c.leftArm.beginFill(c.colors.arms);
+        c.leftArm.drawRoundedRect(-limbW / 2, 0, limbW, limbHArm, limbW / 2);
+        c.leftArm.endFill();
+        c.leftArm.position.set(0, 0);
+        c.leftArm.rotation = 0;
+        c.leftArm.scale.set(1, 1);
+
+        c.rightArm.clear();
+        c.rightArm.lineStyle(outline, 0x000000, 1, 0.5);
+        c.rightArm.beginFill(c.colors.arms);
+        c.rightArm.drawRoundedRect(-limbW / 2, 0, limbW, limbHArm, limbW / 2);
+        c.rightArm.endFill();
+        c.rightArm.position.set(0, 0);
+        c.rightArm.rotation = 0;
+        c.rightArm.scale.set(1, 1);
+
+        // Body + head geometry (drawn once at scale 1)
+        const bodyG = c.bodyG;
+        bodyG.clear();
+
+        // Torso rectangle with hip at bottom center
+        bodyG.lineStyle(outline, 0x000000, 1, 0.5); // Outer alignment
+        bodyG.beginFill(c.colors.body);
+        bodyG.drawRoundedRect(-bodyW / 2, -bodyBaseH, bodyW, bodyBaseH, 4);
+        bodyG.endFill();
+
+        // Fake shadow under body (near the hip)
+        bodyG.lineStyle(0);
+        bodyG.beginFill(0x000000, 0.2);
+        bodyG.drawRect(
+            -bodyW / 2 + outline,
+            -6,
+            bodyW - outline * 2,
+            4
+        );
+        bodyG.endFill();
+
+        // Head is its own graphic
+        const headG = c.headG;
+        headG.clear();
+        headG.lineStyle(outline, 0x000000, 1, 0.5);
+        headG.beginFill(c.colors.head);
+        headG.drawCircle(0, 0, headR);
+        headG.endFill();
+
+        // Highlight on head
+        headG.lineStyle(0);
+        headG.beginFill(0xFFFFFF, 0.3);
+        headG.drawCircle(-headR / 3, -headR / 3, headR / 3);
+        headG.endFill();
+
+        // Ensure transforms are reset; actual placement done per-frame
+        bodyG.position.set(0, 0);
+        bodyG.rotation = 0;
+        bodyG.scale.set(1, 1);
+
+        headG.position.set(0, 0);
+        headG.rotation = 0;
+        headG.scale.set(1, 1);
+
+        // Shadow: draw once, static local geometry
+        const shadow = c.shadow;
+        shadow.clear();
+
+        // Base (unscaled) center Y and leg length used to position shadow ellipse
+        const baseCenterY = this.baseCenterY;
+        const legBaseY = baseCenterY + bodyBaseH / 2 - 2;
+        const hipY = legBaseY;
+        const shadowYOffset = hipY + limbHLeg; // under the feet
+
+        this.shadowOffsetY = shadowYOffset;
+
+        shadow.beginFill(0x000000);
+        shadow.drawEllipse(0, this.shadowOffsetY, bodyW * 0.9, 6);
+        shadow.endFill();
     }
 
     draw() {
         const c = this.character;
         const g = c.graphics;
 
-        // Configs
-        const s = c.scale;
-        const outline = SHAPES.OUTLINE_THICKNESS * s;
-        const bodyBaseH = SHAPES.BODY_HEIGHT * s * c.variations.bodyHeight;
-        const headR = SHAPES.HEAD_RADIUS * s;
-        const limbW = SHAPES.LIMB_WIDTH * s;
-        const limbH = SHAPES.LIMB_HEIGHT * s;
+        // Ensure static geometry is ready and palette is up to date
+        this.init();
+
+        // Configs in unscaled local space
+        const s = 1; // geometry is drawn at scale 1; world scaling is on container
+        const bodyBaseH = SHAPES.BODY_HEIGHT * c.variations.bodyHeight;
+        const headR = SHAPES.HEAD_RADIUS;
+        const limbW = SHAPES.LIMB_WIDTH;
+        const limbH = SHAPES.LIMB_HEIGHT;
+        const bodyW = SHAPES.BODY_WIDTH;
 
         // --- CENTER OF CHARACTER ---
         const centerX = 0;
-        // Base center Y (ground anchored) - bobOffset raises the visible body above this base.
-        const baseCenterY = -20 * s;
+        const baseCenterY = this.baseCenterY * s;
         const centerY = baseCenterY - c.bobOffset; // Lift body up visually while keeping a ground reference
 
         // --- FACING LOGIC ---
@@ -36,22 +168,16 @@ export class CharacterRenderer {
         const rawTorsoTilt = c.torsoTilt || 0;
         const torsoLeanAmount = Math.abs(rawTorsoTilt);
         const torsoPerspectiveScale = 1 - torsoLeanAmount * viewFrontFactor * 0.15;
-        const bodyH = bodyBaseH * torsoPerspectiveScale;
 
         // Limb Positioning (Sliding)
-        // At Front view (cos=1), limbs are at max width (+/- bodyW/2)
-        // At Side view (cos=0), limbs are centered (0)
-        const bodyW = SHAPES.BODY_WIDTH * s;
         const armXOffset = (bodyW / 2) * cosA;
         const legXOffset = (6 * s) * cosA;
 
         // Z-Sorting Weights
-        // We need explicit order: visually-correct motion/facing with:
-        // FarArm (back) < FarLeg < Body < NearLeg < NearArm (front)
-        // Note: numerically lower zIndex is rendered behind in Pixi.
         let zFarArm = 10;
         let zFarLeg = 20;
         let zBody = 30;
+        let zHead = 31; // head sits above torso
         let zNearLeg = 40;
         let zNearArm = 50;
 
@@ -60,6 +186,7 @@ export class CharacterRenderer {
             c.leftArm.zIndex = zNearArm;
             c.leftLeg.zIndex = zNearLeg;
             c.bodyG.zIndex = zBody;
+            c.headG.zIndex = zHead;
             c.rightLeg.zIndex = zFarLeg;
             c.rightArm.zIndex = zFarArm;
         } else {
@@ -67,16 +194,14 @@ export class CharacterRenderer {
             c.leftArm.zIndex = zFarArm;
             c.leftLeg.zIndex = zFarLeg;
             c.bodyG.zIndex = zBody;
+            c.headG.zIndex = zHead;
             c.rightLeg.zIndex = zNearLeg;
             c.rightArm.zIndex = zNearArm;
         }
 
         // Determine which limbs are on the far side for vertical offset
-        // "Far" = visually behind (lower zIndex set above).
         const leftIsFar = (sinA < 0);   // when facing Left, left side is farther
         const rightIsFar = !leftIsFar;
-        // Far-side limbs lift up to 2 units, scaled by character scale and side-view factor
-        // Negative Y is "Up" in screen space, so this raises the far limbs slightly higher.
         const farLimbLift = -2 * s * viewSideFactor;
 
         // --- ANIMATION PERSPECTIVE ---
@@ -84,18 +209,17 @@ export class CharacterRenderer {
         // We keep 20% rotation even at front view so it's not totally stiff
         const rotScale = 0.2 + (0.8 * viewSideFactor);
 
-        // Shorten limbs when they swing "towards" camera in front view
-        const getShortenedLen = (baseLen, angle) => {
-            const swingAmt = Math.abs(angle); 
-            // Shorten proportional to swing angle * frontness
+        // Limb foreshortening handled via Y-scale rather than geometry resize
+        const getShortenScale = (angle) => {
+            const swingAmt = Math.abs(angle);
             const shortenAmt = swingAmt * viewFrontFactor * 0.3;
-            return baseLen * (1.0 - shortenAmt);
+            return 1.0 - shortenAmt;
         };
 
-        const rArmLen = getShortenedLen(limbH * c.variations.armLength, c.angles.rightArm);
-        const lArmLen = getShortenedLen(limbH * c.variations.armLength, c.angles.leftArm);
-        const rLegLen = getShortenedLen(limbH * c.variations.legLength, c.angles.rightLeg);
-        const lLegLen = getShortenedLen(limbH * c.variations.legLength, c.angles.leftLeg);
+        const rArmScaleY = getShortenScale(c.angles.rightArm);
+        const lArmScaleY = getShortenScale(c.angles.leftArm);
+        const rLegScaleY = getShortenScale(c.angles.rightLeg);
+        const lLegScaleY = getShortenScale(c.angles.leftLeg);
 
         const rArmAng = c.angles.rightArm * rotScale;
         const lArmAng = c.angles.leftArm * rotScale;
@@ -103,17 +227,15 @@ export class CharacterRenderer {
         const lLegAng = c.angles.leftLeg * rotScale;
 
         // Base attachment Y positions
-        const legBaseY = centerY + bodyH / 2 - 2 * s;
-        const armBaseY = centerY - bodyH / 4;
+        const legBaseY = centerY + bodyBaseH / 2 - 2 * s;
+        const armBaseY = centerY - bodyBaseH / 4;
         const hipX = centerX;
         const hipY = legBaseY; // top of legs, bottom-center of torso
 
         // Calculate arm attachment Y relative to hip (bodyG pivot)
-        const armRelY = armBaseY - hipY; 
+        const armRelY = armBaseY - hipY;
 
         // Torso Rotation Helpers
-        // Flip torso tilt sign depending on which side is facing the viewer.
-        // When facing right (sinA >= 0) keep positive tilt, when facing left invert it.
         const sideSign = sinA >= 0 ? 1 : -1;
         const visualTorsoTilt = rawTorsoTilt * viewSideFactor;
         const tTilt = visualTorsoTilt * sideSign;
@@ -121,13 +243,10 @@ export class CharacterRenderer {
         const sinT = Math.sin(tTilt);
 
         // Calculate Shoulder Positions in World Space (relative to graphics container)
-        // This ensures arms move with torso but can be Z-sorted independently
-        const getShoulderPos = (sideSign) => {
-            // sideSign: -1 for Left, 1 for Right
-            const lx = sideSign * armXOffset; 
+        const getShoulderPos = (sideSignForShoulder) => {
+            const lx = sideSignForShoulder * armXOffset;
             const ly = armRelY;
 
-            // Rotate (lx, ly) by tTilt around (0,0) which is Hip
             const rx = lx * cosT - ly * sinT;
             const ry = lx * sinT + ly * cosT;
 
@@ -139,113 +258,45 @@ export class CharacterRenderer {
 
         // --- SHADOW ---
         const shadow = c.shadow;
-        shadow.clear();
-        // Move shadow down roughly by the leg length so it sits under the feet
-        // Keep shadow anchored to the ground (ignore bobOffset) so it doesn't rise with the body
-        const shadowYOffset = baseCenterY + bodyH / 2 + (limbH * c.variations.legLength) - 2 * s;
-        shadow.beginFill(0x000000);
-        shadow.drawEllipse(0, shadowYOffset, bodyW * 0.9, 6 * s);
-        shadow.endFill();
+        // Shadow shape is static; we only update groundY based on world position and scale.
+        const worldScale = c.scale;
+        c.groundY = c.shadow.y + this.shadowOffsetY * worldScale;
 
-        // Publish a stable "ground Y" for the character so external systems can sort by ground level.
-        // shadow.position.y is c.shadow.y (set from Character.update), so the world-space ground Y is:
-        c.groundY = c.shadow.y + shadowYOffset;
-        
-        // --- DRAW LIMBS ---
+        // --- DRAW LIMBS USING TRANSFORMS ONLY ---
         // Left leg
-        this.drawLimbShape(
-            c.leftLeg,
-            centerX - legXOffset,
-            legBaseY + (leftIsFar ? farLimbLift : 0),
-            limbW,
-            lLegLen,
-            lLegAng,
-            c.colors.legs,
-            outline
-        );
+        c.leftLeg.position.set(centerX - legXOffset, legBaseY + (leftIsFar ? farLimbLift : 0));
+        c.leftLeg.rotation = lLegAng;
+        c.leftLeg.scale.set(1, lLegScaleY);
 
         // Right leg
-        this.drawLimbShape(
-            c.rightLeg,
-            centerX + legXOffset,
-            legBaseY + (rightIsFar ? farLimbLift : 0),
-            limbW,
-            rLegLen,
-            rLegAng,
-            c.colors.legs,
-            outline
-        );
+        c.rightLeg.position.set(centerX + legXOffset, legBaseY + (rightIsFar ? farLimbLift : 0));
+        c.rightLeg.rotation = rLegAng;
+        c.rightLeg.scale.set(1, rLegScaleY);
 
         // Left arm
-        this.drawLimbShape(
-            c.leftArm,
-            lShoulder.x,
-            lShoulder.y + (leftIsFar ? farLimbLift : 0),
-            limbW * 0.8,
-            lArmLen,
-            lArmAng + tTilt, // Add torso tilt (now view-attenuated and flipped correctly) to arm angle
-            c.colors.arms,
-            outline
-        );
+        c.leftArm.position.set(lShoulder.x, lShoulder.y + (leftIsFar ? farLimbLift : 0));
+        c.leftArm.rotation = lArmAng + tTilt;
+        c.leftArm.scale.set(1, lArmScaleY);
 
         // Right arm
-        this.drawLimbShape(
-            c.rightArm,
-            rShoulder.x,
-            rShoulder.y + (rightIsFar ? farLimbLift : 0),
-            limbW * 0.8,
-            rArmLen,
-            rArmAng + tTilt, // Add torso tilt (now view-attenuated and flipped correctly) to arm angle
-            c.colors.arms,
-            outline
-        );
+        c.rightArm.position.set(rShoulder.x, rShoulder.y + (rightIsFar ? farLimbLift : 0));
+        c.rightArm.rotation = rArmAng + tTilt;
+        c.rightArm.scale.set(1, rArmScaleY);
 
         // --- BODY + HEAD (reuse bodyG), rotated around hip joint ---
         const bodyG = c.bodyG;
-        bodyG.clear();
-
-        // Position the body container at the hip and rotate the whole torso/head
         bodyG.position.set(hipX, hipY);
         bodyG.rotation = tTilt;
+        bodyG.scale.set(1, torsoPerspectiveScale);
 
-        // Body
-        bodyG.lineStyle(outline, 0x000000, 1, 0.5); // Outer alignment
-        bodyG.beginFill(c.colors.body);
-        // Draw torso so that hip is at bottom-center of this rect
-        bodyG.drawRoundedRect(-bodyW / 2, -bodyH, bodyW, bodyH, 4 * s);
-
-        // Fake Shadow under body (near the hip)
-        bodyG.lineStyle(0);
-        bodyG.beginFill(0x000000, 0.2); // Semi transparent shadow
-        bodyG.drawRect(
-            -bodyW / 2 + outline,
-            -6 * s,
-            bodyW - outline * 2,
-            4 * s
-        );
-        bodyG.endFill();
-
-        // Head
-        bodyG.lineStyle(outline, 0x000000, 1, 0.5);
-        bodyG.beginFill(c.colors.head);
-        bodyG.drawCircle(0, -bodyH - headR + 4 * s, headR);
-
-        // Highlight on head
-        bodyG.lineStyle(0);
-        bodyG.beginFill(0xFFFFFF, 0.3);
-        bodyG.drawCircle(-headR / 3, -bodyH - headR, headR / 3);
-        bodyG.endFill();
-    }
-
-    drawLimbShape(graphics, x, y, w, h, angle, color, outline) {
-        graphics.clear();
-        graphics.position.set(x, y);
-        graphics.rotation = angle;
-
-        graphics.lineStyle(outline, 0x000000, 1, 0.5);
-        graphics.beginFill(color);
-        // Pivot is top center of limb: draw from ( -w/2, 0 )
-        graphics.drawRoundedRect(-w / 2, 0, w, h, w / 2);
-        graphics.endFill();
+        // Head follows body rotation but has its own graphic for z-index / future animation
+        const headG = c.headG;
+        // Position head relative to hip in body space, then let container scale/rotate handle rest
+        const headLocalY = -bodyBaseH - headR + 4 * s;
+        // Convert body-local to world (graphics-local) via torso rotation
+        const hx = 0 * cosT - headLocalY * sinT;
+        const hy = 0 * sinT + headLocalY * cosT;
+        headG.position.set(hipX + hx, hipY + hy);
+        headG.rotation = tTilt;
     }
 }
