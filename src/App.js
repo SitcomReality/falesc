@@ -4,6 +4,7 @@ import { SandboxUI } from './UI.js';
 import { ANIMATION_STATES } from './constants.js';
 import { CrowdManager } from './ai/CrowdManager.js';
 import { Camera } from './Camera.js';
+import { InputManager } from './controls/InputManager.js';
 
 class GameApp {
     constructor() {
@@ -37,6 +38,9 @@ class GameApp {
         // AI System
         this.crowdManager = new CrowdManager(this.app);
 
+        // Input / Controls System
+        this.inputManager = new InputManager(window);
+
         // Sandbox Settings
         this.settings = {
             count: 0,
@@ -54,7 +58,8 @@ class GameApp {
         this.camera = new Camera(
             this.app, 
             this.worldContainer, 
-            (x, y) => this.addCharacter(x, y) // On Tap Handler
+            (x, y) => this.addCharacter(x, y), // On Tap Handler
+            this.inputManager
         );
 
         // Initial Character

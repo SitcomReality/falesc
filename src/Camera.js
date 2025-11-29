@@ -1,8 +1,9 @@
 export class Camera {
-    constructor(app, worldContainer, onWorldTap) {
+    constructor(app, worldContainer, onWorldTap, inputManager) {
         this.app = app;
         this.world = worldContainer;
         this.onWorldTap = onWorldTap;
+        this.input = inputManager;
 
         this.position = { x: app.screen.width / 2, y: app.screen.height / 2 };
         this.zoom = 1;
@@ -13,7 +14,6 @@ export class Camera {
         this.panSpeed = 800; // Pixels per second
 
         // Input State
-        this.keys = {};
         this.pointers = new Map(); // id -> {x, y, startX, startY, startTime, isTap}
         this.isMousePanning = false; // Middle mouse drag
 
@@ -39,21 +39,17 @@ export class Camera {
         
         // Wheel Zoom
         view.addEventListener('wheel', e => this.onWheel(e), { passive: false });
-
-        // Keyboard (Window level to catch inputs even if canvas isn't focused)
-        window.addEventListener('keydown', e => this.keys[e.code] = true);
-        window.addEventListener('keyup', e => this.keys[e.code] = false);
     }
 
     update(dt) {
-        // Keyboard Panning (WASD / Arrows)
+        // Keyboard / keybinding-based panning
         let dx = 0;
         let dy = 0;
 
-        if (this.keys['KeyW'] || this.keys['ArrowUp']) dy -= 1;
-        if (this.keys['KeyS'] || this.keys['ArrowDown']) dy += 1;
-        if (this.keys['KeyA'] || this.keys['ArrowLeft']) dx -= 1;
-        if (this.keys['KeyD'] || this.keys['ArrowRight']) dx += 1;
+        if (this.input && this.input.isActionActive('camera_pan_up')) dy -= 1;
+        if (this.input && this.input.isActionActive('camera_pan_down')) dy += 1;
+        if (this.input && this.input.isActionActive('camera_pan_left')) dx -= 1;
+        if (this.input && this.input.isActionActive('camera_pan_right')) dx += 1;
 
         if (dx !== 0 || dy !== 0) {
             // Normalize diagonal speed
