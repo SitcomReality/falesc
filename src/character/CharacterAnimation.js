@@ -41,8 +41,15 @@ export class CharacterAnimation {
         c.stateTime += deltaTime * globalSpeed;
 
         // Update frame counter (with run speed multiplier)
-        const stateSpeedMultiplier = this.currentState === ANIMATION_STATES.RUN ? 2.0 : 1.0;
-        c.frame += (c.speed * globalSpeed * stateSpeedMultiplier) * deltaTime;
+        // If a character's speed is zero (or nearly zero), allow a small fallback so IDLE still breathes.
+        // This prevents characters from appearing completely frozen when some systems or UI set speed to 0.
+        const fallbackIdleSpeed = 0.08; // gentle idle progression when speed is 0
+        const fallbackDefaultSpeed = 0.1; // general fallback for non-idle states
+        const effectiveCharSpeed = (c.speed && c.speed > 1e-4)
+            ? c.speed
+            : (this.currentState === ANIMATION_STATES.IDLE ? fallbackIdleSpeed : fallbackDefaultSpeed);
+
+        c.frame += (effectiveCharSpeed * globalSpeed * stateSpeedMultiplier) * deltaTime;
 
         const t = c.frame;
 
