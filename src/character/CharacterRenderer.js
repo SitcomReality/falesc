@@ -35,8 +35,9 @@ export class CharacterRenderer {
         const limbW = SHAPES.LIMB_WIDTH;
         // Increase arm length by ~2 units minimum to widen shoulders/arms visually
         // We add 2 units to the computed arm length so variations still apply but arms are longer.
-        const limbHArm = SHAPES.LIMB_HEIGHT * c.variations.armLength + 2;
-        const limbHLeg = SHAPES.LIMB_HEIGHT * c.variations.legLength;
+        // Add a small constant to ensure a minimum length: arms +3 units, legs +2 units.
+        const limbHArm = SHAPES.LIMB_HEIGHT * c.variations.armLength + 3;
+        const limbHLeg = SHAPES.LIMB_HEIGHT * c.variations.legLength + 2;
         const bodyW = SHAPES.BODY_WIDTH;
         const outline = SHAPES.OUTLINE_THICKNESS;
 
@@ -54,16 +55,14 @@ export class CharacterRenderer {
         };
 
         // Legs use legs color
-        // Ensure legs have a small minimum extra length to avoid overly short legs
-        drawLimb(c.leftLeg, limbHLeg + 2);
-        drawLimb(c.rightLeg, limbHLeg + 2);
+        drawLimb(c.leftLeg, limbHLeg);
+        drawLimb(c.rightLeg, limbHLeg);
 
         // Arms use arms color (override fill)
         c.leftArm.clear();
         c.leftArm.lineStyle(outline, 0x000000, 1, 0.5);
         c.leftArm.beginFill(c.colors.arms);
-        // Apply an extra +1 unit minimum compared to previous to widen shoulder visuals
-        c.leftArm.drawRoundedRect(-limbW / 2, 0, limbHArm + 1, limbHArm, limbW / 2);
+        c.leftArm.drawRoundedRect(-limbW / 2, 0, limbW, limbHArm, limbW / 2);
         c.leftArm.endFill();
         c.leftArm.position.set(0, 0);
         c.leftArm.rotation = 0;
@@ -72,7 +71,7 @@ export class CharacterRenderer {
         c.rightArm.clear();
         c.rightArm.lineStyle(outline, 0x000000, 1, 0.5);
         c.rightArm.beginFill(c.colors.arms);
-        c.rightArm.drawRoundedRect(-limbW / 2, 0, limbHArm + 1, limbHArm, limbW / 2);
+        c.rightArm.drawRoundedRect(-limbW / 2, 0, limbW, limbHArm, limbW / 2);
         c.rightArm.endFill();
         c.rightArm.position.set(0, 0);
         c.rightArm.rotation = 0;
