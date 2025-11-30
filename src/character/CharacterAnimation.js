@@ -49,6 +49,9 @@ export class CharacterAnimation {
             ? c.speed
             : (this.currentState === ANIMATION_STATES.IDLE ? fallbackIdleSpeed : fallbackDefaultSpeed);
 
+        // Define a multiplier for state/frame progression (was missing previously)
+        const stateSpeedMultiplier = 1.0;
+
         c.frame += (effectiveCharSpeed * globalSpeed * stateSpeedMultiplier) * deltaTime;
 
         const t = c.frame;
