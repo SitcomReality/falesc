@@ -54,14 +54,16 @@ export class CharacterRenderer {
         };
 
         // Legs use legs color
-        drawLimb(c.leftLeg, limbHLeg);
-        drawLimb(c.rightLeg, limbHLeg);
+        // Ensure legs have a small minimum extra length to avoid overly short legs
+        drawLimb(c.leftLeg, limbHLeg + 2);
+        drawLimb(c.rightLeg, limbHLeg + 2);
 
         // Arms use arms color (override fill)
         c.leftArm.clear();
         c.leftArm.lineStyle(outline, 0x000000, 1, 0.5);
         c.leftArm.beginFill(c.colors.arms);
-        c.leftArm.drawRoundedRect(-limbW / 2, 0, limbW, limbHArm, limbW / 2);
+        // Apply an extra +1 unit minimum compared to previous to widen shoulder visuals
+        c.leftArm.drawRoundedRect(-limbW / 2, 0, limbHArm + 1, limbHArm, limbW / 2);
         c.leftArm.endFill();
         c.leftArm.position.set(0, 0);
         c.leftArm.rotation = 0;
@@ -70,7 +72,7 @@ export class CharacterRenderer {
         c.rightArm.clear();
         c.rightArm.lineStyle(outline, 0x000000, 1, 0.5);
         c.rightArm.beginFill(c.colors.arms);
-        c.rightArm.drawRoundedRect(-limbW / 2, 0, limbW, limbHArm, limbW / 2);
+        c.rightArm.drawRoundedRect(-limbW / 2, 0, limbHArm + 1, limbHArm, limbW / 2);
         c.rightArm.endFill();
         c.rightArm.position.set(0, 0);
         c.rightArm.rotation = 0;
