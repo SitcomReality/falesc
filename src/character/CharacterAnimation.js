@@ -41,18 +41,8 @@ export class CharacterAnimation {
         c.stateTime += deltaTime * globalSpeed;
 
         // Update frame counter (with run speed multiplier)
-        // If a character's speed is zero (or nearly zero), allow a small fallback so IDLE still breathes.
-        // This prevents characters from appearing completely frozen when some systems or UI set speed to 0.
-        const fallbackIdleSpeed = 0.08; // gentle idle progression when speed is 0
-        const fallbackDefaultSpeed = 0.1; // general fallback for non-idle states
-        const effectiveCharSpeed = (c.speed && c.speed > 1e-4)
-            ? c.speed
-            : (this.currentState === ANIMATION_STATES.IDLE ? fallbackIdleSpeed : fallbackDefaultSpeed);
-
-        // Define a multiplier for state/frame progression (was missing previously)
-        const stateSpeedMultiplier = 1.0;
-
-        c.frame += (effectiveCharSpeed * globalSpeed * stateSpeedMultiplier) * deltaTime;
+        const stateSpeedMultiplier = this.currentState === ANIMATION_STATES.RUN ? 2.0 : 1.0;
+        c.frame += (c.speed * globalSpeed * stateSpeedMultiplier) * deltaTime;
 
         const t = c.frame;
 
@@ -103,16 +93,16 @@ export class CharacterAnimation {
         };
 
         // Baseline idle parameters used by multiple states
-        // Slightly increased idle bob and arm motion for more noticeable idle life
-        const idleBob = Math.sin(t * 0.05) * 3;        // increased from 2 -> 3
-        const idleLArm = Math.sin(t * 0.08) * 0.18;   // increased amplitude and a tad higher freq
-        const idleRArm = Math.cos(t * 0.08) * 0.18;   // match left with phase offset
+        const idlePhase = stateTime * 1.5;
+        const idleBob = Math.sin(idlePhase) * 1.5;
+        const idleTorso = Math.sin(idlePhase * 0.5) * 0.05;
+        const idleLArm = Math.sin(idlePhase * 0.9) * 0.18;
+        const idleRArm = Math.cos(idlePhase * 0.9) * 0.18;
 
         if (state === ANIMATION_STATES.IDLE) {
-            // Breathing / Bobbing with a gentle torso sway and a tiny arm motion
-            pose.bobOffset = idleBob * 0.6; // scale down so bob remains subtle
-            // Add a very small sway to the torso so idle isn't perfectly static
-            pose.torsoTilt = Math.sin(t * 0.08) * 0.04; // ~0.04 rad (~2.3 deg) sway
+            // Gentle breathing / bobbing and subtle torso sway
+            pose.bobOffset = idleBob;
+            pose.torsoTilt = idleTorso;
             pose.leftLeg = 0;
             pose.rightLeg = 0;
             pose.leftArm = idleLArm;
