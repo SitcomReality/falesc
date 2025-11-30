@@ -93,14 +93,16 @@ export class CharacterAnimation {
         };
 
         // Baseline idle parameters used by multiple states
-        const idleBob = Math.sin(t * 0.05) * 2;
-        const idleLArm = Math.sin(t * 0.05) * 0.1;
-        const idleRArm = Math.cos(t * 0.05) * 0.1;
+        // Slightly increased idle bob and arm motion for more noticeable idle life
+        const idleBob = Math.sin(t * 0.05) * 3;        // increased from 2 -> 3
+        const idleLArm = Math.sin(t * 0.08) * 0.18;   // increased amplitude and a tad higher freq
+        const idleRArm = Math.cos(t * 0.08) * 0.18;   // match left with phase offset
 
         if (state === ANIMATION_STATES.IDLE) {
-            // Breathing / Bobbing
-            pose.bobOffset = idleBob;
-            pose.torsoTilt = 0;
+            // Breathing / Bobbing with a gentle torso sway and a tiny arm motion
+            pose.bobOffset = idleBob * 0.6; // scale down so bob remains subtle
+            // Add a very small sway to the torso so idle isn't perfectly static
+            pose.torsoTilt = Math.sin(t * 0.08) * 0.04; // ~0.04 rad (~2.3 deg) sway
             pose.leftLeg = 0;
             pose.rightLeg = 0;
             pose.leftArm = idleLArm;
