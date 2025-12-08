@@ -89,13 +89,16 @@ export class MineralRenderer {
 
         // Generate crystal data
         const crystals = [];
-        const baseSpread = 30 * v.clusterDensity;
-        const edgeLeanFactor = 0.12 + 0.02 * (count - 2); // more crystals => stronger edge lean
-        const maxLean = 0.4; // clamp so they don't topple over
+        // Reduce baseSpread so bases sit much closer and tend to touch.
+        // Use clusterDensity but shrink the multiplier to pack crystals tightly.
+        const baseSpread = 14 * v.clusterDensity;
+        // Slightly increase edge lean when there are more crystals
+        const edgeLeanFactor = 0.10 + 0.02 * Math.max(0, count - 2);
+        const maxLean = 0.45; // clamp so they don't topple over
 
         for (let i = 0; i < count; i++) {
              const isMain = i === 0;
-             const scale = isMain ? 1.0 : (0.4 + Math.random() * 0.4);
+             const scale = isMain ? 1.0 : (0.5 + Math.random() * 0.45);
 
              let x = 0;
              let y = 0;
@@ -103,21 +106,35 @@ export class MineralRenderer {
                  x = 0;
                  y = 0;
              } else {
-                 // Distribute around the base with some randomness
-                 const t = (i - 1) / Math.max(1, count - 2); // 0..1 across non-main crystals
-                 const sideSpread = (t - 0.5) * 2;           // -1..1
-                 x = sideSpread * baseSpread * 0.7 + (Math.random() - 0.5) * baseSpread * 0.25;
-                 y = (Math.random() - 0.5) * 15 * v.clusterDensity;
+                 if (count === 2) {
+                     // For exactly two crystals, place them symmetrically close and lean away
+                     const side = i === 1 ? -1 : 1; // single other crystal will be i===1
+                     x = side * baseSpread * 0.6 + (Math.random() - 0.5) * baseSpread * 0.05;
+                     y = (Math.random() - 0.5) * 6 * v.clusterDensity;
+                 } else {
+                     // Distribute non-main crystals tightly around the base with low randomness so bases can touch
+                     const t = (i - 1) / Math.max(1, count - 2); // 0..1 across non-main crystals
+                     const sideSpread = (t - 0.5) * 2;           // -1..1
+                     // Use a smaller multiplier so crystals are near each other
+                     x = sideSpread * baseSpread * 0.5 + (Math.random() - 0.5) * baseSpread * 0.12;
+                     y = (Math.random() - 0.5) * 10 * v.clusterDensity;
+                 }
              }
 
              // Base tilt: slightly angled, mostly upright
-             let tilt = (Math.random() - 0.5) * 0.12;
+             let tilt = (Math.random() - 0.5) * 0.08;
 
              if (!isMain) {
                  // Edge crystals lean away from the cluster center
                  const normX = Math.max(-1, Math.min(1, x / (baseSpread || 1)));
                  const lean = normX * edgeLeanFactor;
                  tilt += lean;
+             }
+
+             // Special-case: two-crystal cluster should visibly lean away from each other
+             if (count === 2 && !isMain) {
+                 // Ensure noticeable opposite tilts
+                 tilt = Math.sign(x) * Math.abs(tilt || edgeLeanFactor * 1.5);
              }
 
              // Clamp final tilt
