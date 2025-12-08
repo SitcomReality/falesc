@@ -23,37 +23,16 @@ export const ANIMATION_STATES = {
 };
 
 export const MINERAL_TYPES = {
-    CRYSTAL: 'CRYSTAL',
     ROCK: 'ROCK',
+    CRYSTAL: 'CRYSTAL'
 };
 
-export const MINERAL_PALETTES = {
-    CRYSTAL_GREEN: {
-        mid:      0x34c96a,
-        light:    0x7df6a5,
-        dark:     0x1a7b42,
-        outline:  0x082417,
-        shadow:   0x000000,
-    },
-    CRYSTAL_CYAN: {
-        mid:      0x4cd1f0,
-        light:    0xa3f3ff,
-        dark:     0x2679a0,
-        outline:  0x082033,
-        shadow:   0x000000,
-    },
-    ROCK_BLUE: {
-        mid:      0x8fb5d5,
-        light:    0xc3e0ff,
-        dark:     0x567192,
-        outline:  0x192233,
-        shadow:   0x000000,
-    },
-    ROCK_PURPLE: {
-        mid:      0x9f7bb8,
-        light:    0xd4afe5,
-        dark:     0x5f456e,
-        outline:  0x201126,
-        shadow:   0x000000,
-    },
-};
+export const MINERAL_PALETTES = [
+    // Rocks
+    { id: 'ROCK_GREY', name: "Slate", base: 0x888888, dark: 0x555555, light: 0xAAAAAA },
+    { id: 'ROCK_BROWN', name: "Sandstone", base: 0x8B5A2B, dark: 0x5D3A1A, light: 0xB98E5F },
+    // Crystals
+    { id: 'CRYSTAL_BLUE', name: "Ice", base: 0x4ECDC4, dark: 0x2AB7CA, light: 0xA8E6CF },
+    { id: 'CRYSTAL_PURPLE', name: "Amethyst", base: 0x9B59B6, dark: 0x8E44AD, light: 0xD2B4DE },
+    { id: 'CRYSTAL_GREEN', name: "Emerald", base: 0x2ECC71, dark: 0x27AE60, light: 0x82E0AA }
+];

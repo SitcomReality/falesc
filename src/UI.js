@@ -18,6 +18,16 @@ export class SandboxUI {
             addTen: () => {
                 for(let i=0; i<10; i++) params.addOne();
             },
+            addRock: () => game.addMineral(
+                Math.random() * game.app.screen.width, 
+                Math.random() * game.app.screen.height, 
+                'ROCK'
+            ),
+            addCrystal: () => game.addMineral(
+                Math.random() * game.app.screen.width, 
+                Math.random() * game.app.screen.height, 
+                'CRYSTAL'
+            ),
             removeOne: () => game.removeCharacters(1),
             clear: () => game.clearAll(),
             randomizeColors: () => game.randomizeAllColors(),
@@ -56,8 +66,10 @@ export class SandboxUI {
         const folderPop = this.gui.addFolder('Population');
         folderPop.add(params, 'addOne').name('Add Character (Tap)');
         folderPop.add(params, 'addTen').name('Add 10');
+        folderPop.add(params, 'addRock').name('Add Rock');
+        folderPop.add(params, 'addCrystal').name('Add Crystal');
         folderPop.add(params, 'removeOne').name('Remove 1');
-        folderPop.add(params, 'clear').name('Remove All');        
+        folderPop.add(params, 'clear').name('Clear All');
 
         // Live Count Monitor
         folderPop.add(game.settings, 'count').name('Count').listen().disable();

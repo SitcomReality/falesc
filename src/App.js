@@ -1,17 +1,15 @@
 import * as PIXI from 'pixi.js';
 import { Character } from './Character.js';
+import { MineralStructure } from './minerals/MineralStructure.js';
 import { SandboxUI } from './UI.js';
-import { ANIMATION_STATES } from './constants.js';
+import { ANIMATION_STATES, MINERAL_TYPES } from './constants.js';
 import { CrowdManager } from './ai/CrowdManager.js';
 import { Camera } from './Camera.js';
 import { InputManager } from './controls/InputManager.js';
-import { MineralCluster } from './env/MineralCluster.js';
-import { MINERAL_TYPES, MINERAL_PALETTES } from './constants.js';
 
 class GameApp {
     constructor() {
         this.characters = [];
-        this.minerals = [];
         
         // Setup Pixi
         this.app = new PIXI.Application({
@@ -40,6 +38,8 @@ class GameApp {
 
         // AI System
         this.crowdManager = new CrowdManager(this.app);
+        
+        this.minerals = [];
 
         // Input / Controls System
         this.inputManager = new InputManager(window);
@@ -67,59 +67,29 @@ class GameApp {
 
         // Initial Character
         this.addCharacter(window.innerWidth / 2, window.innerHeight / 2);
-        
-        // Add some random environment objects
-        this.initEnvironment();
 
+        // Initial Minerals
+        for(let i=0; i<8; i++) {
+            const mx = Math.random() * window.innerWidth;
+            const my = Math.random() * window.innerHeight;
+            const type = Math.random() > 0.4 ? MINERAL_TYPES.ROCK : MINERAL_TYPES.CRYSTAL;
+            this.addMineral(mx, my, type);
+        }
+        
         // Game Loop
         this.app.ticker.add((delta) => this.update(delta));
     }
 
-    initEnvironment() {
-        const cx = window.innerWidth / 2;
-        const cy = window.innerHeight / 2;
-
-        // Spawn some crystals
-        for(let i=0; i<5; i++) {
-            this.addMineral(
-                cx + (Math.random() - 0.5) * 600,
-                cy + (Math.random() - 0.5) * 600,
-                MINERAL_TYPES.CRYSTAL,
-                Math.random() > 0.5 ? 'CRYSTAL_GREEN' : 'CRYSTAL_CYAN'
-            );
-        }
-
-        // Spawn some rocks
-        for(let i=0; i<5; i++) {
-            this.addMineral(
-                cx + (Math.random() - 0.5) * 600,
-                cy + (Math.random() - 0.5) * 600,
-                MINERAL_TYPES.ROCK,
-                Math.random() > 0.5 ? 'ROCK_BLUE' : 'ROCK_PURPLE'
-            );
-        }
-    }
-
-    addMineral(x, y, type, paletteKey) {
-        const mineral = new MineralCluster({
-            type: type,
-            paletteKey: paletteKey,
-            size: 0.8 + Math.random() * 0.4,
-            seed: Math.random() * 10000,
-            variantParams: type === MINERAL_TYPES.CRYSTAL ? {
-                numMainShards: 2 + Math.floor(Math.random() * 3),
-                heightRange: [2.5, 5.0]
-            } : {
-                numLargeChunks: 1 + Math.floor(Math.random() * 3),
-                widthRange: [1.2, 2.5]
-            }
-        });
-
-        mineral.setPosition(x, y);
+    addMineral(x, y, type) {
+        const mineral = new MineralStructure(x, y, type);
+        mineral.scale = this.settings.globalScale;
         
         this.minerals.push(mineral);
-        this.characterLayer.addChild(mineral.graphics);
+        this.characterLayer.addChild(mineral.container);
         this.shadowLayer.addChild(mineral.shadowG);
+        
+        // Set initial Z for sorting
+        mineral.container.zIndex = mineral.groundY;
     }
 
     addCharacter(x, y) {
@@ -163,7 +133,14 @@ class GameApp {
 
     clearAll() {
         this.removeCharacters(this.characters.length);
-        // Optional: clear minerals too? For now keeping them as environment.
+        
+        // Clear minerals too
+        this.minerals.forEach(m => {
+            this.characterLayer.removeChild(m.container);
+            this.shadowLayer.removeChild(m.shadowG);
+            m.destroy();
+        });
+        this.minerals = [];
     }
 
     randomizeAllColors() {
@@ -184,14 +161,19 @@ class GameApp {
             this.crowdManager.update(dtSeconds);
         }
 
-        // Update characters and publish each character's graphics.zIndex from renderer-provided groundY,
-        // then use Pixi's sortChildren to order by zIndex (ground-level).
+        // Sort by Y for simple depth effect
         // We throttle sortChildren to every ~10 frames for perf.
         const shouldSort = Math.floor(this.app.ticker.lastTime / (1000 / 60)) % 10 === 0;
 
-        // Update Minerals (static, but might need updates if we add animated effects)
-        this.minerals.forEach(min => min.update(dtSeconds));
+        // Update Minerals
+        this.minerals.forEach(min => {
+            // Apply global scale to minerals as well
+            min.scale = this.settings.globalScale;
+            min.update(dtSeconds);
+            min.container.zIndex = min.groundY;
+        });
 
+        // Update Characters
         this.characters.forEach(char => {
             // Apply Global settings dynamically ONLY if AI is disabled
             // If AI is enabled, the AI Controller handles state/speed/facing logic
@@ -200,22 +182,15 @@ class GameApp {
                 // Manual Override Mode
                 char.facing = this.settings.globalRotation;
                 char.state = this.settings.animationState;
-                // Note: Animation module uses char.speed. 
-                // We'll map globalSpeed (0..3) to a reasonable animation speed (0.1 base)
-                // Actually CharacterAnimation logic multiplies char.speed * globalSpeed arg.
-                // But now we moved to char.update(delta).
-                // So we set char.speed to match what the animation module expects.
                 char.speed = 0.1 * this.settings.globalSpeed;
             } 
             
-            // Always apply scale globally for now (or could be individual)
             char.scale = this.settings.globalScale;
 
-            // Pass seconds to character update (animations expect time in seconds)
+            // Pass seconds to character update
             char.update(dtSeconds);
 
-            // Use the renderer-computed groundY as zIndex so sorting respects 'shadow height'.
-            // Fallback to character y if groundY is not yet available.
+            // Use the renderer-computed groundY as zIndex
             char.graphics.zIndex = typeof char.groundY === 'number' ? char.groundY : char.y;
         });
 
