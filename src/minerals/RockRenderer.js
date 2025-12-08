@@ -76,6 +76,64 @@ export class RockRenderer {
         });
     }
 
+    /**
+     * Helper: draw a closed polygon with rounded corners, using quadratic curves.
+     * Points are objects: { x, y }. Radius is a maximum; actual radius is clamped per-corner.
+     */
+    static drawRoundedPolygon(g, points, radius) {
+        const n = points.length;
+        if (n < 3) {
+            // Fallback to simple polyline
+            g.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < n; i++) {
+                g.lineTo(points[i].x, points[i].y);
+            }
+            g.closePath();
+            return;
+        }
+
+        const r = radius;
+
+        const getPrev = (i) => points[(i - 1 + n) % n];
+        const getNext = (i) => points[(i + 1) % n];
+
+        // First corner: moveTo the start of its rounded segment
+        for (let i = 0; i < n; i++) {
+            const p = points[i];
+            const prev = getPrev(i);
+            const next = getNext(i);
+
+            // Vectors along incoming and outgoing edges
+            const vxIn = p.x - prev.x;
+            const vyIn = p.y - prev.y;
+            const vxOut = next.x - p.x;
+            const vyOut = next.y - p.y;
+
+            const lenIn = Math.hypot(vxIn, vyIn) || 1;
+            const lenOut = Math.hypot(vxOut, vyOut) || 1;
+
+            const maxCornerRadius = Math.min(lenIn * 0.5, lenOut * 0.5, r);
+            const tIn = maxCornerRadius / lenIn;
+            const tOut = maxCornerRadius / lenOut;
+
+            const startX = p.x - vxIn * tIn;
+            const startY = p.y - vyIn * tIn;
+            const endX = p.x + vxOut * tOut;
+            const endY = p.y + vyOut * tOut;
+
+            if (i === 0) {
+                g.moveTo(startX, startY);
+            } else {
+                g.lineTo(startX, startY);
+            }
+
+            // Corner curve
+            g.quadraticCurveTo(p.x, p.y, endX, endY);
+        }
+
+        g.closePath();
+    }
+
     static drawRockPiece(g, v, p) {
         const s = v.sizeMultiplier || 1;
         const baseHeight = 24 * s;
@@ -117,35 +175,45 @@ export class RockRenderer {
         const highestShoulderY = Math.min(leftShoulder.y, rightShoulder.y);
         const apex = { x: (leftShoulder.x + rightShoulder.x) * 0.5 + (Math.random() - 0.5) * 4, y: highestShoulderY - (1 + Math.random() * 3) };
 
+        // Global corner roundness: scale with rock size but keep modest so shapes stay crisp.
+        const baseRadius = 4 * s;
+        const cornerRadius = Math.max(1.5, Math.min(baseRadius, width * 0.15));
+
         g.clear();
 
+        // Light face (left)
         g.lineStyle(baseOutlineThickness, 0x000000, 1, 0.5);
         g.beginFill(p.light);
-        g.moveTo(leftBottom.x, leftBottom.y);
-        g.lineTo(seamBottom.x, seamBottom.y);
-        g.lineTo(seamTop.x, seamTop.y);
-        g.lineTo(leftShoulder.x, leftShoulder.y);
-        g.closePath();
+        RockRenderer.drawRoundedPolygon(g, [
+            leftBottom,
+            seamBottom,
+            seamTop,
+            leftShoulder
+        ], cornerRadius);
         g.endFill();
         g.lineStyle(0);
 
+        // Dark face (right)
         g.lineStyle(baseOutlineThickness, 0x000000, 1, 0.5);
         g.beginFill(p.dark);
-        g.moveTo(seamBottom.x, seamBottom.y);
-        g.lineTo(rightBottom.x, rightBottom.y);
-        g.lineTo(rightShoulder.x, rightShoulder.y);
-        g.lineTo(seamTop.x, seamTop.y);
-        g.closePath();
+        RockRenderer.drawRoundedPolygon(g, [
+            seamBottom,
+            rightBottom,
+            rightShoulder,
+            seamTop
+        ], cornerRadius);
         g.endFill();
         g.lineStyle(0);
 
+        // Top face
         g.lineStyle(baseOutlineThickness, 0x000000, 1, 0.5);
         g.beginFill(p.base);
-        g.moveTo(apex.x, apex.y);
-        g.lineTo(rightShoulder.x, rightShoulder.y);
-        g.lineTo(seamTop.x, seamTop.y);
-        g.lineTo(leftShoulder.x, leftShoulder.y);
-        g.closePath();
+        RockRenderer.drawRoundedPolygon(g, [
+            apex,
+            rightShoulder,
+            seamTop,
+            leftShoulder
+        ], cornerRadius);
         g.endFill();
         g.lineStyle(0);
     }
