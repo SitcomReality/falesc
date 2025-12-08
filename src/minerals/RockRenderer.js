@@ -61,6 +61,18 @@ export class RockRenderer {
         const leftShoulder = { x: leftBottom.x + (-3 + Math.random() * 5), y: shoulderBaseY + (Math.random() - 0.5) * 4 };
         const rightShoulder = { x: rightBottom.x + (-2 + Math.random() * 5), y: shoulderBaseY + (Math.random() - 0.5) * 4 };
 
+        // Ensure the top face (span between leftShoulder.x and rightShoulder.x) is not wider than
+        // the bottom face (span between leftBottom.x and rightBottom.x). If it is, scale the
+        // shoulder x positions toward their center so topWidth <= bottomWidth.
+        const bottomWidth = Math.abs(rightBottom.x - leftBottom.x);
+        const topWidth = Math.abs(rightShoulder.x - leftShoulder.x);
+        if (topWidth > bottomWidth && topWidth > 0) {
+            const centerX = (leftShoulder.x + rightShoulder.x) * 0.5;
+            const scale = bottomWidth / topWidth;
+            leftShoulder.x = centerX + (leftShoulder.x - centerX) * scale;
+            rightShoulder.x = centerX + (rightShoulder.x - centerX) * scale;
+        }
+
         const seamTop = { x: seamBottom.x + (Math.random() - 0.5) * 6, y: shoulderBaseY + (2 + Math.random() * 4) };
 
         const highestShoulderY = Math.min(leftShoulder.y, rightShoulder.y);
