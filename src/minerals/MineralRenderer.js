@@ -25,24 +25,61 @@ export class MineralRenderer {
         struct.shadowG.endFill();
 
         // --- GEOMETRY ---
-        // For Rocks: Single Main Graphics
+        // For Rocks: create a small cluster of chunky flat "rock pieces" so rocks read as clusters
         if (struct.type === MINERAL_TYPES.ROCK) {
-            // Check Cache
-            if (this.cache.has(cacheKey)) {
-                // Remove old if exists
-                if(struct.mainG.parent) struct.mainG.parent.removeChild(struct.mainG);
-
-                // Clone cached geometry
-                struct.mainG = this.cache.get(cacheKey).clone();
-                struct.container.addChild(struct.mainG);
-            } else {
-                // Draw Fresh
-                struct.mainG.clear();
-                this.drawRock(struct.mainG, struct.variation, palette);
-
-                // Cache a clone
-                this.cache.set(cacheKey, struct.mainG.clone());
+            // Remove any previous mainG or cluster children
+            if (struct.mainG && struct.mainG.parent) {
+                struct.mainG.parent.removeChild(struct.mainG);
             }
+            // Make a container to hold sub-rock pieces
+            const cluster = new PIXI.Container();
+            cluster.sortableChildren = true;
+
+            // Choose cluster size based on variation and randomness (1..4 pieces)
+            const baseCount = Math.max(1, Math.floor(1 + struct.variation.sizeMultiplier * 2));
+            const jitter = Math.random() < 0.35 ? 1 : 0; // occasional extra piece
+            const pieceCount = Math.min(4, baseCount + jitter);
+
+            // Spread and overlap so pieces sit close/touch at bases
+            const spread = 10 * struct.variation.sizeMultiplier * (0.6 + Math.random() * 0.8);
+
+            for (let i = 0; i < pieceCount; i++) {
+                const pieceG = new PIXI.Graphics();
+
+                // Per-piece variation: slightly different size/width/lean so cluster reads organic
+                const pieceVar = {
+                    sizeMultiplier: struct.variation.sizeMultiplier * (0.7 + Math.random() * 0.6),
+                    edgeRoughness: struct.variation.edgeRoughness * (0.8 + Math.random() * 0.6),
+                    heightRatio: struct.variation.heightRatio * (0.8 + Math.random() * 0.6)
+                };
+
+                // Draw a rock piece and position it so bases overlap/touch
+                this.drawRock(pieceG, pieceVar, palette);
+
+                // Position pieces around center with slight vertical offsets so they overlap nicely
+                const angle = (i / pieceCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
+                const radius = (i === 0) ? (spread * 0.25) : (spread * (0.3 + Math.random() * 0.7));
+                const px = Math.cos(angle) * radius;
+                const py = Math.sin(angle) * (radius * 0.35) + (Math.random() - 0.5) * 4;
+
+                pieceG.position.set(px, py);
+
+                // Slight rotation to vary silhouettes
+                pieceG.rotation = (Math.random() - 0.5) * 0.25;
+
+                // Lower pieces (back) should draw first; use zIndex by y
+                pieceG.zIndex = py;
+
+                cluster.addChild(pieceG);
+            }
+
+            // Assign cluster as mainG and cache a flattened clone for identical variations (cheap)
+            struct.mainG = cluster;
+            struct.container.addChild(cluster);
+
+            // Build a lightweight cache key for cluster geometry (not per-piece randomness)
+            // We still store a cache footprint so identical seeds can be reused if needed.
+            this.cache.set(cacheKey, cluster.clone());
         } 
         // For Crystals: Multiple Child Containers (Dynamic)
         else {
