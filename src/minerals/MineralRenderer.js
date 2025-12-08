@@ -57,83 +57,97 @@ export class MineralRenderer {
     }
 
     static drawRock(g, v, p) {
-        // Render rocks as short, flat "thick crystal" prisms using three faces:
-        // left (light), right (dark), and a top cap. Shapes are intentionally
-        // irregular by varying edge lengths and slight offsets.
         const s = v.sizeMultiplier || 1;
 
-        // Base geometry parameters (rock is squat compared to crystals)
-        const baseWidth = 18 * s;
-        const baseDepth = 10 * s; // how "thick" it looks front-to-back
-        const height = (18 + Math.random() * 12) * (v.heightRatio || 1) * s;
+        // Base dimensions: shorter and broader than crystals to feel "flat" and chunky
+        const baseHeight = 24 * s;
+        const height = baseHeight * (0.6 + Math.random() * 0.6); // moderate height variations
+        const baseWidth = 28 * s;
+        const width = baseWidth * (0.7 + Math.random() * 0.6);   // some width variation
 
-        // Random variation for asymmetric outer edges
-        const leftEdgeExtra = (Math.random() - 0.4) * 6 * (v.edgeRoughness || 0.15);
-        const rightEdgeExtra = (Math.random() - 0.4) * 6 * (v.edgeRoughness || 0.15);
+        // Split width into slightly asymmetric left/right halves
+        const leftFrac = 0.45 + (Math.random() - 0.5) * 0.15; // 0.375..0.525
+        const rightFrac = 1 - leftFrac;
+        const leftW = width * leftFrac;
+        const rightW = width * rightFrac;
 
-        // Offsets to make base bottom uneven
-        const bottomShift = (Math.random() - 0.5) * 4 * s;
-
-        // Seam X (center seam between left & right faces) is slightly off-center
-        const seamX = (Math.random() - 0.3) * 3;
-
-        // Points (local space, origin at base center)
-        const halfWLeft = baseWidth * 0.5 + leftEdgeExtra;
-        const halfWRight = baseWidth * 0.5 + rightEdgeExtra;
-
-        const bottomY = 0 + bottomShift;
-        const shoulderY = -Math.max(6, height * 0.55); // where sides meet the top cap
-        const centerTopY = -height * 0.9; // center seam top
-        const capApexY = shoulderY - Math.max(4, height * 0.12);
-
-        // Outline thickness consistent with crystals (half character outline)
+        // Outline thickness: half of character outline, same as crystals
         const baseOutlineThickness = SHAPES.OUTLINE_THICKNESS * 0.5;
-        const lineThickness = Math.max(0.6, baseOutlineThickness);
 
-        // LEFT FACE (lighter)
-        g.lineStyle(lineThickness, 0x000000, 1, 0.5);
+        // Random bottom offsets to avoid perfectly straight base
+        const baseY = 0;
+        const baseCenterDrop = 2 + Math.random() * 3;
+
+        const leftBottom = {
+            x: -leftW,
+            y: baseY + (Math.random() - 0.5) * 2
+        };
+        const rightBottom = {
+            x: rightW,
+            y: baseY + (Math.random() - 0.5) * 2
+        };
+        const seamBottom = {
+            x: (Math.random() - 0.5) * 4,
+            y: baseCenterDrop + (Math.random() - 0.5) * 1.5
+        };
+
+        // Top "shoulders" for left/right faces with individual lean/height
+        const shoulderBaseY = -height * (0.6 + Math.random() * 0.15);
+        const leftShoulder = {
+            x: leftBottom.x + (-3 + Math.random() * 5), // lean in or out a bit
+            y: shoulderBaseY + (Math.random() - 0.5) * 4
+        };
+        const rightShoulder = {
+            x: rightBottom.x + (-2 + Math.random() * 5),
+            y: shoulderBaseY + (Math.random() - 0.5) * 4
+        };
+
+        // Center seam top: slightly higher than shoulders, with its own skew
+        const seamTop = {
+            x: seamBottom.x + (Math.random() - 0.5) * 6,
+            y: shoulderBaseY - (2 + Math.random() * 4)
+        };
+
+        // Top "cap" apex: still has a clear top face, but with a bit of skew
+        const highestShoulderY = Math.min(leftShoulder.y, rightShoulder.y, seamTop.y);
+        const apex = {
+            x: (leftShoulder.x + rightShoulder.x) * 0.5 + (Math.random() - 0.5) * 4,
+            y: highestShoulderY - (3 + Math.random() * 4)
+        };
+
+        g.clear();
+
+        // Left face (lighter side)
+        g.lineStyle(baseOutlineThickness, 0x000000, 1, 0.5);
         g.beginFill(p.light);
-        g.moveTo(-halfWLeft, bottomY);           // bottom-left
-        g.lineTo(seamX, bottomY - baseDepth * 0.2); // bottom-center (slightly inset for thickness)
-        g.lineTo(seamX, centerTopY);             // top-center seam
-        g.lineTo(-halfWLeft, shoulderY);         // top-left shoulder
+        g.moveTo(leftBottom.x, leftBottom.y);      // Bottom Left
+        g.lineTo(seamBottom.x, seamBottom.y);      // Bottom Center
+        g.lineTo(seamTop.x, seamTop.y);            // Top Center
+        g.lineTo(leftShoulder.x, leftShoulder.y);  // Top Left
         g.closePath();
         g.endFill();
         g.lineStyle(0);
 
-        // RIGHT FACE (darker)
-        g.lineStyle(lineThickness, 0x000000, 1, 0.5);
+        // Right face (darker / shaded side)
+        g.lineStyle(baseOutlineThickness, 0x000000, 1, 0.5);
         g.beginFill(p.dark);
-        g.moveTo(seamX, bottomY - baseDepth * 0.2); // bottom-center
-        g.lineTo(halfWRight, bottomY);            // bottom-right
-        g.lineTo(halfWRight, shoulderY);          // top-right shoulder
-        g.lineTo(seamX, centerTopY);              // top-center seam
+        g.moveTo(seamBottom.x, seamBottom.y);      // Bottom Center
+        g.lineTo(rightBottom.x, rightBottom.y);    // Bottom Right
+        g.lineTo(rightShoulder.x, rightShoulder.y);// Top Right
+        g.lineTo(seamTop.x, seamTop.y);            // Top Center
         g.closePath();
         g.endFill();
         g.lineStyle(0);
 
-        // TOP CAP (diamond / oblong)
-        g.lineStyle(lineThickness, 0x000000, 1, 0.5);
+        // Top cap (flattened diamond / oblong top face)
+        g.lineStyle(baseOutlineThickness, 0x000000, 1, 0.5);
         g.beginFill(p.base);
-        // Make the cap irregular by nudging left/right points
-        const leftShoulderX = -halfWLeft + (Math.random() - 0.5) * 2;
-        const rightShoulderX = halfWRight + (Math.random() - 0.5) * 2;
-        const centerSeamX = seamX + (Math.random() - 0.5) * 1.5;
-        const apexX = centerSeamX + (Math.random() - 0.5) * 2.5; // tip skew
-        g.moveTo(apexX, capApexY);                    // apex
-        g.lineTo(rightShoulderX, shoulderY);         // right shoulder
-        g.lineTo(centerSeamX, centerTopY);           // center seam top
-        g.lineTo(leftShoulderX, shoulderY);          // left shoulder
+        g.moveTo(apex.x, apex.y);                  // Apex / Top
+        g.lineTo(rightShoulder.x, rightShoulder.y);// Right Shoulder
+        g.lineTo(seamTop.x, seamTop.y);            // Inner seam
+        g.lineTo(leftShoulder.x, leftShoulder.y);  // Left Shoulder
         g.closePath();
         g.endFill();
-        g.lineStyle(0);
-
-        // Subtle top highlight along ridge
-        const highlightThickness = Math.max(0.2, baseOutlineThickness / 3);
-        g.lineStyle(highlightThickness, 0xFFFFFF, 0.25);
-        g.moveTo(leftShoulderX, shoulderY);
-        g.lineTo(apexX, capApexY);
-        g.lineTo(rightShoulderX, shoulderY);
         g.lineStyle(0);
     }
 
