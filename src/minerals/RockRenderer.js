@@ -12,29 +12,51 @@ export class RockRenderer {
         const pieceCount = Math.min(4, baseCount + jitter);
 
         const spread = 10 * variation.sizeMultiplier * (0.6 + Math.random() * 0.8);
+        const piecesData = [];
 
         for (let i = 0; i < pieceCount; i++) {
-            const pieceG = new PIXI.Graphics();
-
             const pieceVar = {
                 sizeMultiplier: variation.sizeMultiplier * (0.7 + Math.random() * 0.6),
                 edgeRoughness: variation.edgeRoughness * (0.8 + Math.random() * 0.6),
                 heightRatio: variation.heightRatio * (0.8 + Math.random() * 0.6)
             };
-
-            RockRenderer.drawRockPiece(pieceG, pieceVar, palette);
-
+            
+            // Calculate position relative to cluster center
             const angle = (i / pieceCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
             const radius = (i === 0) ? (spread * 0.25) : (spread * (0.3 + Math.random() * 0.7));
             const px = Math.cos(angle) * radius;
             const py = Math.sin(angle) * (radius * 0.35) + (Math.random() - 0.5) * 4;
 
-            pieceG.position.set(px, py);
-            pieceG.rotation = (Math.random() - 0.5) * 0.25;
-            pieceG.zIndex = py;
+            piecesData.push({
+                variation: pieceVar,
+                palette: p,
+                px, py,
+                rotation: (Math.random() - 0.5) * 0.25,
+                // Use sizeMultiplier as the metric for size comparison
+                size: pieceVar.sizeMultiplier
+            });
+        }
+        
+        // Sort pieces descending by size. Index 0 is the largest (farthest back), Index N-1 is the smallest (closest front).
+        piecesData.sort((a, b) => b.size - a.size);
+
+        // Render sorted pieces
+        piecesData.forEach((data, index) => {
+            const pieceG = new PIXI.Graphics();
+            RockRenderer.drawRockPiece(pieceG, data.variation, data.palette);
+
+            pieceG.position.set(data.px, data.py);
+            pieceG.rotation = data.rotation;
+            
+            // Calculate zIndex: use relative Y position (data.py) for depth sorting,
+            // but add a significant offset based on size index to ensure smaller rocks (higher index)
+            // appear in front of larger rocks if they overlap.
+            const sizePriorityOffset = index * 10;
+            
+            pieceG.zIndex = data.py + sizePriorityOffset;
 
             container.addChild(pieceG);
-        }
+        });
     }
 
     static drawRockPiece(g, v, p) {
