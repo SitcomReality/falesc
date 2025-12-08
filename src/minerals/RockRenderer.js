@@ -78,7 +78,7 @@ export class RockRenderer {
 
     /**
      * Helper: draw a closed polygon with rounded corners, using quadratic curves.
-     * Points are objects: { x, y }. Radius is a maximum; actual radius is clamped per-corner.
+     * Points are objects: { x, y, sharp?: boolean }. Radius is a maximum; actual radius is clamped per-corner.
      */
     static drawRoundedPolygon(g, points, radius) {
         const n = points.length;
@@ -97,11 +97,24 @@ export class RockRenderer {
         const getPrev = (i) => points[(i - 1 + n) % n];
         const getNext = (i) => points[(i + 1) % n];
 
-        // First corner: moveTo the start of its rounded segment
+        // First corner: moveTo the start of its segment
         for (let i = 0; i < n; i++) {
             const p = points[i];
             const prev = getPrev(i);
             const next = getNext(i);
+
+            if (p.sharp) {
+                // If sharp, just move/line directly to the point
+                if (i === 0) {
+                    g.moveTo(p.x, p.y);
+                } else {
+                    g.lineTo(p.x, p.y);
+                }
+                // Since we drew directly to P, we skip the curve.
+                continue;
+            }
+
+            // --- Calculation for Rounded Corner ---
 
             // Vectors along incoming and outgoing edges
             const vxIn = p.x - prev.x;
@@ -112,28 +125,24 @@ export class RockRenderer {
             const lenIn = Math.hypot(vxIn, vyIn) || 1;
             const lenOut = Math.hypot(vxOut, vyOut) || 1;
 
-            // If this point requests no rounding, force zero corner radius.
-            const cornerRadius = p.noRound ? 0 : Math.min(lenIn * 0.5, lenOut * 0.5, r);
-            const tIn = cornerRadius / lenIn;
-            const tOut = cornerRadius / lenOut;
+            const maxCornerRadius = Math.min(lenIn * 0.5, lenOut * 0.5, r);
+            const tIn = maxCornerRadius / lenIn;
+            const tOut = maxCornerRadius / lenOut;
 
             const startX = p.x - vxIn * tIn;
             const startY = p.y - vyIn * tIn;
             const endX = p.x + vxOut * tOut;
             const endY = p.y + vyOut * tOut;
 
+            // Start of rounded segment
             if (i === 0) {
                 g.moveTo(startX, startY);
             } else {
                 g.lineTo(startX, startY);
             }
 
-            // Corner curve (if cornerRadius is zero this becomes a straight line)
-            if (cornerRadius > 0) {
-                g.quadraticCurveTo(p.x, p.y, endX, endY);
-            } else {
-                g.lineTo(endX, endY);
-            }
+            // Corner curve (p.x, p.y is the control point)
+            g.quadraticCurveTo(p.x, p.y, endX, endY);
         }
 
         g.closePath();
@@ -157,7 +166,7 @@ export class RockRenderer {
 
         const leftBottom = { x: -leftW, y: baseY + (Math.random() - 0.5) * 2 };
         const rightBottom = { x: rightW, y: baseY + (Math.random() - 0.5) * 2 };
-        const seamBottom = { x: (Math.random() - 0.5) * 4, y: baseCenterDrop + (Math.random() - 0.5) * 1.5 };
+        const seamBottom = { x: (Math.random() - 0.5) * 4, y: baseCenterDrop + (Math.random() - 0.5) * 1.5, sharp: true };
 
         const shoulderBaseY = -height * (0.6 + Math.random() * 0.15);
         const leftShoulder = { x: leftBottom.x + (-3 + Math.random() * 5), y: shoulderBaseY + (Math.random() - 0.5) * 4 };
@@ -175,13 +184,10 @@ export class RockRenderer {
             rightShoulder.x = centerX + (rightShoulder.x - centerX) * scale;
         }
 
-        const seamTop = { x: seamBottom.x + (Math.random() - 0.5) * 6, y: shoulderBaseY + (2 + Math.random() * 4) };
+        const seamTop = { x: seamBottom.x + (Math.random() - 0.5) * 6, y: shoulderBaseY + (2 + Math.random() * 4), sharp: true };
 
         const highestShoulderY = Math.min(leftShoulder.y, rightShoulder.y);
         const apex = { x: (leftShoulder.x + rightShoulder.x) * 0.5 + (Math.random() - 0.5) * 4, y: highestShoulderY - (1 + Math.random() * 3) };
-
-        // Mark the apex as a sharp corner where faces meet so it does not get rounded.
-        apex.noRound = true;
 
         // Global corner roundness: scale with rock size but keep modest so shapes stay crisp.
         const baseRadius = 4 * s;
