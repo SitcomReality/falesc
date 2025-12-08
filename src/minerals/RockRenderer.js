@@ -23,9 +23,14 @@ export class RockRenderer {
             
             // Calculate position relative to cluster center
             const angle = (i / pieceCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
-            const radius = (i === 0) ? (spread * 0.25) : (spread * (0.3 + Math.random() * 0.7));
-            const px = Math.cos(angle) * radius;
-            const py = Math.sin(angle) * (radius * 0.35) + (Math.random() - 0.5) * 4;
+            // Make non-main pieces more likely to sit further from center horizontally
+            const radius = (i === 0) ? (spread * 0.25) : (spread * (0.35 + Math.random() * 0.85));
+            // Base polar coords
+            let px = Math.cos(angle) * radius;
+            let py = Math.sin(angle) * (radius * 0.35) + (Math.random() - 0.5) * 4;
+            // Add extra horizontal jitter to widen clusters (scaled by spread and piece size)
+            const horizJitter = (Math.random() - 0.5) * spread * 0.6 * (i === 0 ? 0.35 : 1.0);
+            px += horizJitter;
 
             piecesData.push({
                 variation: pieceVar,
