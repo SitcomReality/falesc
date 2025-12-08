@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { MINERAL_TYPES, MINERAL_PALETTES } from '../constants.js';
+import { SHAPES } from '../constants.js';
 
 export class MineralRenderer {
     // Cache for reuse of static geometry (Graphics clones)
@@ -62,19 +63,25 @@ export class MineralRenderer {
         // 3 Layers for "Fake 3D" look
 
         // 1. Shadow/Base layer (Dark)
+        g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
         g.beginFill(p.dark);
         this.drawJaggedPoly(g, 2, 2, radius, v.edgeRoughness, 7);
         g.endFill();
+        g.lineStyle(0);
 
         // 2. Main Body (Base Color)
+        g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
         g.beginFill(p.base);
         this.drawJaggedPoly(g, 0, -5 * s, radius * 0.9, v.edgeRoughness, 8);
         g.endFill();
+        g.lineStyle(0);
 
         // 3. Highlight/Top (Light)
+        g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
         g.beginFill(p.light);
         this.drawJaggedPoly(g, -5, -12 * s, radius * 0.5, v.edgeRoughness, 6);
         g.endFill();
+        g.lineStyle(0);
     }
 
     static drawCrystalCluster(struct, v, p) {
@@ -116,6 +123,7 @@ export class MineralRenderer {
             // Draw Pillar
 
             // Side/Shadow Facet
+            g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
             g.beginFill(p.dark);
             g.moveTo(-w/2, 0);
             g.lineTo(w/2, 0);
@@ -123,8 +131,10 @@ export class MineralRenderer {
             g.lineTo(-w/2, -h);
             g.closePath();
             g.endFill();
+            g.lineStyle(0);
 
             // Front/Main Facet (Angled cut)
+            g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
             g.beginFill(p.base);
             g.moveTo(-w/2, 0);
             g.lineTo(0, 4); // Stick out bottom slightly
@@ -133,14 +143,17 @@ export class MineralRenderer {
             g.lineTo(-w/2, -h);
             g.closePath();
             g.endFill();
+            g.lineStyle(0);
 
             // Top Cap (Light)
+            g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
             g.beginFill(p.light);
             g.moveTo(-w/2, -h);
             g.lineTo(w/2, -h);
             g.lineTo(0, -h - 12); // Pointy top
             g.closePath();
             g.endFill();
+            g.lineStyle(0);
 
             // Edge highlight
             g.lineStyle(1, 0xFFFFFF, 0.3);
