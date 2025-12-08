@@ -161,9 +161,10 @@ export class MineralRenderer {
             cContainer.position.set(d.x, d.y);
             cContainer.scale.set(d.scale);
 
-            // Static rotation, no sway animation
+            // Static rotation, with a little extra random twist so crystals don't all match
+            const twist = (Math.random() - 0.5) * 0.12; // subtle extra variation
             cContainer.baseRotation = d.tilt;
-            cContainer.rotation = d.tilt;
+            cContainer.rotation = d.tilt + twist;
 
             const g = new PIXI.Graphics();
             
@@ -180,13 +181,27 @@ export class MineralRenderer {
             const halfW = w / 2;
             const topY = -h;
 
+            // Vary the top cap height and horizontal tip skew per-crystal
+            const diamondHeight = (8 + Math.random() * 6) * (0.7 + Math.random() * 0.6);
+            const tipOffset = (Math.random() * 2 - 1) * halfW * 0.7; // lean tip left/right
+            const tipX = tipOffset;
+
+            // Place the light/dark division opposite the tip offset
+            // If the tip is close to the left edge, the divide moves toward the right, and vice versa.
+            const ridgeRatio = 0.85; // how strongly the divide mirrors the tip offset
+            const divideX = -tipOffset * ridgeRatio;
+
+            // Y positions for where the side faces meet the top cap
+            const joinInnerY = topY + diamondHeight * 0.25;
+            const joinOuterY = topY + diamondHeight * 0.55;
+
             // Left face (lighter side)
             g.lineStyle(lineThickness, 0x000000, 1, 0.5);
             g.beginFill(p.light);
-            g.moveTo(-halfW, 0);
-            g.lineTo(0, 2);       // small downward center step for faceting
-            g.lineTo(0, topY);
-            g.lineTo(-halfW, topY);
+            g.moveTo(-halfW, 0);                 // bottom-left
+            g.lineTo(divideX, 2);                // bottom inner near divide
+            g.lineTo(divideX, joinInnerY);       // inner top near ridge
+            g.lineTo(-halfW, joinOuterY);        // outer top, slightly lower for skew
             g.closePath();
             g.endFill();
             g.lineStyle(0);
@@ -194,31 +209,30 @@ export class MineralRenderer {
             // Right face (darker / shaded side)
             g.lineStyle(lineThickness, 0x000000, 1, 0.5);
             g.beginFill(p.dark);
-            g.moveTo(0, 2);
-            g.lineTo(halfW, 0);
-            g.lineTo(halfW, topY);
-            g.lineTo(0, topY);
+            g.moveTo(divideX, 2);               // bottom inner
+            g.lineTo(halfW, 0);                 // bottom-right
+            g.lineTo(halfW, joinOuterY);        // outer top
+            g.lineTo(divideX, joinInnerY);      // inner top at ridge
             g.closePath();
             g.endFill();
             g.lineStyle(0);
 
-            // Top cap as a rotated diamond (oblong)
-            const diamondHeight = 12;
+            // Top cap as a rotated, oblong diamond whose tip can skew left/right
             g.lineStyle(lineThickness, 0x000000, 1, 0.5);
             g.beginFill(p.base);
-            g.moveTo(0, topY - diamondHeight); // top point
-            g.lineTo(halfW, topY);             // right point
-            g.lineTo(0, topY + diamondHeight * 0.1); // slight dip for oblong look
-            g.lineTo(-halfW, topY);            // left point
+            g.moveTo(tipX, topY - diamondHeight);           // top tip, skewed horizontally
+            g.lineTo(halfW, joinOuterY);                    // right shoulder
+            g.lineTo(divideX, topY + diamondHeight * 0.15); // mid valley along ridge
+            g.lineTo(-halfW, joinOuterY);                   // left shoulder
             g.closePath();
             g.endFill();
             g.lineStyle(0);
 
-            // Edge highlight along the top ridge
+            // Edge highlight along the ridge opposite the tip lean
             g.lineStyle(highlightThickness, 0xFFFFFF, 0.3);
-            g.moveTo(-halfW, topY);
-            g.lineTo(0, topY - diamondHeight);
-            g.lineTo(halfW, topY);
+            g.moveTo(-halfW, joinOuterY);
+            g.lineTo(divideX, topY - diamondHeight * 0.1);
+            g.lineTo(halfW, joinOuterY);
             g.lineStyle(0);
 
             cContainer.addChild(g);
