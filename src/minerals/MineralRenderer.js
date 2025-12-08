@@ -89,18 +89,47 @@ export class MineralRenderer {
 
         // Generate crystal data
         const crystals = [];
+        const baseSpread = 30 * v.clusterDensity;
+        const edgeLeanFactor = 0.12 + 0.02 * (count - 2); // more crystals => stronger edge lean
+        const maxLean = 0.4; // clamp so they don't topple over
+
         for (let i = 0; i < count; i++) {
-             // Main pillar is larger
              const isMain = i === 0;
              const scale = isMain ? 1.0 : (0.4 + Math.random() * 0.4);
 
+             let x = 0;
+             let y = 0;
+             if (isMain) {
+                 x = 0;
+                 y = 0;
+             } else {
+                 // Distribute around the base with some randomness
+                 const t = (i - 1) / Math.max(1, count - 2); // 0..1 across non-main crystals
+                 const sideSpread = (t - 0.5) * 2;           // -1..1
+                 x = sideSpread * baseSpread * 0.7 + (Math.random() - 0.5) * baseSpread * 0.25;
+                 y = (Math.random() - 0.5) * 15 * v.clusterDensity;
+             }
+
+             // Base tilt: slightly angled, mostly upright
+             let tilt = (Math.random() - 0.5) * 0.12;
+
+             if (!isMain) {
+                 // Edge crystals lean away from the cluster center
+                 const normX = Math.max(-1, Math.min(1, x / (baseSpread || 1)));
+                 const lean = normX * edgeLeanFactor;
+                 tilt += lean;
+             }
+
+             // Clamp final tilt
+             if (tilt > maxLean) tilt = maxLean;
+             if (tilt < -maxLean) tilt = -maxLean;
+
              crystals.push({
                  scale: scale * v.sizeMultiplier,
-                 // Cluster small ones around base
-                 x: isMain ? 0 : (Math.random() - 0.5) * 30 * v.clusterDensity,
-                 y: isMain ? 0 : (Math.random() - 0.5) * 15 * v.clusterDensity,
+                 x,
+                 y,
                  height: (40 + Math.random() * 30) * v.heightRatio,
-                 tilt: (Math.random() - 0.5) * 0.2 // Initial static tilt
+                 tilt
              });
         }
 
@@ -115,6 +144,7 @@ export class MineralRenderer {
             cContainer.position.set(d.x, d.y);
             cContainer.scale.set(d.scale);
 
+            // Static rotation, no sway animation
             cContainer.baseRotation = d.tilt;
             cContainer.rotation = d.tilt;
 
@@ -124,7 +154,6 @@ export class MineralRenderer {
             // so that line width remains constant relative to struct.container
             const lineThickness = Math.max(0.5, baseOutlineThickness / d.scale);
             const highlightThickness = Math.max(0.2, baseOutlineThickness / 3 / d.scale);
-
 
             const w = 15; // Base width
             const h = d.height;

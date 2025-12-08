@@ -1,6 +1,5 @@
 import * as PIXI from 'pixi.js';
 import { MineralRenderer } from './MineralRenderer.js';
-import { MineralAnimation } from './MineralAnimation.js';
 import { MINERAL_TYPES, MINERAL_PALETTES } from '../constants.js';
 
 export class MineralStructure {
@@ -27,8 +26,7 @@ export class MineralStructure {
             peakCount: type === MINERAL_TYPES.CRYSTAL ? Math.floor(Math.random() * 3) + 2 : 1,
             edgeRoughness: 0.1 + Math.random() * 0.2,
             clusterDensity: 0.8 + Math.random() * 0.5,
-            heightRatio: 0.8 + Math.random() * 0.6,
-            hasSway: type === MINERAL_TYPES.CRYSTAL
+            heightRatio: 0.8 + Math.random() * 0.6
         };
 
         // Graphics Containers
@@ -45,8 +43,8 @@ export class MineralStructure {
         // Children for crystals
         this.clusterContainers = [];
 
-        // Animation System
-        this.animation = new MineralAnimation(this);
+        // Animation System (removed — minerals are static)
+        // this.animation = new MineralAnimation(this);
 
         // Initialize Geometry
         MineralRenderer.initStructure(this);
@@ -68,8 +66,8 @@ export class MineralStructure {
     }
 
     update(dt) {
-        // Animation (Sway)
-        this.animation.update(dt);
+        // Animation removed: minerals are static scenery
+        // this.animation.update(dt);
         
         // Propagate Scale
         this.container.scale.set(this.scale);
