@@ -57,30 +57,83 @@ export class MineralRenderer {
     }
 
     static drawRock(g, v, p) {
+        // Render rocks as short, flat "thick crystal" prisms using three faces:
+        // left (light), right (dark), and a top cap. Shapes are intentionally
+        // irregular by varying edge lengths and slight offsets.
         const s = v.sizeMultiplier || 1;
-        const radius = 20 * s;
 
-        // 3 Layers for "Fake 3D" look
+        // Base geometry parameters (rock is squat compared to crystals)
+        const baseWidth = 18 * s;
+        const baseDepth = 10 * s; // how "thick" it looks front-to-back
+        const height = (18 + Math.random() * 12) * (v.heightRatio || 1) * s;
 
-        // 1. Shadow/Base layer (Dark)
-        g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
-        g.beginFill(p.dark);
-        this.drawJaggedPoly(g, 2, 2, radius, v.edgeRoughness, 7);
-        g.endFill();
-        g.lineStyle(0);
+        // Random variation for asymmetric outer edges
+        const leftEdgeExtra = (Math.random() - 0.4) * 6 * (v.edgeRoughness || 0.15);
+        const rightEdgeExtra = (Math.random() - 0.4) * 6 * (v.edgeRoughness || 0.15);
 
-        // 2. Main Body (Base Color)
-        g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
-        g.beginFill(p.base);
-        this.drawJaggedPoly(g, 0, -5 * s, radius * 0.9, v.edgeRoughness, 8);
-        g.endFill();
-        g.lineStyle(0);
+        // Offsets to make base bottom uneven
+        const bottomShift = (Math.random() - 0.5) * 4 * s;
 
-        // 3. Highlight/Top (Light)
-        g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
+        // Seam X (center seam between left & right faces) is slightly off-center
+        const seamX = (Math.random() - 0.3) * 3;
+
+        // Points (local space, origin at base center)
+        const halfWLeft = baseWidth * 0.5 + leftEdgeExtra;
+        const halfWRight = baseWidth * 0.5 + rightEdgeExtra;
+
+        const bottomY = 0 + bottomShift;
+        const shoulderY = -Math.max(6, height * 0.55); // where sides meet the top cap
+        const centerTopY = -height * 0.9; // center seam top
+        const capApexY = shoulderY - Math.max(4, height * 0.12);
+
+        // Outline thickness consistent with crystals (half character outline)
+        const baseOutlineThickness = SHAPES.OUTLINE_THICKNESS * 0.5;
+        const lineThickness = Math.max(0.6, baseOutlineThickness);
+
+        // LEFT FACE (lighter)
+        g.lineStyle(lineThickness, 0x000000, 1, 0.5);
         g.beginFill(p.light);
-        this.drawJaggedPoly(g, -5, -12 * s, radius * 0.5, v.edgeRoughness, 6);
+        g.moveTo(-halfWLeft, bottomY);           // bottom-left
+        g.lineTo(seamX, bottomY - baseDepth * 0.2); // bottom-center (slightly inset for thickness)
+        g.lineTo(seamX, centerTopY);             // top-center seam
+        g.lineTo(-halfWLeft, shoulderY);         // top-left shoulder
+        g.closePath();
         g.endFill();
+        g.lineStyle(0);
+
+        // RIGHT FACE (darker)
+        g.lineStyle(lineThickness, 0x000000, 1, 0.5);
+        g.beginFill(p.dark);
+        g.moveTo(seamX, bottomY - baseDepth * 0.2); // bottom-center
+        g.lineTo(halfWRight, bottomY);            // bottom-right
+        g.lineTo(halfWRight, shoulderY);          // top-right shoulder
+        g.lineTo(seamX, centerTopY);              // top-center seam
+        g.closePath();
+        g.endFill();
+        g.lineStyle(0);
+
+        // TOP CAP (diamond / oblong)
+        g.lineStyle(lineThickness, 0x000000, 1, 0.5);
+        g.beginFill(p.base);
+        // Make the cap irregular by nudging left/right points
+        const leftShoulderX = -halfWLeft + (Math.random() - 0.5) * 2;
+        const rightShoulderX = halfWRight + (Math.random() - 0.5) * 2;
+        const centerSeamX = seamX + (Math.random() - 0.5) * 1.5;
+        const apexX = centerSeamX + (Math.random() - 0.5) * 2.5; // tip skew
+        g.moveTo(apexX, capApexY);                    // apex
+        g.lineTo(rightShoulderX, shoulderY);         // right shoulder
+        g.lineTo(centerSeamX, centerTopY);           // center seam top
+        g.lineTo(leftShoulderX, shoulderY);          // left shoulder
+        g.closePath();
+        g.endFill();
+        g.lineStyle(0);
+
+        // Subtle top highlight along ridge
+        const highlightThickness = Math.max(0.2, baseOutlineThickness / 3);
+        g.lineStyle(highlightThickness, 0xFFFFFF, 0.25);
+        g.moveTo(leftShoulderX, shoulderY);
+        g.lineTo(apexX, capApexY);
+        g.lineTo(rightShoulderX, shoulderY);
         g.lineStyle(0);
     }
 
