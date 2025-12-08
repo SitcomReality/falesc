@@ -92,9 +92,9 @@ export class MineralRenderer {
         // Reduce baseSpread so bases sit much closer and tend to touch.
         // Use clusterDensity but shrink the multiplier to pack crystals tightly.
         const baseSpread = 14 * v.clusterDensity;
-        // Slightly increase edge lean when there are more crystals
-        const edgeLeanFactor = 0.10 + 0.02 * Math.max(0, count - 2);
-        const maxLean = 0.45; // clamp so they don't topple over
+        // Increase edge lean and make it grow slightly with more crystals
+        const edgeLeanFactor = 0.16 + 0.03 * Math.max(0, count - 2);
+        const maxLean = 0.7; // clamp so they don't topple over
 
         for (let i = 0; i < count; i++) {
              const isMain = i === 0;
