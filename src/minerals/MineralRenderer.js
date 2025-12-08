@@ -5,8 +5,6 @@ import { SHAPES } from '../constants.js';
 export class MineralRenderer {
     // Cache for reuse of static geometry (Graphics clones)
     static cache = new Map();
-    // Absolute outline thickness (pixels) used for all mineral geometry regardless of object size
-    static ABS_OUTLINE = 1.5;
 
     static getPaletteSignature(paletteId) {
         return paletteId;
@@ -65,21 +63,21 @@ export class MineralRenderer {
         // 3 Layers for "Fake 3D" look
 
         // 1. Shadow/Base layer (Dark)
-        g.lineStyle(MineralRenderer.ABS_OUTLINE, 0x000000, 1, 0.5);
+        g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
         g.beginFill(p.dark);
         this.drawJaggedPoly(g, 2, 2, radius, v.edgeRoughness, 7);
         g.endFill();
         g.lineStyle(0);
 
         // 2. Main Body (Base Color)
-        g.lineStyle(MineralRenderer.ABS_OUTLINE, 0x000000, 1, 0.5);
+        g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
         g.beginFill(p.base);
         this.drawJaggedPoly(g, 0, -5 * s, radius * 0.9, v.edgeRoughness, 8);
         g.endFill();
         g.lineStyle(0);
 
         // 3. Highlight/Top (Light)
-        g.lineStyle(MineralRenderer.ABS_OUTLINE, 0x000000, 1, 0.5);
+        g.lineStyle(Math.max(1, SHAPES.OUTLINE_THICKNESS * 0.5), 0x000000, 1, 0.5);
         g.beginFill(p.light);
         this.drawJaggedPoly(g, -5, -12 * s, radius * 0.5, v.edgeRoughness, 6);
         g.endFill();
@@ -109,6 +107,9 @@ export class MineralRenderer {
         // Sort by Y so back crystals draw first
         crystals.sort((a, b) => a.y - b.y);
 
+        // Base mineral outline thickness is half of character outline (1.5 units)
+        const baseOutlineThickness = SHAPES.OUTLINE_THICKNESS * 0.5;
+
         crystals.forEach(d => {
             const cContainer = new PIXI.Container();
             cContainer.position.set(d.x, d.y);
@@ -118,6 +119,12 @@ export class MineralRenderer {
             cContainer.rotation = d.tilt;
 
             const g = new PIXI.Graphics();
+            
+            // Compensate line thickness for pillar scale (d.scale) 
+            // so that line width remains constant relative to struct.container
+            const lineThickness = Math.max(0.5, baseOutlineThickness / d.scale);
+            const highlightThickness = Math.max(0.2, baseOutlineThickness / 3 / d.scale);
+
 
             const w = 15; // Base width
             const h = d.height;
@@ -125,7 +132,7 @@ export class MineralRenderer {
             // Draw Pillar
 
             // Side/Shadow Facet
-            g.lineStyle(MineralRenderer.ABS_OUTLINE, 0x000000, 1, 0.5);
+            g.lineStyle(lineThickness, 0x000000, 1, 0.5);
             g.beginFill(p.dark);
             g.moveTo(-w/2, 0);
             g.lineTo(w/2, 0);
@@ -136,7 +143,7 @@ export class MineralRenderer {
             g.lineStyle(0);
 
             // Front/Main Facet (Angled cut)
-            g.lineStyle(MineralRenderer.ABS_OUTLINE, 0x000000, 1, 0.5);
+            g.lineStyle(lineThickness, 0x000000, 1, 0.5);
             g.beginFill(p.base);
             g.moveTo(-w/2, 0);
             g.lineTo(0, 4); // Stick out bottom slightly
@@ -148,7 +155,7 @@ export class MineralRenderer {
             g.lineStyle(0);
 
             // Top Cap (Light)
-            g.lineStyle(MineralRenderer.ABS_OUTLINE, 0x000000, 1, 0.5);
+            g.lineStyle(lineThickness, 0x000000, 1, 0.5);
             g.beginFill(p.light);
             g.moveTo(-w/2, -h);
             g.lineTo(w/2, -h);
@@ -158,7 +165,7 @@ export class MineralRenderer {
             g.lineStyle(0);
 
             // Edge highlight
-            g.lineStyle(1, 0xFFFFFF, 0.3);
+            g.lineStyle(highlightThickness, 0xFFFFFF, 0.3);
             g.moveTo(-w/2, -h);
             g.lineTo(0, -h - 12);
             g.lineTo(w/2, -h);
