@@ -176,45 +176,49 @@ export class MineralRenderer {
             const h = d.height;
 
             // Draw Pillar
+            // Two side faces for the main body: lighter on the left, darker on the right.
+            const halfW = w / 2;
+            const topY = -h;
 
-            // Side/Shadow Facet
-            g.lineStyle(lineThickness, 0x000000, 1, 0.5);
-            g.beginFill(p.dark);
-            g.moveTo(-w/2, 0);
-            g.lineTo(w/2, 0);
-            g.lineTo(w/2, -h);
-            g.lineTo(-w/2, -h);
-            g.closePath();
-            g.endFill();
-            g.lineStyle(0);
-
-            // Front/Main Facet (Angled cut)
-            g.lineStyle(lineThickness, 0x000000, 1, 0.5);
-            g.beginFill(p.base);
-            g.moveTo(-w/2, 0);
-            g.lineTo(0, 4); // Stick out bottom slightly
-            g.lineTo(w/2, 0);
-            g.lineTo(w/2, -h);
-            g.lineTo(-w/2, -h);
-            g.closePath();
-            g.endFill();
-            g.lineStyle(0);
-
-            // Top Cap (Light)
+            // Left face (lighter side)
             g.lineStyle(lineThickness, 0x000000, 1, 0.5);
             g.beginFill(p.light);
-            g.moveTo(-w/2, -h);
-            g.lineTo(w/2, -h);
-            g.lineTo(0, -h - 12); // Pointy top
+            g.moveTo(-halfW, 0);
+            g.lineTo(0, 2);       // small downward center step for faceting
+            g.lineTo(0, topY);
+            g.lineTo(-halfW, topY);
             g.closePath();
             g.endFill();
             g.lineStyle(0);
 
-            // Edge highlight
+            // Right face (darker / shaded side)
+            g.lineStyle(lineThickness, 0x000000, 1, 0.5);
+            g.beginFill(p.dark);
+            g.moveTo(0, 2);
+            g.lineTo(halfW, 0);
+            g.lineTo(halfW, topY);
+            g.lineTo(0, topY);
+            g.closePath();
+            g.endFill();
+            g.lineStyle(0);
+
+            // Top cap as a rotated diamond (oblong)
+            const diamondHeight = 12;
+            g.lineStyle(lineThickness, 0x000000, 1, 0.5);
+            g.beginFill(p.base);
+            g.moveTo(0, topY - diamondHeight); // top point
+            g.lineTo(halfW, topY);             // right point
+            g.lineTo(0, topY + diamondHeight * 0.1); // slight dip for oblong look
+            g.lineTo(-halfW, topY);            // left point
+            g.closePath();
+            g.endFill();
+            g.lineStyle(0);
+
+            // Edge highlight along the top ridge
             g.lineStyle(highlightThickness, 0xFFFFFF, 0.3);
-            g.moveTo(-w/2, -h);
-            g.lineTo(0, -h - 12);
-            g.lineTo(w/2, -h);
+            g.moveTo(-halfW, topY);
+            g.lineTo(0, topY - diamondHeight);
+            g.lineTo(halfW, topY);
             g.lineStyle(0);
 
             cContainer.addChild(g);
