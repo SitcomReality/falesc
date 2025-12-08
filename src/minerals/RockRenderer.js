@@ -112,9 +112,10 @@ export class RockRenderer {
             const lenIn = Math.hypot(vxIn, vyIn) || 1;
             const lenOut = Math.hypot(vxOut, vyOut) || 1;
 
-            const maxCornerRadius = Math.min(lenIn * 0.5, lenOut * 0.5, r);
-            const tIn = maxCornerRadius / lenIn;
-            const tOut = maxCornerRadius / lenOut;
+            // If this point requests no rounding, force zero corner radius.
+            const cornerRadius = p.noRound ? 0 : Math.min(lenIn * 0.5, lenOut * 0.5, r);
+            const tIn = cornerRadius / lenIn;
+            const tOut = cornerRadius / lenOut;
 
             const startX = p.x - vxIn * tIn;
             const startY = p.y - vyIn * tIn;
@@ -127,8 +128,12 @@ export class RockRenderer {
                 g.lineTo(startX, startY);
             }
 
-            // Corner curve
-            g.quadraticCurveTo(p.x, p.y, endX, endY);
+            // Corner curve (if cornerRadius is zero this becomes a straight line)
+            if (cornerRadius > 0) {
+                g.quadraticCurveTo(p.x, p.y, endX, endY);
+            } else {
+                g.lineTo(endX, endY);
+            }
         }
 
         g.closePath();
@@ -174,6 +179,9 @@ export class RockRenderer {
 
         const highestShoulderY = Math.min(leftShoulder.y, rightShoulder.y);
         const apex = { x: (leftShoulder.x + rightShoulder.x) * 0.5 + (Math.random() - 0.5) * 4, y: highestShoulderY - (1 + Math.random() * 3) };
+
+        // Mark the apex as a sharp corner where faces meet so it does not get rounded.
+        apex.noRound = true;
 
         // Global corner roundness: scale with rock size but keep modest so shapes stay crisp.
         const baseRadius = 4 * s;
