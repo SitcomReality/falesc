@@ -21,3 +21,39 @@ export const ANIMATION_STATES = {
     RUN: 'RUN',
     BEND: 'BEND'
 };
+
+export const MINERAL_TYPES = {
+    CRYSTAL: 'CRYSTAL',
+    ROCK: 'ROCK',
+};
+
+export const MINERAL_PALETTES = {
+    CRYSTAL_GREEN: {
+        mid:      0x34c96a,
+        light:    0x7df6a5,
+        dark:     0x1a7b42,
+        outline:  0x082417,
+        shadow:   0x000000,
+    },
+    CRYSTAL_CYAN: {
+        mid:      0x4cd1f0,
+        light:    0xa3f3ff,
+        dark:     0x2679a0,
+        outline:  0x082033,
+        shadow:   0x000000,
+    },
+    ROCK_BLUE: {
+        mid:      0x8fb5d5,
+        light:    0xc3e0ff,
+        dark:     0x567192,
+        outline:  0x192233,
+        shadow:   0x000000,
+    },
+    ROCK_PURPLE: {
+        mid:      0x9f7bb8,
+        light:    0xd4afe5,
+        dark:     0x5f456e,
+        outline:  0x201126,
+        shadow:   0x000000,
+    },
+};

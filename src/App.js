@@ -5,10 +5,13 @@ import { ANIMATION_STATES } from './constants.js';
 import { CrowdManager } from './ai/CrowdManager.js';
 import { Camera } from './Camera.js';
 import { InputManager } from './controls/InputManager.js';
+import { MineralCluster } from './env/MineralCluster.js';
+import { MINERAL_TYPES, MINERAL_PALETTES } from './constants.js';
 
 class GameApp {
     constructor() {
         this.characters = [];
+        this.minerals = [];
         
         // Setup Pixi
         this.app = new PIXI.Application({
@@ -65,8 +68,58 @@ class GameApp {
         // Initial Character
         this.addCharacter(window.innerWidth / 2, window.innerHeight / 2);
         
+        // Add some random environment objects
+        this.initEnvironment();
+
         // Game Loop
         this.app.ticker.add((delta) => this.update(delta));
+    }
+
+    initEnvironment() {
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+
+        // Spawn some crystals
+        for(let i=0; i<5; i++) {
+            this.addMineral(
+                cx + (Math.random() - 0.5) * 600,
+                cy + (Math.random() - 0.5) * 600,
+                MINERAL_TYPES.CRYSTAL,
+                Math.random() > 0.5 ? 'CRYSTAL_GREEN' : 'CRYSTAL_CYAN'
+            );
+        }
+
+        // Spawn some rocks
+        for(let i=0; i<5; i++) {
+            this.addMineral(
+                cx + (Math.random() - 0.5) * 600,
+                cy + (Math.random() - 0.5) * 600,
+                MINERAL_TYPES.ROCK,
+                Math.random() > 0.5 ? 'ROCK_BLUE' : 'ROCK_PURPLE'
+            );
+        }
+    }
+
+    addMineral(x, y, type, paletteKey) {
+        const mineral = new MineralCluster({
+            type: type,
+            paletteKey: paletteKey,
+            size: 0.8 + Math.random() * 0.4,
+            seed: Math.random() * 10000,
+            variantParams: type === MINERAL_TYPES.CRYSTAL ? {
+                numMainShards: 2 + Math.floor(Math.random() * 3),
+                heightRange: [2.5, 5.0]
+            } : {
+                numLargeChunks: 1 + Math.floor(Math.random() * 3),
+                widthRange: [1.2, 2.5]
+            }
+        });
+
+        mineral.setPosition(x, y);
+        
+        this.minerals.push(mineral);
+        this.characterLayer.addChild(mineral.graphics);
+        this.shadowLayer.addChild(mineral.shadowG);
     }
 
     addCharacter(x, y) {
@@ -110,6 +163,7 @@ class GameApp {
 
     clearAll() {
         this.removeCharacters(this.characters.length);
+        // Optional: clear minerals too? For now keeping them as environment.
     }
 
     randomizeAllColors() {
@@ -130,12 +184,13 @@ class GameApp {
             this.crowdManager.update(dtSeconds);
         }
 
-        // Sort by Y for simple depth effect
-        // Only sort every 10 frames to save perf if we have many characters
         // Update characters and publish each character's graphics.zIndex from renderer-provided groundY,
         // then use Pixi's sortChildren to order by zIndex (ground-level).
         // We throttle sortChildren to every ~10 frames for perf.
         const shouldSort = Math.floor(this.app.ticker.lastTime / (1000 / 60)) % 10 === 0;
+
+        // Update Minerals (static, but might need updates if we add animated effects)
+        this.minerals.forEach(min => min.update(dtSeconds));
 
         this.characters.forEach(char => {
             // Apply Global settings dynamically ONLY if AI is disabled
