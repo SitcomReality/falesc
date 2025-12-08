@@ -73,13 +73,13 @@ export class MineralRenderer {
                 cluster.addChild(pieceG);
             }
 
-            // Assign cluster as mainG and cache a flattened clone for identical variations (cheap)
+            // Assign cluster as mainG and cache the container for identical variations (cheap)
             struct.mainG = cluster;
             struct.container.addChild(cluster);
 
             // Build a lightweight cache key for cluster geometry (not per-piece randomness)
-            // We still store a cache footprint so identical seeds can be reused if needed.
-            this.cache.set(cacheKey, cluster.clone());
+            // Store the container reference since PIXI.Container doesn't provide clone().
+            this.cache.set(cacheKey, cluster);
         } 
         // For Crystals: Multiple Child Containers (Dynamic)
         else {
