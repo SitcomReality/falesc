@@ -40,7 +40,19 @@ export class RockRenderer {
         // Sort pieces descending by size. Index 0 is the largest (farthest back), Index N-1 is the smallest (closest front).
         piecesData.sort((a, b) => b.size - a.size);
 
-        // Render sorted pieces
+        // Ensure vertical stacking: guarantee that each subsequent (smaller) piece has
+        // a base Y that is not higher than any larger piece (i.e. py increases with index).
+        // Compute a compact base starting point and a small per-layer offset based on spread.
+        const originalYs = piecesData.map(d => d.py);
+        const minOriginalY = Math.min(...originalYs);
+        const layerOffset = Math.max(4, Math.abs(spread) * 0.18); // pixels between layers
+
+        // Reassign py so larger pieces (lower index) are higher/behind, smaller ones lower/in front.
+        piecesData.forEach((d, i) => {
+            d.py = minOriginalY + i * layerOffset;
+        });
+
+        // Render sorted pieces (now with adjusted vertical stacking)
         piecesData.forEach((data, index) => {
             const pieceG = new PIXI.Graphics();
             RockRenderer.drawRockPiece(pieceG, data.variation, data.palette);
