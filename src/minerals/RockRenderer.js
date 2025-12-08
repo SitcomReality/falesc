@@ -29,7 +29,7 @@ export class RockRenderer {
 
             piecesData.push({
                 variation: pieceVar,
-                palette: p,
+                palette: palette,
                 px, py,
                 rotation: (Math.random() - 0.5) * 0.25,
                 // Use sizeMultiplier as the metric for size comparison
