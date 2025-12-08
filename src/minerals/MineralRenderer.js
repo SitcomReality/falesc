@@ -103,16 +103,20 @@ export class MineralRenderer {
         };
 
         // Center seam top: slightly higher than shoulders, with its own skew
+        // Place the seam top lower (closer to the base) than the shoulders so the two
+        // side faces meet on a downward angle (V-shaped join).
         const seamTop = {
             x: seamBottom.x + (Math.random() - 0.5) * 6,
-            y: shoulderBaseY - (2 + Math.random() * 4)
+            y: shoulderBaseY + (2 + Math.random() * 4)
         };
 
         // Top "cap" apex: still has a clear top face, but with a bit of skew
-        const highestShoulderY = Math.min(leftShoulder.y, rightShoulder.y, seamTop.y);
+        const highestShoulderY = Math.min(leftShoulder.y, rightShoulder.y);
+        // Move apex slightly above the shoulders so the seamTop sits lower and the
+        // two side faces form a downward-pointing join toward seamTop.
         const apex = {
             x: (leftShoulder.x + rightShoulder.x) * 0.5 + (Math.random() - 0.5) * 4,
-            y: highestShoulderY - (3 + Math.random() * 4)
+            y: highestShoulderY - (1 + Math.random() * 3)
         };
 
         g.clear();
