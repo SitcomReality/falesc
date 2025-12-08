@@ -97,57 +97,89 @@ export class MineralRenderer {
         const maxLean = 0.7; // clamp so they don't topple over
 
         for (let i = 0; i < count; i++) {
-             const isMain = i === 0;
-             const scale = isMain ? 1.0 : (0.5 + Math.random() * 0.45);
+            const isMain = i === 0;
+            const scale = isMain ? 1.0 : (0.5 + Math.random() * 0.45);
 
-             let x = 0;
-             let y = 0;
-             if (isMain) {
-                 x = 0;
-                 y = 0;
-             } else {
-                 if (count === 2) {
-                     // For exactly two crystals, place them symmetrically close and lean away
-                     const side = i === 1 ? -1 : 1; // single other crystal will be i===1
-                     x = side * baseSpread * 0.6 + (Math.random() - 0.5) * baseSpread * 0.05;
-                     y = (Math.random() - 0.5) * 6 * v.clusterDensity;
-                 } else {
-                     // Distribute non-main crystals tightly around the base with low randomness so bases can touch
-                     const t = (i - 1) / Math.max(1, count - 2); // 0..1 across non-main crystals
-                     const sideSpread = (t - 0.5) * 2;           // -1..1
-                     // Use a smaller multiplier so crystals are near each other
-                     x = sideSpread * baseSpread * 0.5 + (Math.random() - 0.5) * baseSpread * 0.12;
-                     y = (Math.random() - 0.5) * 10 * v.clusterDensity;
-                 }
-             }
+            let x = 0;
+            let y = 0;
+            if (isMain) {
+                x = 0;
+                y = 0;
+            } else {
+                if (count === 2) {
+                    // For exactly two crystals, place them symmetrically close and lean away
+                    const side = i === 1 ? -1 : 1; // single other crystal will be i===1
+                    x = side * baseSpread * 0.6 + (Math.random() - 0.5) * baseSpread * 0.05;
+                    y = (Math.random() - 0.5) * 6 * v.clusterDensity;
+                } else {
+                    // Distribute non-main crystals tightly around the base with low randomness so bases can touch
+                    const t = (i - 1) / Math.max(1, count - 2); // 0..1 across non-main crystals
+                    const sideSpread = (t - 0.5) * 2;           // -1..1
+                    // Use a smaller multiplier so crystals are near each other
+                    x = sideSpread * baseSpread * 0.5 + (Math.random() - 0.5) * baseSpread * 0.12;
+                    y = (Math.random() - 0.5) * 10 * v.clusterDensity;
+                }
+            }
 
-             // Base tilt: slightly angled, mostly upright
-             let tilt = (Math.random() - 0.5) * 0.08;
+            // Base tilt: small random wobble so nothing is perfectly straight
+            let tilt = (Math.random() - 0.5) * 0.05;
 
-             if (!isMain) {
-                 // Edge crystals lean away from the cluster center
-                 const normX = Math.max(-1, Math.min(1, x / (baseSpread || 1)));
-                 const lean = normX * edgeLeanFactor;
-                 tilt += lean;
-             }
+            if (!isMain) {
+                // Edge crystals lean away from the cluster center more than central ones.
+                const normX = Math.max(-1, Math.min(1, x / (baseSpread || 1))); // -1 .. 1
+                const edgeBias = Math.sign(normX) * Math.pow(Math.abs(normX), 1.5); // central ~0, edges closer to +/-1
+                const lean = edgeBias * edgeLeanFactor;
+                tilt += lean;
+            }
 
-             // Special-case: two-crystal cluster should visibly lean away from each other
-             if (count === 2 && !isMain) {
-                 // Ensure noticeable opposite tilts
-                 tilt = Math.sign(x) * Math.abs(tilt || edgeLeanFactor * 1.5);
-             }
+            // Special-case: two-crystal cluster should visibly lean away from each other
+            if (count === 2 && !isMain) {
+                // Force a strong opposing lean based on side
+                const side = Math.sign(x) || 1;
+                tilt = side * Math.min(maxLean * 0.85, Math.abs(tilt) + edgeLeanFactor);
+            }
 
-             // Clamp final tilt
-             if (tilt > maxLean) tilt = maxLean;
-             if (tilt < -maxLean) tilt = -maxLean;
+            // Clamp final tilt
+            if (tilt > maxLean) tilt = maxLean;
+            if (tilt < -maxLean) tilt = -maxLean;
 
-             crystals.push({
-                 scale: scale * v.sizeMultiplier,
-                 x,
-                 y,
-                 height: (40 + Math.random() * 30) * v.heightRatio,
-                 tilt
-             });
+            // Per-crystal top/shaft variation
+            const baseWidth = 15;
+            const halfW = baseWidth / 2;
+
+            const height = (40 + Math.random() * 30) * v.heightRatio;
+
+            // Where the two side faces meet (top of the shaft, before the cap)
+            const shaftTopFactor = 0.45 + Math.random() * 0.2; // between ~45% and 65% of height
+            const shaftTopY = -height * shaftTopFactor;
+
+            // Outer top corners sit slightly above the joint to form a downward arrow
+            const sideLift = 3 + Math.random() * 3; // how much higher the outer corners are vs the joint
+
+            // Tip offset for the cap (oblong, skewable top)
+            const maxTipOffset = halfW * 0.75;
+            const tipOffset = (Math.random() * 2 - 1) * maxTipOffset;
+
+            // Division between dark/light is on the opposite side of the tip
+            const ridgeOffset = -tipOffset * (halfW / maxTipOffset);
+
+            // Cap height: current peak is the max; we usually stay flatter
+            const maxExtraTip = Math.min(10, height * 0.25);
+            const minTip = 3;
+            const tipHeight = minTip + Math.random() * (maxExtraTip - minTip);
+
+            crystals.push({
+                scale: scale * v.sizeMultiplier,
+                x,
+                y,
+                height,
+                tilt,
+                shaftTopY,
+                sideLift,
+                tipOffset,
+                ridgeOffset,
+                tipHeight
+            });
         }
 
         // Sort by Y so back crystals draw first
@@ -161,10 +193,9 @@ export class MineralRenderer {
             cContainer.position.set(d.x, d.y);
             cContainer.scale.set(d.scale);
 
-            // Static rotation, with a little extra random twist so crystals don't all match
-            const twist = (Math.random() - 0.5) * 0.12; // subtle extra variation
+            // Static rotation, no sway animation
             cContainer.baseRotation = d.tilt;
-            cContainer.rotation = d.tilt + twist;
+            cContainer.rotation = d.tilt;
 
             const g = new PIXI.Graphics();
             
@@ -179,29 +210,23 @@ export class MineralRenderer {
             // Draw Pillar
             // Two side faces for the main body: lighter on the left, darker on the right.
             const halfW = w / 2;
-            const topY = -h;
 
-            // Vary the top cap height and horizontal tip skew per-crystal
-            const diamondHeight = (8 + Math.random() * 6) * (0.7 + Math.random() * 0.6);
-            const tipOffset = (Math.random() * 2 - 1) * halfW * 0.7; // lean tip left/right
-            const tipX = tipOffset;
+            // Shared top-join for both faces (where they meet before the cap)
+            const centerJointX = d.ridgeOffset || 0;
+            const centerJointY = d.shaftTopY || -h * 0.6;
 
-            // Place the light/dark division opposite the tip offset
-            // If the tip is close to the left edge, the divide moves toward the right, and vice versa.
-            const ridgeRatio = 0.85; // how strongly the divide mirrors the tip offset
-            const divideX = -tipOffset * ridgeRatio;
-
-            // Y positions for where the side faces meet the top cap
-            const joinInnerY = topY + diamondHeight * 0.25;
-            const joinOuterY = topY + diamondHeight * 0.55;
+            // Outer top corners are slightly higher (less negative Y) to create a downward arrow
+            const sideLift = d.sideLift || 4;
+            const leftOuterY = centerJointY + sideLift;
+            const rightOuterY = centerJointY + sideLift;
 
             // Left face (lighter side)
             g.lineStyle(lineThickness, 0x000000, 1, 0.5);
             g.beginFill(p.light);
-            g.moveTo(-halfW, 0);                 // bottom-left
-            g.lineTo(divideX, 2);                // bottom inner near divide
-            g.lineTo(divideX, joinInnerY);       // inner top near ridge
-            g.lineTo(-halfW, joinOuterY);        // outer top, slightly lower for skew
+            g.moveTo(-halfW, 0);
+            g.lineTo(centerJointX, 2);                 // small downward center step for faceting
+            g.lineTo(centerJointX, centerJointY);      // inner edge up to the joint
+            g.lineTo(-halfW, leftOuterY);              // outer top corner slightly higher
             g.closePath();
             g.endFill();
             g.lineStyle(0);
@@ -209,30 +234,47 @@ export class MineralRenderer {
             // Right face (darker / shaded side)
             g.lineStyle(lineThickness, 0x000000, 1, 0.5);
             g.beginFill(p.dark);
-            g.moveTo(divideX, 2);               // bottom inner
-            g.lineTo(halfW, 0);                 // bottom-right
-            g.lineTo(halfW, joinOuterY);        // outer top
-            g.lineTo(divideX, joinInnerY);      // inner top at ridge
+            g.moveTo(centerJointX, 2);
+            g.lineTo(halfW, 0);
+            g.lineTo(halfW, rightOuterY);
+            g.lineTo(centerJointX, centerJointY);
             g.closePath();
             g.endFill();
             g.lineStyle(0);
 
-            // Top cap as a rotated, oblong diamond whose tip can skew left/right
+            // Top cap as a skewable, oblong diamond
+            const tipHeight = d.tipHeight || 8;
+
+            // Tip is offset, while the ridge where light/dark meet is on the opposite side (centerJointX)
+            const tipX = d.tipOffset || 0;
+            const tipY = Math.max(centerJointY - tipHeight, -h); // never taller than original peak
+
+            // Widths of the cap sides adapt to lean direction
+            const lean = Math.max(-1, Math.min(1, tipX / (halfW || 1)));
+            const leftWidth = halfW * (0.7 + 0.2 * Math.max(0, -lean));  // narrower on the lean side
+            const rightWidth = halfW * (0.7 + 0.2 * Math.max(0, lean));
+
+            const leftX = centerJointX - leftWidth;
+            const rightX = centerJointX + rightWidth;
+
+            // Slightly rounded bottom for oblong feel
+            const bottomY = centerJointY + Math.max(2, tipHeight * 0.25);
+
             g.lineStyle(lineThickness, 0x000000, 1, 0.5);
             g.beginFill(p.base);
-            g.moveTo(tipX, topY - diamondHeight);           // top tip, skewed horizontally
-            g.lineTo(halfW, joinOuterY);                    // right shoulder
-            g.lineTo(divideX, topY + diamondHeight * 0.15); // mid valley along ridge
-            g.lineTo(-halfW, joinOuterY);                   // left shoulder
+            g.moveTo(tipX, tipY);          // top point (tip)
+            g.lineTo(rightX, centerJointY);
+            g.lineTo(centerJointX, bottomY);
+            g.lineTo(leftX, centerJointY);
             g.closePath();
             g.endFill();
             g.lineStyle(0);
 
-            // Edge highlight along the ridge opposite the tip lean
+            // Edge highlight along the top ridge from left to tip to right
             g.lineStyle(highlightThickness, 0xFFFFFF, 0.3);
-            g.moveTo(-halfW, joinOuterY);
-            g.lineTo(divideX, topY - diamondHeight * 0.1);
-            g.lineTo(halfW, joinOuterY);
+            g.moveTo(leftX, centerJointY);
+            g.lineTo(tipX, tipY);
+            g.lineTo(rightX, centerJointY);
             g.lineStyle(0);
 
             cContainer.addChild(g);
