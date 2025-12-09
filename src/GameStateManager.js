@@ -9,7 +9,8 @@ export const GameState = {
 export class GameStateManager {
     constructor(app) {
         this.app = app;
-        this.state = GameState.MENU;
+        // Start with no active state so the first setState call always runs
+        this.state = null;
         this.currentTurn = 0;
         this.screens = new Map();
         this.activeScreen = null;
@@ -31,7 +32,8 @@ export class GameStateManager {
     }
 
     setState(newState) {
-        if (this.state === newState) return;
+        // If we're already in this state *and* have an active screen, do nothing
+        if (this.state === newState && this.activeScreen) return;
         
         // Hide current screen
         if (this.activeScreen) {
