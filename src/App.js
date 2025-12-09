@@ -11,16 +11,19 @@ import { LobbyScreen } from './screens/LobbyScreen.js';
 import { GameScreen } from './screens/GameScreen.js';
 import { InterstitialScreen } from './screens/InterstitialScreen.js';
 import { EndScreen } from './screens/EndScreen.js';
+import { MapGenerator } from './map/MapGenerator.js';
+import { SeededRandom } from './map/SeededRandom.js';
 
 class GameApp {
     constructor() {
         this.characters = [];
         this.minerals = [];
+        this.map = null;
         
         // Setup Pixi
         this.app = new PIXI.Application({
             resizeTo: window,
-            backgroundColor: 0xdddddd,
+            backgroundColor: 0x4A90E2,
             antialias: true,
             resolution: window.devicePixelRatio || 1,
             autoDensity: true
@@ -32,6 +35,7 @@ class GameApp {
         this.app.stage.addChild(this.worldContainer);
 
         // Containers (Layers)
+        this.mapLayer = new PIXI.Container();
         this.shadowLayer = new PIXI.Container();
         this.characterLayer = new PIXI.Container();
         
@@ -39,6 +43,7 @@ class GameApp {
         this.characterLayer.sortableChildren = true;
 
         // Add layers to World instead of Stage
+        this.worldContainer.addChild(this.mapLayer);
         this.worldContainer.addChild(this.shadowLayer);
         this.worldContainer.addChild(this.characterLayer);
 
@@ -66,8 +71,12 @@ class GameApp {
             this.inputManager
         );
 
-        // Initialize game world (populate with random entities)
-        this.initializeWorld();
+        // Listen for game start to generate world
+        const originalStartGame = this.stateManager.startGame.bind(this.stateManager);
+        this.stateManager.startGame = () => {
+            this.initializeWorld();
+            originalStartGame();
+        };
 
         // Start at menu
         this.stateManager.setState(GameState.MENU);
@@ -77,26 +86,85 @@ class GameApp {
     }
 
     initializeWorld() {
-        // Add random characters with AI enabled
+        // Clear existing world
+        this.clearWorld();
+        
+        // Generate map
+        this.map = new MapGenerator(
+            this.stateManager.settings.mapSeed,
+            this.stateManager.settings.mapSize,
+            this.app.screen.width,
+            this.app.screen.height
+        );
+        
+        // Add map graphics to layer
+        // Bridges first (behind sectors)
+        this.map.bridges.forEach(bridge => {
+            this.mapLayer.addChild(bridge.graphics);
+        });
+        
+        // Then sectors
+        this.map.sectors.forEach(sector => {
+            this.mapLayer.addChild(sector.graphics);
+        });
+        
+        // Create seeded RNG for deterministic entity placement
+        const entityRNG = new SeededRandom(this.stateManager.settings.mapSeed + 1);
+        
+        // Add characters on map
         const numCharacters = 15;
         for (let i = 0; i < numCharacters; i++) {
-            const x = Math.random() * window.innerWidth;
-            const y = Math.random() * window.innerHeight;
-            this.addCharacter(x, y);
+            const point = this.map.getRandomPointOnMap();
+            this.addCharacter(point.x, point.y);
         }
 
-        // Add random minerals
-        const numMinerals = 20;
+        // Add minerals deterministically on map
+        const mineralCounts = {
+            small: 30,
+            medium: 50,
+            large: 70
+        };
+        
+        const numMinerals = mineralCounts[this.stateManager.settings.mapSize] || 50;
+        
         for (let i = 0; i < numMinerals; i++) {
-            const x = Math.random() * window.innerWidth;
-            const y = Math.random() * window.innerHeight;
-            const type = Math.random() > 0.5 ? MINERAL_TYPES.ROCK : MINERAL_TYPES.CRYSTAL;
-            this.addMineral(x, y, type);
+            const point = this.map.getRandomPointOnMap();
+            const type = entityRNG.next() > 0.5 ? MINERAL_TYPES.ROCK : MINERAL_TYPES.CRYSTAL;
+            
+            // Find which palette to use deterministically
+            const paletteIds = type === MINERAL_TYPES.ROCK 
+                ? ['ROCK_GREY', 'ROCK_BROWN']
+                : ['CRYSTAL_BLUE', 'CRYSTAL_PURPLE', 'CRYSTAL_GREEN'];
+            const paletteId = paletteIds[entityRNG.nextInt(0, paletteIds.length - 1)];
+            
+            this.addMineral(point.x, point.y, type, paletteId);
         }
     }
 
-    addMineral(x, y, type) {
-        const mineral = new MineralStructure(x, y, type);
+    clearWorld() {
+        // Clear characters
+        this.characters.forEach(char => char.destroy());
+        this.characters = [];
+        this.crowdManager.clear();
+        
+        // Clear minerals
+        this.minerals.forEach(min => min.destroy());
+        this.minerals = [];
+        
+        // Clear map
+        if (this.map) {
+            this.map.destroy();
+            this.map = null;
+        }
+        
+        // Clear layers
+        this.mapLayer.removeChildren();
+        this.characterLayer.removeChildren();
+        this.shadowLayer.removeChildren();
+    }
+
+    addMineral(x, y, type, paletteId) {
+        const mineral = new MineralStructure(x, y, type, paletteId);
         
         this.minerals.push(mineral);
         this.characterLayer.addChild(mineral.container);

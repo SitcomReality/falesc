@@ -25,15 +25,46 @@ export class LobbyScreen {
             margin-bottom: 40px;
         `;
         
-        const settings = document.createElement('div');
-        settings.style.cssText = `
+        // Map Settings Form
+        const settingsContainer = document.createElement('div');
+        settingsContainer.style.cssText = `
             margin-bottom: 40px;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 300px;
         `;
-        settings.innerHTML = `
-            <p style="margin: 8px 0;">Map Seed: ${this.gsm.settings.mapSeed.toFixed(4)}</p>
-            <p style="margin: 8px 0;">Map Size: ${this.gsm.settings.mapSize}</p>
-            <p style="margin: 8px 0;">Turn Timer: ${this.gsm.settings.turnDuration || 'None'}</p>
+        
+        // Map Seed Input
+        const seedGroup = this.createInputGroup('Map Seed:', 'number', this.gsm.settings.mapSeed, (value) => {
+            this.gsm.settings.mapSeed = parseInt(value) || Math.floor(Math.random() * 1000000);
+        });
+        
+        // Random Seed Button
+        const randomSeedBtn = this.createButton('Random', () => {
+            const newSeed = Math.floor(Math.random() * 1000000);
+            this.gsm.settings.mapSeed = newSeed;
+            seedGroup.input.value = newSeed;
+        }, true);
+        randomSeedBtn.style.marginLeft = '10px';
+        seedGroup.container.appendChild(randomSeedBtn);
+        
+        // Map Size Select
+        const sizeGroup = this.createSelectGroup('Map Size:', 
+            ['small', 'medium', 'large'], 
+            this.gsm.settings.mapSize,
+            (value) => {
+                this.gsm.settings.mapSize = value;
+            }
+        );
+        
+        settingsContainer.appendChild(seedGroup.container);
+        settingsContainer.appendChild(sizeGroup);
+        
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = `
+            display: flex;
+            gap: 12px;
         `;
         
         const startBtn = this.createButton('Start Game', () => {
@@ -44,22 +75,101 @@ export class LobbyScreen {
             this.gsm.setState('MENU');
         });
         
+        buttonContainer.appendChild(startBtn);
+        buttonContainer.appendChild(backBtn);
+        
         this.container.appendChild(title);
-        this.container.appendChild(settings);
-        this.container.appendChild(startBtn);
-        this.container.appendChild(backBtn);
+        this.container.appendChild(settingsContainer);
+        this.container.appendChild(buttonContainer);
         
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
     }
 
-    createButton(text, onClick) {
+    createInputGroup(label, type, defaultValue, onChange) {
+        const container = document.createElement('div');
+        container.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        `;
+        
+        const labelEl = document.createElement('label');
+        labelEl.textContent = label;
+        labelEl.style.cssText = `
+            font-size: 16px;
+            margin-right: 12px;
+        `;
+        
+        const input = document.createElement('input');
+        input.type = type;
+        input.value = defaultValue;
+        input.style.cssText = `
+            padding: 8px 12px;
+            font-size: 14px;
+            font-family: 'Noto Sans', sans-serif;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #444;
+            width: 120px;
+        `;
+        
+        input.addEventListener('change', (e) => onChange(e.target.value));
+        
+        container.appendChild(labelEl);
+        container.appendChild(input);
+        
+        return { container, input };
+    }
+
+    createSelectGroup(label, options, defaultValue, onChange) {
+        const container = document.createElement('div');
+        container.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        `;
+        
+        const labelEl = document.createElement('label');
+        labelEl.textContent = label;
+        labelEl.style.cssText = `
+            font-size: 16px;
+            margin-right: 12px;
+        `;
+        
+        const select = document.createElement('select');
+        select.style.cssText = `
+            padding: 8px 12px;
+            font-size: 14px;
+            font-family: 'Noto Sans', sans-serif;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #444;
+            cursor: pointer;
+        `;
+        
+        options.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt;
+            option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+            option.selected = opt === defaultValue;
+            select.appendChild(option);
+        });
+        
+        select.addEventListener('change', (e) => onChange(e.target.value));
+        
+        container.appendChild(labelEl);
+        container.appendChild(select);
+        
+        return container;
+    }
+
+    createButton(text, onClick, small = false) {
         const btn = document.createElement('button');
         btn.textContent = text;
         btn.style.cssText = `
-            padding: 16px 48px;
-            margin: 12px;
-            font-size: 18px;
+            padding: ${small ? '8px 16px' : '16px 48px'};
+            font-size: ${small ? '14px' : '18px'};
             font-family: 'Noto Sans', sans-serif;
             background: #fff;
             color: #1a1a1a;

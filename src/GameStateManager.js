@@ -17,7 +17,7 @@ export class GameStateManager {
         
         // Game settings (will be configured in lobby)
         this.settings = {
-            mapSeed: Math.random(),
+            mapSeed: Math.floor(Math.random() * 1000000),
             mapSize: 'medium',
             turnDuration: 0, // 0 = no timer
             initialResources: 100
