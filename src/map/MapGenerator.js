@@ -16,10 +16,11 @@ export class MapGenerator {
         // Map size configuration
         const RADIUS_SCALE = 4.0; // Scale up sectors significantly as requested (approx 4x larger)
 
+        // Configs reflect 1 Central Hub + N Perimeter Islands
         const sizeConfigs = {
-            small: { sectorCount: 5, minRadius: 120 * RADIUS_SCALE, maxRadius: 180 * RADIUS_SCALE },
-            medium: { sectorCount: 7, minRadius: 100 * RADIUS_SCALE, maxRadius: 160 * RADIUS_SCALE },
-            large: { sectorCount: 10, minRadius: 80 * RADIUS_SCALE, maxRadius: 140 * RADIUS_SCALE }
+            small: { sectorCount: 5, minRadius: 120 * RADIUS_SCALE, maxRadius: 180 * RADIUS_SCALE }, // 1 Hub + 4 Perim
+            medium: { sectorCount: 7, minRadius: 100 * RADIUS_SCALE, maxRadius: 160 * RADIUS_SCALE }, // 1 Hub + 6 Perim
+            large: { sectorCount: 9, minRadius: 80 * RADIUS_SCALE, maxRadius: 140 * RADIUS_SCALE } // 1 Hub + 8 Perim
         };
 
         this.config = sizeConfigs[mapSize] || sizeConfigs.medium;
@@ -40,119 +41,65 @@ export class MapGenerator {
 
     generateSectorPositions() {
         const { sectorCount, minRadius, maxRadius } = this.config;
-        const padding = maxRadius * 0.8; // Use relative padding based on new radius
-
-        // Place first sector near center
-        const firstSector = new Sector(
+        
+        // Determine the number of perimeter sectors
+        const perimeterCount = sectorCount - 1;
+        
+        // --- 1. Central Hub ---
+        
+        // Make the central island significantly larger (1.7x to 2.2x the max perimeter radius)
+        const hubRadius = maxRadius * this.rng.nextRange(1.7, 2.2);
+        
+        const hub = new Sector(
             0,
-            this.screenWidth / 2 + this.rng.nextRange(-100, 100) * 2.5,
-            this.screenHeight / 2 + this.rng.nextRange(-100, 100) * 2.5,
-            this.rng.nextRange(minRadius, maxRadius),
+            this.screenWidth / 2,
+            this.screenHeight / 2,
+            hubRadius,
             this.rng
         );
-        this.sectors.push(firstSector);
-
-        // Place remaining sectors with minimum distance constraint
-        const minDist = (minRadius + maxRadius) * 1.3;
-        let attempts = 0;
-        const maxAttempts = 1000;
-
-        while (this.sectors.length < sectorCount && attempts < maxAttempts) {
-            attempts++;
-
-            const x = this.rng.nextRange(padding, this.screenWidth - padding);
-            const y = this.rng.nextRange(padding, this.screenHeight - padding);
-
-            // Check if far enough from existing sectors
-            let valid = true;
-            for (const sector of this.sectors) {
-                const dist = Math.hypot(x - sector.centerX, y - sector.centerY);
-                if (dist < minDist) {
-                    valid = false;
-                    break;
-                }
-            }
-
-            if (valid) {
-                const sector = new Sector(
-                    this.sectors.length,
-                    x,
-                    y,
-                    this.rng.nextRange(minRadius, maxRadius),
-                    this.rng
-                );
-                this.sectors.push(sector);
-            }
+        this.sectors.push(hub);
+        
+        // --- 2. Perimeter Islands (Equidistant placement) ---
+        
+        const center = { x: this.screenWidth / 2, y: this.screenHeight / 2 };
+        // Place islands on a circle around the center, sized relative to the smaller screen dimension
+        const placementRadius = Math.min(this.screenWidth, this.screenHeight) * 0.4;
+        
+        for (let i = 0; i < perimeterCount; i++) {
+            // Calculate angle for equidistant placement
+            const angle = (i / perimeterCount) * Math.PI * 2 + this.rng.nextRange(-0.1, 0.1); // slight rotation offset
+            
+            const r = this.rng.nextRange(minRadius, maxRadius);
+            
+            // Apply isometric squash (0.65) to Y placement to match sector geometry
+            const x = center.x + Math.cos(angle) * placementRadius;
+            const y = center.y + Math.sin(angle) * placementRadius * 0.65;
+            
+            const sector = new Sector(
+                this.sectors.length,
+                x,
+                y,
+                r,
+                this.rng
+            );
+            this.sectors.push(sector);
         }
     }
 
     createConnections() {
-        // Create minimum spanning tree using Prim's algorithm
-        if (this.sectors.length === 0) return;
+        // Enforce hub-and-spoke topology: Sector 0 (Hub) connects to all others.
+        if (this.sectors.length < 2) return;
 
-        const connected = new Set([this.sectors[0].id]);
-        const unconnected = new Set(this.sectors.slice(1).map(s => s.id));
-
-        while (unconnected.size > 0) {
-            let bestDist = Infinity;
-            let bestPair = null;
-
-            // Find closest unconnected sector to any connected sector
-            for (const connId of connected) {
-                const connSector = this.sectors[connId];
-
-                for (const unconId of unconnected) {
-                    const unconSector = this.sectors[unconId];
-                    const dist = Math.hypot(
-                        connSector.centerX - unconSector.centerX,
-                        connSector.centerY - unconSector.centerY
-                    );
-
-                    if (dist < bestDist) {
-                        bestDist = dist;
-                        bestPair = [connId, unconId];
-                    }
-                }
-            }
-
-            if (bestPair) {
-                // Create bridge
-                this.connectSectors(bestPair[0], bestPair[1]);
-                connected.add(bestPair[1]);
-                unconnected.delete(bestPair[1]);
-            } else {
-                break;
-            }
+        const hubId = 0;
+        
+        // Sectors 1 through N are perimeter islands.
+        for (let i = 1; i < this.sectors.length; i++) {
+            this.connectSectors(hubId, i);
         }
     }
 
     addExtraConnections() {
-        // Add a few extra bridges for redundancy (creates loops)
-        const extraCount = Math.floor(this.sectors.length * 0.3);
-
-        for (let i = 0; i < extraCount; i++) {
-            const sectorA = this.sectors[this.rng.nextInt(0, this.sectors.length - 1)];
-
-            // Find a nearby sector not already connected
-            const candidates = this.sectors.filter(s =>
-                s.id !== sectorA.id && !sectorA.connections.includes(s.id)
-            );
-
-            if (candidates.length > 0) {
-                // Sort by distance
-                candidates.sort((a, b) => {
-                    const distA = Math.hypot(a.centerX - sectorA.centerX, a.centerY - sectorA.centerY);
-                    const distB = Math.hypot(b.centerX - sectorA.centerX, b.centerY - sectorA.centerY);
-                    return distA - distB;
-                });
-
-                // Pick one of the 3 closest
-                const pickFrom = candidates.slice(0, Math.min(3, candidates.length));
-                const sectorB = pickFrom[this.rng.nextInt(0, pickFrom.length - 1)];
-
-                this.connectSectors(sectorA.id, sectorB.id);
-            }
-        }
+        // No extra connections needed for the defined hub-and-spoke topology.
     }
 
     connectSectors(idA, idB) {
