@@ -23,7 +23,7 @@ class GameApp {
         // Setup Pixi
         this.app = new PIXI.Application({
             resizeTo: window,
-            backgroundColor: 0x4A90E2,
+            backgroundColor: 0x1a1a2e, // Dark Space Blue
             antialias: true,
             resolution: window.devicePixelRatio || 1,
             autoDensity: true

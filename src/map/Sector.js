@@ -21,9 +21,13 @@ export class Sector {
     }
 
     generateShape(rng) {
-        // Create a wobbly circular shape using multiple points
-        const numPoints = 16 + rng.nextInt(0, 8);
+        // Create a wobbly shape with higher point density for smoother linear segments
+        // (better for 3D extrusion look without complex curve tessellation)
+        const numPoints = 40 + rng.nextInt(0, 20);
         const points = [];
+        
+        // Isometric aspect ratio (squash vertical to look like we're viewing from an angle)
+        const aspect = 0.65;
 
         for (let i = 0; i < numPoints; i++) {
             const angle = (i / numPoints) * Math.PI * 2;
@@ -34,7 +38,7 @@ export class Sector {
 
             points.push({
                 x: this.centerX + Math.cos(angle) * r,
-                y: this.centerY + Math.sin(angle) * r
+                y: this.centerY + Math.sin(angle) * r * aspect
             });
         }
 
@@ -43,30 +47,46 @@ export class Sector {
 
     draw() {
         this.graphics.clear();
+        
+        const depth = 35; // Height of the cliff/side
+        const topColor = 0xE8DCC0; // Sand/Light Dirt
+        const sideColor = 0x655540; // Dark Rock/Earth
+        const strokeColor = 0x9B8B6F;
 
-        // Fill
-        this.graphics.beginFill(0xE8DCC0, 1);
-        this.graphics.lineStyle(3, 0x9B8B6F, 1, 0.5);
+        if (this.shape.length === 0) return;
 
-        if (this.shape.length > 0) {
-            this.graphics.moveTo(this.shape[0].x, this.shape[0].y);
+        // 1. Draw the "Sides" (Underground Projection)
+        this.graphics.beginFill(sideColor);
+        
+        // Draw the bottom lid (offset by depth)
+        this.graphics.moveTo(this.shape[0].x, this.shape[0].y + depth);
+        for (let i = 1; i < this.shape.length; i++) {
+            this.graphics.lineTo(this.shape[i].x, this.shape[i].y + depth);
+        }
+        this.graphics.closePath();
+        
+        // Draw the walls connecting Top to Bottom
+        for (let i = 0; i < this.shape.length; i++) {
+            const curr = this.shape[i];
+            const next = this.shape[(i + 1) % this.shape.length];
+            
+            this.graphics.moveTo(curr.x, curr.y);
+            this.graphics.lineTo(next.x, next.y);
+            this.graphics.lineTo(next.x, next.y + depth);
+            this.graphics.lineTo(curr.x, curr.y + depth);
+        }
+        this.graphics.endFill();
 
-            // Draw smooth curves through points
-            for (let i = 0; i < this.shape.length; i++) {
-                const current = this.shape[i];
-                const next = this.shape[(i + 1) % this.shape.length];
-                const nextNext = this.shape[(i + 2) % this.shape.length];
+        // 2. Draw Top Surface
+        this.graphics.beginFill(topColor);
+        this.graphics.lineStyle(3, strokeColor, 1, 0.5);
 
-                // Control point for smooth curve
-                const cpX = next.x;
-                const cpY = next.y;
-
-                this.graphics.quadraticCurveTo(cpX, cpY, (next.x + nextNext.x) / 2, (next.y + nextNext.y) / 2);
-            }
-
-            this.graphics.closePath();
+        this.graphics.moveTo(this.shape[0].x, this.shape[0].y);
+        for (let i = 1; i < this.shape.length; i++) {
+             this.graphics.lineTo(this.shape[i].x, this.shape[i].y);
         }
 
+        this.graphics.closePath();
         this.graphics.endFill();
     }
 
