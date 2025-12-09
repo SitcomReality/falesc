@@ -60,7 +60,8 @@ export class Bridge {
         // Perspective: Horizontal bridges are thinner
         const absSin = Math.abs(Math.sin(angle));
         const widthFactor = 0.5 + 0.5 * absSin;
-        const width = 45 * widthFactor; 
+        // Doubled base width (was 45) to make bridges twice as wide visually
+        const width = 90 * widthFactor; 
 
         // Calculate perp vector for width
         const perp = angle + Math.PI / 2;
@@ -107,7 +108,8 @@ export class Bridge {
 
     drawGate(g, x, y, angle, totalWidth, palette) {
         // Gate consists of two vertical pillars only (lintel removed).
-        const pillarW = 12;
+        // Double pillar width to match wider bridge
+        const pillarW = 24;
         const pillarH = 50; 
         
         // Positions for pillars (centered on the width line)
