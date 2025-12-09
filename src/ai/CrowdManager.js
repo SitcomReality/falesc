@@ -5,6 +5,7 @@ export class CrowdManager {
         this.app = app;
         this.controllers = new Map(); // Map<Character, NPCController>
         this.worldBounds = { width: app.screen.width, height: app.screen.height };
+        this.isPointOnMap = () => true; // Default to allow all movement
     }
 
     setWorldBounds(width, height) {
@@ -15,9 +16,19 @@ export class CrowdManager {
         }
     }
 
+    setMapChecker(checkerFn) {
+        this.isPointOnMap = checkerFn;
+        // Update existing controllers
+        for(const controller of this.controllers.values()) {
+            controller.setMapChecker(checkerFn);
+        }
+    }
+
     register(character) {
         if (!this.controllers.has(character)) {
             const controller = new NPCController(character, this.worldBounds);
+            // Pass checker immediately if available
+            controller.setMapChecker(this.isPointOnMap);
             this.controllers.set(character, controller);
         }
     }

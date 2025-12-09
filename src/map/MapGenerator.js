@@ -193,7 +193,14 @@ export class MapGenerator {
 
     isPointOnMap(x, y) {
         // Check if point is inside any sector
-        return this.sectors.some(sector => sector.containsPoint(x, y));
+        if (this.sectors.some(sector => sector.containsPoint(x, y))) {
+            return true;
+        }
+        // Check if point is on any bridge
+        if (this.bridges.some(bridge => bridge.containsPoint(x, y))) {
+            return true;
+        }
+        return false;
     }
 
     getRandomSector() {

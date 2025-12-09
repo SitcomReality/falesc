@@ -12,10 +12,69 @@ export class Bridge {
         this.pointA = this.findClosestEdgePoint(sectorA, sectorB.centerX, sectorB.centerY);
         this.pointB = this.findClosestEdgePoint(sectorB, sectorA.centerX, sectorA.centerY);
         
+        // Cache calculated geometry (floorCorners and derived values)
+        this.geometry = this._calculateGeometry();
+        
         this.graphics = new PIXI.Graphics();
         this.draw();
     }
 
+    _calculateGeometry() {
+        const extraExtend = 18;
+        const dx = this.pointB.x - this.pointA.x;
+        const dy = this.pointB.y - this.pointA.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const dirX = dx / len;
+        const dirY = dy / len;
+
+        const extA = { x: this.pointA.x - dirX * extraExtend, y: this.pointA.y - dirY * extraExtend };
+        const extB = { x: this.pointB.x + dirX * extraExtend, y: this.pointB.y + dirY * extraExtend };
+
+        const angle = Math.atan2(extB.y - extA.y, extB.x - extA.x);
+        
+        // Perspective
+        const absSin = Math.abs(Math.sin(angle));
+        const widthFactor = 0.5 + 0.5 * absSin;
+        const width = 90 * widthFactor; 
+
+        // Calculate perp vector for width
+        const perp = angle + Math.PI / 2;
+        const px = Math.cos(perp) * width / 2;
+        const py = Math.sin(perp) * width / 2;
+        
+        const floorCorners = [
+            { x: extA.x - px, y: extA.y - py }, // A-Left
+            { x: extB.x - px, y: extB.y - py }, // B-Left
+            { x: extB.x + px, y: extB.y + py }, // B-Right
+            { x: extA.x + px, y: extA.y + py }  // A-Right
+        ];
+        
+        return {
+            floorCorners,
+            angle,
+            perp,
+            width
+        };
+    }
+
+    containsPoint(x, y) {
+        // Point-in-Polygon check for the 4 floor corners (using ray casting)
+        let inside = false;
+        const points = this.geometry.floorCorners;
+        const n = points.length;
+
+        for (let i = 0, j = n - 1; i < n; j = i++) {
+            const xi = points[i].x, yi = points[i].y;
+            const xj = points[j].x, yj = points[j].y;
+
+            const intersect = ((yi > y) !== (yj > y))
+                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+
+        return inside;
+    }
+    
     findClosestEdgePoint(sector, targetX, targetY) {
         // Find the point on the sector's perimeter closest to the target
         let minDist = Infinity;
@@ -43,41 +102,11 @@ export class Bridge {
             floor: 0x78909C   // Floor Surface
         };
 
-        // Extend endpoints slightly outward so bridge visually reaches onto terrain even when island edges are concave.
-        const extraExtend = 18; // pixels to extend beyond the found edge points
-        const dx = this.pointB.x - this.pointA.x;
-        const dy = this.pointB.y - this.pointA.y;
-        const len = Math.hypot(dx, dy) || 1;
-        const dirX = dx / len;
-        const dirY = dy / len;
-
-        // Use extended endpoints for drawing so pillars/floor slightly overlap island tops.
-        const extA = { x: this.pointA.x - dirX * extraExtend, y: this.pointA.y - dirY * extraExtend };
-        const extB = { x: this.pointB.x + dirX * extraExtend, y: this.pointB.y + dirY * extraExtend };
-
-        const angle = Math.atan2(extB.y - extA.y, extB.x - extA.x);
-        
-        // Perspective: Horizontal bridges are thinner
-        const absSin = Math.abs(Math.sin(angle));
-        const widthFactor = 0.5 + 0.5 * absSin;
-        // Doubled base width (was 45) to make bridges twice as wide visually
-        const width = 90 * widthFactor; 
-
-        // Calculate perp vector for width
-        const perp = angle + Math.PI / 2;
-        const px = Math.cos(perp) * width / 2;
-        const py = Math.sin(perp) * width / 2;
+        const { floorCorners: corners, angle, perp, width } = this.geometry;
 
         // --- 1. FLOOR ---
         const floorDepth = 8;
         
-        const corners = [
-            { x: extA.x - px, y: extA.y - py }, // A-Left
-            { x: extB.x - px, y: extB.y - py }, // B-Left
-            { x: extB.x + px, y: extB.y + py }, // B-Right
-            { x: extA.x + px, y: extA.y + py }  // A-Right
-        ];
-
         // Floor Sides (Darker)
         g.beginFill(palette.dark);
         g.moveTo(corners[3].x, corners[3].y);

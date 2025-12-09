@@ -110,6 +110,10 @@ class GameApp {
             this.MAP_HEIGHT
         );
         
+        // Pass map containment check function to CrowdManager
+        // Bind the function to the map instance so 'this' inside isPointOnMap refers to MapGenerator
+        this.crowdManager.setMapChecker(this.map.isPointOnMap.bind(this.map));
+        
         // Add map graphics to layer
         
         // Then sectors
