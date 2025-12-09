@@ -21,29 +21,76 @@ export class Sector {
     }
 
     generateShape(rng) {
-        // Create a wobbly shape with higher point density for smoother linear segments
-        // Reduced point count for simpler shapes, fewer jagged edges.
-        const numPoints = 25 + rng.nextInt(0, 10); 
+        // Create a smoother, less spiky island outline.
+        // Steps:
+        //  - generate fewer base points with low-frequency wobble
+        //  - clamp extreme radius deviations
+        //  - apply 2 passes of Chaikin smoothing to remove sharp corners / deep concaves
+
+        const basePoints = 20 + rng.nextInt(0, 8); // slightly fewer points for simpler shapes
         const points = [];
-        
-        // Isometric aspect ratio (squash vertical to look like we're viewing from an angle)
-        const aspect = 0.65;
+        const aspect = 0.65; // isometric squash
 
-        for (let i = 0; i < numPoints; i++) {
-            const angle = (i / numPoints) * Math.PI * 2;
-            // Vary radius with reduced wobble frequency and amplitude for smoother organic shapes
-            const baseRadius = this.radius * (0.75 + rng.next() * 0.5); 
-            // Reduced frequency (3 -> 1.5) and amplitude (0.2 -> 0.1)
-            const wobble = Math.sin(angle * 1.5 + rng.next() * Math.PI) * this.radius * 0.1;
-            const r = baseRadius + wobble;
+        // Parameters to control wobble: low frequency, low amplitude
+        const wobbleFreq = 1.2;
+        const wobbleAmpFactor = 0.08; // fraction of radius
+        const minRadiusFactor = 0.7;
+        const maxRadiusFactor = 1.15;
 
-            points.push({
-                x: this.centerX + Math.cos(angle) * r,
-                y: this.centerY + Math.sin(angle) * r * aspect
-            });
+        for (let i = 0; i < basePoints; i++) {
+            const angle = (i / basePoints) * Math.PI * 2;
+            // Base radius with small random variation
+            let r = this.radius * (minRadiusFactor + rng.next() * (maxRadiusFactor - minRadiusFactor));
+            // Low-frequency wobble
+            const wobble = Math.sin(angle * wobbleFreq + rng.next() * Math.PI * 2) * this.radius * wobbleAmpFactor;
+            r += wobble;
+
+            // Clamp to prevent very deep concave or extreme spike
+            const minR = this.radius * 0.65;
+            const maxR = this.radius * 1.25;
+            r = Math.max(minR, Math.min(maxR, r));
+
+            points.push({ x: this.centerX + Math.cos(angle) * r, y: this.centerY + Math.sin(angle) * r * aspect });
         }
 
-        return points;
+        // Chaikin smoothing function (subdivision) - preserves overall silhouette while softening corners
+        const chaikin = (pts, iterations = 1) => {
+            for (let iter = 0; iter < iterations; iter++) {
+                const newPts = [];
+                const n = pts.length;
+                for (let i = 0; i < n; i++) {
+                    const p0 = pts[i];
+                    const p1 = pts[(i + 1) % n];
+                    // Q = 0.75*P0 + 0.25*P1, R = 0.25*P0 + 0.75*P1 (keeps shape tighter than equal split)
+                    const qx = p0.x * 0.75 + p1.x * 0.25;
+                    const qy = p0.y * 0.75 + p1.y * 0.25;
+                    const rx = p0.x * 0.25 + p1.x * 0.75;
+                    const ry = p0.y * 0.25 + p1.y * 0.75;
+                    newPts.push({ x: qx, y: qy });
+                    newPts.push({ x: rx, y: ry });
+                }
+                pts = newPts;
+            }
+            return pts;
+        };
+
+        // Apply two light smoothing passes
+        let smooth = chaikin(points, 2);
+
+        // Optionally reduce residual tiny spikes by clamping local curvature:
+        // For each point, if it lies far outside the local average, pull it inward.
+        const clampFactor = 0.18; // how strongly to clamp outliers (0=no clamp, 1=full clamp to avg)
+        for (let i = 0; i < smooth.length; i++) {
+            const prev = smooth[(i - 1 + smooth.length) % smooth.length];
+            const next = smooth[(i + 1) % smooth.length];
+            const avgX = (prev.x + next.x) / 2;
+            const avgY = (prev.y + next.y) / 2;
+            // Move the point slightly toward the local average to soften sharp protrusions
+            smooth[i].x = smooth[i].x * (1 - clampFactor) + avgX * clampFactor;
+            smooth[i].y = smooth[i].y * (1 - clampFactor) + avgY * clampFactor;
+        }
+
+        return smooth;
     }
 
     draw() {
