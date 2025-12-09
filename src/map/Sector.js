@@ -22,8 +22,8 @@ export class Sector {
 
     generateShape(rng) {
         // Create a wobbly shape with higher point density for smoother linear segments
-        // (better for 3D extrusion look without complex curve tessellation)
-        const numPoints = 40 + rng.nextInt(0, 20);
+        // Reduced point count for simpler shapes, fewer jagged edges.
+        const numPoints = 25 + rng.nextInt(0, 10); 
         const points = [];
         
         // Isometric aspect ratio (squash vertical to look like we're viewing from an angle)
@@ -31,9 +31,10 @@ export class Sector {
 
         for (let i = 0; i < numPoints; i++) {
             const angle = (i / numPoints) * Math.PI * 2;
-            // Vary radius with multiple octaves of noise-like variation
-            const baseRadius = this.radius * (0.7 + rng.next() * 0.6);
-            const wobble = Math.sin(angle * 3 + rng.next() * Math.PI) * this.radius * 0.2;
+            // Vary radius with reduced wobble frequency and amplitude for smoother organic shapes
+            const baseRadius = this.radius * (0.75 + rng.next() * 0.5); 
+            // Reduced frequency (3 -> 1.5) and amplitude (0.2 -> 0.1)
+            const wobble = Math.sin(angle * 1.5 + rng.next() * Math.PI) * this.radius * 0.1;
             const r = baseRadius + wobble;
 
             points.push({
