@@ -43,9 +43,19 @@ export class Bridge {
             floor: 0x78909C   // Floor Surface
         };
 
+        // Extend endpoints slightly outward so bridge visually reaches onto terrain even when island edges are concave.
+        const extraExtend = 18; // pixels to extend beyond the found edge points
         const dx = this.pointB.x - this.pointA.x;
         const dy = this.pointB.y - this.pointA.y;
-        const angle = Math.atan2(dy, dx);
+        const len = Math.hypot(dx, dy) || 1;
+        const dirX = dx / len;
+        const dirY = dy / len;
+
+        // Use extended endpoints for drawing so pillars/floor slightly overlap island tops.
+        const extA = { x: this.pointA.x - dirX * extraExtend, y: this.pointA.y - dirY * extraExtend };
+        const extB = { x: this.pointB.x + dirX * extraExtend, y: this.pointB.y + dirY * extraExtend };
+
+        const angle = Math.atan2(extB.y - extA.y, extB.x - extA.x);
         
         // Perspective: Horizontal bridges are thinner
         const absSin = Math.abs(Math.sin(angle));
@@ -61,10 +71,10 @@ export class Bridge {
         const floorDepth = 8;
         
         const corners = [
-            { x: this.pointA.x - px, y: this.pointA.y - py }, // A-Left
-            { x: this.pointB.x - px, y: this.pointB.y - py }, // B-Left
-            { x: this.pointB.x + px, y: this.pointB.y + py }, // B-Right
-            { x: this.pointA.x + px, y: this.pointA.y + py }  // A-Right
+            { x: extA.x - px, y: extA.y - py }, // A-Left
+            { x: extB.x - px, y: extB.y - py }, // B-Left
+            { x: extB.x + px, y: extB.y + py }, // B-Right
+            { x: extA.x + px, y: extA.y + py }  // A-Right
         ];
 
         // Floor Sides (Darker)
@@ -84,7 +94,8 @@ export class Bridge {
         g.endFill();
 
         // --- 2. GATES ---
-        // Sort gates by Y position to handle occlusion properly (painter's algo)
+        // Use original (non-extended) edge points as the logical gate anchor so pillars sit at the island edge,
+        // but draw them so they overlap visibly thanks to the extended floor.
         const gateA = { x: this.pointA.x, y: this.pointA.y, angle: perp };
         const gateB = { x: this.pointB.x, y: this.pointB.y, angle: perp };
         const gates = [gateA, gateB].sort((a, b) => a.y - b.y);
@@ -95,7 +106,7 @@ export class Bridge {
     }
 
     drawGate(g, x, y, angle, totalWidth, palette) {
-        // Gate consists of two pillars and a top bar.
+        // Gate consists of two vertical pillars only (lintel removed).
         const pillarW = 12;
         const pillarH = 50; 
         
@@ -111,18 +122,10 @@ export class Bridge {
             { x: rx, y: ry }
         ].sort((a, b) => a.y - b.y);
 
-        // Draw Pillars
+        // Draw Pillars only (no lintel)
         pillars.forEach(p => {
             this.drawPillar(g, p.x, p.y, pillarW, pillarH, palette);
         });
-
-        // Draw Lintel connecting the tops
-        const topLx = lx;
-        const topLy = ly - pillarH;
-        const topRx = rx;
-        const topRy = ry - pillarH;
-        
-        this.drawLintel(g, topLx, topLy, topRx, topRy, 10, palette);
     }
 
     drawPillar(g, x, y, w, h, p) {
@@ -168,50 +171,6 @@ export class Bridge {
         g.moveTo(x + seam, topY);
         g.lineTo(x + seam, botShoulderY);
         g.lineStyle(0);
-    }
-
-    drawLintel(g, x1, y1, x2, y2, thickness, p) {
-        const barHeight = thickness;
-        const barDepth = 8;
-        
-        const dx = x2 - x1;
-        const dy = y2 - y1;
-        const angle = Math.atan2(dy, dx);
-        const perp = angle + Math.PI/2;
-        
-        const offX = Math.cos(perp) * barDepth/2;
-        const offY = Math.sin(perp) * barDepth/2;
-        
-        const corners = [
-            { x: x1 + offX, y: y1 + offY },
-            { x: x2 + offX, y: y2 + offY },
-            { x: x2 - offX, y: y2 - offY },
-            { x: x1 - offX, y: y1 - offY }
-        ];
-        
-        // Draw Top Face
-        g.beginFill(p.light);
-        g.moveTo(corners[0].x, corners[0].y);
-        g.lineTo(corners[1].x, corners[1].y);
-        g.lineTo(corners[2].x, corners[2].y);
-        g.lineTo(corners[3].x, corners[3].y);
-        g.endFill();
-        
-        // Draw Side Face (Down)
-        g.beginFill(p.dark);
-        g.moveTo(corners[2].x, corners[2].y);
-        g.lineTo(corners[1].x, corners[1].y);
-        g.lineTo(corners[1].x, corners[1].y + barHeight);
-        g.lineTo(corners[2].x, corners[2].y + barHeight);
-        g.endFill();
-        
-        // Cap Side
-        g.beginFill(p.base);
-        g.moveTo(corners[3].x, corners[3].y);
-        g.lineTo(corners[2].x, corners[2].y);
-        g.lineTo(corners[2].x, corners[2].y + barHeight);
-        g.lineTo(corners[3].x, corners[3].y + barHeight);
-        g.endFill();
     }
 
     destroy() {
