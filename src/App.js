@@ -40,7 +40,6 @@ class GameApp {
         this.characterLayer = new PIXI.Container();
         
         // Z-Index sorting enabled
-        this.mapLayer.sortableChildren = true;
         this.characterLayer.sortableChildren = true;
 
         // Add layers to World instead of Stage
@@ -112,15 +111,14 @@ class GameApp {
         );
         
         // Add map graphics to layer
-        // First sectors (background)
+        
+        // Then sectors
         this.map.sectors.forEach(sector => {
-            sector.graphics.zIndex = 0;
             this.mapLayer.addChild(sector.graphics);
         });
-        
-        // Then bridges so they appear in front of islands
+
+        // Bridges second (in front of sectors)
         this.map.bridges.forEach(bridge => {
-            bridge.graphics.zIndex = 10;
             this.mapLayer.addChild(bridge.graphics);
         });
         
