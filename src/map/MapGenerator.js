@@ -159,6 +159,29 @@ export class MapGenerator {
         const sectorA = this.sectors[idA];
         const sectorB = this.sectors[idB];
 
+        // Before connecting, ensure the straight bridge line doesn't pass over any other sector.
+        // Sample points along the proposed bridge line and test for containment in other sectors.
+        const wouldIntersectOther = (a, b) => {
+            const samples = 30; // resolution of the test
+            const dx = (b.centerX - a.centerX) / (samples - 1);
+            const dy = (b.centerY - a.centerY) / (samples - 1);
+
+            for (let i = 1; i < samples - 1; i++) { // skip exact endpoints (they're on A/B)
+                const sx = a.centerX + dx * i;
+                const sy = a.centerY + dy * i;
+                for (const s of this.sectors) {
+                    if (s.id === a.id || s.id === b.id) continue;
+                    if (s.containsPoint(sx, sy)) return true;
+                }
+            }
+            return false;
+        };
+
+        // If the bridge would cross any other sector, do not create it.
+        if (wouldIntersectOther(sectorA, sectorB)) {
+            return;
+        }
+
         if (!sectorA.connections.includes(idB)) {
             sectorA.connections.push(idB);
             sectorB.connections.push(idA);
