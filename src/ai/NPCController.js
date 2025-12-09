@@ -24,9 +24,9 @@ export const NPC_PARAMS = {
 };
 
 export class NPCController {
-    constructor(character, screenBounds) {
+    constructor(character, bounds) {
         this.character = character;
-        this.bounds = screenBounds;
+        this.bounds = bounds;
         
         this.timer = 0;
         this.state = 'IDLE'; 
@@ -37,6 +37,10 @@ export class NPCController {
 
         // Initial random state, scaled by brainSpeed
         this.decideNextAction();
+    }
+
+    setBounds(newBounds) {
+        this.bounds = newBounds;
     }
 
     update(dt) {

@@ -14,10 +14,12 @@ export class MapGenerator {
         this.screenHeight = screenHeight;
 
         // Map size configuration
+        const RADIUS_SCALE = 4.0; // Scale up sectors significantly as requested (approx 4x larger)
+
         const sizeConfigs = {
-            small: { sectorCount: 5, minRadius: 120, maxRadius: 180 },
-            medium: { sectorCount: 7, minRadius: 100, maxRadius: 160 },
-            large: { sectorCount: 10, minRadius: 80, maxRadius: 140 }
+            small: { sectorCount: 5, minRadius: 120 * RADIUS_SCALE, maxRadius: 180 * RADIUS_SCALE },
+            medium: { sectorCount: 7, minRadius: 100 * RADIUS_SCALE, maxRadius: 160 * RADIUS_SCALE },
+            large: { sectorCount: 10, minRadius: 80 * RADIUS_SCALE, maxRadius: 140 * RADIUS_SCALE }
         };
 
         this.config = sizeConfigs[mapSize] || sizeConfigs.medium;
@@ -38,13 +40,13 @@ export class MapGenerator {
 
     generateSectorPositions() {
         const { sectorCount, minRadius, maxRadius } = this.config;
-        const padding = 150;
+        const padding = maxRadius * 0.8; // Use relative padding based on new radius
 
         // Place first sector near center
         const firstSector = new Sector(
             0,
-            this.screenWidth / 2 + this.rng.nextRange(-100, 100),
-            this.screenHeight / 2 + this.rng.nextRange(-100, 100),
+            this.screenWidth / 2 + this.rng.nextRange(-100, 100) * 2.5,
+            this.screenHeight / 2 + this.rng.nextRange(-100, 100) * 2.5,
             this.rng.nextRange(minRadius, maxRadius),
             this.rng
         );

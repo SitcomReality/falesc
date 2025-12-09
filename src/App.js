@@ -70,6 +70,16 @@ class GameApp {
             (x, y) => {}, // No tap handler for now
             this.inputManager
         );
+        
+        // Define world parameters based on minimum zoom (1/0.2 = 5). This is the full map size.
+        this.WORLD_SCALE_FACTOR = 5;
+        this.MAP_WIDTH = this.app.screen.width * this.WORLD_SCALE_FACTOR;
+        this.MAP_HEIGHT = this.app.screen.height * this.WORLD_SCALE_FACTOR;
+
+        // Initialize Camera position to the center of the large map
+        this.camera.position.x = this.MAP_WIDTH / 2;
+        this.camera.position.y = this.MAP_HEIGHT / 2;
+        this.camera.updateTransform();
 
         // Listen for game start to generate world
         const originalStartGame = this.stateManager.startGame.bind(this.stateManager);
@@ -89,12 +99,15 @@ class GameApp {
         // Clear existing world
         this.clearWorld();
         
+        // Update crowd manager bounds before spawning characters
+        this.crowdManager.setWorldBounds(this.MAP_WIDTH, this.MAP_HEIGHT);
+
         // Generate map
         this.map = new MapGenerator(
             this.stateManager.settings.mapSeed,
             this.stateManager.settings.mapSize,
-            this.app.screen.width,
-            this.app.screen.height
+            this.MAP_WIDTH,
+            this.MAP_HEIGHT
         );
         
         // Add map graphics to layer
@@ -174,11 +187,11 @@ class GameApp {
     }
 
     addCharacter(x, y) {
-        const padding = 50;
-        const cx = Math.max(padding, Math.min(this.app.screen.width - padding, x));
-        const cy = Math.max(padding, Math.min(this.app.screen.height - padding, y));
+        // const padding = 50;
+        // const cx = Math.max(padding, Math.min(this.app.screen.width - padding, x));
+        // const cy = Math.max(padding, Math.min(this.app.screen.height - padding, y));
 
-        const char = new Character(cx, cy);
+        const char = new Character(x, y);
         
         this.characters.push(char);
         this.crowdManager.register(char);
