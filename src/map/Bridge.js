@@ -36,17 +36,17 @@ export class Bridge {
         this.graphics.clear();
         
         // Draw bridge as a thick line
-        this.graphics.lineStyle(8, 0x8B7355, 1);
+        this.graphics.lineStyle(80, 0x8B7355, 1);
         this.graphics.moveTo(this.pointA.x, this.pointA.y);
         this.graphics.lineTo(this.pointB.x, this.pointB.y);
         
         // Add darker outline
-        this.graphics.lineStyle(12, 0x5D4E3C, 1);
+        this.graphics.lineStyle(120, 0x5D4E3C, 1);
         this.graphics.moveTo(this.pointA.x, this.pointA.y);
         this.graphics.lineTo(this.pointB.x, this.pointB.y);
         
         // Draw the main bridge on top
-        this.graphics.lineStyle(8, 0x8B7355, 1);
+        this.graphics.lineStyle(80, 0x8B7355, 1);
         this.graphics.moveTo(this.pointA.x, this.pointA.y);
         this.graphics.lineTo(this.pointB.x, this.pointB.y);
     }
