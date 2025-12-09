@@ -111,10 +111,10 @@ class GameApp {
         );
         
         // Add map graphics to layer
-        // Bridges first (behind sectors)
-        this.map.bridges.forEach(bridge => {
-            this.mapLayer.addChild(bridge.graphics);
-        });
+        // Bridges temporarily hidden (not added to layer)
+        // this.map.bridges.forEach(bridge => {
+        //     this.mapLayer.addChild(bridge.graphics);
+        // });
         
         // Then sectors
         this.map.sectors.forEach(sector => {
