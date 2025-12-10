@@ -9,13 +9,14 @@ export function generateShape(centerX, centerY, radius, rng) {
 
     const basePoints = 20 + rng.nextInt(0, 8); // slightly fewer points for simpler shapes
     const points = [];
-    const aspect = 0.65; // isometric squash
+    // Make islands wider than they are tall by reducing the vertical aspect
+    const aspect = 0.5; // reduced from 0.65 to squash vertical extent
 
     // Parameters to control wobble: low frequency, low amplitude
     const wobbleFreq = 1.2;
-    const wobbleAmpFactor = 0.08; // fraction of radius
+    const wobbleAmpFactor = 0.06; // slightly reduced to avoid tall spikes
     const minRadiusFactor = 0.8; // Increased from 0.7 to ensure coverage
-    const maxRadiusFactor = 1.2;
+    const maxRadiusFactor = 1.15; // tightened to reduce extreme radial excursions
 
     for (let i = 0; i < basePoints; i++) {
         const angle = (i / basePoints) * Math.PI * 2;
