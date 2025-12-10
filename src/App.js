@@ -137,7 +137,10 @@ class GameApp {
         const numMinerals = mineralCounts[this.stateManager.settings.mapSize] || 50;
         
         for (let i = 0; i < numMinerals; i++) {
-            const point = this.map.getRandomPointOnMap();
+            // Pick a random sector, then a random point outside its grid
+            const sector = this.map.getRandomSector();
+            const point = sector.getRandomPointOutsideGrid(entityRNG);
+            
             const type = entityRNG.next() > 0.5 ? MINERAL_TYPES.ROCK : MINERAL_TYPES.CRYSTAL;
             
             // Find which palette to use deterministically

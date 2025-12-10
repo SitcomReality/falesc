@@ -10,70 +10,105 @@ export class MapGenerator {
         this.sectors = [];
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
-
-        // Map size configuration
-        const RADIUS_SCALE = 4.0; // Scale up sectors significantly as requested (approx 4x larger)
-
-        const sizeConfigs = {
-            small: { sectorCount: 5, minRadius: 120 * RADIUS_SCALE, maxRadius: 180 * RADIUS_SCALE },
-            medium: { sectorCount: 7, minRadius: 100 * RADIUS_SCALE, maxRadius: 160 * RADIUS_SCALE },
-            large: { sectorCount: 10, minRadius: 80 * RADIUS_SCALE, maxRadius: 140 * RADIUS_SCALE }
-        };
-
-        this.config = sizeConfigs[mapSize] || sizeConfigs.medium;
+        this.mapSize = mapSize;
 
         this.generate();
     }
 
     generate() {
-        // 1. Generate sector positions using Poisson-like distribution
-        this.generateSectorPositions();
+        // Define islands based on map size
+        // Grids: 2 means 2x2, 3 means 3x3, etc.
+        const configs = {
+            small: [2, 2, 2, 2],
+            medium: [2, 2, 2, 2, 3, 3],
+            large: [2, 2, 2, 2, 3, 3, 4]
+        };
+
+        const islandsToGenerate = configs[this.mapSize] || configs.medium;
+        
+        // Sort larger islands to the front so they are placed first (usually easier to pack)
+        islandsToGenerate.sort((a, b) => b - a);
+
+        this.generateSectorPositions(islandsToGenerate);
     }
 
-    generateSectorPositions() {
-        const { sectorCount, minRadius, maxRadius } = this.config;
-        const padding = maxRadius * 0.8; // Use relative padding based on new radius
+    generateSectorPositions(gridSizes) {
+        const padding = 200; // Edge padding
 
-        // Place first sector near center
-        const firstSector = new Sector(
-            0,
-            this.screenWidth / 2 + this.rng.nextRange(-100, 100) * 2.5,
-            this.screenHeight / 2 + this.rng.nextRange(-100, 100) * 2.5,
-            this.rng.nextRange(minRadius, maxRadius),
-            this.rng
-        );
-        this.sectors.push(firstSector);
+        // Try to place each requested island
+        for (const gridSize of gridSizes) {
+            // Calculate required radius for this grid size
+            // Grid width is ~120 for size 2. Radius needs to cover it + margin.
+            // Base radius approx: (gridSize * 35) + 60
+            const baseRadius = (gridSize * 35) + 70;
+            const radius = baseRadius * this.rng.nextRange(0.95, 1.1);
 
-        // Place remaining sectors with minimum distance constraint
-        const minDist = (minRadius + maxRadius) * 1.3;
-        let attempts = 0;
-        const maxAttempts = 1000;
+            let placed = false;
+            let attempts = 0;
+            // Higher attempts because packing is denser and harder
+            const maxAttempts = 2000; 
 
-        while (this.sectors.length < sectorCount && attempts < maxAttempts) {
-            attempts++;
+            while (!placed && attempts < maxAttempts) {
+                attempts++;
+                
+                // Bias slightly towards center for density
+                // Use a gaussian-like distribution (sum of randoms) for better clustering
+                let x, y;
+                
+                if (this.sectors.length === 0) {
+                    // First sector dead center
+                    x = this.screenWidth / 2;
+                    y = this.screenHeight / 2;
+                } else {
+                    // Pick a random point
+                    x = this.rng.nextRange(padding, this.screenWidth - padding);
+                    y = this.rng.nextRange(padding, this.screenHeight - padding);
+                    
+                    // Or bias toward existing sector?
+                    // For dense packing, picking a point near an existing sector is often better than random
+                    if (this.rng.next() > 0.3) {
+                        const target = this.sectors[this.rng.nextInt(0, this.sectors.length - 1)];
+                        const angle = this.rng.nextRange(0, Math.PI * 2);
+                        const dist = target.radius + radius + this.rng.nextRange(20, 100);
+                        x = target.centerX + Math.cos(angle) * dist;
+                        y = target.centerY + Math.sin(angle) * dist;
+                    }
+                }
 
-            const x = this.rng.nextRange(padding, this.screenWidth - padding);
-            const y = this.rng.nextRange(padding, this.screenHeight - padding);
+                // Bounds check
+                if (x < padding || x > this.screenWidth - padding || 
+                    y < padding || y > this.screenHeight - padding) {
+                    continue;
+                }
 
-            // Check if far enough from existing sectors
-            let valid = true;
-            for (const sector of this.sectors) {
-                const dist = Math.hypot(x - sector.centerX, y - sector.centerY);
-                if (dist < minDist) {
-                    valid = false;
-                    break;
+                // Check collisions with existing sectors
+                let valid = true;
+                for (const sector of this.sectors) {
+                    const dist = Math.hypot(x - sector.centerX, y - sector.centerY);
+                    const minSeparation = (sector.radius + radius) * 1.05; // 1.05 = very tight packing
+                    
+                    if (dist < minSeparation) {
+                        valid = false;
+                        break;
+                    }
+                }
+
+                if (valid) {
+                    const sector = new Sector(
+                        this.sectors.length,
+                        x,
+                        y,
+                        radius,
+                        this.rng,
+                        gridSize
+                    );
+                    this.sectors.push(sector);
+                    placed = true;
                 }
             }
-
-            if (valid) {
-                const sector = new Sector(
-                    this.sectors.length,
-                    x,
-                    y,
-                    this.rng.nextRange(minRadius, maxRadius),
-                    this.rng
-                );
-                this.sectors.push(sector);
+            
+            if (!placed) {
+                console.warn(`Could not place island of grid size ${gridSize} after ${maxAttempts} attempts.`);
             }
         }
     }

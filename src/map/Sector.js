@@ -5,12 +5,17 @@ import * as PIXI from 'pixi.js';
  * It has an irregular, organic shape and can contain buildings/minerals.
  */
 export class Sector {
-    constructor(id, centerX, centerY, radius, rng) {
+    constructor(id, centerX, centerY, radius, rng, gridSize = 2) {
         this.id = id;
         this.centerX = centerX;
         this.centerY = centerY;
         this.radius = radius;
+        this.gridSize = gridSize;
         this.connections = []; // Array of Sector IDs this connects to
+        
+        // Grid Visual Settings
+        this.tileSize = 60; // Visual size of one grid tile side
+        this.gridAspect = 0.6; // Isometric squash factor for the grid (approx matching island aspect)
 
         // Generate organic outline
         this.shape = this.generateShape(rng);
@@ -136,6 +141,79 @@ export class Sector {
 
         this.graphics.closePath();
         this.graphics.endFill();
+        
+        this.drawGrid();
+    }
+
+    drawGrid() {
+        const g = this.graphics;
+        const n = this.gridSize;
+        const tw = this.tileSize;
+        const th = this.tileSize * this.gridAspect;
+        
+        // Draw grid outline and inner lines
+        g.lineStyle(2, 0xFFFFFF, 0.15); // Subtle white lines
+        
+        // Helper to project grid coordinates (u, v) to world (x, y)
+        // Grid centered at (0,0), u and v range from -n/2 to n/2
+        const project = (u, v) => {
+            // Isometric projection: x = (u - v), y = (u + v)
+            return {
+                x: (u - v) * (tw / 2) + this.centerX,
+                y: (u + v) * (th / 2) + this.centerY
+            };
+        };
+
+        const start = -n / 2;
+        const end = n / 2;
+
+        // Draw Lines along U axis
+        for (let i = 0; i <= n; i++) {
+            const u = start + i;
+            const p1 = project(u, start);
+            const p2 = project(u, end);
+            g.moveTo(p1.x, p1.y);
+            g.lineTo(p2.x, p2.y);
+        }
+
+        // Draw Lines along V axis
+        for (let i = 0; i <= n; i++) {
+            const v = start + i;
+            const p1 = project(start, v);
+            const p2 = project(end, v);
+            g.moveTo(p1.x, p1.y);
+            g.lineTo(p2.x, p2.y);
+        }
+        
+        g.lineStyle(0);
+    }
+
+    /**
+     * Checks if a point falls within the diamond grid area.
+     */
+    isPointInGrid(x, y) {
+        const tw = this.tileSize;
+        const th = this.tileSize * this.gridAspect;
+        
+        // Inverse Projection
+        const dx = x - this.centerX;
+        const dy = y - this.centerY;
+        
+        // Solving:
+        // x = (u - v) * tw/2
+        // y = (u + v) * th/2
+        // u = y/th + x/tw
+        // v = y/th - x/tw
+        
+        const u = dy / th + dx / tw;
+        const v = dy / th - dx / tw;
+        
+        const limit = this.gridSize / 2;
+        // Add small buffer to avoid placing things exactly on the line
+        const buffer = 0.1;
+        
+        return (u > -limit - buffer && u < limit + buffer &&
+                v > -limit - buffer && v < limit + buffer);
     }
 
     containsPoint(x, y) {
@@ -157,7 +235,6 @@ export class Sector {
 
     getRandomPoint(rng) {
         // Get a random point inside the sector
-        // Simple rejection sampling
         const bounds = this.getBounds();
         let attempts = 0;
 
@@ -171,8 +248,30 @@ export class Sector {
             attempts++;
         }
 
-        // Fallback to center
         return { x: this.centerX, y: this.centerY };
+    }
+
+    getRandomPointOutsideGrid(rng) {
+        // Get a random point on the island but NOT in the grid
+        const bounds = this.getBounds();
+        let attempts = 0;
+
+        while (attempts < 100) {
+            const x = rng.nextRange(bounds.minX, bounds.maxX);
+            const y = rng.nextRange(bounds.minY, bounds.maxY);
+
+            if (this.containsPoint(x, y) && !this.isPointInGrid(x, y)) {
+                return { x, y };
+            }
+            attempts++;
+        }
+        
+        // Fallback: pick a point far from center if search fails
+        const angle = rng.next() * Math.PI * 2;
+        return { 
+            x: this.centerX + Math.cos(angle) * this.radius * 0.8, 
+            y: this.centerY + Math.sin(angle) * this.radius * 0.8 
+        };
     }
 
     getBounds() {
