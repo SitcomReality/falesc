@@ -51,8 +51,9 @@ export function drawSectorGraphics(graphics, shape, centerX, centerY, gridSize, 
 function drawGrid(graphics, centerX, centerY, gridSize, tileWidth, tileHeight) {
     // Grid properties
     const N = gridSize;
-    const lineColor = 0xFFFFFF;
-    const alpha = 0.15;
+    // Slightly darker grey and a bit more opaque so the grid is easier to see
+    const lineColor = 0xB0B0B0;
+    const alpha = 0.25;
 
     graphics.lineStyle(2, lineColor, alpha);
 
