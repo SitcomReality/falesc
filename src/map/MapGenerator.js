@@ -10,106 +10,140 @@ export class MapGenerator {
         this.sectors = [];
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
-        this.mapSize = mapSize;
+
+        // Map config: islands defined by grid sizes
+        // Small: 4 islands (2x2)
+        // Medium: 6 islands (4x 2x2, 2x 3x3)
+        // Large: 7 islands (4x 2x2, 2x 3x3, 1x 4x4)
+        
+        const gridConfigs = {
+            small: [2, 2, 2, 2],
+            medium: [3, 3, 2, 2, 2, 2],
+            large: [4, 3, 3, 2, 2, 2, 2]
+        };
+
+        this.gridSizes = gridConfigs[mapSize] || gridConfigs.medium;
+        
+        // Sort larger grids first for better packing (center heavy)
+        this.gridSizes.sort((a, b) => b - a);
 
         this.generate();
     }
 
     generate() {
-        // Define islands based on map size
-        // Grids: 2 means 2x2, 3 means 3x3, etc.
-        const configs = {
-            small: [2, 2, 2, 2],
-            medium: [2, 2, 2, 2, 3, 3],
-            large: [2, 2, 2, 2, 3, 3, 4]
-        };
-
-        const islandsToGenerate = configs[this.mapSize] || configs.medium;
-        
-        // Sort larger islands to the front so they are placed first (usually easier to pack)
-        islandsToGenerate.sort((a, b) => b - a);
-
-        this.generateSectorPositions(islandsToGenerate);
+        this.generateSectorsPacked();
     }
 
-    generateSectorPositions(gridSizes) {
-        const padding = 200; // Edge padding
-
-        // Try to place each requested island
-        for (const gridSize of gridSizes) {
-            // Calculate required radius for this grid size
-            // Grid width is ~120 for size 2. Radius needs to cover it + margin.
-            // Base radius approx: (gridSize * 35) + 60
-            const baseRadius = (gridSize * 35) + 70;
-            const radius = baseRadius * this.rng.nextRange(0.95, 1.1);
-
+    generateSectorsPacked() {
+        // Place sectors in a spiral expanding from center
+        // We calculate positions relative to (0,0) then center the whole cluster
+        
+        const tempSectors = [];
+        
+        // Config
+        const minSpacing = 40; // Pixels between island edges
+        
+        for (let i = 0; i < this.gridSizes.length; i++) {
+            const size = this.gridSizes[i];
+            
+            // Create a temporary sector just to get its radius for collision
+            // We'll update x,y later
+            const tempSector = new Sector(i, 0, 0, size, this.rng);
+            const radius = tempSector.radius;
+            
             let placed = false;
+            let angle = 0;
+            let dist = 0;
+            const stepAngle = 0.5; // radians
+            const stepDist = 5; // pixels per step outwards
+            
+            // Limit iterations
             let attempts = 0;
-            // Higher attempts because packing is denser and harder
-            const maxAttempts = 2000; 
-
-            while (!placed && attempts < maxAttempts) {
-                attempts++;
+            while (!placed && attempts < 2000) {
+                // Archimedean spiral: r = a + b * theta
+                // We just increase dist manually to keep it simple / evenly spaced search
                 
-                // Bias slightly towards center for density
-                // Use a gaussian-like distribution (sum of randoms) for better clustering
-                let x, y;
+                const x = Math.cos(angle) * dist;
+                const y = Math.sin(angle) * dist * 0.7; // Squash Y slightly for isometric-ish layout feel
                 
-                if (this.sectors.length === 0) {
-                    // First sector dead center
-                    x = this.screenWidth / 2;
-                    y = this.screenHeight / 2;
-                } else {
-                    // Pick a random point
-                    x = this.rng.nextRange(padding, this.screenWidth - padding);
-                    y = this.rng.nextRange(padding, this.screenHeight - padding);
+                // Check collision
+                let overlap = false;
+                for (const existing of tempSectors) {
+                    const dx = x - existing.x;
+                    const dy = y - existing.y;
+                    const d = Math.hypot(dx, dy);
                     
-                    // Or bias toward existing sector?
-                    // For dense packing, picking a point near an existing sector is often better than random
-                    if (this.rng.next() > 0.3) {
-                        const target = this.sectors[this.rng.nextInt(0, this.sectors.length - 1)];
-                        const angle = this.rng.nextRange(0, Math.PI * 2);
-                        const dist = target.radius + radius + this.rng.nextRange(20, 100);
-                        x = target.centerX + Math.cos(angle) * dist;
-                        y = target.centerY + Math.sin(angle) * dist;
-                    }
-                }
-
-                // Bounds check
-                if (x < padding || x > this.screenWidth - padding || 
-                    y < padding || y > this.screenHeight - padding) {
-                    continue;
-                }
-
-                // Check collisions with existing sectors
-                let valid = true;
-                for (const sector of this.sectors) {
-                    const dist = Math.hypot(x - sector.centerX, y - sector.centerY);
-                    const minSeparation = (sector.radius + radius) * 1.05; // 1.05 = very tight packing
-                    
-                    if (dist < minSeparation) {
-                        valid = false;
+                    // Simple circle collision
+                    // Distance must be > r1 + r2 + spacing
+                    if (d < (radius + existing.radius + minSpacing)) {
+                        overlap = true;
                         break;
                     }
                 }
-
-                if (valid) {
-                    const sector = new Sector(
-                        this.sectors.length,
-                        x,
-                        y,
-                        radius,
-                        this.rng,
-                        gridSize
-                    );
-                    this.sectors.push(sector);
+                
+                if (!overlap) {
+                    // Valid spot
+                    tempSector.centerX = x;
+                    tempSector.centerY = y;
+                    // Need to regenerate graphics/shape at new pos? 
+                    // No, Sector constructor already generated shape at 0,0? 
+                    // Actually Sector constructor took x,y. 
+                    // Let's just create a NEW sector at the valid spot to be clean
+                    // because generateShape uses centerX/Y in the point calculation.
+                    
+                    const finalSector = new Sector(i, x, y, size, this.rng);
+                    // Override the temp radius used for calc with exact one from new obj
+                    finalSector.radius = radius; 
+                    
+                    tempSectors.push({ x, y, radius, sector: finalSector });
+                    this.sectors.push(finalSector);
                     placed = true;
                 }
+                
+                angle += stepAngle;
+                dist += 10; // increase radius search
+                attempts++;
             }
+        }
+        
+        // Center the cluster on screen
+        if (this.sectors.length > 0) {
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
             
-            if (!placed) {
-                console.warn(`Could not place island of grid size ${gridSize} after ${maxAttempts} attempts.`);
-            }
+            this.sectors.forEach(s => {
+                minX = Math.min(minX, s.centerX - s.radius);
+                maxX = Math.max(maxX, s.centerX + s.radius);
+                minY = Math.min(minY, s.centerY - s.radius);
+                maxY = Math.max(maxY, s.centerY + s.radius);
+            });
+            
+            const clusterCenterX = (minX + maxX) / 2;
+            const clusterCenterY = (minY + maxY) / 2;
+            
+            const screenCX = this.screenWidth / 2;
+            const screenCY = this.screenHeight / 2;
+            
+            const offsetX = screenCX - clusterCenterX;
+            const offsetY = screenCY - clusterCenterY;
+            
+            this.sectors.forEach(s => {
+                s.centerX += offsetX;
+                s.centerY += offsetY;
+            });
+            
+            // Re-create proper sectors with final positions
+            const finalPositions = this.sectors.map(s => ({ 
+                x: s.centerX, 
+                y: s.centerY, 
+                size: s.gridSize 
+            }));
+            
+            // Clear and rebuild
+            this.sectors = [];
+            finalPositions.forEach((pos, index) => {
+                this.sectors.push(new Sector(index, pos.x, pos.y, pos.size, this.rng));
+            });
         }
     }
 
@@ -125,6 +159,11 @@ export class MapGenerator {
     getRandomPointOnMap() {
         const sector = this.getRandomSector();
         return sector.getRandomPoint(this.rng);
+    }
+
+    getRandomMineralPoint() {
+        const sector = this.getRandomSector();
+        return sector.getRandomPointOutsideGrid(this.rng);
     }
 
     destroy() {

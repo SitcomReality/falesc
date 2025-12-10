@@ -1,21 +1,38 @@
 import * as PIXI from 'pixi.js';
+import { TILE_WIDTH, TILE_HEIGHT } from '../constants.js';
 
 /**
  * A Sector represents one island region on the map.
  * It has an irregular, organic shape and can contain buildings/minerals.
  */
 export class Sector {
-    constructor(id, centerX, centerY, radius, rng, gridSize = 2) {
+    constructor(id, centerX, centerY, gridSize, rng) {
         this.id = id;
         this.centerX = centerX;
         this.centerY = centerY;
-        this.radius = radius;
         this.gridSize = gridSize;
-        this.connections = []; // Array of Sector IDs this connects to
+        this.rng = rng;
+
+        // Calculate size based on grid
+        // Grid diagonal width = gridSize * TILE_WIDTH
+        // We want radius to be comfortably larger than half the grid diagonal
+        const gridHalfWidth = (gridSize * TILE_WIDTH) / 2;
+        const baseRadius = gridHalfWidth * 1.8; // 1.8x to ensure grid fits with ground around it
+        this.radius = baseRadius;
         
-        // Grid Visual Settings
-        this.tileSize = 60; // Visual size of one grid tile side
-        this.gridAspect = 0.6; // Isometric squash factor for the grid (approx matching island aspect)
+        this.connections = []; // Array of Sector IDs this connects to
+
+        // Define Grid Polygon (Diamond) relative to center
+        // Top, Right, Bottom, Left
+        const gh = (gridSize * TILE_HEIGHT) / 2;
+        const gw = (gridSize * TILE_WIDTH) / 2;
+        
+        this.gridPoly = [
+            { x: 0, y: -gh },
+            { x: gw, y: 0 },
+            { x: 0, y: gh },
+            { x: -gw, y: 0 }
+        ];
 
         // Generate organic outline
         this.shape = this.generateShape(rng);
@@ -39,8 +56,8 @@ export class Sector {
         // Parameters to control wobble: low frequency, low amplitude
         const wobbleFreq = 1.2;
         const wobbleAmpFactor = 0.08; // fraction of radius
-        const minRadiusFactor = 0.7;
-        const maxRadiusFactor = 1.15;
+        const minRadiusFactor = 0.8; // Increased from 0.7 to ensure coverage
+        const maxRadiusFactor = 1.2;
 
         for (let i = 0; i < basePoints; i++) {
             const angle = (i / basePoints) * Math.PI * 2;
@@ -51,8 +68,8 @@ export class Sector {
             r += wobble;
 
             // Clamp to prevent very deep concave or extreme spike
-            const minR = this.radius * 0.65;
-            const maxR = this.radius * 1.25;
+            const minR = this.radius * 0.7;
+            const maxR = this.radius * 1.3;
             r = Math.max(minR, Math.min(maxR, r));
 
             points.push({ x: this.centerX + Math.cos(angle) * r, y: this.centerY + Math.sin(angle) * r * aspect });
@@ -141,79 +158,102 @@ export class Sector {
 
         this.graphics.closePath();
         this.graphics.endFill();
-        
+
+        // 3. Draw Grid (Subtle Overlay)
         this.drawGrid();
     }
 
     drawGrid() {
-        const g = this.graphics;
-        const n = this.gridSize;
-        const tw = this.tileSize;
-        const th = this.tileSize * this.gridAspect;
+        // Grid properties
+        const N = this.gridSize;
+        const lineColor = 0xFFFFFF;
+        const alpha = 0.15;
+
+        this.graphics.lineStyle(2, lineColor, alpha);
+
+        // We need to draw grid lines.
+        // Transform from grid coords (u,v) [0..N] to screen coords.
+        // Center of grid is at (N/2, N/2) which aligns with (this.centerX, this.centerY)
         
-        // Draw grid outline and inner lines
-        g.lineStyle(2, 0xFFFFFF, 0.15); // Subtle white lines
-        
-        // Helper to project grid coordinates (u, v) to world (x, y)
-        // Grid centered at (0,0), u and v range from -n/2 to n/2
         const project = (u, v) => {
-            // Isometric projection: x = (u - v), y = (u + v)
-            return {
-                x: (u - v) * (tw / 2) + this.centerX,
-                y: (u + v) * (th / 2) + this.centerY
-            };
+            // Center the grid coordinates
+            const cu = u - N / 2;
+            const cv = v - N / 2;
+            // Isometric projection
+            // x = (u - v) * halfWidth
+            // y = (u + v) * halfHeight
+            const x = (cu - cv) * (TILE_WIDTH / 2);
+            const y = (cu + cv) * (TILE_HEIGHT / 2);
+            return { x: this.centerX + x, y: this.centerY + y };
         };
 
-        const start = -n / 2;
-        const end = n / 2;
-
-        // Draw Lines along U axis
-        for (let i = 0; i <= n; i++) {
-            const u = start + i;
-            const p1 = project(u, start);
-            const p2 = project(u, end);
-            g.moveTo(p1.x, p1.y);
-            g.lineTo(p2.x, p2.y);
+        // Draw rows
+        for (let v = 0; v <= N; v++) {
+            const start = project(0, v);
+            const end = project(N, v);
+            this.graphics.moveTo(start.x, start.y);
+            this.graphics.lineTo(end.x, end.y);
         }
 
-        // Draw Lines along V axis
-        for (let i = 0; i <= n; i++) {
-            const v = start + i;
-            const p1 = project(start, v);
-            const p2 = project(end, v);
-            g.moveTo(p1.x, p1.y);
-            g.lineTo(p2.x, p2.y);
+        // Draw cols
+        for (let u = 0; u <= N; u++) {
+            const start = project(u, 0);
+            const end = project(u, N);
+            this.graphics.moveTo(start.x, start.y);
+            this.graphics.lineTo(end.x, end.y);
         }
-        
-        g.lineStyle(0);
     }
 
-    /**
-     * Checks if a point falls within the diamond grid area.
-     */
     isPointInGrid(x, y) {
-        const tw = this.tileSize;
-        const th = this.tileSize * this.gridAspect;
+        // Transform world x,y back to grid u,v
+        // Reverse iso: 
+        // dx = x - cx, dy = y - cy
+        // u = (dx / halfW + dy / halfH) / 2 + N/2
+        // v = (dy / halfH - dx / halfW) / 2 + N/2
+        // Simplification:
+        // dy / halfH = (cu + cv)
+        // dx / halfW = (cu - cv)
+        // sum = 2cu => cu = sum/2
+        // sub = 2cv => cv = sub/2
         
-        // Inverse Projection
         const dx = x - this.centerX;
         const dy = y - this.centerY;
+        const hw = TILE_WIDTH / 2;
+        const hh = TILE_HEIGHT / 2;
+
+        const cu = (dx / hw + dy / hh) / 2;
+        const cv = (dy / hh - dx / hw) / 2;
+
+        const u = cu + this.gridSize / 2;
+        const v = cv + this.gridSize / 2;
+
+        // Add a small buffer so minerals don't hug the line exactly
+        const buffer = 0.1; 
+        return (u >= -buffer && u <= this.gridSize + buffer && 
+                v >= -buffer && v <= this.gridSize + buffer);
+    }
+
+    getRandomPointOutsideGrid(rng) {
+        // Try to find a point on the island that is NOT in the grid
+        let attempts = 0;
+        const maxAttempts = 50;
         
-        // Solving:
-        // x = (u - v) * tw/2
-        // y = (u + v) * th/2
-        // u = y/th + x/tw
-        // v = y/th - x/tw
+        while (attempts < maxAttempts) {
+            const pt = this.getRandomPoint(rng);
+            if (!this.isPointInGrid(pt.x, pt.y)) {
+                return pt;
+            }
+            attempts++;
+        }
         
-        const u = dy / th + dx / tw;
-        const v = dy / th - dx / tw;
-        
-        const limit = this.gridSize / 2;
-        // Add small buffer to avoid placing things exactly on the line
-        const buffer = 0.1;
-        
-        return (u > -limit - buffer && u < limit + buffer &&
-                v > -limit - buffer && v < limit + buffer);
+        // Fallback: Just return a point near the edge of the island
+        // Pick a random angle and a radius near the edge
+        const angle = rng.next() * Math.PI * 2;
+        const r = this.radius * 0.9;
+        return {
+            x: this.centerX + Math.cos(angle) * r,
+            y: this.centerY + Math.sin(angle) * r * 0.65 // aspect
+        };
     }
 
     containsPoint(x, y) {
@@ -235,6 +275,7 @@ export class Sector {
 
     getRandomPoint(rng) {
         // Get a random point inside the sector
+        // Simple rejection sampling
         const bounds = this.getBounds();
         let attempts = 0;
 
@@ -248,30 +289,8 @@ export class Sector {
             attempts++;
         }
 
+        // Fallback to center
         return { x: this.centerX, y: this.centerY };
-    }
-
-    getRandomPointOutsideGrid(rng) {
-        // Get a random point on the island but NOT in the grid
-        const bounds = this.getBounds();
-        let attempts = 0;
-
-        while (attempts < 100) {
-            const x = rng.nextRange(bounds.minX, bounds.maxX);
-            const y = rng.nextRange(bounds.minY, bounds.maxY);
-
-            if (this.containsPoint(x, y) && !this.isPointInGrid(x, y)) {
-                return { x, y };
-            }
-            attempts++;
-        }
-        
-        // Fallback: pick a point far from center if search fails
-        const angle = rng.next() * Math.PI * 2;
-        return { 
-            x: this.centerX + Math.cos(angle) * this.radius * 0.8, 
-            y: this.centerY + Math.sin(angle) * this.radius * 0.8 
-        };
     }
 
     getBounds() {
