@@ -34,15 +34,9 @@ export class NPCController {
         // Initialize target to current facing so they don't snap immediately
         this.targetFacing = character.facing || 0;
         this.currentTurnRate = 0;
-        
-        this.isPointOnMap = () => true; // Default fallback
 
         // Initial random state, scaled by brainSpeed
         this.decideNextAction();
-    }
-    
-    setMapChecker(checkerFn) {
-        this.isPointOnMap = checkerFn;
     }
 
     setBounds(newBounds) {
@@ -144,31 +138,9 @@ export class NPCController {
         // Coordinate alignment: 0 = Front/Down, PI/2 = Right
         const baseSpeed = c.state === ANIMATION_STATES.RUN ? NPC_PARAMS.runSpeed : NPC_PARAMS.walkSpeed; 
         
-        const proposedX = c.x + Math.sin(c.facing) * baseSpeed * dt;
-        const proposedY = c.y + Math.cos(c.facing) * baseSpeed * dt;
-        
-        // Apply map confinement: only move if the destination is on an island or bridge.
-        if (this.isPointOnMap(proposedX, proposedY)) {
-            c.x = proposedX;
-            c.y = proposedY;
-        } else {
-            // Movement failed: Character hit water/void. Stop, flip direction, and re-evaluate action.
-            
-            // 1. Flip direction: target the opposite angle
-            this.targetFacing = c.facing + Math.PI;
-            // Introduce turn rate to slowly turn away from the edge instead of instant snap
-            this.currentTurnRate = (Math.random() * 2 - 1) * NPC_PARAMS.turnSpeed; 
-
-            // 2. Force change state to avoid instantly trying to run forward again
-            if (Math.random() < 0.7) {
-                 this.changeState('IDLE', 1.0); // Stop and think for 1s
-            } else {
-                 this.changeState('BEND', 2.0); // Or bend/inspect for 2s
-            }
-            
-            // Since movement failed, skip bounds checking for this frame
-            return;
-        }
+        // Use sin for X and cos for Y to align with Renderer's "0 = Front" orientation
+        c.x += Math.sin(c.facing) * baseSpeed * dt;
+        c.y += Math.cos(c.facing) * baseSpeed * dt;
 
         // Bounds Checking (Bounce)
         const pad = NPC_PARAMS.boundaryPadding;

@@ -110,20 +110,11 @@ class GameApp {
             this.MAP_HEIGHT
         );
         
-        // Pass map containment check function to CrowdManager
-        // Bind the function to the map instance so 'this' inside isPointOnMap refers to MapGenerator
-        this.crowdManager.setMapChecker(this.map.isPointOnMap.bind(this.map));
-        
         // Add map graphics to layer
         
         // Then sectors
         this.map.sectors.forEach(sector => {
             this.mapLayer.addChild(sector.graphics);
-        });
-
-        // Bridges second (in front of sectors)
-        this.map.bridges.forEach(bridge => {
-            this.mapLayer.addChild(bridge.graphics);
         });
         
         // Create seeded RNG for deterministic entity placement
