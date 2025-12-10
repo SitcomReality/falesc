@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js';
 import { TILE_WIDTH, TILE_HEIGHT } from '../constants.js';
-import { buildSectorShape } from './SectorShape.js';
-import { drawSectorGraphic } from './SectorDraw.js';
-import { projectGridPoint, gridContainsPoint } from './SectorGrid.js';
+import { generateShape } from './ShapeGenerator.js';
+import { drawSectorGraphics } from './SectorGraphics.js';
+import { projectGridToWorld, isPointInIsoGrid, getGridDiamond } from './GridUtils.js';
 
 /**
  * A Sector represents one island region on the map.
@@ -18,39 +18,35 @@ export class Sector {
 
         // Calculate size based on grid
         const gridHalfWidth = (gridSize * TILE_WIDTH) / 2;
-        const baseRadius = gridHalfWidth * 1.8;
+        const baseRadius = gridHalfWidth * 1.8; // ensure grid fits with ground around it
         this.radius = baseRadius;
+        
+        this.connections = []; // Array of Sector IDs this connects to
 
-        this.connections = [];
+        // Precompute grid diamond for quick reference (centered at sector center)
+        this.gridPoly = getGridDiamond(this.centerX, this.centerY, this.gridSize, TILE_WIDTH, TILE_HEIGHT);
 
-        // Define Grid Polygon (Diamond) relative to center (kept for reference)
-        const gh = (gridSize * TILE_HEIGHT) / 2;
-        const gw = (gridSize * TILE_WIDTH) / 2;
-
-        this.gridPoly = [
-            { x: 0, y: -gh },
-            { x: gw, y: 0 },
-            { x: 0, y: gh },
-            { x: -gw, y: 0 }
-        ];
-
-        // Generate organic outline (delegated to module)
-        this.shape = buildSectorShape(this.centerX, this.centerY, this.radius, this.rng);
+        // Generate organic outline
+        this.shape = generateShape(this.centerX, this.centerY, this.radius, this.rng);
 
         // Graphics
         this.graphics = new PIXI.Graphics();
-        drawSectorGraphic(this.graphics, this.shape, this.centerX, this.centerY, this.gridSize);
+        drawSectorGraphics(this.graphics, this.shape, this.centerX, this.centerY, this.gridSize, TILE_WIDTH, TILE_HEIGHT);
 
-        // Expose helpers from grid module as instance methods
-        this._projectGridPoint = (u, v) => projectGridPoint(u, v, this.gridSize, this.centerX, this.centerY);
-        this.isPointInGrid = (x, y) => gridContainsPoint(x, y, this.gridSize, this.centerX, this.centerY);
+        // Keep lightweight helpers bound for reuse
+        this._project = (u, v) => projectGridToWorld(u, v, this.centerX, this.centerY, this.gridSize, TILE_WIDTH, TILE_HEIGHT);
+    }
+
+    // Delegates to GridUtils for point-in-grid checks
+    isPointInGrid(x, y) {
+        return isPointInIsoGrid(x, y, this.centerX, this.centerY, this.gridSize, TILE_WIDTH, TILE_HEIGHT);
     }
 
     getRandomPointOutsideGrid(rng) {
         // Try to find a point on the island that is NOT in the grid
         let attempts = 0;
         const maxAttempts = 50;
-
+        
         while (attempts < maxAttempts) {
             const pt = this.getRandomPoint(rng);
             if (!this.isPointInGrid(pt.x, pt.y)) {
@@ -58,13 +54,13 @@ export class Sector {
             }
             attempts++;
         }
-
-        // Fallback: point near edge
+        
+        // Fallback: point near the edge of the island (preserve isometric aspect)
         const angle = rng.next() * Math.PI * 2;
         const r = this.radius * 0.9;
         return {
             x: this.centerX + Math.cos(angle) * r,
-            y: this.centerY + Math.sin(angle) * r * 0.65
+            y: this.centerY + Math.sin(angle) * r * 0.65 // aspect
         };
     }
 
@@ -86,10 +82,11 @@ export class Sector {
     }
 
     getRandomPoint(rng) {
+        // Get a random point inside the sector (rejection sampling)
         const bounds = this.getBounds();
         let attempts = 0;
 
-        while (attempts < 100) {
+        while (attempts < 200) {
             const x = rng.nextRange(bounds.minX, bounds.maxX);
             const y = rng.nextRange(bounds.minY, bounds.maxY);
 
@@ -99,6 +96,7 @@ export class Sector {
             attempts++;
         }
 
+        // Fallback to center
         return { x: this.centerX, y: this.centerY };
     }
 
