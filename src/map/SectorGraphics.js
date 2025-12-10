@@ -3,7 +3,7 @@ import * as PIXI from 'pixi.js';
 export function drawSectorGraphics(graphics, shape, centerX, centerY, gridSize, tileWidth, tileHeight) {
     graphics.clear();
 
-    const depth = 35; // Height of the cliff/side
+    const depth = 40; // Height of the cliff/side
     const topColor = 0xE8DCC0; // Sand/Light Dirt
     const sideColor = 0x655540; // Dark Rock/Earth
     const strokeColor = 0x9B8B6F;
@@ -52,8 +52,8 @@ function drawGrid(graphics, centerX, centerY, gridSize, tileWidth, tileHeight) {
     // Grid properties
     const N = gridSize;
     // Slightly darker grey and a bit more opaque so the grid is easier to see
-    const lineColor = 0xB0B0B0;
-    const alpha = 0.25;
+    const lineColor = 0x808080;
+    const alpha = 0.5;
 
     graphics.lineStyle(2, lineColor, alpha);
 
