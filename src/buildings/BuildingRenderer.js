@@ -1,0 +1,88 @@
+import * as PIXI from 'pixi.js';
+import { TILE_WIDTH, TILE_HEIGHT } from '../constants.js';
+
+export class BuildingRenderer {
+    static draw(graphics, building) {
+        graphics.clear();
+        
+        const { state } = building;
+        const isGhost = state === 'RESERVED';
+        
+        // Dimensions
+        const w = TILE_WIDTH;
+        const h = TILE_HEIGHT;
+        const halfW = w / 2;
+        const halfH = h / 2;
+        const height = 60; // vertical height of the block
+        
+        // Palette
+        // Light left, Dark right, Top brightest
+        // Ghost: Translucent Blue-ish
+        // Active: Concrete/White
+        
+        let colorTop, colorLeft, colorRight, alpha, strokeColor;
+        
+        if (isGhost) {
+            colorTop = 0xAADDFF;
+            colorLeft = 0x88BBEE;
+            colorRight = 0x5588CC;
+            alpha = 0.6;
+            strokeColor = 0xFFFFFF;
+        } else {
+            colorTop = 0xE0E0E0;
+            colorLeft = 0xCCCCCC;
+            colorRight = 0x999999;
+            alpha = 1.0;
+            strokeColor = 0x555555;
+        }
+        
+        // Vertices relative to center (0,0) which is center of the grid tile footprint
+        // Tile footprint top: (0, -halfH), right: (halfW, 0), bottom: (0, halfH), left: (-halfW, 0)
+        
+        // We draw the prism sitting on this footprint.
+        // Base vertices
+        const bTop = { x: 0, y: -halfH };
+        const bRight = { x: halfW, y: 0 };
+        const bBottom = { x: 0, y: halfH };
+        const bLeft = { x: -halfW, y: 0 };
+        
+        // Top face vertices (shift up by height)
+        const tTop = { x: bTop.x, y: bTop.y - height };
+        const tRight = { x: bRight.x, y: bRight.y - height };
+        const tBottom = { x: bBottom.x, y: bBottom.y - height };
+        const tLeft = { x: bLeft.x, y: bLeft.y - height };
+        
+        // Draw Faces
+        
+        // Right Face (Dark)
+        graphics.beginFill(colorRight, alpha);
+        graphics.lineStyle(1, strokeColor, alpha);
+        graphics.moveTo(bBottom.x, bBottom.y);
+        graphics.lineTo(bRight.x, bRight.y);
+        graphics.lineTo(tRight.x, tRight.y);
+        graphics.lineTo(tBottom.x, tBottom.y);
+        graphics.closePath();
+        graphics.endFill();
+        
+        // Left Face (Light)
+        graphics.beginFill(colorLeft, alpha);
+        graphics.lineStyle(1, strokeColor, alpha);
+        graphics.moveTo(bBottom.x, bBottom.y);
+        graphics.lineTo(bLeft.x, bLeft.y);
+        graphics.lineTo(tLeft.x, tLeft.y);
+        graphics.lineTo(tBottom.x, tBottom.y);
+        graphics.closePath();
+        graphics.endFill();
+        
+        // Top Face
+        graphics.beginFill(colorTop, alpha);
+        graphics.lineStyle(1, strokeColor, alpha);
+        graphics.moveTo(tTop.x, tTop.y);
+        graphics.lineTo(tRight.x, tRight.y);
+        graphics.lineTo(tBottom.x, tBottom.y);
+        graphics.lineTo(tLeft.x, tLeft.y);
+        graphics.closePath();
+        graphics.endFill();
+    }
+}
+

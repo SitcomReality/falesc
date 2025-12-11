@@ -25,6 +25,7 @@ export class GameStateManager {
         
         // Player data
         this.players = [];
+        this.actionsRemaining = 0;
     }
 
     registerScreen(stateName, screen) {
@@ -51,6 +52,7 @@ export class GameStateManager {
 
     startGame() {
         this.currentTurn = 1;
+        this.actionsRemaining = 1; // 1 build per turn
         this.setState(GameState.PLAYING);
     }
 
@@ -60,6 +62,7 @@ export class GameStateManager {
         // Simulate turn processing
         setTimeout(() => {
             this.currentTurn++;
+            this.actionsRemaining = 1; // Reset actions
             this.setState(GameState.PLAYING);
         }, 2000);
     }

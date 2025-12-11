@@ -26,28 +26,27 @@ export function getGridDiamond(centerX, centerY, gridSize, tileWidth, tileHeight
     ];
 }
 
-export function isPointInIsoGrid(x, y, centerX, centerY, gridSize, tileWidth, tileHeight) {
-    // Transform world x,y back to grid u,v
-    // Reverse iso: 
-    // dx = x - cx, dy = y - cy
-    // u = (dx / halfW + dy / halfH) / 2 + N/2
-    // v = (dy / halfH - dx / halfW) / 2 + N/2
-    // Simplification:
-    // dy / halfH = (cu + cv)
-    // dx / halfW = (cu - cv)
-    // sum = 2cu => cu = sum/2
-    // sub = 2cv => cv = sub/2
-
+export function worldToGrid(x, y, centerX, centerY, gridSize, tileWidth, tileHeight) {
     const dx = x - centerX;
     const dy = y - centerY;
-    const hw = tileWidth / 2;
-    const hh = tileHeight / 2;
 
-    const cu = (dx / hw + dy / hh) / 2;
-    const cv = (dy / hh - dx / hw) / 2;
+    // Inverse Isometric
+    // x = (cu - cv) * (w/2) => cu - cv = x / (w/2)
+    // y = (cu + cv) * (h/2) => cu + cv = y / (h/2)
+    // 2cu = x/(w/2) + y/(h/2)
+    // 2cv = y/(h/2) - x/(w/2)
+    
+    const cu = (dx / tileWidth) + (dy / tileHeight);
+    const cv = (dy / tileHeight) - (dx / tileWidth);
 
     const u = cu + gridSize / 2;
     const v = cv + gridSize / 2;
+    
+    return { u, v };
+}
+
+export function isPointInIsoGrid(x, y, centerX, centerY, gridSize, tileWidth, tileHeight) {
+    const { u, v } = worldToGrid(x, y, centerX, centerY, gridSize, tileWidth, tileHeight);
 
     // Add a small buffer so minerals don't hug the line exactly
     const buffer = 0.1;

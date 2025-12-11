@@ -68,7 +68,7 @@ export class GameScreen {
     }
 
     updateTurnDisplay() {
-        this.turnDisplay.textContent = `Turn ${this.gsm.currentTurn}`;
+        this.turnDisplay.textContent = `Turn ${this.gsm.currentTurn} | Builds: ${this.gsm.actionsRemaining}`;
     }
 }
 

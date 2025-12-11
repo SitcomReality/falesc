@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 import { TILE_WIDTH, TILE_HEIGHT } from '../constants.js';
 import { generateShape } from './ShapeGenerator.js';
 import { drawSectorGraphics } from './SectorGraphics.js';
-import { projectGridToWorld, isPointInIsoGrid, getGridDiamond } from './GridUtils.js';
+import { projectGridToWorld, isPointInIsoGrid, getGridDiamond, worldToGrid } from './GridUtils.js';
 
 /**
  * A Sector represents one island region on the map.
@@ -40,6 +40,10 @@ export class Sector {
     // Delegates to GridUtils for point-in-grid checks
     isPointInGrid(x, y) {
         return isPointInIsoGrid(x, y, this.centerX, this.centerY, this.gridSize, TILE_WIDTH, TILE_HEIGHT);
+    }
+
+    getGridCell(x, y) {
+        return worldToGrid(x, y, this.centerX, this.centerY, this.gridSize, TILE_WIDTH, TILE_HEIGHT);
     }
 
     getRandomPointOutsideGrid(rng) {

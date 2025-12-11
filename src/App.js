@@ -13,6 +13,8 @@ import { InterstitialScreen } from './screens/InterstitialScreen.js';
 import { EndScreen } from './screens/EndScreen.js';
 import { MapGenerator } from './map/MapGenerator.js';
 import { SeededRandom } from './map/SeededRandom.js';
+import { BuildingManager } from './buildings/BuildingManager.js';
+import { BuildModal } from './ui/BuildModal.js';
 
 class GameApp {
     constructor() {
@@ -52,6 +54,17 @@ class GameApp {
 
         // Input / Controls System
         this.inputManager = new InputManager(window);
+        
+        // Building System
+        // Initialize AFTER characterLayer is created
+        this.buildingManager = new BuildingManager(this.app, null, this.characterLayer);
+        
+        // UI
+        this.pendingBuildLocation = null;
+        this.buildModal = new BuildModal(
+            (name) => this.finalizeBuild(name),
+            () => { this.pendingBuildLocation = null; }
+        );
 
         // Game State Manager
         this.stateManager = new GameStateManager(this.app);
@@ -67,7 +80,7 @@ class GameApp {
         this.camera = new Camera(
             this.app, 
             this.worldContainer, 
-            (x, y) => {}, // No tap handler for now
+            (x, y) => this.onWorldTap(x, y),
             this.inputManager
         );
         
@@ -87,12 +100,61 @@ class GameApp {
             this.initializeWorld();
             originalStartGame();
         };
+        
+        // Hook into turn processing
+        const originalEndTurn = this.stateManager.endTurn.bind(this.stateManager);
+        this.stateManager.endTurn = () => {
+            originalEndTurn();
+            // Process buildings during turn transition
+            setTimeout(() => {
+                this.buildingManager.processTurn();
+            }, 1000);
+        };
 
         // Start at menu
         this.stateManager.setState(GameState.MENU);
         
         // Game Loop
         this.app.ticker.add((delta) => this.update(delta));
+    }
+    
+    finalizeBuild(name) {
+        if (this.pendingBuildLocation) {
+            const { sectorId, u, v } = this.pendingBuildLocation;
+            this.buildingManager.createBuilding(sectorId, u, v, name);
+            this.stateManager.actionsRemaining--;
+            if (this.stateManager.activeScreen && this.stateManager.activeScreen.updateTurnDisplay) {
+                this.stateManager.activeScreen.updateTurnDisplay();
+            }
+        }
+        this.pendingBuildLocation = null;
+    }
+    
+    onWorldTap(x, y) {
+        if (this.stateManager.state !== GameState.PLAYING) return;
+        if (this.stateManager.actionsRemaining <= 0) return;
+
+        // Check against sectors
+        if (!this.map) return;
+        
+        for (const sector of this.map.sectors) {
+            const cell = sector.getGridCell(x, y);
+            // Check if within grid bounds (integer check)
+            if (cell.u >= 0 && cell.u < sector.gridSize &&
+                cell.v >= 0 && cell.v < sector.gridSize) {
+                
+                // Check if cell is free
+                if (!this.buildingManager.isCellOccupied(sector.id, cell.u, cell.v)) {
+                    this.pendingBuildLocation = {
+                        sectorId: sector.id,
+                        u: cell.u,
+                        v: cell.v
+                    };
+                    this.buildModal.show();
+                    return;
+                }
+            }
+        }
     }
 
     initializeWorld() {
@@ -109,6 +171,8 @@ class GameApp {
             this.MAP_WIDTH,
             this.MAP_HEIGHT
         );
+        
+        this.buildingManager.setMap(this.map);
         
         // Add map graphics to layer
         
@@ -159,6 +223,9 @@ class GameApp {
         // Clear minerals
         this.minerals.forEach(min => min.destroy());
         this.minerals = [];
+        
+        // Clear buildings
+        this.buildingManager.clear();
         
         // Clear map
         if (this.map) {
