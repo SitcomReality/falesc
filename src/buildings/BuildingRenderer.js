@@ -6,7 +6,8 @@ export class BuildingRenderer {
         graphics.clear();
         
         const { state } = building;
-        const isGhost = state === 'RESERVED';
+        const isPending = state === 'PENDING';
+        const isGhost = state === 'RESERVED' || isPending;
         
         // Dimensions
         const w = TILE_WIDTH;
@@ -17,12 +18,19 @@ export class BuildingRenderer {
         
         // Palette
         // Light left, Dark right, Top brightest
-        // Ghost: Translucent Blue-ish
-        // Active: Concrete/White
+        // Pending: very translucent, pulsing placeholder
+        // Reserved: translucent ghost
+        // Active: solid concrete/white
         
         let colorTop, colorLeft, colorRight, alpha, strokeColor;
         
-        if (isGhost) {
+        if (isPending) {
+            colorTop = 0xC8ECFF;
+            colorLeft = 0x9ED5FF;
+            colorRight = 0x6EA6E6;
+            alpha = 0.35;
+            strokeColor = 0xFFFFFF;
+        } else if (isGhost) {
             colorTop = 0xAADDFF;
             colorLeft = 0x88BBEE;
             colorRight = 0x5588CC;

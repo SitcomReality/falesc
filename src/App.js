@@ -105,7 +105,9 @@ class GameApp {
         const originalEndTurn = this.stateManager.endTurn.bind(this.stateManager);
         this.stateManager.endTurn = () => {
             originalEndTurn();
-            // Process buildings during turn transition
+            // Process buildings during turn transition:
+            // PENDING -> RESERVED on first interstitial,
+            // RESERVED -> ACTIVE on second interstitial.
             setTimeout(() => {
                 this.buildingManager.processTurn();
             }, 1000);
@@ -288,6 +290,9 @@ class GameApp {
             char.update(dtSeconds);
             char.graphics.zIndex = typeof char.groundY === 'number' ? char.groundY : char.y;
         });
+
+        // Update Buildings (for pulsing placeholders, etc.)
+        this.buildingManager.update(dtSeconds);
 
         if (shouldSort) {
             this.characterLayer.sortChildren();

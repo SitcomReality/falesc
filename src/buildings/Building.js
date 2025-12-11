@@ -8,11 +8,16 @@ export class Building {
         this.u = u;
         this.v = v;
         this.name = name;
-        this.state = 'RESERVED'; // RESERVED | ACTIVE
+        // Three-phase lifecycle:
+        // PENDING (ephemeral placeholder) -> RESERVED (ghost) -> ACTIVE (solid)
+        this.state = 'PENDING';
         
         this.container = new PIXI.Container();
         this.graphics = new PIXI.Graphics();
         this.container.addChild(this.graphics);
+
+        // Time accumulator for pulsing effect while PENDING
+        this.pulseTime = 0;
         
         this.updateGraphics();
     }
@@ -25,14 +30,29 @@ export class Building {
     }
     
     promote() {
-        if (this.state === 'RESERVED') {
+        if (this.state === 'PENDING') {
+            this.state = 'RESERVED';
+        } else if (this.state === 'RESERVED') {
             this.state = 'ACTIVE';
-            this.updateGraphics();
         }
+        this.updateGraphics();
     }
     
     updateGraphics() {
         BuildingRenderer.draw(this.graphics, this);
+    }
+
+    update(dt) {
+        // Ephemeral placeholder pulses; other states are solid alpha
+        if (this.state === 'PENDING') {
+            this.pulseTime += dt;
+            const base = 0.35;
+            const amp = 0.25;
+            // Pulse between roughly 0.1 and 0.6 alpha
+            this.container.alpha = base + Math.sin(this.pulseTime * 4) * amp;
+        } else {
+            this.container.alpha = 1.0;
+        }
     }
     
     destroy() {

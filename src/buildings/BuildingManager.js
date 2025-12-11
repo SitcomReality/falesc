@@ -50,9 +50,24 @@ export class BuildingManager {
     processTurn() {
         let changed = false;
         this.buildings.forEach(b => {
-            if (b.state === 'RESERVED') {
+            // Advance one step per interstitial:
+            // PENDING -> RESERVED (ghost) -> ACTIVE (solid)
+            if (b.state === 'PENDING') {
                 b.promote();
                 changed = true;
+            } else if (b.state === 'RESERVED') {
+                b.promote();
+                changed = true;
+            }
+        });
+        return changed;
+    }
+
+    update(dt) {
+        // Per-frame updates for buildings (e.g. pulsing placeholders)
+        this.buildings.forEach(b => {
+            if (typeof b.update === 'function') {
+                b.update(dt);
             }
         });
     }
