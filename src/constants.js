@@ -27,8 +27,8 @@ export const MINERAL_TYPES = {
     CRYSTAL: 'CRYSTAL'
 };
 
-export const TILE_WIDTH = 256;
-export const TILE_HEIGHT = 128;
+export const TILE_WIDTH = 512;
+export const TILE_HEIGHT = 256;
 
 export const MINERAL_PALETTES = [
     // Rocks

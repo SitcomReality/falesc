@@ -14,7 +14,7 @@ export class BuildingRenderer {
         const h = TILE_HEIGHT;
         const halfW = w / 2;
         const halfH = h / 2;
-        const height = 60; // vertical height of the block
+        const height = 180; // vertical height of the block
         
         // Palette
         // Light left, Dark right, Top brightest
