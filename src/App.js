@@ -63,7 +63,8 @@ class GameApp {
         this.pendingBuildLocation = null;
         this.buildModal = new BuildModal(
             (name) => this.finalizeBuild(name),
-            () => { this.pendingBuildLocation = null; }
+            () => { this.pendingBuildLocation = null; },
+            this.inputManager
         );
 
         // Game State Manager

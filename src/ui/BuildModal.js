@@ -1,7 +1,8 @@
 export class BuildModal {
-    constructor(onBuild, onCancel) {
+    constructor(onBuild, onCancel, inputManager) {
         this.onBuild = onBuild;
         this.onCancel = onCancel;
+        this.inputManager = inputManager;
         
         this.container = document.createElement('div');
         this.container.style.cssText = `
@@ -72,6 +73,17 @@ export class BuildModal {
         
         // Prevent click propagation to game canvas
         this.container.addEventListener('pointerdown', e => e.stopPropagation());
+
+        // Allow Enter to submit and Escape to cancel while typing
+        this._onKey = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buildBtn.click();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                this.hide();
+            }
+        };
     }
     
     createButton(text, onClick) {
@@ -91,11 +103,22 @@ export class BuildModal {
     show(targetName) {
         this.input.value = '';
         this.container.style.display = 'flex';
+        // Tell input manager to ignore global key binds while modal open
+        if (this.inputManager && typeof this.inputManager.setModalOpen === 'function') {
+            this.inputManager.setModalOpen(true);
+        }
+        // Focus and listen for local key handling
         this.input.focus();
+        this.input.addEventListener('keydown', this._onKey);
     }
     
     hide() {
         this.container.style.display = 'none';
+        // Restore input manager behavior
+        if (this.inputManager && typeof this.inputManager.setModalOpen === 'function') {
+            this.inputManager.setModalOpen(false);
+        }
+        this.input.removeEventListener('keydown', this._onKey);
         if (this.onCancel) this.onCancel();
     }
 }
