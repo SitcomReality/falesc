@@ -70,12 +70,25 @@ export class BuildingRenderer {
         const sC = { x: bBottom.x + offsetX,    y: bBottom.y + offsetY };         // bottom + offset
         const sD = { x: bBottom.x,              y: bBottom.y };                   // building bottom base
         
+        // Second shadow parallelogram rotated 90°: same dimensions, attached to NE corner
+        const sE = { x: bTop.x,                  y: bTop.y };                        // building top base
+        const sF = { x: bTop.x + offsetX,        y: bTop.y + offsetY };              // top + offset
+        const sG = { x: bRight.x + offsetX,      y: bRight.y + offsetY };          // shared with sB
+        const sH = { x: bRight.x,                y: bRight.y };                      // shared with sA
+        
         graphics.beginFill(0x000000, shadowAlpha);
         graphics.lineStyle(0);
+        // First parallelogram
         graphics.moveTo(sA.x, sA.y);
         graphics.lineTo(sB.x, sB.y);
         graphics.lineTo(sC.x, sC.y);
         graphics.lineTo(sD.x, sD.y);
+        graphics.closePath();
+        // Second parallelogram
+        graphics.moveTo(sE.x, sE.y);
+        graphics.lineTo(sF.x, sF.y);
+        graphics.lineTo(sG.x, sG.y);
+        graphics.lineTo(sH.x, sH.y);
         graphics.closePath();
         graphics.endFill();
         
