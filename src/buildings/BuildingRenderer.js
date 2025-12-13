@@ -78,28 +78,28 @@ export class BuildingRenderer {
         graphics.lineTo(sD.x, sD.y);
         graphics.closePath();
         graphics.endFill();
-
-        // --- Secondary Shadow (rotated / top-right, fading behind the building) ---
-        // Create a second parallelogram that projects toward the North-East (top-right)
-        // using a rotated offset so it sits to the top-right of the existing shadow and
-        // appears to disappear behind the building on the North-East side.
-        // We keep it slightly subtler in alpha so it blends with the main shadow.
-        const offset2X = shadowLength * 0.45; // smaller horizontal component
-        const offset2Y = shadowLength * 0.9;  // larger vertical component (will be inverted to go up)
-        const secondaryAlpha = Math.max(0.06, shadowAlpha * 0.65);
-
-        // Anchor this secondary shadow around the top-right edge so it appears to tuck behind
-        const rA = { x: tRight.x,                         y: tRight.y };                          // top-right top corner
-        const rB = { x: tRight.x + offset2X,              y: tRight.y - offset2Y };               // shifted up-right
-        const rC = { x: tBottom.x + offset2X,             y: tBottom.y - offset2Y };              // below shifted up-right
-        const rD = { x: tBottom.x,                        y: tBottom.y };                         // top of right face
-
-        graphics.beginFill(0x000000, secondaryAlpha);
+        
+        // --- Additional shadow wrapping around the North-East side ---
+        // This shadow is a rotated parallelogram: its "length" is the previous shadow's width
+        // and its "width" is the previous shadow's length, forming a contiguous shape.
+        // Compute rotated offsets (swap & flip to project up/right so it sits along NE)
+        const rotOffsetX = offsetY;         // new shadow extends to the right by previous vertical offset
+        const rotOffsetY = -offsetX * 0.6;  // and slightly up by a fraction of previous horizontal offset
+        
+        // Anchor at the top-right corner of the building's top face (tRight)
+        const nA = { x: tRight.x, y: tRight.y }; // bottom-left of the new shadow (touches building)
+        const nB = { x: tRight.x + rotOffsetX, y: tRight.y + rotOffsetY }; // far corner (NE)
+        // Connect down to the far joint that meets the SE shadow's far corner (approx)
+        // We aim to meet near sB (the far corner of the SE shadow), creating a continuous wrap.
+        const nC = { x: sB.x, y: sB.y }; // connect to the outer corner of the existing shadow
+        const nD = { x: tRight.x + offsetX, y: tRight.y + offsetY }; // runs back down toward building/SE shadow
+        
+        graphics.beginFill(0x000000, shadowAlpha);
         graphics.lineStyle(0);
-        graphics.moveTo(rA.x, rA.y);
-        graphics.lineTo(rB.x, rB.y);
-        graphics.lineTo(rC.x, rC.y);
-        graphics.lineTo(rD.x, rD.y);
+        graphics.moveTo(nA.x, nA.y);
+        graphics.lineTo(nB.x, nB.y);
+        graphics.lineTo(nC.x, nC.y);
+        graphics.lineTo(nD.x, nD.y);
         graphics.closePath();
         graphics.endFill();
         
