@@ -14,7 +14,10 @@ export class BuildingRenderer {
         const h = TILE_HEIGHT;
         const halfW = w / 2;
         const halfH = h / 2;
-        const height = 180; // vertical height of the block
+        const height = 180; // vertical height of the block (screen space)
+        
+        // Shadow length is 50% of the building height
+        const shadowLength = height * 0.5;
         
         // Palette
         // Light left, Dark right, Top brightest
@@ -22,7 +25,7 @@ export class BuildingRenderer {
         // Reserved: translucent ghost
         // Active: solid concrete/white
         
-        let colorTop, colorLeft, colorRight, alpha, strokeColor;
+        let colorTop, colorLeft, colorRight, alpha, strokeColor, shadowAlpha;
         
         if (isPending) {
             colorTop = 0xC8ECFF;
@@ -30,18 +33,21 @@ export class BuildingRenderer {
             colorRight = 0x6EA6E6;
             alpha = 0.35;
             strokeColor = 0xFFFFFF;
+            shadowAlpha = 0.2;
         } else if (isGhost) {
             colorTop = 0xAADDFF;
             colorLeft = 0x88BBEE;
             colorRight = 0x5588CC;
             alpha = 0.6;
             strokeColor = 0xFFFFFF;
+            shadowAlpha = 0.3;
         } else {
             colorTop = 0xE0E0E0;
             colorLeft = 0xCCCCCC;
             colorRight = 0x999999;
             alpha = 1.0;
             strokeColor = 0x555555;
+            shadowAlpha = 0.5;
         }
         
         // Vertices relative to center (0,0) which is center of the grid tile footprint
@@ -60,7 +66,33 @@ export class BuildingRenderer {
         const tBottom = { x: bBottom.x, y: bBottom.y - height };
         const tLeft = { x: bLeft.x, y: bLeft.y - height };
         
-        // Draw Faces
+        // --- Shadow ---
+        // Shadow is an isometric diamond "corner" extending to the right of the base.
+        // Construct a smaller diamond using the same orientation as grid tiles.
+        const shadowWidth = shadowLength;
+        const shadowHeight = shadowLength * (TILE_HEIGHT / TILE_WIDTH);
+        const shadowHalfW = shadowWidth / 2;
+        const shadowHalfH = shadowHeight / 2;
+        
+        // Position the diamond so its left point touches the building's right base corner
+        const shadowCenterX = bRight.x + shadowHalfW;
+        const shadowCenterY = bRight.y;
+        
+        const sTop    = { x: shadowCenterX,           y: shadowCenterY - shadowHalfH };
+        const sRight  = { x: shadowCenterX + shadowHalfW, y: shadowCenterY };
+        const sBottom = { x: shadowCenterX,           y: shadowCenterY + shadowHalfH };
+        const sLeft   = { x: shadowCenterX - shadowHalfW, y: shadowCenterY }; // equals bRight.x
+        
+        graphics.beginFill(0x000000, shadowAlpha);
+        graphics.lineStyle(0);
+        graphics.moveTo(sTop.x, sTop.y);
+        graphics.lineTo(sRight.x, sRight.y);
+        graphics.lineTo(sBottom.x, sBottom.y);
+        graphics.lineTo(sLeft.x, sLeft.y);
+        graphics.closePath();
+        graphics.endFill();
+        
+        // --- Building Faces ---
         
         // Right Face (Dark)
         graphics.beginFill(colorRight, alpha);
