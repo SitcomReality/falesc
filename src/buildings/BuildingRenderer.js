@@ -65,6 +65,7 @@ export class BuildingRenderer {
         const offsetX = shadowLength * 0.9; // how far to the right
         const offsetY = shadowLength * 0.45; // how far down (kept shallower for iso)
         
+        // Primary SE shadow (existing)
         const sA = { x: bRight.x,               y: bRight.y };                    // building right base
         const sB = { x: bRight.x + offsetX,     y: bRight.y + offsetY };          // right + offset (far SE)
         const sC = { x: bBottom.x + offsetX,    y: bBottom.y + offsetY };         // bottom + offset
@@ -79,27 +80,23 @@ export class BuildingRenderer {
         graphics.closePath();
         graphics.endFill();
         
-        // --- Additional shadow wrapping around the North-East side ---
-        // This shadow is a rotated parallelogram: its "length" is the previous shadow's width
-        // and its "width" is the previous shadow's length, forming a contiguous shape.
-        // Compute rotated offsets (swap & flip to project up/right so it sits along NE)
-        const rotOffsetX = offsetY;         // new shadow extends to the right by previous vertical offset
-        const rotOffsetY = -offsetX * 0.6;  // and slightly up by a fraction of previous horizontal offset
+        // --- Secondary NE shadow (wraps behind the building on the North-East side)
+        // Create a second parallelogram that connects to the SE shadow at its far corner (sB)
+        // and touches the building floor at tRight/bRight to form a contiguous wrap.
+        // This secondary shadow is effectively a 90°-rotated partner: its "length" uses
+        // the primary shadow's vertical extent and its "width" uses the primary horizontal extent.
+        const s2A = { x: tRight.x,                      y: tRight.y };                      // top-right of roof/floor
+        const s2B = { x: tRight.x + offsetX,            y: tRight.y + offsetY };            // offset from top-right (toward SE)
+        const s2C = { x: sB.x,                          y: sB.y };                          // connect to primary shadow far-corner
+        const s2D = { x: bRight.x,                      y: bRight.y };                      // building right base (shared edge)
         
-        // Anchor at the top-right corner of the building's top face (tRight)
-        const nA = { x: tRight.x, y: tRight.y }; // bottom-left of the new shadow (touches building)
-        const nB = { x: tRight.x + rotOffsetX, y: tRight.y + rotOffsetY }; // far corner (NE)
-        // Connect down to the far joint that meets the SE shadow's far corner (approx)
-        // We aim to meet near sB (the far corner of the SE shadow), creating a continuous wrap.
-        const nC = { x: sB.x, y: sB.y }; // connect to the outer corner of the existing shadow
-        const nD = { x: tRight.x + offsetX, y: tRight.y + offsetY }; // runs back down toward building/SE shadow
-        
+        // Draw the secondary shadow and ensure same fill/alpha so it reads as one contiguous shape
         graphics.beginFill(0x000000, shadowAlpha);
         graphics.lineStyle(0);
-        graphics.moveTo(nA.x, nA.y);
-        graphics.lineTo(nB.x, nB.y);
-        graphics.lineTo(nC.x, nC.y);
-        graphics.lineTo(nD.x, nD.y);
+        graphics.moveTo(s2A.x, s2A.y);
+        graphics.lineTo(s2B.x, s2B.y);
+        graphics.lineTo(s2C.x, s2C.y);
+        graphics.lineTo(s2D.x, s2D.y);
         graphics.closePath();
         graphics.endFill();
         
