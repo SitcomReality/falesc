@@ -58,26 +58,24 @@ export class BuildingRenderer {
         const tBottom = { x: bBottom.x, y: bBottom.y - height };
         const tLeft = { x: bLeft.x, y: bLeft.y - height };
         
-        // --- Shadow (south-east strip that disappears behind the building) ---
-        // We'll draw a tapered polygon originating at the building's right base corner (bRight)
-        // and extending down-right across the ground, stopping before it would wrap around
-        // onto the north-east/top area. This creates a shadow strip along the SE side.
-        const dx = shadowLength; // horizontal reach
-        const dy = shadowLength * 0.45; // vertical reach (shallower for iso look)
+        // --- Shadow (flat isometric parallelogram aligned to grid) ---
+        // Light from NW -> shadow projects SE. Build a parallelogram whose edges are parallel
+        // to the tile footprint edges by offsetting the right and bottom footprint points.
+        // Offset chosen to keep an isometric look (dx along x, dy along y).
+        const offsetX = shadowLength * 0.9; // how far to the right
+        const offsetY = shadowLength * 0.45; // how far down (kept shallower for iso)
         
-        // Points: start at the right base corner, extend outward to create a tapered shape,
-        // then connect back near the building bottom so shadow sits flush against the base.
-        const s0 = { x: bRight.x,                  y: bRight.y }; // against building
-        const s1 = { x: bRight.x + dx * 0.9,       y: bRight.y + dy * 0.55 }; // far lower-right
-        const s2 = { x: bBottom.x + dx * 0.45,     y: bBottom.y + dy * 0.25 }; // near-bottom taper
-        const s3 = { x: bBottom.x,                 y: bBottom.y }; // bottom base corner
+        const sA = { x: bRight.x,               y: bRight.y };                    // building right base
+        const sB = { x: bRight.x + offsetX,     y: bRight.y + offsetY };          // right + offset (far SE)
+        const sC = { x: bBottom.x + offsetX,    y: bBottom.y + offsetY };         // bottom + offset
+        const sD = { x: bBottom.x,              y: bBottom.y };                   // building bottom base
         
         graphics.beginFill(0x000000, shadowAlpha);
         graphics.lineStyle(0);
-        graphics.moveTo(s0.x, s0.y);
-        graphics.lineTo(s1.x, s1.y);
-        graphics.lineTo(s2.x, s2.y);
-        graphics.lineTo(s3.x, s3.y);
+        graphics.moveTo(sA.x, sA.y);
+        graphics.lineTo(sB.x, sB.y);
+        graphics.lineTo(sC.x, sC.y);
+        graphics.lineTo(sD.x, sD.y);
         graphics.closePath();
         graphics.endFill();
         
