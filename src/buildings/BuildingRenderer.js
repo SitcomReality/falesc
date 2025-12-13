@@ -20,11 +20,6 @@ export class BuildingRenderer {
         const shadowLength = height * 0.5;
         
         // Palette
-        // Light left, Dark right, Top brightest
-        // Pending: very translucent, pulsing placeholder
-        // Reserved: translucent ghost
-        // Active: solid concrete/white
-        
         let colorTop, colorLeft, colorRight, alpha, strokeColor, shadowAlpha;
         
         if (isPending) {
@@ -52,9 +47,6 @@ export class BuildingRenderer {
         
         // Vertices relative to center (0,0) which is center of the grid tile footprint
         // Tile footprint top: (0, -halfH), right: (halfW, 0), bottom: (0, halfH), left: (-halfW, 0)
-        
-        // We draw the prism sitting on this footprint.
-        // Base vertices
         const bTop = { x: 0, y: -halfH };
         const bRight = { x: halfW, y: 0 };
         const bBottom = { x: 0, y: halfH };
@@ -66,35 +58,31 @@ export class BuildingRenderer {
         const tBottom = { x: bBottom.x, y: bBottom.y - height };
         const tLeft = { x: bLeft.x, y: bLeft.y - height };
         
-        // --- Shadow ---
-        // Shadow is an isometric diamond "corner" extending to the right of the base.
-        // Construct a smaller diamond using the same orientation as grid tiles.
-        const shadowWidth = shadowLength;
-        const shadowHeight = shadowLength * (TILE_HEIGHT / TILE_WIDTH);
-        const shadowHalfW = shadowWidth / 2;
-        const shadowHalfH = shadowHeight / 2;
+        // --- Shadow (south-east strip that disappears behind the building) ---
+        // We'll draw a tapered polygon originating at the building's right base corner (bRight)
+        // and extending down-right across the ground, stopping before it would wrap around
+        // onto the north-east/top area. This creates a shadow strip along the SE side.
+        const dx = shadowLength; // horizontal reach
+        const dy = shadowLength * 0.45; // vertical reach (shallower for iso look)
         
-        // Position the diamond so its left point touches the building's right base corner
-        const shadowCenterX = bRight.x + shadowHalfW;
-        const shadowCenterY = bRight.y;
-        
-        const sTop    = { x: shadowCenterX,           y: shadowCenterY - shadowHalfH };
-        const sRight  = { x: shadowCenterX + shadowHalfW, y: shadowCenterY };
-        const sBottom = { x: shadowCenterX,           y: shadowCenterY + shadowHalfH };
-        const sLeft   = { x: shadowCenterX - shadowHalfW, y: shadowCenterY }; // equals bRight.x
+        // Points: start at the right base corner, extend outward to create a tapered shape,
+        // then connect back near the building bottom so shadow sits flush against the base.
+        const s0 = { x: bRight.x,                  y: bRight.y }; // against building
+        const s1 = { x: bRight.x + dx * 0.9,       y: bRight.y + dy * 0.55 }; // far lower-right
+        const s2 = { x: bBottom.x + dx * 0.45,     y: bBottom.y + dy * 0.25 }; // near-bottom taper
+        const s3 = { x: bBottom.x,                 y: bBottom.y }; // bottom base corner
         
         graphics.beginFill(0x000000, shadowAlpha);
         graphics.lineStyle(0);
-        graphics.moveTo(sTop.x, sTop.y);
-        graphics.lineTo(sRight.x, sRight.y);
-        graphics.lineTo(sBottom.x, sBottom.y);
-        graphics.lineTo(sLeft.x, sLeft.y);
+        graphics.moveTo(s0.x, s0.y);
+        graphics.lineTo(s1.x, s1.y);
+        graphics.lineTo(s2.x, s2.y);
+        graphics.lineTo(s3.x, s3.y);
         graphics.closePath();
         graphics.endFill();
         
         // --- Building Faces ---
-        
-        // Right Face (Dark)
+        // Draw right face first (so it visually sits above the ground shadow where appropriate)
         graphics.beginFill(colorRight, alpha);
         graphics.lineStyle(1, strokeColor, alpha);
         graphics.moveTo(bBottom.x, bBottom.y);
