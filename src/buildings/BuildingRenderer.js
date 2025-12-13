@@ -78,6 +78,30 @@ export class BuildingRenderer {
         graphics.lineTo(sD.x, sD.y);
         graphics.closePath();
         graphics.endFill();
+
+        // --- Secondary Shadow (rotated / top-right, fading behind the building) ---
+        // Create a second parallelogram that projects toward the North-East (top-right)
+        // using a rotated offset so it sits to the top-right of the existing shadow and
+        // appears to disappear behind the building on the North-East side.
+        // We keep it slightly subtler in alpha so it blends with the main shadow.
+        const offset2X = shadowLength * 0.45; // smaller horizontal component
+        const offset2Y = shadowLength * 0.9;  // larger vertical component (will be inverted to go up)
+        const secondaryAlpha = Math.max(0.06, shadowAlpha * 0.65);
+
+        // Anchor this secondary shadow around the top-right edge so it appears to tuck behind
+        const rA = { x: tRight.x,                         y: tRight.y };                          // top-right top corner
+        const rB = { x: tRight.x + offset2X,              y: tRight.y - offset2Y };               // shifted up-right
+        const rC = { x: tBottom.x + offset2X,             y: tBottom.y - offset2Y };              // below shifted up-right
+        const rD = { x: tBottom.x,                        y: tBottom.y };                         // top of right face
+
+        graphics.beginFill(0x000000, secondaryAlpha);
+        graphics.lineStyle(0);
+        graphics.moveTo(rA.x, rA.y);
+        graphics.lineTo(rB.x, rB.y);
+        graphics.lineTo(rC.x, rC.y);
+        graphics.lineTo(rD.x, rD.y);
+        graphics.closePath();
+        graphics.endFill();
         
         // --- Building Faces ---
         // Draw right face first (so it visually sits above the ground shadow where appropriate)
