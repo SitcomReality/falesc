@@ -70,25 +70,33 @@ export class BuildingRenderer {
         const sC = { x: bBottom.x + offsetX,    y: bBottom.y + offsetY };         // bottom + offset
         const sD = { x: bBottom.x,              y: bBottom.y };                   // building bottom base
         
-        // Second shadow parallelogram rotated 90°: same dimensions, attached to NE corner
-        const sE = { x: bTop.x,                  y: bTop.y };                        // building top base
-        const sF = { x: bTop.x + offsetX,        y: bTop.y + offsetY };              // top + offset
-        const sG = { x: bRight.x + offsetX,      y: bRight.y + offsetY };          // shared with sB
-        const sH = { x: bRight.x,                y: bRight.y };                      // shared with sA
-        
+        // SE shadow (right-bottom side)
         graphics.beginFill(0x000000, shadowAlpha);
         graphics.lineStyle(0);
-        // First parallelogram
         graphics.moveTo(sA.x, sA.y);
         graphics.lineTo(sB.x, sB.y);
         graphics.lineTo(sC.x, sC.y);
         graphics.lineTo(sD.x, sD.y);
         graphics.closePath();
-        // Second parallelogram
-        graphics.moveTo(sE.x, sE.y);
-        graphics.lineTo(sF.x, sF.y);
-        graphics.lineTo(sG.x, sG.y);
-        graphics.lineTo(sH.x, sH.y);
+        graphics.endFill();
+        
+        // NE shadow (right-top side) - perpendicular projection, rotated 90 degrees
+        // Offset swapped and negated: offsetX' is the width (based on existing shadow's height)
+        // and offsetY' is negative height (based on existing shadow's width, going upward)
+        const offsetX2 = shadowLength * 0.45;  // width of new shadow
+        const offsetY2 = -shadowLength * 0.9;  // height of new shadow (negative = upward)
+        
+        const nA = { x: bRight.x,                            y: bRight.y };                         // bottom-left (also sA)
+        const nB = { x: bRight.x + offsetX,                  y: bRight.y + offsetY };               // bottom-right (also sB, shared)
+        const nC = { x: bRight.x + offsetX + offsetX2,       y: bRight.y + offsetY + offsetY2 };   // top-right
+        const nD = { x: bRight.x + offsetX2,                 y: bRight.y + offsetY2 };              // top-left
+        
+        graphics.beginFill(0x000000, shadowAlpha);
+        graphics.lineStyle(0);
+        graphics.moveTo(nA.x, nA.y);
+        graphics.lineTo(nB.x, nB.y);
+        graphics.lineTo(nC.x, nC.y);
+        graphics.lineTo(nD.x, nD.y);
         graphics.closePath();
         graphics.endFill();
         
