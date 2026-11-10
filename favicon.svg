@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="FALESC">
+  <rect width="64" height="64" rx="12" fill="#1a1a2e"/>
+  <path d="M32 8 L56 32 L32 56 L8 32 Z" fill="#E8DCC0" stroke="#655540" stroke-width="3"/>
+  <path d="M32 14 L50 32 L32 50 L14 32 Z" fill="none" stroke="#9B8B6F" stroke-width="2"/>
+  <text x="32" y="39" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="#1a1a2e">F</text>
+</svg>
