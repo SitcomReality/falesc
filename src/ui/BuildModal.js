@@ -3,6 +3,7 @@ export class BuildModal {
         this.onBuild = onBuild;
         this.onCancel = onCancel;
         this.inputManager = inputManager;
+        this.isOpen = false;
         
         this.container = document.createElement('div');
         this.container.style.cssText = `
@@ -20,18 +21,28 @@ export class BuildModal {
             color: #fff;
             z-index: 2000;
             min-width: 300px;
+            max-width: calc(100vw - 64px);
+            box-sizing: border-box;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         `;
         
         const title = document.createElement('h3');
+        title.id = 'build-modal-title';
         title.textContent = 'Construct Building';
         title.style.margin = '0 0 8px 0';
-        
+
+        this.container.setAttribute('role', 'dialog');
+        this.container.setAttribute('aria-modal', 'true');
+        this.container.setAttribute('aria-labelledby', 'build-modal-title');
+
         const label = document.createElement('label');
         label.textContent = 'Building Name:';
-        
+        label.htmlFor = 'build-name-input';
+
         this.input = document.createElement('input');
         this.input.type = 'text';
+        this.input.id = 'build-name-input';
+        this.input.dataset.testid = 'build-name';
         this.input.placeholder = 'My Structure';
         this.input.style.cssText = `
             padding: 8px;
@@ -50,19 +61,22 @@ export class BuildModal {
         `;
         
         const cancelBtn = this.createButton('Cancel', () => this.hide());
+        cancelBtn.dataset.testid = 'build-cancel';
         cancelBtn.style.background = '#444';
         
         const buildBtn = this.createButton('Reserve', () => {
-            const name = this.input.value || 'Untitled';
+            const name = this.input.value.trim() || 'Untitled';
             this.onBuild(name);
-            this.hide();
+            this.hide(false);
         });
+        buildBtn.dataset.testid = 'build-submit';
         buildBtn.style.background = '#4ECDC4';
         buildBtn.style.color = '#000';
         
         btnRow.appendChild(cancelBtn);
         btnRow.appendChild(buildBtn);
         
+        this.container.dataset.testid = 'build-modal';
         this.container.appendChild(title);
         this.container.appendChild(label);
         this.container.appendChild(this.input);
@@ -84,6 +98,12 @@ export class BuildModal {
                 this.hide();
             }
         };
+        this._onDocumentKey = (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this.hide();
+            }
+        };
     }
     
     createButton(text, onClick) {
@@ -100,7 +120,9 @@ export class BuildModal {
         return btn;
     }
     
-    show(targetName) {
+    show() {
+        if (this.isOpen) return;
+        this.isOpen = true;
         this.input.value = '';
         this.container.style.display = 'flex';
         // Tell input manager to ignore global key binds while modal open
@@ -110,16 +132,20 @@ export class BuildModal {
         // Focus and listen for local key handling
         this.input.focus();
         this.input.addEventListener('keydown', this._onKey);
+        document.addEventListener('keydown', this._onDocumentKey);
     }
     
-    hide() {
+    hide(cancelled = true) {
+        if (!this.isOpen) return;
+        this.isOpen = false;
         this.container.style.display = 'none';
         // Restore input manager behavior
         if (this.inputManager && typeof this.inputManager.setModalOpen === 'function') {
             this.inputManager.setModalOpen(false);
         }
         this.input.removeEventListener('keydown', this._onKey);
-        if (this.onCancel) this.onCancel();
+        document.removeEventListener('keydown', this._onDocumentKey);
+        if (cancelled && this.onCancel) this.onCancel();
     }
 }
 

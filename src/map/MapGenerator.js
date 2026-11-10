@@ -50,6 +50,7 @@ export class MapGenerator {
             // We'll update x,y later
             const tempSector = new Sector(i, 0, 0, size, this.rng);
             const radius = tempSector.radius;
+            tempSector.destroy();
             
             let placed = false;
             let angle = 0;
@@ -139,11 +140,14 @@ export class MapGenerator {
                 size: s.gridSize 
             }));
             
-            // Clear and rebuild
+            // Clear and rebuild at the final (centred) positions. The scratch
+            // sectors were only used to measure the cluster bounds.
+            const scratchSectors = this.sectors;
             this.sectors = [];
             finalPositions.forEach((pos, index) => {
                 this.sectors.push(new Sector(index, pos.x, pos.y, pos.size, this.rng));
             });
+            scratchSectors.forEach(sector => sector.destroy());
         }
     }
 

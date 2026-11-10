@@ -33,9 +33,18 @@ export class Camera {
         // Pointer Events (Mouse & Touch)
         view.addEventListener('pointerdown', e => this.onPointerDown(e));
         view.addEventListener('pointermove', e => this.onPointerMove(e));
-        view.addEventListener('pointerup', e => this.onPointerUp(e));
-        view.addEventListener('pointercancel', e => this.onPointerUp(e));
-        view.addEventListener('pointerleave', e => this.onPointerUp(e));
+        // Listen on window so a button released outside the canvas still ends
+        // the gesture (pointer capture is not used, and pointerleave alone does
+        // not tell us the button was released).
+        window.addEventListener('pointerup', e => this.onPointerUp(e));
+        window.addEventListener('pointercancel', e => this.onPointerUp(e));
+        view.addEventListener('pointerleave', e => {
+            // Leaving the canvas is not a tap; it often means the pointer was
+            // released over a DOM button (End Turn, Build modal, etc.).
+            const pointer = this.pointers.get(e.pointerId);
+            if (pointer) pointer.isTap = false;
+            this.onPointerUp(e);
+        });
         
         // Wheel Zoom
         view.addEventListener('wheel', e => this.onWheel(e), { passive: false });
@@ -206,8 +215,8 @@ export class Camera {
             // Conditions: labeled isTap, short duration, single touch (unless mouse)
             const isShort = (performance.now() - ptr.startTime) < 400;
             if (ptr.isTap && isShort) {
-                // Ignore middle mouse clicks for tap
-                if (e.button !== 1) {
+                // Only primary-button taps build; right/middle clicks must not.
+                if (e.button === 0) {
                     // Only trigger if we aren't currently doing a multi-touch gesture
                     if (this.pointers.size === 1 && !this.isMousePanning) {
                         const worldPos = this.screenToWorld(ptr.x, ptr.y);
@@ -218,8 +227,9 @@ export class Camera {
             this.pointers.delete(e.pointerId);
         }
 
-        // End Mouse Pan
-        if (e.pointerType === 'mouse' && e.button === 1) {
+        // End Mouse Pan whenever the middle button is no longer held. Checking
+        // e.buttons handles releases outside the canvas and pointerleave.
+        if (e.pointerType === 'mouse' && (e.buttons & 4) === 0) {
             this.isMousePanning = false;
         }
 

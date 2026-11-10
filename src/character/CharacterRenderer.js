@@ -63,7 +63,7 @@ export class CharacterRenderer {
         c.leftArm.clear();
         c.leftArm.lineStyle(outline, 0x000000, 1, 0.5);
         c.leftArm.beginFill(c.colors.arms);
-        c.leftArm.drawRoundedRect(-limbW / 2, 0, limbHArm ? limbW : limbW, limbHArm, limbW / 2);
+        c.leftArm.drawRoundedRect(-limbW / 2, 0, limbW, limbHArm, limbW / 2);
         c.leftArm.endFill();
         c.leftArm.position.set(0, 0);
         c.leftArm.rotation = 0;
@@ -130,7 +130,7 @@ export class CharacterRenderer {
         const baseCenterY = this.baseCenterY;
         const legBaseY = baseCenterY + bodyBaseH / 2 - 2;
         const hipY = legBaseY;
-        const shadowYOffset = hipY + limbHLeg; // under the feet
+        const shadowYOffset = hipY + clampedLimbHLeg; // under the feet
 
         this.shadowOffsetY = shadowYOffset;
 

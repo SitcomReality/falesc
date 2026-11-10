@@ -29,11 +29,14 @@ export class MenuScreen {
         const startBtn = this.createButton('Start Game', () => {
             this.gsm.setState('LOBBY');
         });
+        startBtn.dataset.testid = 'menu-start';
         
         const joinBtn = this.createButton('Join Multiplayer', () => {
             alert('Multiplayer not yet implemented');
         });
+        joinBtn.dataset.testid = 'menu-join';
         
+        this.container.dataset.testid = 'menu-screen';
         this.container.appendChild(title);
         this.container.appendChild(startBtn);
         this.container.appendChild(joinBtn);

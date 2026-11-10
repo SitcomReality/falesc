@@ -57,6 +57,7 @@ export class GameStateManager {
     }
 
     endTurn() {
+        if (this.state !== GameState.PLAYING) return;
         this.setState(GameState.INTERSTITIAL);
         
         // Simulate turn processing

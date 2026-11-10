@@ -1,0 +1,170 @@
+{
+  "name": "falesc",
+  "url": "/",
+  "serve": {
+    "command": "node scripts/dev-server.mjs --port {port} --strict-port",
+    "url": "http://127.0.0.1:{port}/"
+  },
+  "ready": "window.__APP_READY__ === true",
+  "viewport": {
+    "width": 1280,
+    "height": 720,
+    "dpr": 1
+  },
+  "timeoutMs": 30000,
+  "artifacts": ".artifacts/webgame",
+  "engine": "auto",
+  "canvasSelectors": [
+    "#minimap"
+  ],
+  "expect": {
+    "noPageErrors": true,
+    "consoleErrors": "warn",
+    "noExternalRequests": true
+  },
+  "steps": [
+    {
+      "name": "title",
+      "assertTitle": "FALESC"
+    },
+    {
+      "name": "first frame",
+      "assert": "(() => { const g = window.__falesc; if (!g || !g.ready || g.snapshot().frame < 1) return false; const gl = g.app.app.renderer.gl; return !gl || !gl.isContextLost || !gl.isContextLost(); })()",
+      "message": "Pixi should render a first frame without a lost WebGL context"
+    },
+    {
+      "name": "menu is visible",
+      "assertVisible": "[data-testid=menu-screen]"
+    },
+    {
+      "name": "open lobby",
+      "click": "[data-testid=menu-start]"
+    },
+    {
+      "name": "lobby is visible",
+      "assertVisible": "[data-testid=lobby-screen]"
+    },
+    {
+      "name": "set deterministic seed",
+      "eval": "(() => { const input = document.querySelector('[data-testid=lobby-seed]'); input.value = '12345'; input.dispatchEvent(new Event('change', { bubbles: true })); return input.value; })()"
+    },
+    {
+      "name": "start game",
+      "click": "[data-testid=lobby-start]"
+    },
+    {
+      "name": "world is playing",
+      "waitFor": "window.__falesc && window.__falesc.snapshot().state === 'PLAYING' && window.__falesc.snapshot().sectors > 0"
+    },
+    {
+      "name": "world contents",
+      "assert": "(() => { const s = window.__falesc.snapshot(); return s.seed === 12345 && s.characters === 15 && s.minerals > 0 && s.actionsRemaining === 1; })()",
+      "message": "expected seeded world with 15 characters, minerals, and one build action"
+    },
+    {
+      "name": "playing screenshot",
+      "screenshot": "playing.png"
+    },
+    {
+      "name": "open build modal on a free cell",
+      "eval": "(() => { const cell = window.__falesc.findFreeCell(); window.__falesc.app.onWorldTap(cell.x, cell.y); return cell; })()"
+    },
+    {
+      "name": "build modal is visible",
+      "assertVisible": "[data-testid=build-modal]"
+    },
+    {
+      "name": "type building name",
+      "type": "Test Hall",
+      "selector": "[data-testid=build-name]"
+    },
+    {
+      "name": "reserve building",
+      "click": "[data-testid=build-submit]"
+    },
+    {
+      "name": "building is pending",
+      "assert": "(() => { const s = window.__falesc.snapshot(); return s.buildings === 1 && s.buildingStates[0] === 'PENDING' && s.actionsRemaining === 0; })()",
+      "message": "expected one PENDING building and no actions left"
+    },
+    {
+      "name": "pending screenshot",
+      "screenshot": "building-pending.png"
+    },
+    {
+      "name": "end turn 1",
+      "click": "[data-testid=end-turn]"
+    },
+    {
+      "name": "interstitial shown",
+      "assert": "window.__falesc.snapshot().state === 'INTERSTITIAL'"
+    },
+    {
+      "name": "wait for turn 2",
+      "sleep": 2500
+    },
+    {
+      "name": "turn 2 and ghost building",
+      "assert": "(() => { const s = window.__falesc.snapshot(); return s.state === 'PLAYING' && s.turn === 2 && s.buildingStates[0] === 'RESERVED'; })()",
+      "message": "expected turn 2 in PLAYING with a RESERVED building"
+    },
+    {
+      "name": "end turn 2",
+      "click": "[data-testid=end-turn]"
+    },
+    {
+      "name": "wait for turn 3",
+      "sleep": 2500
+    },
+    {
+      "name": "turn 3 and active building",
+      "assert": "(() => { const s = window.__falesc.snapshot(); return s.state === 'PLAYING' && s.turn === 3 && s.buildingStates[0] === 'ACTIVE'; })()",
+      "message": "expected turn 3 in PLAYING with an ACTIVE building"
+    },
+    {
+      "name": "active screenshot",
+      "screenshot": "building-active.png"
+    },
+    {
+      "name": "zoom out to map overview",
+      "eval": "(() => { const g = window.__falesc; g.app.camera.zoom = 0.2; g.app.camera.position.x = g.app.MAP_WIDTH / 2; g.app.camera.position.y = g.app.MAP_HEIGHT / 2; g.app.camera.updateTransform(); return { zoom: g.app.camera.zoom }; })()"
+    },
+    {
+      "name": "let zoom render",
+      "sleep": 300
+    },
+    {
+      "name": "map overview screenshot",
+      "screenshot": "map-overview.png"
+    },
+    {
+      "name": "restore camera",
+      "eval": "(() => { const g = window.__falesc; g.app.camera.zoom = 1; g.app.camera.position.x = g.app.MAP_WIDTH / 2; g.app.camera.position.y = g.app.MAP_HEIGHT / 2; g.app.camera.updateTransform(); return true; })()"
+    },
+    {
+      "name": "open build modal again",
+      "eval": "(() => { const cell = window.__falesc.findFreeCell(); window.__falesc.app.onWorldTap(cell.x, cell.y); return cell; })()"
+    },
+    {
+      "name": "modal is open before ending",
+      "assert": "window.__falesc.snapshot().buildModalOpen === true"
+    },
+    {
+      "name": "end game closes modal",
+      "click": "[data-testid=end-game]"
+    },
+    {
+      "name": "modal is closed after ending",
+      "assert": "(() => { const s = window.__falesc.snapshot(); return s.state === 'END' && s.buildModalOpen === false; })()",
+      "message": "ending the game must dismiss an open build prompt"
+    },
+    {
+      "name": "end screen shown",
+      "assertVisible": "[data-testid=end-screen]"
+    },
+    {
+      "name": "end screenshot",
+      "screenshot": "end.png"
+    }
+  ]
+}

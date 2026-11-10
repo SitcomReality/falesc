@@ -6,16 +6,7 @@ import { CrystalRenderer } from './CrystalRenderer.js';
 import { drawShadowForStructure } from './MineralUtils.js';
 
 export class MineralRenderer {
-    // Cache for reuse of static geometry (Graphics clones)
-    static cache = new Map();
-
-    static getPaletteSignature(paletteId) {
-        return paletteId;
-    }
-
     static initStructure(struct) {
-        const variationKey = JSON.stringify(struct.variation);
-        const cacheKey = `${struct.type}_${struct.paletteId}_${variationKey}`;
         const palette = MINERAL_PALETTES.find(p => p.id === struct.paletteId) || MINERAL_PALETTES[0];
 
         // Shadow (shared helper)
@@ -24,9 +15,10 @@ export class MineralRenderer {
 
         // Delegate geometry to specific renderers
         if (struct.type === MINERAL_TYPES.ROCK) {
-            // Clean previous mainG if present
+            // Clean previous mainG if present (it has no useful geometry yet).
             if (struct.mainG && struct.mainG.parent) {
                 struct.mainG.parent.removeChild(struct.mainG);
+                struct.mainG.destroy({ children: true });
             }
             const rockContainer = new PIXI.Container();
             rockContainer.sortableChildren = true;
@@ -36,9 +28,6 @@ export class MineralRenderer {
 
             struct.mainG = rockContainer;
             struct.container.addChild(rockContainer);
-
-            // Cache a reference for identical parameters (note: randomness inside RockRenderer is mild)
-            this.cache.set(cacheKey, rockContainer);
         } else {
             // Clear crystals
             struct.clusterContainers.forEach(c => c.destroy());

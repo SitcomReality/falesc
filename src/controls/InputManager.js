@@ -16,6 +16,10 @@ export class InputManager {
 
         this._onKeyDown = this._onKeyDown.bind(this);
         this._onKeyUp = this._onKeyUp.bind(this);
+        this._onBlur = () => { this.keyStates.clear(); };
+        this._onVisibilityChange = () => {
+            if (document.hidden) this.keyStates.clear();
+        };
 
         this._attachListeners();
     }
@@ -23,11 +27,15 @@ export class InputManager {
     _attachListeners() {
         this.target.addEventListener('keydown', this._onKeyDown);
         this.target.addEventListener('keyup', this._onKeyUp);
+        this.target.addEventListener('blur', this._onBlur);
+        document.addEventListener('visibilitychange', this._onVisibilityChange);
     }
 
     destroy() {
         this.target.removeEventListener('keydown', this._onKeyDown);
         this.target.removeEventListener('keyup', this._onKeyUp);
+        this.target.removeEventListener('blur', this._onBlur);
+        document.removeEventListener('visibilitychange', this._onVisibilityChange);
         this.keyStates.clear();
         this.bindings.clear();
     }

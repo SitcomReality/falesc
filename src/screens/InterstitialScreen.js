@@ -30,6 +30,7 @@ export class InterstitialScreen {
             opacity: 0.7;
         `;
         
+        this.container.dataset.testid = 'interstitial-screen';
         this.container.appendChild(this.message);
         this.container.appendChild(this.details);
         

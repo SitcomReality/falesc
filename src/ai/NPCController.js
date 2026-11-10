@@ -93,6 +93,10 @@ export class NPCController {
             // Set speed so that (speed * duration) = PI
             // This ensures exactly one down-up cycle over the duration
             c.speed = Math.PI / duration; 
+            // A BEND -> BEND transition does not change Character.state, so the
+            // state setter will not reset stateTime; do it here or the second
+            // bend starts already past PI and looks frozen.
+            c.stateTime = 0;
         } else if (newState === 'WANDER') {
             // Use configured run chance
             const run = Math.random() < NPC_PARAMS.runChance;

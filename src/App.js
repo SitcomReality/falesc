@@ -15,12 +15,14 @@ import { MapGenerator } from './map/MapGenerator.js';
 import { SeededRandom } from './map/SeededRandom.js';
 import { BuildingManager } from './buildings/BuildingManager.js';
 import { BuildModal } from './ui/BuildModal.js';
+import { Minimap } from './ui/Minimap.js';
 
 class GameApp {
     constructor() {
         this.characters = [];
         this.minerals = [];
         this.map = null;
+        this.frameCount = 0;
         
         // Setup Pixi
         this.app = new PIXI.Application({
@@ -77,6 +79,14 @@ class GameApp {
         this.stateManager.registerScreen(GameState.INTERSTITIAL, new InterstitialScreen(this.stateManager));
         this.stateManager.registerScreen(GameState.END, new EndScreen(this.stateManager));
 
+        // Leaving active play must close the build prompt; otherwise it can sit
+        // on top of the interstitial/end screen and accept a stale build.
+        const originalSetState = this.stateManager.setState.bind(this.stateManager);
+        this.stateManager.setState = (newState) => {
+            if (newState !== GameState.PLAYING) this.buildModal.hide();
+            originalSetState(newState);
+        };
+
         // Camera System
         this.camera = new Camera(
             this.app, 
@@ -84,7 +94,13 @@ class GameApp {
             (x, y) => this.onWorldTap(x, y),
             this.inputManager
         );
+
+        // Minimap (2D canvas overlay)
+        this.minimap = new Minimap(this);
         
+        // Keep the camera centred on the same world point when the window resizes.
+        this.app.renderer.on('resize', () => this.camera.updateTransform());
+
         // Define world parameters based on minimum zoom (1/0.2 = 5). This is the full map size.
         this.WORLD_SCALE_FACTOR = 5;
         this.MAP_WIDTH = this.app.screen.width * this.WORLD_SCALE_FACTOR;
@@ -105,6 +121,7 @@ class GameApp {
         // Hook into turn processing
         const originalEndTurn = this.stateManager.endTurn.bind(this.stateManager);
         this.stateManager.endTurn = () => {
+            if (this.stateManager.state !== GameState.PLAYING) return;
             originalEndTurn();
             // Process buildings during turn transition:
             // PENDING -> RESERVED on first interstitial,
@@ -116,15 +133,80 @@ class GameApp {
 
         // Start at menu
         this.stateManager.setState(GameState.MENU);
-        
+
+        // Debug surface for browser smoke tests and manual console poking.
+        this.exposeDebugApi();
+
         // Game Loop
         this.app.ticker.add((delta) => this.update(delta));
     }
+
+    exposeDebugApi() {
+        const game = this;
+        window.__falesc = {
+            app: game,
+            get ready() {
+                return window.__APP_READY__ === true;
+            },
+            snapshot() {
+                return {
+                    ready: window.__APP_READY__ === true,
+                    frame: game.frameCount,
+                    state: game.stateManager.state,
+                    turn: game.stateManager.currentTurn,
+                    actionsRemaining: game.stateManager.actionsRemaining,
+                    seed: game.stateManager.settings.mapSeed,
+                    mapSize: game.stateManager.settings.mapSize,
+                    characters: game.characters.length,
+                    minerals: game.minerals.length,
+                    buildings: game.buildingManager.buildings.length,
+                    buildingStates: game.buildingManager.buildings.map((building) => building.state),
+                    sectors: game.map ? game.map.sectors.length : 0,
+                    buildModalOpen: game.buildModal.container.style.display !== 'none',
+                    camera: {
+                        x: game.camera.position.x,
+                        y: game.camera.position.y,
+                        zoom: game.camera.zoom
+                    }
+                };
+            },
+            /** First grid cell that has no building, plus its world position. */
+            findFreeCell() {
+                if (!game.map) return null;
+                for (const sector of game.map.sectors) {
+                    for (let v = 0; v < sector.gridSize; v++) {
+                        for (let u = 0; u < sector.gridSize; u++) {
+                            if (!game.buildingManager.isCellOccupied(sector.id, u, v)) {
+                                const pos = sector._project(u + 0.5, v + 0.5);
+                                return { sectorId: sector.id, u, v, x: pos.x, y: pos.y };
+                            }
+                        }
+                    }
+                }
+                return null;
+            },
+            /** Convert a world position to CSS pixel coordinates on the canvas. */
+            worldToScreen(x, y) {
+                const cx = game.app.screen.width / 2;
+                const cy = game.app.screen.height / 2;
+                return {
+                    x: cx + (x - game.camera.position.x) * game.camera.zoom,
+                    y: cy + (y - game.camera.position.y) * game.camera.zoom
+                };
+            }
+        };
+    }
     
     finalizeBuild(name) {
-        if (this.pendingBuildLocation) {
+        if (this.pendingBuildLocation &&
+            this.stateManager.state === GameState.PLAYING &&
+            this.stateManager.actionsRemaining > 0) {
             const { sectorId, u, v } = this.pendingBuildLocation;
-            this.buildingManager.createBuilding(sectorId, u, v, name);
+            const building = this.buildingManager.createBuilding(sectorId, u, v, name);
+            if (!building) {
+                this.pendingBuildLocation = null;
+                return;
+            }
             this.stateManager.actionsRemaining--;
             if (this.stateManager.activeScreen && this.stateManager.activeScreen.updateTurnDisplay) {
                 this.stateManager.activeScreen.updateTurnDisplay();
@@ -136,6 +218,7 @@ class GameApp {
     onWorldTap(x, y) {
         if (this.stateManager.state !== GameState.PLAYING) return;
         if (this.stateManager.actionsRemaining <= 0) return;
+        if (this.buildModal.isOpen) return;
 
         // Check against sectors
         if (!this.map) return;
@@ -161,6 +244,11 @@ class GameApp {
     }
 
     initializeWorld() {
+        // Recompute the map size from the current window so a resize while
+        // sitting in the lobby does not leave a stale world size behind.
+        this.MAP_WIDTH = this.app.screen.width * this.WORLD_SCALE_FACTOR;
+        this.MAP_HEIGHT = this.app.screen.height * this.WORLD_SCALE_FACTOR;
+
         // Clear existing world
         this.clearWorld();
         
@@ -176,6 +264,13 @@ class GameApp {
         );
         
         this.buildingManager.setMap(this.map);
+
+        // Every new game starts centred and at the default zoom, even if the
+        // player panned the hidden world from the menu.
+        this.camera.zoom = 1;
+        this.camera.position.x = this.MAP_WIDTH / 2;
+        this.camera.position.y = this.MAP_HEIGHT / 2;
+        this.camera.updateTransform();
         
         // Add map graphics to layer
         
@@ -265,7 +360,7 @@ class GameApp {
         this.characterLayer.addChild(char.graphics);
         this.shadowLayer.addChild(char.shadow);
         
-        char.graphics.zIndex = char.groundY || char.y;
+        char.graphics.zIndex = char.groundY ?? char.y;
     }
 
     update(delta) {
@@ -299,9 +394,23 @@ class GameApp {
             this.characterLayer.sortChildren();
         }
 
+        // Redraw the minimap with the camera and building state (a few times a
+        // second is plenty; it is an orientation aid, not the game view).
+        if (this.frameCount % 3 === 0) {
+            this.minimap.update();
+        }
+
         // Update active game screen if in PLAYING state
         if (this.stateManager.state === GameState.PLAYING && this.stateManager.activeScreen) {
             this.stateManager.activeScreen.updateTurnDisplay();
+        }
+
+        // Signal readiness after the first completed frame. The browser smoke
+        // test waits for this instead of screenshotting during initial paint.
+        this.frameCount += 1;
+        if (this.frameCount === 1) {
+            window.__APP_READY__ = true;
+            window.dispatchEvent(new CustomEvent('app-ready'));
         }
     }
 }

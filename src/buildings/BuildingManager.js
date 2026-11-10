@@ -24,6 +24,17 @@ export class BuildingManager {
     createBuilding(sectorId, u, v, name) {
         const iu = Math.floor(u);
         const iv = Math.floor(v);
+
+        if (!this.map) {
+            console.warn('Cannot create building before a map exists');
+            return null;
+        }
+
+        const sector = this.map.sectors.find(s => s.id === sectorId);
+        if (!sector) {
+            console.warn(`Unknown sector: ${sectorId}`);
+            return null;
+        }
         
         if (this.isCellOccupied(sectorId, iu, iv)) {
             console.warn('Cell occupied');
@@ -32,10 +43,6 @@ export class BuildingManager {
         
         const id = `b_${Date.now()}_${Math.floor(Math.random()*1000)}`;
         const building = new Building(id, sectorId, iu, iv, name);
-        
-        // Calculate World Position
-        const sector = this.map.sectors.find(s => s.id === sectorId);
-        if (!sector) return null;
         
         // Grid centers
         const pos = projectGridToWorld(iu + 0.5, iv + 0.5, sector.centerX, sector.centerY, sector.gridSize, TILE_WIDTH, TILE_HEIGHT);

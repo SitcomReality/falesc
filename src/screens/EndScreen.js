@@ -34,7 +34,9 @@ export class EndScreen {
         const menuBtn = this.createButton('Return to Menu', () => {
             this.gsm.setState('MENU');
         });
+        menuBtn.dataset.testid = 'end-menu';
         
+        this.container.dataset.testid = 'end-screen';
         this.container.appendChild(title);
         this.container.appendChild(this.stats);
         this.container.appendChild(menuBtn);

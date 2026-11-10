@@ -1,6 +1,7 @@
 export class LobbyScreen {
     constructor(gameStateManager) {
         this.gsm = gameStateManager;
+        this.fieldCounter = 0;
         this.container = document.createElement('div');
         this.container.style.cssText = `
             position: fixed;
@@ -37,8 +38,10 @@ export class LobbyScreen {
         
         // Map Seed Input
         const seedGroup = this.createInputGroup('Map Seed:', 'number', this.gsm.settings.mapSeed, (value) => {
-            this.gsm.settings.mapSeed = parseInt(value) || Math.floor(Math.random() * 1000000);
+            const parsed = Number.parseInt(value, 10);
+            if (Number.isInteger(parsed)) this.gsm.settings.mapSeed = parsed;
         });
+        seedGroup.input.dataset.testid = 'lobby-seed';
         
         // Random Seed Button
         const randomSeedBtn = this.createButton('Random', () => {
@@ -46,6 +49,7 @@ export class LobbyScreen {
             this.gsm.settings.mapSeed = newSeed;
             seedGroup.input.value = newSeed;
         }, true);
+        randomSeedBtn.dataset.testid = 'lobby-random-seed';
         randomSeedBtn.style.marginLeft = '10px';
         seedGroup.container.appendChild(randomSeedBtn);
         
@@ -57,6 +61,7 @@ export class LobbyScreen {
                 this.gsm.settings.mapSize = value;
             }
         );
+        sizeGroup.querySelector('select').dataset.testid = 'lobby-size';
         
         settingsContainer.appendChild(seedGroup.container);
         settingsContainer.appendChild(sizeGroup);
@@ -70,14 +75,17 @@ export class LobbyScreen {
         const startBtn = this.createButton('Start Game', () => {
             this.gsm.startGame();
         });
+        startBtn.dataset.testid = 'lobby-start';
         
         const backBtn = this.createButton('Back', () => {
             this.gsm.setState('MENU');
         });
+        backBtn.dataset.testid = 'lobby-back';
         
         buttonContainer.appendChild(startBtn);
         buttonContainer.appendChild(backBtn);
         
+        this.container.dataset.testid = 'lobby-screen';
         this.container.appendChild(title);
         this.container.appendChild(settingsContainer);
         this.container.appendChild(buttonContainer);
@@ -103,6 +111,8 @@ export class LobbyScreen {
         
         const input = document.createElement('input');
         input.type = type;
+        input.id = `lobby-field-${this.fieldCounter++}`;
+        labelEl.htmlFor = input.id;
         input.value = defaultValue;
         input.style.cssText = `
             padding: 8px 12px;
@@ -138,6 +148,8 @@ export class LobbyScreen {
         `;
         
         const select = document.createElement('select');
+        select.id = `lobby-field-${this.fieldCounter++}`;
+        labelEl.htmlFor = select.id;
         select.style.cssText = `
             padding: 8px 12px;
             font-size: 14px;

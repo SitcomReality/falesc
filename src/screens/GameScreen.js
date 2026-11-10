@@ -25,12 +25,16 @@ export class GameScreen {
         const endTurnBtn = this.createButton('End Turn', () => {
             this.gsm.endTurn();
         });
+        endTurnBtn.dataset.testid = 'end-turn';
         
         const endGameBtn = this.createButton('End Game', () => {
             this.gsm.endGame();
         });
+        endGameBtn.dataset.testid = 'end-game';
         endGameBtn.style.background = '#555';
         
+        this.turnDisplay.dataset.testid = 'turn-display';
+        this.container.dataset.testid = 'game-hud';
         this.container.appendChild(this.turnDisplay);
         this.container.appendChild(endTurnBtn);
         this.container.appendChild(endGameBtn);
@@ -68,7 +72,10 @@ export class GameScreen {
     }
 
     updateTurnDisplay() {
-        this.turnDisplay.textContent = `Turn ${this.gsm.currentTurn} | Builds: ${this.gsm.actionsRemaining}`;
+        const text = `Turn ${this.gsm.currentTurn} | Builds: ${this.gsm.actionsRemaining}`;
+        if (this.turnDisplay.textContent !== text) {
+            this.turnDisplay.textContent = text;
+        }
     }
 }
 
