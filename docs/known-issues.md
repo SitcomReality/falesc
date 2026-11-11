@@ -22,7 +22,7 @@ Severity is about impact on the slice, not effort:
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Home shard plus one commons isle are buildable; shared works, a purse and manual top-ups exist, but no shared capital budget or fuller archipelago |
-| 3 | Medium | No floors or multi-slot modules; shell finish, hours policy and one retrofit module exist |
+| 3 | Medium | No floors or adjacency; shell finish, hours policy and a two-module retrofit exist |
 | 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
@@ -102,20 +102,20 @@ placement on scenery. Add a shared capital budget and further islands only with 
 ownership and camera affordances. The commons isle is the first
 proof of cross-island transit and shared ownership.
 
-### 3. No floors or multi-slot modules
+### 3. No floors or adjacency
 
 **Evidence**
 
 - The five buildable programs are fixed compositions. `ServiceBuilding` stores
   `finish`, `policy`, `level`, `retrofitId`, `qualityBonus` and `upkeepBonus`;
-  one retrofit module changes them, and only to `grand`/level 2.
-- There are no floors, multi-slot modules, adjacency resonance or district
-  identity. The player can choose a Humble/Comfortable/Grand finish, service
-  hours and one retrofit module, but not an access policy or full loadout.
+  up to two retrofit modules change them, and retrofit sets the grand finish.
+- There are no floors, adjacency resonance or district identity. The player can
+  choose a Humble/Comfortable/Grand finish, service hours and two retrofit
+  modules, but not an access policy or a full loadout.
 - Footprints are `1×1` except the Garden Dome's `2×2`; entrance validation is a
   single free door cell, not multi-cell entrance/queue design.
-- The service record can dismantle, reopen and apply one retrofit, but there is
-  no remodel or module loadout.
+- The service record can dismantle, reopen and hold two retrofit modules, but
+  there is no remodel or floor plan.
 
 **Impact**
 
@@ -401,7 +401,7 @@ These are no longer open:
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
 - **Building finishes.** A build chooses Humble, Comfortable or Grand; the shell changes cost, capacity, upkeep and the resident standard fit and is saved. Covered by `building-finishes.mjs`.
 - **Service hours.** Open services can choose As built, Round the clock, Daylight or Evening; the choice changes open phases, quality and upkeep and is saved.
-- **Service retrofit.** An active player service can install one of Sunroom, Atelier or Night Kitchen; the module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
+- **Service retrofit.** An active player service can install up to two of Sunroom, Atelier and Night Kitchen; each module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
 - **Outer commons isle.** A second buildable shard in the Contest, reached by reserved shuttle gates; player services on it earn cross-island visits. Covered by `commons-isle.mjs`.
 - **Stewardship legacy.** A winning stewardship promise is saved in `falesc.legacy.v1` and grants a small starting effect to the next charter. Covered by `campaign.mjs`.
 - **Commons purse.** Every chapter gives 1 lumen when shared works stand; the purse pays shared upkeep and closes/reopens the shared doors together. Covered by `commons-purse.mjs`.

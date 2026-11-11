@@ -51,16 +51,18 @@ export class RetrofitModal {
     render() {
         const service = this.service;
         const lumen = this.game?.charter?.lumen || 0;
+        const installed = service.retrofits || [];
         const options = RETROFIT_MODULES.map((module) => {
-            const affordable = lumen >= module.cost;
+            const already = installed.includes(module.id);
+            const affordable = !already && lumen >= module.cost;
             const effects = [
                 module.capacity ? `+${module.capacity} capacity` : null,
                 module.quality ? `+${module.quality.toFixed(2)} quality` : null,
                 `+${module.upkeep} upkeep`
             ].filter(Boolean).join(' · ');
             return `
-                <button type="button" class="retrofit-option" data-testid="retrofit-${module.id}" data-module="${module.id}" ${affordable ? '' : 'disabled'}>
-                    <span class="kicker">${escapeHtml(module.kicker)}</span>
+                <button type="button" class="retrofit-option${already ? ' is-installed' : ''}" data-testid="retrofit-${module.id}" data-module="${module.id}" ${affordable ? '' : 'disabled'}>
+                    <span class="kicker">${already ? 'Installed' : escapeHtml(module.kicker)}</span>
                     <strong>${escapeHtml(module.name)}</strong>
                     <span>${escapeHtml(module.blurb)}</span>
                     <span class="retrofit-option__stats">${escapeHtml(effects)} · ${module.cost} lumen</span>
@@ -71,11 +73,11 @@ export class RetrofitModal {
             <div class="modal__head">
                 <div>
                     <p class="kicker" style="color:var(--wine)">Service retrofit</p>
-                    <h3 class="modal__title" id="retrofit-title">Choose a finish for ${escapeHtml(service.name)}.</h3>
+                    <h3 class="modal__title" id="retrofit-title">Add a module to ${escapeHtml(service.name)}.</h3>
                 </div>
                 <button type="button" class="modal__close" data-testid="retrofit-close-x" aria-label="Close retrofit">×</button>
             </div>
-            <p class="modal__blurb">A retrofit is permanent. More seats, a finer room, or a later kitchen — the choice changes the service record and the day.</p>
+            <p class="modal__blurb">A retrofit is permanent and a service can hold two modules. ${installed.length === 1 ? 'One module is already installed; choose a second.' : 'More seats, a finer room, or a later kitchen — the choice changes the service record and the day.'}</p>
             <div class="retrofit-options">${options}</div>
             <p class="modal__error" data-role="retrofit-error" aria-live="polite"></p>
             <div class="modal__actions">

@@ -1,6 +1,6 @@
 /**
- * One retrofit module per service. The choice is the service's finish: more
- * seats, a finer room, or a longer shared table.
+ * Up to two retrofit modules per service. Each choice is a different finish:
+ * more seats, a finer room, or a longer shared table.
  */
 export const RETROFIT_MODULES = [
     {

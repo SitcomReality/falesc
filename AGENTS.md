@@ -23,7 +23,7 @@ with two AI rivals, a shared lumen economy, shared residents, rival housing,
 recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
 a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
 a fundable shared Commons Beacon that becomes a six-seat all-needs civic service,
-transient day visitors who pay for service visits, and a one-step service retrofit. The full multi-round festival, auctions, deeper legacy effects, deeper rival
+transient day visitors who pay for service visits, and a two-module service retrofit. The full multi-round festival, auctions, deeper legacy effects, deeper rival
 strategy, floors and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
@@ -192,8 +192,8 @@ after any behavioural change.
   their card with traits, needs, affinity and last door. Once the Beacon is lit, the
   first Commons Assembly lets residents petition, each chapter nominate and
   residents vote; the winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
-  `CommonsBallot.js`). One second reading can amend it after a full day. An open player service can be retrofitted once for 6
-  lumen; Sunroom, Atelier or Night Kitchen trade seats, quality and upkeep. The
+  `CommonsBallot.js`). One second reading can amend it after a full day. An open player service can hold up to two retrofit
+  modules (6–7 lumen each) from Sunroom, Atelier and Night Kitchen. The
   service record owns the action and the module is saved. Open services can also
   choose As built, Round the clock, Daylight or Evening hours. The five buildable
   services include the 2×2 Bathhouse for Rest + Company. A build chooses a

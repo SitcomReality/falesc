@@ -54,6 +54,23 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.ok(after.quality > 0.2);
     assert.equal(after.upkeep, before.upkeep + 1);
     assert.equal(after.lumen, before.lumen - 6);
+    assert.equal(await page.visible('[data-testid=structure-upgrade]'), true);
+    await page.click('[data-testid=structure-upgrade]');
+    await page.waitFor("window.__falesc.app.retrofitModal.isOpen === true");
+    assert.equal(await page.evaluate("document.querySelector('[data-testid=retrofit-atelier]').disabled"), true);
+    await page.click('[data-testid=retrofit-sunroom]');
+    await page.waitFor("window.__falesc.app.retrofitModal.isOpen === false");
+    const second = await page.evaluate(`(() => {
+        const app = window.__falesc.app;
+        const service = app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
+        return { retrofits: service.retrofits, capacity: service.capacity, quality: service.qualityBonus, upkeep: app.charter.services.upkeepFor(service) };
+    })()`);
+    log(JSON.stringify({ second }));
+    assert.deepEqual(second.retrofits, ['atelier', 'sunroom']);
+    assert.equal(second.capacity, before.capacity + 2);
+    assert.ok(second.quality > after.quality);
+    assert.equal(second.upkeep, before.upkeep + 2);
+    assert.equal(await page.visible('[data-testid=structure-upgrade]'), false);
     await screenshot('retrofit-done.png');
 
     await page.evaluate("window.__falesc.app.saveGame()");
@@ -64,12 +81,13 @@ export default async function ({ page, assert, log, screenshot }) {
     const restored = await page.evaluate(`(() => {
         const app = window.__falesc.app;
         const service = app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
-        return { capacity: service.capacity, level: service.level, retrofitId: service.retrofitId, quality: service.qualityBonus, upkeep: app.charter.services.upkeepFor(service) };
+        return { capacity: service.capacity, level: service.level, retrofitId: service.retrofitId, retrofits: service.retrofits, quality: service.qualityBonus, upkeep: app.charter.services.upkeepFor(service) };
     })()`);
     log(JSON.stringify({ restored }));
-    assert.equal(restored.capacity, before.capacity);
+    assert.equal(restored.capacity, before.capacity + 2);
     assert.equal(restored.level, 2);
-    assert.equal(restored.retrofitId, 'atelier');
-    assert.equal(restored.upkeep, before.upkeep + 1);
+    assert.equal(restored.retrofitId, 'sunroom');
+    assert.equal(restored.upkeep, before.upkeep + 2);
+    assert.deepEqual(restored.retrofits, ['atelier', 'sunroom']);
     await page.pause(400);
 }

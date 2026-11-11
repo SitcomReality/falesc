@@ -175,15 +175,16 @@ reopen shared doors that had closed.
 
 ## Retrofit
 
-An open player service can be retrofitted once from its service record. Choose
-one module:
+An open player service can hold up to **two retrofit modules**, chosen from its
+service record. Each module can be installed once:
 
 - **Sunroom** — 6 lumen: **+2 capacity**, **+0.05 quality**, **+1 upkeep**.
 - **Atelier** — 6 lumen: **+0.22 quality**, **+1 upkeep**, no extra seats.
 - **Night Kitchen** — 7 lumen: **+1 capacity**, **+0.12 quality**, **+2 upkeep**.
 
-All three give a **grand** finish. The module is permanent and saved with the
-charter; rivals do not retrofit. Policy capacity and retrofit capacity stack.
+All three give a **grand** finish. The modules are permanent and saved with the
+charter; rivals do not retrofit. Module capacity stacks with policy capacity,
+and a service can combine two different modules.
 
 ## The Commons Beacon
 

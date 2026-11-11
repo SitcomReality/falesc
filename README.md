@@ -59,7 +59,7 @@ so any static file server works, but ES modules require `http://`, not `file://`
   small fee to the chapter whose door they choose. A visitor who likes your
   chapter and a spare bed can begin a one-day trial stay; clicking their name
   opens a card with their needs, affinity and last door. Open a player service and choose **Retrofit** to pick Sunroom, Atelier or
-  Night Kitchen. Open services can also switch to Round the clock, Daylight or
+  Night Kitchen, and two modules can be combined. Open services can also switch to Round the clock, Daylight or
   Evening hours.
 - In the last three Contest days, choose a **campaign promise** from the
   standings card or the automatic campaign dialog. Rivals publish theirs, and a

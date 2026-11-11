@@ -198,6 +198,14 @@ export class ServiceBuilding {
         }
     }
 
+    get retrofits() {
+        const fromModules = (this.modules || [])
+            .filter((entry) => entry.startsWith('retrofit:'))
+            .map((entry) => entry.slice('retrofit:'.length));
+        if (fromModules.length === 0 && this.retrofitId) return [this.retrofitId];
+        return fromModules;
+    }
+
     toJSON() {
         return {
             id: this.id,

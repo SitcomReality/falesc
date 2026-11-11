@@ -120,7 +120,7 @@ export class ServiceCardModal {
             <div><dt>Visits</dt><dd>${service.visits}</dd></div>
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
             <div><dt>Finish</dt><dd>${escapeHtml(service.finish || 'comfortable')}</dd></div>
-            <div><dt>Condition</dt><dd>${service.level >= 2 ? `Retrofitted · ${escapeHtml(RETROFIT_BY_ID[service.retrofitId]?.name || 'custom finish')}` : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
+            <div><dt>Condition</dt><dd>${service.retrofits?.length ? `Retrofitted · ${service.retrofits.map((id) => escapeHtml(RETROFIT_BY_ID[id]?.name || id)).join(' + ')}` : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
             <div><dt>Hours</dt><dd>${escapeHtml(SERVICE_HOURS_BY_ID[service.policy?.hours]?.name || 'As built')}</dd></div>
             <div><dt>Door</dt><dd>${service.entrance ? `cell ${service.entrance.u}, ${service.entrance.v}` : '—'}</dd></div>
         `;
@@ -147,11 +147,11 @@ export class ServiceCardModal {
             : rivalService
                 ? "A rival chapter's service cannot be dismantled."
                 : service.fixed ? 'The Welcome Post is part of the charter.' : '';
-        const canUpgrade = !rivalService && !service.fixed && working && service.level < 2;
+        const canUpgrade = !rivalService && !service.fixed && working && (service.retrofits?.length || 0) < 2;
         this.upgradeBtn.hidden = !canUpgrade;
         this.upgradeBtn.disabled = !canUpgrade || (this.game?.charter?.lumen || 0) < RETROFIT_MIN_COST;
-        this.upgradeBtn.textContent = 'Retrofit →';
-        this.upgradeBtn.title = canUpgrade ? 'Add two seats, better finish and one upkeep.' : '';
+        this.upgradeBtn.textContent = (service.retrofits?.length || 0) === 1 ? 'Add a second module →' : 'Add a module →';
+        this.upgradeBtn.title = canUpgrade ? 'Add a permanent module: seats, quality or a later kitchen.' : '';
         const canSetHours = !rivalService && !service.fixed && service.programId !== 'housing' && working;
         this.hoursWrap.hidden = !canSetHours;
         this.hoursSelect.value = SERVICE_HOURS_BY_ID[service.policy?.hours] ? service.policy.hours : 'as_built';

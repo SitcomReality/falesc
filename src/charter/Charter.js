@@ -709,7 +709,9 @@ export class Charter {
         if (service.state !== 'ACTIVE' || service.closed) {
             return { ok: false, error: 'Only an open, working service can be retrofitted.' };
         }
-        if (service.level >= 2) return { ok: false, error: 'This service is already retrofitted.' };
+        const installed = service.retrofits;
+        if (installed.includes(moduleId)) return { ok: false, error: 'That module is already installed.' };
+        if (installed.length >= 2) return { ok: false, error: 'This service already has two retrofit modules.' };
         const module = RETROFIT_BY_ID[moduleId];
         if (!module) return { ok: false, error: 'Unknown retrofit module.' };
         if (this.lumen < module.cost) {
