@@ -11,7 +11,7 @@
 > residents, rival Welcome Houses and housing growth, per-chapter lumen,
 > contributions, upkeep and closures, Devotion standings, a patronage-flow
 > overlay, doctrine/need-pressure builds, reopen recovery and a pledge/vote Confluence
-> finale, including a three-day campaign programme of rival/player promises and a
+> finale, including a six-event, three-day campaign programme of rival/player promises and a
 > post-vote stewardship promise and a fundable shared Commons Beacon. A separate
 > shared-commons island, long-term rival plan, a multi-round festival, auctions
 > and systemic stewardship remain target.

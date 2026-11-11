@@ -41,14 +41,19 @@ export class Campaign {
         return PLEDGE_BY_ID[this.rivalPledges[chapterId]] || null;
     }
 
+    eventsFor(day) {
+        return this.events.filter((event) => event.day === day);
+    }
+
     eventFor(day) {
         return this.events.find((event) => event.day === day) || null;
     }
 
     appealFor(chapterId, day) {
-        const event = this.eventFor(day);
         const pledge = this.pledgeFor(chapterId);
-        return event && pledge && pledge.need === event.need ? 1.12 : 1;
+        if (!pledge) return 1;
+        const matches = this.eventsFor(day).filter((event) => event.need === pledge.need).length;
+        return matches === 0 ? 1 : Math.min(1.12, 1 + matches * 0.06);
     }
 
     momentumFor(chapterId) {
@@ -103,9 +108,22 @@ const EVENT_COPY = {
 function buildEvents(startedDay, dayLimit, seed) {
     const days = Math.max(1, dayLimit - startedDay + 1);
     const order = new SeededRandom((seed || 1) + 9173).shuffle(['sustenance', 'rest', 'company', 'wonder']);
-    return order.slice(0, Math.min(3, days)).map((need, index) => ({
-        day: startedDay + index,
-        need,
-        ...EVENT_COPY[need]
-    }));
+    const events = [];
+    for (let index = 0; index < Math.min(3, days); index++) {
+        const first = order[(index * 2) % order.length];
+        const second = order[(index * 2 + 1) % order.length];
+        events.push({
+            day: startedDay + index,
+            need: first,
+            session: 'First bell',
+            ...EVENT_COPY[first]
+        });
+        events.push({
+            day: startedDay + index,
+            need: second,
+            session: 'Second bell',
+            ...EVENT_COPY[second]
+        });
+    }
+    return events;
 }

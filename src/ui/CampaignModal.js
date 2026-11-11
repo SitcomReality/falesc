@@ -72,7 +72,7 @@ export class CampaignModal {
             return `<li><span class="campaign-rivals__dot" style="background:${rival.colour}"></span><span>${escapeHtml(rival.name)}</span><strong>${escapeHtml(pledge?.name || 'No promise yet')}</strong></li>`;
         }).join('');
         this.eventsEl.innerHTML = (campaign.events || []).map((event) => `
-            <li><span>Day ${event.day}</span><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.blurb)}</small></li>
+            <li><span>Day ${event.day} · ${escapeHtml(event.session || 'Festival')}</span><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.blurb)}</small></li>
         `).join('');
         this.rivalsEl.innerHTML = rivalRows || '<li><span>No rival promises yet.</span></li>';
         const selected = campaign.playerPledge || PLEDGES[0].id;

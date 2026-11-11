@@ -54,7 +54,7 @@ moves, shared services/occupancy, shared residents, rival Welcome Houses and
 housing growth, per-chapter lumen/contributions/upkeep/closures, Devotion
 standings, patronage, a patronage-flow overlay and a most-beloved-chapter end at
 the day limit. Rivals also recover from closures and choose builds by need
-pressure, the last three days run a three-event campaign with rival promises and
+pressure, the last three days run a six-event campaign with rival promises and
 matching service appeal, and the day limit convenes a pledge/vote Confluence.
 A player winner chooses a stewardship promise that seeds the next charter with
 a small legacy. The archipelago can fund a shared Commons Beacon for a nightly
