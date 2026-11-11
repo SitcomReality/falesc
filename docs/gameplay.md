@@ -155,11 +155,16 @@ islands remain scenery. Rivals do not build there.
 
 Services raised on the commons isle are **shared works of The Commons**. The
 player pays the construction cost and work, but the building belongs to the
-commons chapter: every resident can use it, its upkeep is waived for now, and it
-cannot be dismantled, retrofitted or given private hours. A small share of every
-shared-service visit still credits the builder chapter, so public generosity is
-visible in Devotion. The Commons modal counts the shared works standing on the
-isle.
+commons chapter: every resident can use it, and it cannot be dismantled,
+retrofitted or given private hours. A small share of every shared-service visit
+still credits the builder chapter, so public generosity is visible in Devotion.
+The Commons modal counts the shared works standing on the isle.
+
+Shared works draw upkeep from the **commons purse**. Whenever shared works
+stand, every chapter with at least **1 lumen** gives **1 lumen** to the purse at
+the start of a day. At the end of the day the purse pays the shared upkeep; if
+it cannot cover it, the shared doors close together until the purse can cover
+them again. The report shows the purse, shared upkeep and any closures.
 
 ## Retrofit
 

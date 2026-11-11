@@ -91,6 +91,9 @@ export class ReportScreen {
             : '';
         const commonsVisits = report.patronageByChapter?.commons || 0;
         const commonsPolicy = COMMONS_POLICY_BY_ID[report.commons?.policy];
+        const purseNote = report.commonsPurse !== undefined
+            ? `<p class="report__warning">Commons purse ${report.commonsPurse} lumen · shared upkeep ${report.commonsUpkeep || 0}/day${report.commonsClosed?.length ? ` · closed: ${report.commonsClosed.map((entry) => escapeHtml(entry.name)).join(', ')}` : ''}.</p>`
+            : '';
         const commonsNote = report.commons
             ? `<p class="report__warning">${report.commons.active ? `The Commons Beacon is lit: every need eases by ${report.commons.comfort} at night, and ${commonsVisits} visits found its door.${commonsPolicy ? ` The assembly chose ${commonsPolicy.name}.` : ' The first assembly is waiting.'}` : `Commons Beacon fund: ${report.commons.fund} / ${report.commons.target} lumen.`}</p>`
             : '';
@@ -116,6 +119,7 @@ export class ReportScreen {
                 ${visitorsNote}
                 ${trialNote}
                 ${commonsNote}
+                ${purseNote}
                 ${closures}
                 <div class="report__columns">
                     <section>

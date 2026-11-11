@@ -166,6 +166,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `bathhouse.mjs` | Builds the fifth service, checks its 2×2 footprint, capacity 5, late opening, visits and saved state. |
 | `service-hours.mjs` | Switches an open canteen to Round the clock, checks +2 upkeep and save/reload. |
 | `retrofit.mjs` | Builds a canteen, waits for it to open, opens the retrofit chooser, installs the Atelier, checks +0.22 quality/+1 upkeep (capacity unchanged) and save/reload. |
+| `commons-purse.mjs` | Builds two shared works, checks the levy and upkeep, and verifies the shared doors close together when the purse is short. |
 | `commons-assembly.mjs` | Lights the Beacon, checks the residents' petition, nominates Open Beds, lets all residents vote, verifies the winning policy applies to existing and newly built services, checks the HUD label and save/reload. |
 | `visitor-return.mjs` | Charmed but unhoused visitors are remembered up to two, return on a later day with the same name/affinity, and are marked returning in the report. |
 | `visitor-stay.mjs` | Builds a player canteen and spare bed, opens the visitor card, starts a one-day trial stay, checks the bed is held, the trial survives reload, and the guest resolves into a resident after the trial day. |

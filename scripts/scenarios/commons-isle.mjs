@@ -66,13 +66,16 @@ export default async function ({ page, assert, log, screenshot }) {
     const report = await page.evaluate(`(() => {
         const app = window.__falesc.app;
         const service = app.charter.commonsManager.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
-        return { visits: app.charter.lastReport?.visits, service: { state: service?.state, visits: service?.visits, sectorId: service?.sectorId, chapterId: service?.chapterId, builderChapterId: service?.builderChapterId } };
+        return { visits: app.charter.lastReport?.visits, purse: app.charter.lastReport?.commonsPurse, upkeep: app.charter.lastReport?.commonsUpkeep, closed: app.charter.lastReport?.commonsClosed, service: { state: service?.state, visits: service?.visits, sectorId: service?.sectorId, chapterId: service?.chapterId, builderChapterId: service?.builderChapterId } };
     })()`);
     log(JSON.stringify({ report }));
     assert.equal(report.service.state, 'ACTIVE');
     assert.equal(report.service.sectorId, setup.commons);
     assert.equal(report.service.chapterId, 'commons');
     assert.equal(report.service.builderChapterId, 'player');
+    assert.equal(report.purse, 1, 'three chapters give one lumen and the shared Bathhouse draws two');
+    assert.equal(report.upkeep, 2);
+    assert.equal(report.closed.length, 0);
     assert.ok(report.service.visits > 0, 'residents should shuttle to the commons isle');
     assert.ok(await page.text('[data-testid=report-screen]').then((text) => text.includes('Commons Baths')));
     await screenshot('commons-isle-report.png');
@@ -92,10 +95,11 @@ export default async function ({ page, assert, log, screenshot }) {
     const restored = await page.evaluate(`(() => {
         const app = window.__falesc.app;
         const service = app.charter.commonsManager.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
-        return { sectorId: service?.sectorId, chapterId: service?.chapterId, transit: app.charter.transit, enabled: Boolean(app.charter.map.commonsEnabled) };
+        return { sectorId: service?.sectorId, chapterId: service?.chapterId, purse: app.charter.commons.purse, transit: app.charter.transit, enabled: Boolean(app.charter.map.commonsEnabled) };
     })()`);
     assert.equal(restored.sectorId, setup.commons);
     assert.equal(restored.chapterId, 'commons');
+    assert.equal(restored.purse, 1);
     assert.ok(restored.transit.home && restored.transit.commons);
     assert.equal(restored.enabled, true);
     await page.pause(400);

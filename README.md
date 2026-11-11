@@ -112,6 +112,7 @@ webgame_smoke --scenario scripts/scenarios/visitors.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
+webgame_smoke --scenario scripts/scenarios/commons-purse.mjs
 webgame_smoke --scenario scripts/scenarios/retrofit.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
 webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
@@ -153,7 +154,7 @@ appear in the HUD and report. At the day limit the archipelago convenes a
 **Campaign and Confluence**: the final three days run a three-event festival
 programme where rivals publish promises and the player chooses one; every
 resident then votes and the result becomes the charter record. Still absent: a
-larger multi-round festival, a shared commons treasury and fuller archipelago,
+larger multi-round festival, a manual commons-treasury loop, a fuller archipelago,
 auctions/systemic stewardship and a deeper rival strategy beyond need-pressure
 builds/recovery, building layers or retrofit, audio, multiplayer, or a keyboard
 build cursor. A patronage-flow overlay traces each resident's last choice from

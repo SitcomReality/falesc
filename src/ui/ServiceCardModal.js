@@ -109,7 +109,7 @@ export class ServiceCardModal {
             <span><strong>${working ? 'Working' : service.closed ? 'Closed' : 'Under construction'}</strong></span>
             <span>${escapeHtml(service.chapterName || 'Home Chapter')}</span>
             <span>${service.capacity} capacity</span>
-            <span>${shared ? 'shared · upkeep waived' : service.chapterId !== 'player' ? 'rival budget' : `${upkeep} upkeep / day`}</span>
+            <span>${shared ? 'shared · purse-funded' : service.chapterId !== 'player' ? 'rival budget' : `${upkeep} upkeep / day`}</span>
         `;
         this.blurbEl.textContent = program?.blurb || '';
         this.factsEl.innerHTML = `

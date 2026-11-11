@@ -55,6 +55,8 @@ export class CommonsModal {
         if (!commons) return;
         const sharedWorks = (this.charter.commonsManager?.services || [])
             .filter((service) => service.chapterId === 'commons' && service.id !== commons.serviceId && service.state === 'ACTIVE').length;
+        const purse = commons.purse || 0;
+        const upkeep = this.charter.sharedUpkeepTotal(true);
         const contributors = Object.entries(commons.contributors || {})
             .filter(([, value]) => value > 0)
             .map(([id, value]) => {
@@ -107,6 +109,7 @@ export class CommonsModal {
                     <button type="button" class="modal__close" data-testid="commons-close-x" aria-label="Close commons">×</button>
                 </div>
                 <p class="modal__blurb">The fund is full. The Beacon is a shared place for every resident: it eases every need by ${BALANCE.commons.comfort + (policy?.comfort || 0)} each night${policy?.restRecovery ? ' and gives one more Rest back in bed' : ''}, and its door is open for ${visits} visits so far. ${sharedWorks} shared work${sharedWorks === 1 ? '' : 's'} stand on the outer commons isle.</p>
+                <p class="commons-purse">Commons purse <strong>${purse}</strong> lumen · shared upkeep <strong>${upkeep}</strong> / day. Every chapter gives ${BALANCE.commons.levyPerChapter} when shared works stand.</p>
                 ${assemblyHtml}
                 <h4 class="campaign-modal__label">Given so far</h4>
                 <ul class="commons-contributors">${contributors || '<li><span>The commons</span><strong>—</strong></li>'}</ul>
@@ -127,6 +130,7 @@ export class CommonsModal {
                     <button type="button" class="modal__close" data-testid="commons-close-x" aria-label="Close commons">×</button>
                 </div>
                 <p class="modal__blurb">A shared tower of prism glass, funded by every chapter. When it is lit, every resident sleeps a little easier: each night it eases every need. ${sharedWorks} shared work${sharedWorks === 1 ? '' : 's'} already stand on the outer commons isle.</p>
+                <p class="commons-purse">Commons purse <strong>${purse}</strong> lumen · shared upkeep <strong>${upkeep}</strong> / day. Every chapter gives ${BALANCE.commons.levyPerChapter} when shared works stand.</p>
                 <div class="commons-progress">
                     <div class="commons-progress__track"><i style="width:${Math.min(100, Math.round(commons.fund / commons.target * 100))}%"></i></div>
                     <strong>${commons.fund} / ${commons.target} lumen</strong>

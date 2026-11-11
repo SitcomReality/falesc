@@ -73,6 +73,7 @@ export class Charter {
         this.commons = {
             target: BALANCE.commons.target,
             fund: 0,
+            purse: 0,
             active: false,
             contributors: {},
             activatedDay: null,
@@ -682,6 +683,58 @@ export class Charter {
         return { ok: true, cost };
     }
 
+    sharedWorkServices() {
+        return (this.commonsManager?.services || [])
+            .filter((service) => service.chapterId === 'commons' && service.id !== this.commons.serviceId);
+    }
+
+    sharedUpkeepTotal(includeClosed = false) {
+        return this.sharedWorkServices()
+            .filter((service) => includeClosed || (service.state === 'ACTIVE' && !service.closed))
+            .reduce((sum, service) => sum + (this.commonsManager.upkeepFor(service) || 0), 0);
+    }
+
+    collectCommonsLevy() {
+        if (this.sharedWorkServices().length === 0) return { collected: 0 };
+        let collected = 0;
+        for (const chapter of this.chapters) {
+            if (chapter.lumen < BALANCE.commons.levyPerChapter) continue;
+            chapter.lumen -= BALANCE.commons.levyPerChapter;
+            collected += BALANCE.commons.levyPerChapter;
+        }
+        this.commons.purse += collected;
+        if (this.commons.purse >= this.sharedUpkeepTotal(true)) {
+            for (const service of this.sharedWorkServices()) service.closed = false;
+        }
+        return { collected, purse: this.commons.purse };
+    }
+
+    settleCommonsPurse(report) {
+        if (this.sharedWorkServices().length === 0) return;
+        const services = this.sharedWorkServices().filter((service) => service.state === 'ACTIVE' && !service.closed);
+        const upkeep = services.reduce((sum, service) => sum + (this.commonsManager.upkeepFor(service) || 0), 0);
+        const purseBefore = this.commons.purse;
+        report.commonsPurseBefore = purseBefore;
+        report.commonsUpkeep = upkeep;
+        report.commonsClosed = [];
+        if (services.length === 0 || upkeep <= 0) {
+            report.commonsPurse = this.commons.purse;
+            return;
+        }
+        if (this.commons.purse >= upkeep) {
+            this.commons.purse -= upkeep;
+            report.commonsPurse = this.commons.purse;
+            report.commonsSpent = upkeep;
+            return;
+        }
+        for (const service of services) {
+            service.closed = true;
+            report.commonsClosed.push({ id: service.id, name: service.name });
+        }
+        this.commons.purse = 0;
+        report.commonsPurse = 0;
+    }
+
     spawnVisitors() {
         if (this.mode !== 'contest') {
             this.visitors = [];
@@ -762,6 +815,7 @@ export class Charter {
         if (this.ending) return { report: this.lastReport, events: [] };
         this.spawnVisitors();
         const simulation = new DaySimulator(this).run();
+        this.settleCommonsPurse(simulation.report);
         this.lastReport = simulation.report;
         this.report = simulation.report;
         this.history.push(simulation.report);
@@ -778,6 +832,7 @@ export class Charter {
         this.clearVisitors();
         this.day += 1;
         this.works = BALANCE.worksPerDay;
+        this.collectCommonsLevy();
         const promoted = this.services.promoteUnderConstruction();
         for (const service of this.services.services) service.resetDaily();
         if (this.commonsManager) {
@@ -1099,6 +1154,7 @@ export class Charter {
             this.commons = {
                 target: saved.commons.target || BALANCE.commons.target,
                 fund: Number(saved.commons.fund) || 0,
+                purse: Number(saved.commons.purse) || 0,
                 active: Boolean(saved.commons.active),
                 contributors: { ...(saved.commons.contributors || {}) },
                 activatedDay: saved.commons.activatedDay || null,

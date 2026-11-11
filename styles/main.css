@@ -3906,3 +3906,19 @@ body.has-modal > canvas {
     font-size: 12px;
     text-transform: none;
 }
+
+.commons-purse {
+    margin: 8px 0 0;
+    padding: 7px 9px;
+    background: var(--paper-deep);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.commons-purse strong {
+    color: var(--ink);
+}

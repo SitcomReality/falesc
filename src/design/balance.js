@@ -21,7 +21,9 @@ export const BALANCE = {
         target: 20,
         rivalDaily: 1,
         minRivalLumen: 6,
-        comfort: 3
+        comfort: 3,
+        builderAffinity: 0.03,
+        levyPerChapter: 1
     },
     contest: {
         startingLumen: 15,

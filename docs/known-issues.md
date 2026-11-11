@@ -21,7 +21,7 @@ Severity is about impact on the slice, not effort:
 | # | Severity | Issue |
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
-| 2 | Medium | Home shard plus one commons isle are buildable; shared works exist but no commons treasury or fuller archipelago |
+| 2 | Medium | Home shard plus one commons isle are buildable; shared works and a purse exist, but no manual treasury loop or fuller archipelago |
 | 3 | Medium | No building layers or multi-slot modules; a single hours policy and one retrofit module exist |
 | 4 | Medium | The festival programme is scripted and stewardship is epilogue-only |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
@@ -82,10 +82,10 @@ when the curve is chosen.
 - Residents reach the commons isle through a reserved shuttle gate and a
   cross-island route; rivals still build only on the home shard.
 - Other generated islands have scenery and minerals but no buildable grid.
-- Services built on the commons isle are shared works owned by The Commons,
-  but they waive upkeep and there is no commons treasury, shared budget or
-  rival construction there. The Commons Beacon remains a project on the home
-  shard.
+- Services built on the commons isle are shared works owned by The Commons.
+  A commons purse fed by every chapter pays their upkeep, but there is no
+  manual contribution loop, no shared capital budget and no rival construction
+  there. The Commons Beacon remains a project on the home shard.
   interaction, services, transit or residents.
 
 **Impact**
@@ -98,7 +98,7 @@ the camera has settled on the home shard.
 
 Keep the home shard as the Phase 1 scope, but make the boundary explicit in the
 lobby and HUD. The next step is the Phase 2 shared commons, not quietly enabling
-placement on scenery. Add a commons treasury/upkeep loop and further islands only with their own
+placement on scenery. Add a manual commons-treasury loop and further islands only with their own
 navigation, ownership and camera affordances. The commons isle is the first
 proof of cross-island transit and shared ownership.
 
@@ -400,6 +400,7 @@ These are no longer open:
 - **Service hours.** Open services can choose As built, Round the clock, Daylight or Evening; the choice changes open phases, quality and upkeep and is saved.
 - **Service retrofit.** An active player service can install one of Sunroom, Atelier or Night Kitchen; the module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
 - **Outer commons isle.** A second buildable shard in the Contest, reached by reserved shuttle gates; player services on it earn cross-island visits. Covered by `commons-isle.mjs`.
+- **Commons purse.** Every chapter gives 1 lumen when shared works stand; the purse pays shared upkeep and closes/reopens the shared doors together. Covered by `commons-purse.mjs`.
 - **Shared commons works.** Buildings raised on the Contest commons isle belong to The Commons, are usable by every resident and credit their builder. Covered by `commons-isle.mjs`.
 - **Commons Assembly ballot and petition.** A lit Beacon lets residents petition, each chapter nominate and all residents vote; existing and future services inherit the winner's capacity or comfort effect. Covered by `commons-assembly.mjs`.
 - **Day visitors.** 2–3 transient Contest visitors arrive each day, use services, pay visitor fees and leave before the next day unless offered a trial stay; charmed visitors can return, and a visitor card shows their traits, needs and last door. Covered by `visitors.mjs`, `visitor-stay.mjs` and `visitor-return.mjs`.
