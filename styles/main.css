@@ -4513,3 +4513,56 @@ html.is-reduced-motion *::after {
 .care-watch[hidden] {
     display: none;
 }
+
+/* Need survey care list --------------------------------------------------- */
+.need-survey__watch {
+    margin: 12px 0;
+    padding: 9px 10px;
+    background: rgba(255, 79, 154, 0.1);
+    border: 1.5px solid var(--coral);
+    border-radius: var(--radius);
+}
+
+.need-survey__watch ul {
+    display: grid;
+    gap: 5px;
+    margin: 7px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.need-survey__watch li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    border-bottom: 1px solid rgba(33, 18, 37, 0.16);
+}
+
+.need-survey__watch li:last-child {
+    border-bottom: 0;
+}
+
+.need-survey__watch button {
+    padding: 3px 0;
+    background: none;
+    border: 0;
+    color: var(--wine);
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.need-survey__watch button:hover,
+.need-survey__watch button:focus-visible {
+    text-decoration: underline;
+}
+
+.need-survey__watch li span {
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 8px;
+    text-transform: uppercase;
+}

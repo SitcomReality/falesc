@@ -307,7 +307,8 @@ ballot and the single second reading are the whole Assembly cycle.
 
 When an active resident is in crisis — any need at **85+**, wellbeing below
 **30**, or a night without a bed — the objective card shows a red **Care watch**
-line with the count. Click it to open the need survey. It is a live planning
+line with the count. Click it to open the need survey. The survey lists the residents in crisis with
+a reason; clicking a name opens their resident card. It is a live planning
 signal, not a separate warning system.
 
 ## Charter ledger

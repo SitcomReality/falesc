@@ -26,8 +26,13 @@ export default async function ({ page, assert, screenshot }) {
     await page.waitFor("window.__falesc.app.needSurvey.isOpen === true");
     const survey = await page.text('[data-testid=need-survey]');
     assert.ok(survey.includes('Sustenance'));
-    assert.ok(survey.includes(name) || survey.includes('What the chapter needs'));
-    await page.click('[data-testid=need-survey-done]');
-    await page.waitFor("window.__falesc.app.needSurvey.isOpen === false");
+    assert.ok(survey.includes(name));
+    assert.ok(survey.includes('Residents needing care'));
+    await page.click(`[data-resident-id]`);
+    await page.waitFor("window.__falesc.app.residentCard.isOpen === true");
+    const card = await page.text('[data-testid=resident-modal]');
+    assert.ok(card.includes(name));
+    await page.click('[data-testid=resident-close]');
+    await page.waitFor("window.__falesc.app.residentCard.isOpen === false");
     await page.pause(300);
 }

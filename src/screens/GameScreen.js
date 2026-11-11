@@ -458,7 +458,7 @@ export class GameScreen {
         this._setText(this.flourishingLabel, 'flourishingLabel', `Flourishing ${Math.round(charter.flourishing)}`);
         const goalsMet = openCharter ? false : charter.goalsMet;
         const watch = charter.careWatch();
-        this.careWatch.hidden = watch.count === 0 || openCharter;
+        this.careWatch.hidden = watch.count === 0;
         this.careWatch.textContent = watch.count ? `${watch.count} resident${watch.count === 1 ? '' : 's'} need care · survey` : '';
         this._setText(this.goalCopy, 'goalCopy', openCharter
             ? 'No deadline. Keep building; abandon from the charter menu when you are done.'

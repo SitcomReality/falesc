@@ -120,7 +120,11 @@ export class FalescGame {
         });
         this.fieldGuide = new FieldGuideModal({ overlays: this.overlays });
         this.departureArchive = new DepartureArchiveModal({ game: this, overlays: this.overlays });
-        this.needSurvey = new NeedSurveyModal({ game: this, overlays: this.overlays });
+        this.needSurvey = new NeedSurveyModal({
+            game: this,
+            overlays: this.overlays,
+            onOpenResident: (residentId) => this.openResident(residentId)
+        });
         this.ledger = new CharterLedgerModal({ game: this, overlays: this.overlays });
         this.rivalDossier = new RivalDossierModal({ game: this, overlays: this.overlays });
         this.charterArchive = new CharterArchiveModal({

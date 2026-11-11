@@ -6,8 +6,9 @@ import { NEEDS } from '../design/needs.js';
  * capacity the chapter has for it.
  */
 export class NeedSurveyModal {
-    constructor({ game, overlays }) {
+    constructor({ game, overlays, onOpenResident = null }) {
         this.game = game;
+        this.onOpenResident = onOpenResident;
         this.overlays = overlays;
         this.isOpen = false;
         this.container = document.createElement('div');
@@ -44,6 +45,7 @@ export class NeedSurveyModal {
     render() {
         const survey = this.game?.charter?.needSurvey() || [];
         const residents = this.game?.charter?.activeResidents || [];
+        const watch = this.game?.charter?.careWatch?.() || { count: 0, residents: [] };
         this.panel.innerHTML = `
             <div class="modal__head">
                 <div>
@@ -66,12 +68,17 @@ export class NeedSurveyModal {
                     `;
                 }).join('')}
             </div>
+            ${watch.count ? `<div class="need-survey__watch"><span class="kicker">Residents needing care</span><ul>${watch.residents.map((resident) => `<li><button type="button" data-resident-id="${resident.id}">${escapeHtml(resident.name)}</button><span>${escapeHtml(careReason(resident))}</span></li>`).join('')}</ul></div>` : ''}
             <p class="modal__note">Housing is exempt from closure; every other service can close on a shortfall.</p>
             <div class="modal__actions">
                 <button type="button" class="btn btn--paper" data-testid="need-survey-done">Back to planning</button>
             </div>
         `;
         this.panel.querySelectorAll('[data-testid^=need-survey-close], [data-testid=need-survey-done]').forEach((button) => button.addEventListener('click', () => this.hide()));
+        this.panel.querySelectorAll('[data-resident-id]').forEach((button) => button.addEventListener('click', () => {
+            this.hide();
+            this.onOpenResident?.(button.dataset.residentId);
+        }));
     }
 
     onKeyDown(event) {
@@ -93,6 +100,13 @@ export class NeedSurveyModal {
         this.container.setAttribute('aria-hidden', 'true');
         this.overlays.close(this);
     }
+}
+
+function careReason(resident) {
+    if ((resident.memory?.homelessDays || 0) > 0) return 'no bed';
+    if (resident.wellbeing < 30) return 'low wellbeing';
+    const urgent = Object.entries(resident.needs || {}).sort((a, b) => b[1] - a[1])[0];
+    return urgent ? `${urgent[0]} ${Math.round(urgent[1])}` : 'needs care';
 }
 
 function escapeHtml(value) {
