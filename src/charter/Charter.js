@@ -1096,7 +1096,7 @@ export class Charter {
         this.settleCommonsPurse(simulation.report);
         this.lastReport = simulation.report;
         this.report = simulation.report;
-        this.history.push(simulation.report);
+        this.history.push(this.historyEntry(simulation.report));
         this.pendingArrivals = [];
         this.refreshDerived();
         return simulation;
@@ -1416,6 +1416,7 @@ export class Charter {
             },
             pendingArrivals: this.pendingArrivals,
             lastReport: summarizeReport(this.lastReport),
+            history: this.history.slice(-60),
             residents: this.roster.map((resident) => resident.toJSON()),
             services: this.services.serialize(),
             rivals: this.rivals.map((rival) => rival.toJSON())
@@ -1502,8 +1503,22 @@ export class Charter {
         this.refreshDerived();
         this.report = null;
         this.lastReport = saved.lastReport || null;
-        this.history = [];
+        this.history = Array.isArray(saved.history) ? saved.history.slice(-60) : [];
         this.bulletin = this.buildBulletin(this.pendingArrivals, this.lastRivalMoves);
+    }
+
+    historyEntry(report) {
+        return {
+            day: this.day,
+            population: this.population,
+            housed: this.housedPopulation,
+            flourishing: Math.round(this.flourishing),
+            lumen: this.lumen,
+            net: report?.net || 0,
+            visits: report?.visits || 0,
+            visitors: report?.visitors || 0,
+            closures: report?.closures?.length || 0
+        };
     }
 
     stats() {

@@ -43,6 +43,7 @@ webgame_smoke --scenario scripts/scenarios/open-charter.mjs
 webgame_smoke --scenario scripts/scenarios/charter-archive.mjs
 webgame_smoke --scenario scripts/scenarios/legacy-menu.mjs
 webgame_smoke --scenario scripts/scenarios/departure-archive.mjs
+webgame_smoke --scenario scripts/scenarios/charter-ledger.mjs
 webgame_smoke --scenario scripts/scenarios/need-survey.mjs
 webgame_smoke --scenario scripts/scenarios/field-guide.mjs
 webgame_smoke --scenario scripts/scenarios/sound-toggle.mjs

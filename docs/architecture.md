@@ -112,7 +112,7 @@ src/
     OverlayManager.js, StandingsCard.js, ResidentCardModal.js, Minimap.js,
     ChatterManager.js, CampaignModal.js, CommonsModal.js,
     FieldGuideModal.js, FloorPlanModal.js, DepartureArchiveModal.js,
-    CharterArchiveModal.js, NeedSurveyModal.js, icons.js
+    CharterArchiveModal.js, NeedSurveyModal.js, CharterLedgerModal.js, icons.js
   world/
     World.js                 Pixi app, layers, camera/input, map and minerals
     PatronageFlow.js         world-space last-choice arcs on the overlay layer

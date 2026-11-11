@@ -26,6 +26,7 @@ import { FieldGuideModal } from './ui/FieldGuideModal.js';
 import { DepartureArchiveModal } from './ui/DepartureArchiveModal.js';
 import { CharterArchiveModal } from './ui/CharterArchiveModal.js';
 import { NeedSurveyModal } from './ui/NeedSurveyModal.js';
+import { CharterLedgerModal } from './ui/CharterLedgerModal.js';
 import { recordCharter, recordFromCharter } from './persistence/CharterArchive.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
@@ -114,6 +115,7 @@ export class FalescGame {
         this.fieldGuide = new FieldGuideModal({ overlays: this.overlays });
         this.departureArchive = new DepartureArchiveModal({ game: this, overlays: this.overlays });
         this.needSurvey = new NeedSurveyModal({ game: this, overlays: this.overlays });
+        this.ledger = new CharterLedgerModal({ game: this, overlays: this.overlays });
         this.charterArchive = new CharterArchiveModal({
             overlays: this.overlays,
             onClear: () => this.menuScreen?.show()
@@ -291,6 +293,7 @@ export class FalescGame {
         this.departureArchive.hide();
         this.charterArchive.hide();
         this.needSurvey.hide();
+        this.ledger.hide();
         this.visitorCard.hide();
     }
 
@@ -727,6 +730,11 @@ export class FalescGame {
     openRetrofit(service) {
         if (!this.charter) return false;
         this.retrofitModal.show(service);
+        return true;
+    }
+
+    openLedger() {
+        this.ledger.show();
         return true;
     }
 

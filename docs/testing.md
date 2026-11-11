@@ -159,6 +159,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `charter-archive.mjs` | Abandons a live charter, checks the menu archive and its day/outcome/mode record, clears it and hides the menu button. |
 | `legacy-menu.mjs` | Seeds a stewardship legacy, checks the menu card and effect text, then clears it and verifies storage is empty. |
 | `departure-archive.mjs` | Records a departure, opens the Past residents archive from the pause menu, checks the day/reason/last door and closes it. |
+| `charter-ledger.mjs` | Plays two days, checks the daily rows and sparkline, then reloads and confirms the history persists. |
 | `need-survey.mjs` | Opens the need survey after a day, checks all four rows, urgency/capacity text and closes it. |
 | `field-guide.mjs` | Opens the almanac from the menu and the pause menu, checks the service/policy/control sections, and closes it. |
 | `sound-toggle.mjs` | Opens the charter menu, turns the procedural soundscape on and off, checks persistence and the audio context. |

@@ -4327,3 +4327,68 @@ body.has-modal > canvas {
     letter-spacing: 0.03em;
     text-transform: uppercase;
 }
+
+/* Charter ledger ---------------------------------------------------------- */
+.charter-ledger {
+    width: min(620px, calc(100vw - 32px));
+}
+
+.charter-ledger__spark {
+    display: block;
+    width: 100%;
+    height: 64px;
+    margin: 12px 0 8px;
+    overflow: visible;
+}
+
+.charter-ledger__spark polyline {
+    fill: none;
+    stroke: var(--coral);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.charter-ledger__spark line {
+    stroke: rgba(33, 18, 37, 0.3);
+    stroke-width: 1;
+}
+
+.charter-ledger__table-wrap {
+    overflow-x: auto;
+    margin: 8px 0 14px;
+}
+
+.charter-ledger__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 10px;
+}
+
+.charter-ledger__table th,
+.charter-ledger__table td {
+    padding: 5px 6px;
+    text-align: right;
+    border-bottom: 1px solid rgba(33, 18, 37, 0.18);
+}
+
+.charter-ledger__table th:first-child,
+.charter-ledger__table td:first-child {
+    text-align: left;
+}
+
+.charter-ledger__table th {
+    color: var(--ink-soft);
+    font-size: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.charter-ledger__table td.is-positive {
+    color: #1c7a60;
+}
+
+.charter-ledger__table td.is-negative {
+    color: var(--wine);
+}
