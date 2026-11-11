@@ -103,6 +103,15 @@ building; solo First Light does not use the dividend. The **patronage flow overl
 `P`) traces each resident's last choice from their home door to the service
 door, coloured by chapter.
 
+## Rival plans
+
+Each rival publishes a **long-term plan** in the Devotion standings: the next
+service it intends to raise. A plan waits one day, then becomes the rival's
+priority. If the planned service is out of reach the rival saves for it instead
+of breaking other ground; if no plot is free it may build something else while
+the plan waits. A plan goes stale after three days. The line reads **planning**
+or **saving for** followed by the service name.
+
 ## Campaign
 
 On the **last three days** of a Contest the campaign begins. Each day has a

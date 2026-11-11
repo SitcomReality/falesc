@@ -100,6 +100,9 @@ export function planRivalDay(rival, charter) {
     if (civic) return civic;
 
     choosePlan(rival, charter);
+    const planned = rival.plan ? PROGRAM_BY_ID[rival.plan.programId] : null;
+    if (planned && rival.lumen < planned.cost) return null;
+    if (planned && countProgram(rival, rival.plan.programId) >= programLimit(rival.plan.programId)) rival.plan = null;
     const pressure = needPressure(charter);
     const candidates = (rival.programs || [])
         .map((programId, index) => {
@@ -174,6 +177,7 @@ function choosePlan(rival, charter) {
         programId: next.programId,
         name: next.programId === 'housing' ? 'More housing' : next.program.name,
         need: next.program.need,
+        cost: next.program.cost,
         startedDay: charter.day
     };
 }

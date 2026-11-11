@@ -101,7 +101,7 @@ export class StandingsCard {
                 <span class="standings-row__dot" style="background:${chapter.colour}"></span>
                 <span class="standings-row__name">${escapeHtml(chapter.name)}${chapter.isPlayer ? ' (you)' : ''}</span>
                 <strong class="standings-row__hearts">${chapter.devotion.toFixed(1)} ♥</strong>
-                <span class="standings-row__visits">${chapter.residents} residents · ${chapter.visits} visits${chapter.plan ? ` · planning ${escapeHtml(chapter.plan.name)}` : ''}</span>
+                <span class="standings-row__visits">${chapter.residents} residents · ${chapter.visits} visits${chapter.plan ? ` · ${chapter.plan.saving ? 'saving for' : 'planning'} ${escapeHtml(chapter.plan.name)}` : ''}</span>
             </li>
         `).join('');
     }
