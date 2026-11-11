@@ -155,6 +155,17 @@ resident temperament fits the room: cosy residents prefer cosy, social residents
 prefer lively, curious residents prefer curious, and an efficient room suits a
 rushed day. The atmosphere is saved with the service.
 
+## Neighbouring services and districts
+
+Every service checks the four cells along its footprint edge. Each distinct
+neighbour adds **+0.02 quality**, and each neighbour from a different chapter adds
+another **+0.02**, capped at **+0.10**. Three or more connected services form a
+named **district** — Long Table, Hearth Lane, Lantern Row, Steam Walk or The
+Commons — with a shared quality bonus of **+0.02** at three doors, rising to
+**+0.05**, plus **+0.01** for mixed chapters. The district's name floats over
+the connected doors in the world, and the service record lists both the
+neighbours and the district.
+
 ## The outer commons isle
 
 In the Contest, one second, smaller island is marked as the **outer commons
