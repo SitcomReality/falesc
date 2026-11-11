@@ -153,6 +153,7 @@ the same four options, and the player chooses one:
 - **A room of one's own** — rest.
 - **The long table** — company.
 - **A garden in the void** — wonder.
+- **A bench of one's own** — purpose.
 
 The player's promise is locked once chosen. Each campaign day has a **festival
 event** — *The Empty Larder*, *The Long Night*, *The Homecoming* or *Lanterns

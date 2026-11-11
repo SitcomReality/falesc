@@ -4,7 +4,7 @@ import { escapeHtml } from './html.js';
 
 /**
  * Campaign promise chooser. Rivals publish their promises; the player picks
- * one of the same four needs. The promise persists into the Confluence vote.
+ * one of the same five needs. The promise persists into the Confluence vote.
  */
 export class CampaignModal {
     constructor({ onChoose, onSponsor, overlays }) {

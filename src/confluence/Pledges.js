@@ -1,5 +1,5 @@
 /**
- * The four festival promises. A pledge speaks to one resident need; the same
+ * The five festival promises. A pledge speaks to one resident need; the same
  * list is used by the player's campaign, rival campaigns and the final vote.
  */
 export const PLEDGES = [
@@ -23,6 +23,13 @@ export const PLEDGES = [
         name: 'The long table',
         headline: 'A seat kept open at every table.',
         copy: 'A place to linger, argue, listen and be known by name.'
+    },
+    {
+        id: 'purpose',
+        need: 'purpose',
+        name: "A bench of one's own",
+        headline: 'Work worth doing, close to home.',
+        copy: 'A workshop, a tool wall, a place where what you make is needed.'
     },
     {
         id: 'wonder',
