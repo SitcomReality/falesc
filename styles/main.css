@@ -909,7 +909,7 @@ body > canvas {
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-    z-index: 3;
+    z-index: 5;
 }
 
 .brand {
