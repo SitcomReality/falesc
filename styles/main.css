@@ -5458,3 +5458,12 @@ body.is-photo-mode .care-watch {
     letter-spacing: 0.02em;
     color: var(--ink-soft);
 }
+
+.menu__drift {
+    margin: 0 0 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--cream);
+    opacity: 0.75;
+}

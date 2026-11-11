@@ -1,5 +1,6 @@
 import { readLegacy, describeLegacy, clearLegacy } from '../confluence/StewardshipLegacy.js';
 import { readArchive } from '../persistence/CharterArchive.js';
+import { readDriftRank } from '../persistence/DriftRank.js';
 
 export class MenuScreen {
     constructor(screenStateMachine, game = null) {
@@ -26,6 +27,10 @@ export class MenuScreen {
         tagline.className = 'menu__tagline';
         tagline.innerHTML = 'Fully automated luxury egalitarian space communism. <em>Somebody has to do the dishes.</em>';
 
+        const drift = document.createElement('p');
+        drift.className = 'menu__drift';
+        drift.dataset.testid = 'menu-drift';
+
         const legacy = document.createElement('aside');
         legacy.className = 'menu__legacy';
         legacy.dataset.testid = 'menu-legacy';
@@ -36,6 +41,7 @@ export class MenuScreen {
             <span data-role="legacy-blurb"></span>
             <button type="button" class="menu__legacy-clear" data-testid="menu-clear-legacy">Let it go</button>
         `;
+        this.driftEl = drift;
         this.legacyCard = legacy;
         this.legacyTitle = legacy.querySelector('[data-role=legacy-title]');
         this.legacyBlurb = legacy.querySelector('[data-role=legacy-blurb]');
@@ -100,7 +106,7 @@ export class MenuScreen {
         joinBtn.insertAdjacentHTML('beforeend', '<span class="kicker" style="margin-left:4px;opacity:.7">later</span>');
 
         actions.append(startBtn, continueBtn, exportBtn, importBtn, joinBtn);
-        inner.append(eyebrow, title, tagline, actions, legacy, this.importInput);
+        inner.append(eyebrow, title, tagline, drift, actions, legacy, this.importInput);
 
         const aside = document.createElement('aside');
         aside.className = 'menu__aside paper';
@@ -144,6 +150,11 @@ export class MenuScreen {
         }
         if (this.exportBtn) this.exportBtn.hidden = !canContinue;
         if (this.archiveBtn) this.archiveBtn.hidden = readArchive().length === 0;
+        const rank = readDriftRank();
+        this.driftEl.textContent = rank.charters
+            ? `Drift rank ${rank.rank} · ${rank.label} · ${rank.charters} charter${rank.charters === 1 ? '' : 's'} · +${rank.bonus} starting lumen`
+            : 'Drift rank 0 · Unwritten · the first charter sets the tone';
+        this.driftEl.hidden = false;
         const legacy = readLegacy();
         const effect = describeLegacy(legacy);
         this.legacyCard.hidden = !effect;

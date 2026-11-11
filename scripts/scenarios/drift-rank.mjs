@@ -9,6 +9,9 @@ export default async function ({ page, assert, screenshot }) {
         { chapterName: 'Three', mode: 'contest', day: 14, outcome: 'victory', population: 9, flourishing: 80, visits: 20, devotion: 5, chosenAt: new Date().toISOString() }
     ]))`);
     await page.reload();
+    assert.ok((await page.text('[data-testid=menu-drift]')).includes('Drift rank 1'));
+    await page.pause(300);
+    await screenshot('drift-menu.png');
     await page.click('[data-testid=menu-archive]');
     const archive = await page.text('[data-testid=charter-archive]');
     assert.ok(archive.includes('Drift rank 1'));
