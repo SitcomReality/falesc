@@ -118,6 +118,7 @@ webgame_smoke --scenario scripts/scenarios/need-survey.mjs
 webgame_smoke --scenario scripts/scenarios/field-guide.mjs
 webgame_smoke --scenario scripts/scenarios/sound-toggle.mjs
 webgame_smoke --scenario scripts/scenarios/keyboard-cursor.mjs
+webgame_smoke --scenario scripts/scenarios/playback-pause.mjs
 webgame_smoke --scenario scripts/scenarios/resident-day.mjs
 webgame_smoke --scenario scripts/scenarios/economy.mjs
 webgame_smoke --scenario scripts/scenarios/persistence.mjs

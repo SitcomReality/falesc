@@ -844,11 +844,19 @@ export class FalescGame {
             report: simulation.report
         };
         this.playbackSpeed = 1;
+        this.playbackPaused = false;
         this.crowd.preparePlayback(simulation.events);
         this.dayScreen.setSpeed(1);
         this.dayScreen.update({ day: this.charter.day, phase: DAY_PHASES[0].name, progress: 0 });
         this.screenStateMachine.setState(GamePhase.DAY);
         return true;
+    }
+
+    togglePlaybackPause() {
+        if (this.screenStateMachine.state !== GamePhase.DAY || !this.playback) return false;
+        this.playbackPaused = !this.playbackPaused;
+        this.dayScreen.setPaused(this.playbackPaused);
+        return this.playbackPaused;
     }
 
     setPlaybackSpeed(speed) {
@@ -867,6 +875,7 @@ export class FalescGame {
     finishDayPlayback() {
         if (this.screenStateMachine.state !== GamePhase.DAY) return;
         this.playback = null;
+        this.playbackPaused = false;
         this.crowd.resetToPlanningPositions();
         this.screenStateMachine.setState(GamePhase.REPORT);
         this.saveGame();
@@ -1110,7 +1119,7 @@ export class FalescGame {
     }
 
     updatePlayback(dt) {
-        if (!this.playback) return;
+        if (!this.playback || this.playbackPaused) return;
         this.playback.clock += dt * this.playback.speed;
         const clock = Math.min(this.playback.duration, this.playback.clock);
         const phaseSeconds = BALANCE.playback.phaseSeconds;

@@ -19,6 +19,7 @@ export class DayScreen {
                     <i data-role="progress"></i>
                 </div>
                 <div class="day-strip__controls">
+                    <button type="button" class="btn btn--small btn--paper" data-testid="day-pause" aria-pressed="false">Pause</button>
                     <button type="button" class="btn btn--small btn--paper" data-testid="day-speed-1" data-speed="1">1×</button>
                     <button type="button" class="btn btn--small btn--paper" data-testid="day-speed-2" data-speed="2">2×</button>
                     <button type="button" class="btn btn--small btn--paper" data-testid="day-speed-4" data-speed="4">4×</button>
@@ -31,12 +32,14 @@ export class DayScreen {
         this.progressEl = this.container.querySelector('[data-role=progress]');
         this.trackEl = this.container.querySelector('[role=progressbar]');
         this.speedButtons = [...this.container.querySelectorAll('[data-speed]')];
+        this.pauseButton = this.container.querySelector('[data-testid=day-pause]');
 
         for (const button of this.speedButtons) {
             button.addEventListener('click', () => {
                 this.game.setPlaybackSpeed(Number(button.dataset.speed));
             });
         }
+        this.pauseButton.addEventListener('click', () => this.game.togglePlaybackPause());
         this.container.querySelector('[data-testid=day-skip]').addEventListener('click', () => this.game.skipDay());
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
@@ -45,6 +48,7 @@ export class DayScreen {
     show() {
         this.container.style.display = 'block';
         this.setSpeed(this.game.playbackSpeed || 1);
+        this.setPaused(false);
     }
 
     update({ day, phase, progress }) {
@@ -53,6 +57,11 @@ export class DayScreen {
         const percent = Math.max(0, Math.min(100, progress * 100));
         if (this.progressEl) this.progressEl.style.width = `${percent}%`;
         this.trackEl?.setAttribute('aria-valuenow', String(Math.round(percent)));
+    }
+
+    setPaused(paused) {
+        this.pauseButton.textContent = paused ? 'Play' : 'Pause';
+        this.pauseButton.setAttribute('aria-pressed', String(Boolean(paused)));
     }
 
     setSpeed(speed) {

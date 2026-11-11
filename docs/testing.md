@@ -176,6 +176,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `field-guide.mjs` | Opens the almanac from the menu and the pause menu, checks the service/policy/control sections, and closes it. |
 | `sound-toggle.mjs` | Opens the charter menu, turns the procedural soundscape on and off, checks persistence and the audio context. |
 | `keyboard-cursor.mjs` | Toggles the keyboard build cursor, moves it with arrows, opens the build dialog with Enter, and confirms a pending build. |
+| `playback-pause.mjs` | Opens a day, pauses and confirms the clock is frozen, resumes, then skips to the report. |
 | `resident-day.mjs` | A Tidelander is scheduled into the Canteen, walks and enters during playback, emerges with a lower need, remembers the visit, and the card quotes the why line. |
 | `economy.mjs` | Founding state is 10 lumen / 2 works / 6 residents; two builds cost 8 lumen and both works; the report satisfies `lumenAfter = prior + contributions − upkeep`; a new house adds beds and arrivals; both services open overnight. |
 | `persistence.mjs` | Save v2 holds day 3, lumen, works, services, residents, needs and last choice; reload + **Continue charter** restores them, the Canteen comes back `ACTIVE`, a resident card renders without NaN, and a new build gets a non-colliding service id. |
