@@ -57,7 +57,41 @@ export default async function ({ page, assert, screenshot, log }) {
     assert.equal(after.residents[0].needs.rest, before.residents[0].needs.rest);
     assert.equal(JSON.stringify(after.residents.find((resident) => resident.lastChoice)?.lastChoice), JSON.stringify(before.residents.find((resident) => resident.lastChoice)?.lastChoice));
     assert.equal(after.services.find((service) => service.programId === 'canteen')?.state, 'ACTIVE');
+    assert.ok(Number.isFinite(after.devotion), 'Devotion must survive the save round-trip');
+    assert.ok(Number.isFinite(after.flourishing), 'Flourishing must survive the save round-trip');
 
+    await page.evaluate("window.__falesc.openResident('r01')");
+    await page.waitFor("window.__falesc.snapshot().residentCardOpen === true");
+    const cardText = await page.text('[data-testid=resident-modal]');
+    assert.ok(cardText.includes('Devotion'), 'resident card should render after Continue');
+    assert.ok(!cardText.includes('NaN'), 'resident card must not contain NaN after Continue');
+    await page.click('[data-testid=resident-close]');
+    await page.evaluate("window.__falesc.app.bulletinModal.hide()");
+
+    const rebuilt = await page.evaluate(`(() => {
+        const app = window.__falesc.app;
+        app.selectProgram('housing');
+        const cell = window.__falesc.findFreeCell('housing');
+        app.onWorldTap(cell.x, cell.y);
+        const result = app.finalizeBuild('Post Script House');
+        app.buildModal.hide(false);
+        const s = window.__falesc.snapshot();
+        return { result, ids: s.services.map((service) => service.id), state: s };
+    })()`);
+    log(JSON.stringify({ rebuilt: { ids: rebuilt.ids, services: rebuilt.state.services.length, works: rebuilt.state.works, lumen: rebuilt.state.lumen } }));
+    assert.ok(rebuilt.result.ok, 'building after Continue should work');
+    assert.equal(new Set(rebuilt.ids).size, rebuilt.ids.length, 'service ids must stay unique after Continue');
+
+    await page.evaluate("window.__falesc.openDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
+    await page.evaluate("window.__falesc.skipDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
+    await page.evaluate("window.__falesc.beginNextDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+    const nextDay = await page.evaluate("window.__falesc.snapshot()");
+    log(JSON.stringify({ nextDay: { day: nextDay.day, population: nextDay.population, capacity: nextDay.housingCapacity, spareBeds: nextDay.spareBeds, homes: nextDay.residents.map((resident) => resident.homeServiceId), ids: nextDay.services.map((service) => service.id) } }));
+    assert.equal(new Set(nextDay.services.map((service) => service.id)).size, nextDay.services.length, 'service ids must stay unique after a new build');
+    assert.ok(nextDay.residents.every((resident) => resident.homeServiceId), 'new arrivals should receive a real bed after Continue');
     await page.evaluate("window.__falesc.app.bulletinModal.hide()");
     await screenshot('persisted.png');
 }

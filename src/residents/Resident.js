@@ -26,7 +26,11 @@ export class Resident {
         }
         this.active = active;
         this.homeServiceId = homeServiceId;
-        this.affinity = { player: affinity };
+        const affinityValue = typeof affinity === 'number'
+            ? affinity
+            : Number(affinity?.player ?? 0.8);
+        const safeAffinity = Number.isFinite(affinityValue) ? affinityValue : 0.8;
+        this.affinity = { player: Math.max(0, Math.min(5, safeAffinity)) };
         this.memory = {
             lastChoice: null,
             recentVisits: [],

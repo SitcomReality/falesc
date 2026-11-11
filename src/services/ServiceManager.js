@@ -85,6 +85,10 @@ export class ServiceManager {
     }
 
     register(service) {
+        const idMatch = /^s(\d+)$/.exec(service.id);
+        if (idMatch) {
+            this._nextNumber = Math.max(this._nextNumber, Number(idMatch[1]) + 1);
+        }
         this.services.push(service);
         for (const cell of service.cells) {
             this.occupancy.set(cellKey(service.sectorId, cell.u, cell.v), service);
