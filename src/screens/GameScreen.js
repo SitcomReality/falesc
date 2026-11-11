@@ -184,7 +184,7 @@ export class GameScreen {
         // charter menu. These shortcuts are inert while a text dialog is open.
         this._onShortcut = (event) => {
             if (event.ctrlKey || event.metaKey || event.altKey) return;
-            if (this.gsm.state !== 'PLAYING' || this.game.buildModal.isOpen) return;
+            if (this.gsm.state !== 'PLAYING' || this.game.buildModal.isOpen || this.game.structureModal?.isOpen) return;
             if (this.pausePanel && !this.pausePanel.hidden && event.key !== 'Escape') return;
             if (event.key === 'Escape') {
                 event.preventDefault();

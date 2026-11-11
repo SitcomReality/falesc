@@ -34,6 +34,14 @@ export default async function ({ page, assert, log }) {
     assert.equal(npc.bad.length, 0);
     assert.equal(npc.controllers, npc.characters);
 
+    // The survey chart is click-to-pan.
+    const beforeChart = await page.evaluate("window.__falesc.snapshot().camera");
+    await page.click('#minimap');
+    const afterChart = await page.evaluate("window.__falesc.snapshot().camera");
+    const moved = Math.hypot(afterChart.x - beforeChart.x, afterChart.y - beforeChart.y);
+    log(`survey chart moved camera ${moved.toFixed(1)}px`);
+    assert.ok(moved > 1, 'clicking the survey chart should move the camera');
+
     const camera = await page.evaluate(`(() => {
         const c = window.__falesc.app.camera;
         c.position.x = 1e9; c.position.y = -1e9; c.updateTransform();

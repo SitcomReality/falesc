@@ -200,6 +200,9 @@ persisted and included in HUD/snapshot income.
    lumen, spends the action, dismisses the hint, and autosaves.
 6. Cancel, Escape, a failed validation, or leaving `PLAYING` clears the pending
    location. A failed validation keeps the dialog open with an inline reason.
+7. Clicking an occupied plot opens `StructureModal` instead. Dismantling removes
+   the building, refunds half its effective cost, rebuilds paths, updates the
+   HUD, and autosaves. It does not spend a build action.
 
 Buildings are added to `characterLayer` so they share Y-sorted draw order with
 characters and minerals. `BuildingRenderer` draws four distinct illustrated

@@ -19,6 +19,7 @@ import { drawSettlementPaths } from './map/SettlementPaths.js';
 import { ChatterManager } from './ui/ChatterManager.js';
 import { BLUEPRINT_BY_ID, BEACON_ID, DEFAULT_BLUEPRINT_ID, AFFINITY_RANGE, effectiveCost } from './buildings/blueprints.js';
 import { BuildModal } from './ui/BuildModal.js';
+import { StructureModal } from './ui/StructureModal.js';
 import { Minimap } from './ui/Minimap.js';
 import { SaveManager } from './persistence/SaveManager.js';
 
@@ -96,6 +97,10 @@ class GameApp {
             },
             inputManager: this.inputManager
         });
+        this.structureModal = new StructureModal({
+            onDemolish: (building) => this.demolishBuilding(building),
+            inputManager: this.inputManager
+        });
 
         // Game State Manager
         this.stateManager = new GameStateManager(this.app);
@@ -112,8 +117,11 @@ class GameApp {
         // on top of the interstitial/end screen and accept a stale build.
         const originalSetState = this.stateManager.setState.bind(this.stateManager);
         this.stateManager.setState = (newState) => {
-            if (newState !== GameState.PLAYING) this.buildModal.hide();
-            if (newState !== GameState.PLAYING) this.clearHover();
+            if (newState !== GameState.PLAYING) {
+                this.buildModal.hide();
+                this.structureModal.hide();
+                this.clearHover();
+            }
             if (newState === GameState.MENU || newState === GameState.LOBBY || newState === GameState.END) {
                 this.stateManager.cancelPendingTurn();
             }
@@ -490,36 +498,70 @@ class GameApp {
     onWorldTap(x, y) {
         const state = this.stateManager;
         if (state.state !== GameState.PLAYING) return;
-        if (state.actionsRemaining <= 0) return;
-        if (this.buildModal.isOpen) return;
+        if (this.buildModal.isOpen || this.structureModal.isOpen) return;
         if (!this.map) return;
 
-        const blueprintId = state.selectedBlueprint || DEFAULT_BLUEPRINT_ID;
-        const blueprint = BLUEPRINT_BY_ID[blueprintId];
         const buildings = this.buildingManager.buildings;
-        if (!blueprint) return;
-        if (blueprint.unique && buildings.some((building) => building.blueprintId === blueprintId)) return;
-        if (effectiveCost(blueprint, buildings) > state.lumen) return;
 
         for (const sector of this.map.sectors) {
             const cell = sector.getGridCell(x, y);
-            if (cell.u >= 0 && cell.u < sector.gridSize &&
-                cell.v >= 0 && cell.v < sector.gridSize) {
+            if (cell.u < 0 || cell.u >= sector.gridSize || cell.v < 0 || cell.v >= sector.gridSize) continue;
 
-                if (!this.buildingManager.isCellOccupied(sector.id, cell.u, cell.v)) {
-                    this.pendingBuildLocation = {
-                        sectorId: sector.id,
-                        u: cell.u,
-                        v: cell.v
-                    };
-                    const pos = sector._project(cell.u + 0.5, cell.v + 0.5);
-                    this.pendingBuildBonus = this.crystalAffinity(pos.x, pos.y, blueprint);
-                    this.clearHover();
-                    this.buildModal.show(blueprint, state.lumen, buildings, this.pendingBuildBonus);
-                    return;
-                }
+            const iu = Math.floor(cell.u);
+            const iv = Math.floor(cell.v);
+            const existing = buildings.find(
+                (building) => building.sectorId === sector.id && building.u === iu && building.v === iv
+            );
+
+            if (existing) {
+                this.clearHover();
+                const refund = this.demolitionRefund(existing);
+                this.structureModal.show(existing, refund);
+                return;
             }
+
+            if (state.actionsRemaining <= 0) return;
+            const blueprintId = state.selectedBlueprint || DEFAULT_BLUEPRINT_ID;
+            const blueprint = BLUEPRINT_BY_ID[blueprintId];
+            if (!blueprint) return;
+            if (blueprint.unique && buildings.some((building) => building.blueprintId === blueprintId)) return;
+            if (effectiveCost(blueprint, buildings) > state.lumen) return;
+
+            this.pendingBuildLocation = { sectorId: sector.id, u: iu, v: iv };
+            const pos = sector._project(iu + 0.5, iv + 0.5);
+            this.pendingBuildBonus = this.crystalAffinity(pos.x, pos.y, blueprint);
+            this.clearHover();
+            this.buildModal.show(blueprint, state.lumen, buildings, this.pendingBuildBonus);
+            return;
         }
+    }
+
+    demolitionRefund(building) {
+        const blueprint = BLUEPRINT_BY_ID[building.blueprintId];
+        if (!blueprint) return 0;
+        const cost = effectiveCost(blueprint, this.buildingManager.buildings);
+        return Math.max(0, Math.floor(cost * 0.5));
+    }
+
+    demolishBuilding(building) {
+        const state = this.stateManager;
+        if (state.state !== GameState.PLAYING) return { ok: false, error: 'The tide has already turned.' };
+        if (!this.buildingManager.buildings.includes(building)) {
+            return { ok: false, error: 'That structure is already gone.' };
+        }
+        const blueprint = BLUEPRINT_BY_ID[building.blueprintId];
+        const refund = this.demolitionRefund(building);
+        if (!this.buildingManager.removeBuilding(building)) {
+            return { ok: false, error: 'That structure could not be dismantled.' };
+        }
+        state.addLumen(refund);
+        if (building.blueprintId === BEACON_ID) state.hintDismissed = false;
+        this.rebuildPaths();
+        this.clearHover();
+        state.activeScreen?.updateTurnDisplay?.(true);
+        state.activeScreen?.toast?.(`${building.name} dismantled — +${refund} lumen returned.`, 'sun');
+        this.saveGame();
+        return { ok: true, refund, blueprint: blueprint?.id };
     }
 
     previewTide() {

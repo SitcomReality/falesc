@@ -144,6 +144,14 @@ export class BuildingManager {
         return restored;
     }
 
+    removeBuilding(building) {
+        const index = this.buildings.indexOf(building);
+        if (index === -1) return false;
+        this.buildings.splice(index, 1);
+        building.destroy();
+        return true;
+    }
+
     clear() {
         this.buildings.forEach(b => b.destroy());
         this.buildings = [];

@@ -1949,3 +1949,24 @@ body.has-modal > canvas {
         text-align: center;
     }
 }
+
+#minimap {
+    cursor: pointer;
+}
+
+.btn--danger {
+    --btn-bg: var(--coral);
+    --btn-fg: var(--ink);
+    --btn-shadow: var(--ink);
+}
+
+.modal__note {
+    margin: -6px 0 10px;
+    padding: 9px 11px;
+    background: var(--cream);
+    border-left: 3px solid var(--coral);
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.5;
+}

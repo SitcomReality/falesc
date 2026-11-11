@@ -37,9 +37,9 @@ Severity is about impact on the prototype, not effort:
   `App.finalizeBuild()`, and the dialog keeps an inline error, but the world
   itself does not explain a rejected plot. Crystal affinity is only a positive
   proximity bonus.
-- All buildings are one tile, cannot be removed, and cannot be upgraded.
-- Blueprints have a fixed cost/income; Lantern House's Beacon discount is the
-  only placement-adjacent decision.
+- All buildings are one tile and cannot be upgraded (demolition now exists).
+- Blueprints have a fixed cost/income; Lantern House's Beacon discount and crystal
+  affinity are the only placement-adjacent decisions.
 
 **Impact**
 
@@ -51,9 +51,9 @@ characters are scenery with no relationship to the town.
 
 Add a `PlacementPolicy` returning `{ ok, reason, cost }` for terrain,
 occupancy, minerals, characters, and blueprint-specific constraints. Feed the
-same reason into the dialog and a short HUD toast. Add a `Demolish` action with a
-partial refund and a confirmation, then an upgrade path for at least one
-blueprint. Cover policy reasons and refunds with scenario assertions.
+same reason into the dialog and a short HUD toast. Add an upgrade path for at
+least one blueprint. Demolition with a half-cost refund and cancellation already
+exists; keep its scenario assertions up to date.
 
 ### 2. Screen lifecycle and HUD inertness
 
@@ -205,6 +205,9 @@ These were found and fixed during the design/engine overhaul:
   simulation only runs while `PLAYING` and the document is visible; the camera
   and survey chart continue.
 - **Map allocation.** Each island is created once instead of three times.
+- **Structure inspection and demolition.** Occupied plots open a structure
+  record; dismantling refunds half the effective cost, frees the plot, and does
+  not spend a build action. Covered by `demolition.mjs`.
 - **UI/UX overhaul.** Local OFL fonts, sunset scene, paper/ink/coral visual
   system, illustrated HUD, blueprint dock, framed survey chart, themed menu,
   lobby, interstitial, end screen, build dialog, mobile reflow, and visible focus

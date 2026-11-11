@@ -17,6 +17,7 @@ before the last tide.
 | `1` `2` `3` `4` | Arm Prism Rig / Tide Garden / Lantern House / Aurora Beacon |
 | `E` | End the current tide |
 | Primary click/tap on an empty grid cell | Open the build dialog for the armed blueprint |
+| Primary click/tap on an existing structure | Open its record and dismantle it |
 | `Enter` in the build dialog | Reserve the plot |
 | `Escape` in the build dialog | Cancel |
 | `Enter` / `Escape` in the charter menu | Resume / close |
@@ -72,6 +73,12 @@ The build dock disables blueprints that are unaffordable, already unique, or
 blocked because the tide's build action is spent. Hovering a disabled card
 explains why in its tooltip.
 
+Clicking an existing structure opens a **structure record** with its name,
+lifecycle state, income, and a **Dismantle** action. Dismantling refunds half the
+structure's effective cost (rounded down), frees the plot immediately, and does
+not consume a build action. It can be used to correct a mistake or re-plan the
+town; the refund is always less than the build cost, so it is not a profit loop.
+
 ## Map and difficulty
 
 | Map size | Islands | Minerals | Tide limit |
@@ -109,7 +116,7 @@ discarded rather than partially loaded.
 
 ## Current limitations
 
-- No demolition or upgrades.
+- No upgrades or building levels.
 - No placement restrictions around minerals, characters, or ownership; crystal
   affinity is a positive bonus, not a blocking rule.
 - No audio.

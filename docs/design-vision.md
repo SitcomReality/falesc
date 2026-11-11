@@ -237,6 +237,9 @@ chart with a compass rose. Back is a quiet text action.
 - **Build dialog:** cream paper card, blueprint icon and name, cost/yield,
   editable structure name, Reserve / Cancel. Escape cancels, Enter reserves,
   focus is trapped, and the HUD behind is inert.
+- **Structure record:** clicking a finished or half-built structure opens a
+  matching card with its income, affinity, and a Dismantle action. Dismantling
+  returns half cost and frees the plot; it is a correction, not a strategy.
 - **Placement:** hovering a grid cell shows a mint (valid) or coral (blocked)
   diamond and a ghost of the armed blueprint. Number keys arm blueprints; `E`
   ends the tide; Escape opens the charter menu.

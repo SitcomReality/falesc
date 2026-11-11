@@ -26,8 +26,11 @@ export class Minimap {
         this.canvas.dataset.testid = 'minimap';
         this.canvas.width = this.resolution;
         this.canvas.height = this.resolution;
-        this.canvas.setAttribute('aria-label', 'Survey chart of the archipelago');
+        this.canvas.setAttribute('aria-label', 'Survey chart of the archipelago. Click to move the camera.');
         this.canvas.setAttribute('role', 'img');
+        this.canvas.title = 'Click the chart to move the camera';
+        this.canvas.addEventListener('click', (event) => this.onClick(event));
+        this.projection = null;
 
         this.wrapper.appendChild(this.canvas);
         mount.appendChild(this.wrapper);
@@ -86,6 +89,7 @@ export class Minimap {
         ctx.stroke();
 
         if (!map || map.sectors.length === 0) {
+            this.projection = null;
             ctx.fillStyle = 'rgba(255, 248, 234, 0.55)';
             ctx.font = '700 9px "Space Mono", monospace';
             ctx.textAlign = 'center';
@@ -120,6 +124,7 @@ export class Minimap {
         const fit = Math.min(contentSize / worldWidth, contentSize / worldHeight);
         const offsetX = padding + (contentSize - worldWidth * fit) / 2 - minX * fit;
         const offsetY = padding + (contentSize - worldHeight * fit) / 2 - minY * fit;
+        this.projection = { scale: fit, offsetX, offsetY };
         const project = (x, y) => ({ x: x * fit + offsetX, y: y * fit + offsetY });
 
         // Islands: a tinted fill, an ink coast and a second highlight stroke.
@@ -190,5 +195,17 @@ export class Minimap {
             viewWidth,
             viewHeight
         );
+    }
+
+    onClick(event) {
+        if (!this.projection || !this.game.map) return;
+        const rect = this.canvas.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * this.size;
+        const y = ((event.clientY - rect.top) / rect.height) * this.size;
+        const worldX = (x - this.projection.offsetX) / this.projection.scale;
+        const worldY = (y - this.projection.offsetY) / this.projection.scale;
+        this.game.camera.position.x = worldX;
+        this.game.camera.position.y = worldY;
+        this.game.camera.updateTransform();
     }
 }

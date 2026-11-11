@@ -30,6 +30,7 @@ node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios
 node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/engine-regression.mjs
 node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/determinism.mjs
 node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/affinity.mjs
+node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/demolition.mjs
 node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/mobile.mjs --width 390 --height 844
 node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/showcase.mjs
 ```
@@ -90,6 +91,7 @@ content).
 | Lobby | deterministic seed `12345`, start-game transition |
 | World generation | 6 sectors, 15 characters, minerals present, 8 starting lumen, 14-day limit, default blueprint |
 | Build flow | free cell, build dialog, typed name, reserve, `PENDING` state, 3-lumen cost paid, action spent |
+| Structure record | clicking an occupied plot opens the inspect/demolish dialog; half-cost refund; plot freed (scenario) |
 | Turn flow | interstitial, ~2 s turn advance, `PENDING → RESERVED` |
 | Second turn | `RESERVED → ACTIVE`, turn 3, `+2` income |
 | Charter menu | open, visible, resume, close |
@@ -152,6 +154,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `engine-regression.mjs` | 15 NPCs stay on their home island and out of buildings through 3,600 updates; the camera clamps at both extremes; leaving during the interstitial cancels the pending turn. |
 | `determinism.mjs` | The same seed produces identical island geometry, character palettes/proportions, and mineral variations across reloads. |
 | `affinity.mjs` | A Prism Rig near a crystal gets +1 income, the dialog announces it, and the bonus survives save/continue. |
+| `demolition.mjs` | Clicking a structure opens its record; dismantling refunds half cost, removes it, and frees the plot. |
 | `mobile.mjs` | Menu, lobby, HUD, and build dialog are captured at 390×844; the build dialog is visible. |
 | `showcase.mjs` | Places one of each blueprint, marks them active, and captures the illustrated structures and HUD for design review. |
 
