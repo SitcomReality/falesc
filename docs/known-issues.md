@@ -22,7 +22,7 @@ Severity is about impact on the slice, not effort:
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Home shard plus one commons isle are buildable; shared works, a purse and manual top-ups exist, but no shared capital budget or fuller archipelago |
-| 3 | Medium | Floors are capacity plaques, not stacked geometry; no adjacency or full loadout |
+| 3 | Medium | Floors are capacity plaques, not stacked geometry; adjacency is a small quality bonus, not districts |
 | 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
@@ -102,7 +102,7 @@ placement on scenery. Add a shared capital budget and further islands only with 
 ownership and camera affordances. The commons isle is the first
 proof of cross-island transit and shared ownership.
 
-### 3. Floors are capacity plaques, not stacked geometry
+### 3. Floors are plaques and adjacency is a bonus, not a district
 
 **Evidence**
 
@@ -110,8 +110,9 @@ proof of cross-island transit and shared ownership.
   `finish`, `policy`, `level`, `retrofitId`, `qualityBonus` and `upkeepBonus`;
   up to two retrofit modules change them, and retrofit sets the grand finish.
 - Extra floors add capacity and upkeep and draw a small plaque above the
-  building, but the silhouette does not grow a true stacked storey. There is no
-  adjacency resonance or district identity, and no access policy or full loadout.
+  building, but the silhouette does not grow a true stacked storey. Neighbouring
+  services add a small quality bonus, but there is no district identity,
+  adjacency resonance or access policy or full loadout.
 - Footprints are `1×1` except the Garden Dome's `2×2`; entrance validation is a
   single free door cell, not multi-cell entrance/queue design.
 - The service record can dismantle, reopen and hold two retrofit modules, but
@@ -399,6 +400,7 @@ These are no longer open:
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
+- **Neighbouring services.** Each distinct neighbour adds quality, with an extra bonus for mixed chapters. Covered by `service-adjacency.mjs`.
 - **Service floors.** An open, player-built service can add up to two floors for capacity and upkeep; the floor plaque is visible and saved. Covered by `service-floors.mjs`.
 - **Building finishes.** A build chooses Humble, Comfortable or Grand; the shell changes cost, capacity, upkeep and the resident standard fit and is saved. Covered by `building-finishes.mjs`.
 - **Service hours.** Open services can choose As built, Round the clock, Daylight or Evening; the choice changes open phases, quality and upkeep and is saved.

@@ -166,6 +166,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `commons-isle.mjs` | Builds a shared Bathhouse on the second commons isle, verifies reserved shuttle gates, commons ownership, cross-island visits, the shared service card and save/reload. |
 | `building-finishes.mjs` | Builds a Grand canteen and a Humble tea house, checks cost/capacity/upkeep, the finish in the service record, and save/reload. |
 | `bathhouse.mjs` | Builds the fifth service, checks its 2×2 footprint, capacity 5, late opening, visits and saved state. |
+| `service-adjacency.mjs` | Builds a player canteen beside a rival service, checks the mixed-neighbour quality bonus, the service record and save/reload. |
 | `service-floors.mjs` | Adds two floors to an active canteen, checks capacity/upkeep/lumen, the floor button hiding at three floors, the world plaque and save/reload. |
 | `service-hours.mjs` | Switches an open canteen to Round the clock, checks +2 upkeep and save/reload. |
 | `retrofit.mjs` | Builds a canteen, waits for it to open, opens the retrofit chooser, installs the Atelier, checks +0.22 quality/+1 upkeep (capacity unchanged) and save/reload. |

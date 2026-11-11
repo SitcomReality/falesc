@@ -62,6 +62,9 @@ export class ServiceBuilding {
         this.qualityBonus = Number(qualityBonus) || 0;
         this.upkeepBonus = Number(upkeepBonus) || 0;
         this.floors = Math.max(1, Math.min(3, Number(floors) || 1));
+        this.adjacencyBonus = 0;
+        this.adjacencyNeighbours = 0;
+        this.adjacencyChapters = [];
         this.entrance = entrance;
         this.visits = Number(visits) || 0;
         this.hearts = Number(hearts) || 0;

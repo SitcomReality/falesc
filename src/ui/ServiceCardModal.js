@@ -125,6 +125,7 @@ export class ServiceCardModal {
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
             <div><dt>Finish</dt><dd>${escapeHtml(service.finish || 'comfortable')}</dd></div>
             <div><dt>Floors</dt><dd>${service.floors || 1} / 3</dd></div>
+            ${service.adjacencyBonus ? `<div><dt>Neighbours</dt><dd>+${service.adjacencyBonus.toFixed(2)} quality · ${service.adjacencyNeighbours || 0} door${service.adjacencyNeighbours === 1 ? '' : 's'}</dd></div>` : ''}
             <div><dt>Condition</dt><dd>${service.retrofits?.length ? `Retrofitted · ${service.retrofits.map((id) => escapeHtml(RETROFIT_BY_ID[id]?.name || id)).join(' + ')}` : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
             <div><dt>Hours</dt><dd>${escapeHtml(SERVICE_HOURS_BY_ID[service.policy?.hours]?.name || 'As built')}</dd></div>
             <div><dt>Door</dt><dd>${service.entrance ? `cell ${service.entrance.u}, ${service.entrance.v}` : '—'}</dd></div>

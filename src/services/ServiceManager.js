@@ -1,5 +1,6 @@
 import { PROGRAM_BY_ID } from '../design/programs.js';
 import { serviceUpkeepModifier } from './ServicePolicies.js';
+import { computeAdjacency } from './ServiceAdjacency.js';
 import { evaluatePlacement, cellKey } from './PlacementPolicy.js';
 import { ServiceBuilding } from './ServiceBuilding.js';
 
@@ -45,6 +46,15 @@ export class ServiceManager {
 
     isCellOccupied(sectorId, u, v) {
         return this.occupancy.has(cellKey(sectorId, Math.floor(u), Math.floor(v)));
+    }
+
+    refreshAdjacency() {
+        for (const service of this.services) {
+            const adjacency = computeAdjacency(service, this.occupancy);
+            service.adjacencyBonus = adjacency.bonus;
+            service.adjacencyNeighbours = adjacency.neighbours;
+            service.adjacencyChapters = adjacency.chapters;
+        }
     }
 
     countProgram(programId) {

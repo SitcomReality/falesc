@@ -132,6 +132,7 @@ export class Charter {
             this.setupTransit();
         }
         if (this.legacy) this.applyLegacy();
+        this.refreshAdjacency();
         this.assignHomes();
         this.refreshDerived();
         this.bulletin = this.buildBulletin([]);
@@ -634,6 +635,12 @@ export class Charter {
         }
     }
 
+    refreshAdjacency() {
+        this.services.refreshAdjacency();
+        for (const rival of this.rivals || []) rival.services.refreshAdjacency();
+        this.commonsManager?.refreshAdjacency();
+    }
+
     refreshDerived() {
         this.flourishing = this.wellbeing;
         this.devotion = this.playerDevotion;
@@ -679,6 +686,7 @@ export class Charter {
         this.lumen -= cost;
         this.works -= 1;
         applyCommonsPolicyToService(result.service, this.commons?.policy);
+        this.refreshAdjacency();
         this.assignHomes();
         this.refreshDerived();
         return { ...result, cost };
@@ -763,6 +771,7 @@ export class Charter {
         const removed = this.services.remove(service);
         if (!removed) return { ok: false, reason: 'That service could not be dismantled.' };
         this.lumen += refund;
+        this.refreshAdjacency();
         for (const resident of this.activeResidents) {
             if (resident.homeServiceId === service.id) resident.homeServiceId = null;
         }
@@ -913,6 +922,7 @@ export class Charter {
 
     openDay() {
         if (this.ending) return { report: this.lastReport, events: [] };
+        this.refreshAdjacency();
         this.spawnVisitors();
         const simulation = new DaySimulator(this).run();
         this.settleCommonsPurse(simulation.report);
@@ -944,6 +954,7 @@ export class Charter {
             rival.services.promoteUnderConstruction();
             for (const service of rival.services.services) service.resetDaily();
         }
+        this.refreshAdjacency();
         this.assignHomes();
         const arrivals = this.addArrivals();
         this.pendingArrivals = arrivals;
@@ -1294,6 +1305,7 @@ export class Charter {
             this.commons.assembly.stage = 'nominations';
         }
         this.commonsCell = this.findCommonsCell(this.homeSector);
+        this.refreshAdjacency();
         this.assignHomes();
         this.refreshDerived();
         this.report = null;
