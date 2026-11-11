@@ -203,7 +203,8 @@ line from a resident. From there:
 ## Services
 
 All five buildable services cost one work and finish overnight. The Commons
-Beacon is endgame art and data, not a buildable program.
+Beacon is a shared funded project, not a buildable program; once lit it is a
+six-seat all-needs shared service.
 
 | Program | Serves | Cost | Upkeep/day | Capacity | Hours | Footprint |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -211,7 +212,8 @@ Beacon is endgame art and data, not a buildable program.
 | **Canteen** | Sustenance | 4 | 2 | 4 | morning, afternoon | 1×1 |
 | **Tea House** | Company, a little Sustenance | 5 | 2 | 3 | afternoon, evening | 1×1 |
 | **Garden Dome** | Wonder | 6 | 3 | 2 | afternoon, evening | 2×2 |
-| **Commons Beacon** | — | 12 | 0 | — | — | 2×2, not buildable |
+| **Bathhouse** | Rest, Company | 5 | 2 | 5 | afternoon–night | 2×2 |
+| **Commons Beacon** | all needs | funded | 0 | 6 | all phases | 2×2, shared project |
 
 The starting Welcome Post is housing with a capacity override of **6** and a
 fixed flag. A normal Welcome House adds four beds. The Garden Dome is the only
