@@ -8,7 +8,7 @@
 > and layered customisation without a spreadsheet. Five small layers, each with
 > a clear visual and mechanical consequence, plus adjacency and footprint.
 >
-> **Status note (2026-11-11):** First Light implements the first six programs,
+> **Status note (2026-11-11):** First Light implements the first seven programs,
 > footprints, a reserved door cell, capacity, queues, enter/exit, visits and
 > demolition. Shells, modules, player-chosen finish/policy and retrofit are
 > still target. The "current prototype" comparisons below are historical.
@@ -80,7 +80,7 @@ combinations, not from forty silhouettes.
 | Bathhouse | Care / Rest | 2×2 | Steam, cleanliness, social ritual. |
 | Clinic | Care | 2×2 | Low capacity, high urgency. |
 | Creche | Care / Purpose | 1×1 / 2×2 | Frees parents for work/leisure. |
-| Amphitheatre | Company / Wonder | 3×3 | Evening crowds, noise. |
+| Amphitheatre | Company / Wonder | 2×2 | Evening crowds, noise. |
 | Observatory | Wonder | 2×2 | Night trade, exacting residents. |
 | Workshop | Purpose | 2×2 | Production, noise, dignity. |
 | Transit Gate | Access | 2×2 | Reduces distance penalty. |

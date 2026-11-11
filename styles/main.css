@@ -1228,7 +1228,7 @@ body > canvas {
 
 /* Build dock */
 .build-dock {
-    width: min(660px, calc(100vw - 260px));
+    width: min(780px, calc(100vw - 250px));
     padding: 11px;
     background: var(--paper);
     border: var(--border);
@@ -1259,7 +1259,7 @@ body > canvas {
 
 .blueprints {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 7px;
 }
 
@@ -1327,7 +1327,7 @@ body > canvas {
 .blueprint__name {
     font-family: var(--display);
     font-variation-settings: 'SOFT' 60, 'WONK' 1, 'opsz' 32;
-    font-size: 15px;
+    font-size: 13.5px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.01em;
@@ -2237,7 +2237,7 @@ body.has-modal > canvas {
 
 .report__numbers {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 0;
     margin: 16px 0 18px;
     border: 1.5px solid rgba(33, 18, 37, 0.38);

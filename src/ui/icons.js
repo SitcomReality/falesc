@@ -105,6 +105,14 @@ export const ICONS = {
         <path d="M32 16v5M29.5 18.5h5" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>
         <rect x="29" y="38" width="6" height="9" fill="#211225"/>
     `),
+    amphitheatre: svg(`
+        <path d="M6 50h52" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M12 47c0-16 9-27 20-27s20 11 20 27" fill="#FFF2D8" stroke="${INK}" stroke-width="2.5"/>
+        <path d="M18 47c0-11 6-19 14-19s14 8 14 19" fill="#FFB6D0" stroke="${INK}" stroke-width="2"/>
+        <path d="M24 47c0-7 3-11 8-11s8 4 8 11" fill="#FFD36E" stroke="${INK}" stroke-width="2"/>
+        <rect x="27" y="38" width="10" height="7" fill="#59E3C2" stroke="${INK}" stroke-width="1.5"/>
+        <path d="M16 30l4-4M48 30l-4-4M32 18v-5" stroke="#FFD36E" stroke-width="2.5" stroke-linecap="round"/>
+    `),
     commons_beacon: svg(`
         <path d="M8 50h48" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
         <path d="M23 49 27 22h10l4 27Z" fill="#C9B6FF" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>

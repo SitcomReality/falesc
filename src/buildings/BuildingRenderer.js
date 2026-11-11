@@ -74,6 +74,15 @@ const PROGRAMS = {
             { x: 104, y: -86 }
         ]
     },
+    amphitheatre: {
+        hw: 184,
+        hh: 78,
+        guide: [
+            { x: -158, y: -62 },
+            { x: 0, y: -112 },
+            { x: 158, y: -62 }
+        ]
+    },
     bathhouse: {
         hw: 158,
         hh: 66,
@@ -116,6 +125,9 @@ export class BuildingRenderer {
                 break;
             case 'bathhouse':
                 BuildingRenderer.drawBathhouse(graphics, state);
+                break;
+            case 'amphitheatre':
+                BuildingRenderer.drawAmphitheatre(graphics, state);
                 break;
             case 'clinic':
                 BuildingRenderer.drawClinic(graphics, state);
@@ -1382,6 +1394,48 @@ export class BuildingRenderer {
     /* ------------------------------------------------------------------ */
     /* Commons Beacon — art-deco prism-glass lighthouse                    */
     /* ------------------------------------------------------------------ */
+    static drawAmphitheatre(graphics, state) {
+        const trim = BuildingRenderer.tone(CREAM, state);
+        const deck = BuildingRenderer.tone(PAPER_WARM, state);
+        const deckLip = BuildingRenderer.tone(BuildingRenderer.shade(PAPER_WARM, 0.24), state);
+        const stone = BuildingRenderer.tone(PAPER, state);
+        const rose = BuildingRenderer.tone(ROSE, state);
+        const warm = BuildingRenderer.tone(SUN, state);
+        const mint = BuildingRenderer.tone(MINT, state);
+        const ink = BuildingRenderer.tone(INK, state);
+
+        BuildingRenderer.drawPlinth(graphics, state, {
+            hw: 190,
+            hh: 82,
+            cy: 12,
+            top: deck,
+            lip: deckLip,
+            trim
+        });
+        graphics.beginFill(stone, 1);
+        graphics.lineStyle(3, ink, 1);
+        graphics.drawEllipse(0, -26, 126, 50);
+        graphics.endFill();
+        for (let tier = 0; tier < 3; tier++) {
+            graphics.beginFill(tier === 1 ? warm : deck, 1);
+            graphics.lineStyle(2, ink, 0.9);
+            graphics.drawEllipse(0, -18 + tier * 7, 104 - tier * 20, 36 - tier * 6);
+            graphics.endFill();
+        }
+        graphics.beginFill(rose, 1);
+        graphics.lineStyle(2.5, ink, 1);
+        graphics.drawRoundedRect(-42, 13, 84, 22, 4);
+        graphics.endFill();
+        graphics.beginFill(trim, 1);
+        graphics.drawRect(-30, 17, 60, 12);
+        graphics.endFill();
+        graphics.beginFill(mint, 0.95);
+        for (let light = 0; light < 5; light++) {
+            graphics.drawCircle(-46 + light * 23, -62 - (light % 2) * 5, 3.2);
+        }
+        graphics.endFill();
+    }
+
     static drawCommonsBeacon(graphics, state) {
         const trim = BuildingRenderer.tone(CREAM, state);
         const deck = BuildingRenderer.tone(PAPER_WARM, state);
