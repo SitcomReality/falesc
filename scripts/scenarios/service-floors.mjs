@@ -67,6 +67,9 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.equal(top.floors, 3);
     assert.equal(top.capacity, before.capacity + 1);
     assert.deepEqual(top.plans, ['dormer', 'roof_garden']);
+    const rooms = await page.text('[data-testid=structure-modal]');
+    assert.ok(rooms.includes('Dormer'));
+    assert.ok(rooms.includes('Roof Garden'));
     assert.ok(top.quality > 0.07);
     assert.equal(top.button, false, 'the floor button hides at three floors');
     await screenshot('service-floors-top.png');

@@ -4,6 +4,7 @@ import { RETROFIT_BY_ID, RETROFIT_MIN_COST } from '../services/RetrofitModules.j
 import { SERVICE_HOURS, SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
 import { SERVICE_VIBES, SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
 import { SERVICE_ACCESS, SERVICE_ACCESS_BY_ID } from '../services/ServiceAccess.js';
+import { FLOOR_PLAN_BY_ID } from '../services/FloorPlans.js';
 import { finishCost } from '../services/BuildingFinishes.js';
 
 /**
@@ -142,7 +143,7 @@ export class ServiceCardModal {
             <div><dt>Visits</dt><dd>${service.visits}</dd></div>
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
             <div><dt>Finish</dt><dd>${escapeHtml(service.finish || 'comfortable')}</dd></div>
-            <div><dt>Floors</dt><dd>${service.floors || 1} / 3</dd></div>
+            <div><dt>Floors</dt><dd>${service.floors || 1} / 3${(service.floorPlans || []).length ? ` · ${(service.floorPlans || []).map((id) => escapeHtml(FLOOR_PLAN_BY_ID[id]?.name || id)).join(', ')}` : ''}</dd></div>
             ${service.adjacencyBonus ? `<div><dt>Neighbours</dt><dd>+${service.adjacencyBonus.toFixed(2)} quality · ${service.adjacencyNeighbours || 0} door${service.adjacencyNeighbours === 1 ? '' : 's'}</dd></div>` : ''}
             ${service.districtName ? `<div><dt>District</dt><dd>${escapeHtml(service.districtName)} · +${service.districtBonus.toFixed(2)} quality · ${service.districtSize} doors</dd></div>` : ''}
             <div><dt>Condition</dt><dd>${service.retrofits?.length ? `Retrofitted · ${service.retrofits.map((id) => escapeHtml(RETROFIT_BY_ID[id]?.name || id)).join(' + ')}` : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
