@@ -1,5 +1,11 @@
 # Gameplay and controls
 
+> **Status note:** This describes the Prism Tide prototype. The refined
+> direction — resident needs, service buildings, care-based competition and the
+> Confluence — is in [design-refinement.md](design-refinement.md) and
+> [design/](design/). The controls and technical details here remain useful;
+> the objective and economy are prototype-era.
+
 FALESC: The Prism Tide is an isometric island city-builder. You have one build
 action per tide, a small purse of lumen, and a deadline: raise the Aurora Beacon
 before the last tide.

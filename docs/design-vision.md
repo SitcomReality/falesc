@@ -1,5 +1,12 @@
 # FALESC — Design vision
 
+> **Status note:** The visual identity in this document is still the guardrail.
+> The economy and loop in §8, the sea/island/plant imagery in §7, and the
+> milestones in §11 describe the Prism Tide prototype and are prototype-era.
+> The refined direction — residents, service buildings, care-based competition
+> and the Confluence — is in [design-refinement.md](design-refinement.md); the
+> world-art correction is in [design/world.md](design/world.md).
+
 > **FALESC: The Prism Tide.** Raise a town at the edge of the Glass Sea before
 > the last light goes out.
 
@@ -270,6 +277,9 @@ Charter action. Never a bare “Game Over” and a white button.
 
 ## 11. Milestones and acceptance
 
+> The milestones below are the prototype's visual/engine milestones. The refined
+> build order is in [design/roadmap.md](design/roadmap.md).
+
 1. **Identity foundation** — this document, local fonts, CSS tokens/components,
    rebuilt menu/lobby/HUD/build/end, atmospheric backdrop. Acceptance: screens
    are recognisably one game; no default-blue/gold; smoke test and font loading
@@ -287,13 +297,23 @@ Charter action. Never a bare “Game Over” and a white button.
 
 ## 12. Copy and naming
 
-- World: **the Glass Sea**, **the Prism Tide**, **FALESC** (the archipelago).
-- Player role: **Lampwright**.
+- World: **the Glass Sea** (the luminous void, not water), **the Prism Tide**
+  (the cosmic event and first scenario), **FALESC** (the archipelago).
+- Main mode: **the Confluence** — the end-of-charter festival and vote.
+- Player role: **Administrator** / **Steward** (the prototype's “Lampwright” is
+  prototype-era).
 - Inhabitants: **Tidelanders**.
-- Currency: **lumen** (lowercase, like a material; “12 lumen”).
-- Turns: **days** / **tides**. “Day 3” on screen; “Let the tide turn” as the end
-  turn verb.
-- Structures: **Prism Rig**, **Tide Garden**, **Lantern House**, **Aurora
-  Beacon**.
+- Currency: **lumen** (lowercase, like a material; “12 lumen”). It is civic
+  energy, not money.
+- Turns: **days** / **tides**. “Day 3” on screen; “Open the day” as the end-turn
+  verb in the refined loop (“Let the tide turn” is prototype-era).
+- Services: **Housing**, **Canteen**, **Night Kitchen**, **Tea House**,
+  **Bathhouse**, **Clinic**, **Creche**, **Amphitheatre**, **Observatory**,
+  **Workshop**, **Garden Dome**, **Transit Gate**, **Council Hall**.
+- Endgame: **Commons Beacon** (shared wonder), **Devotion**, **Flourishing**,
+  **Patronage**.
+- Prototype structures (salvageable): **Prism Rig** → Lumen Pylon, **Tide
+  Garden** → Garden Dome, **Lantern House** → Welcome House / Night Kitchen,
+  **Aurora Beacon** → Commons Beacon.
 - Tone: warm, wry, concise. Never fantasy-generic (“A realm awaits!”) and never
   enterprise (“Resource management dashboard”).
