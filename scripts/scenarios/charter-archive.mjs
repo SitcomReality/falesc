@@ -6,6 +6,7 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.evaluate("localStorage.removeItem('falesc.save.v2'); localStorage.removeItem('falesc.charters.v1')");
     await page.reload();
     await page.evaluate("window.__falesc.startCharter(12345, 'medium', 'first-light')");
+    await page.evaluate("window.__falesc.app.charter.motto = 'Every door open.'");
     await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
     await page.evaluate("window.__falesc.app.bulletinModal.hide()");
     await page.evaluate("window.__falesc.app.charter.day = 5; window.__falesc.app.endCharter('abandon')");
@@ -18,6 +19,7 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.equal(records[0].outcome, 'abandon');
     assert.equal(records[0].day, 5);
     assert.equal(records[0].mode, 'first-light');
+    assert.equal(records[0].motto, 'Every door open.');
 
     assert.ok(await page.visible('[data-testid=menu-archive]'));
     await page.click('[data-testid=menu-archive]');
@@ -25,6 +27,7 @@ export default async function ({ page, assert, log, screenshot }) {
     const text = await page.text('[data-testid=charter-archive]');
     assert.ok(text.includes('First Light · abandoned'));
     assert.ok(text.includes('Day 5'));
+    assert.ok(text.includes('Every door open.'));
     await page.pause(300);
     await screenshot('charter-archive.png');
     await page.click('[data-testid=charter-archive-clear]');

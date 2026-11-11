@@ -80,6 +80,8 @@ export class FalescGame {
         if (chartParams.seed !== null) this.settings.mapSeed = chartParams.seed;
         if (chartParams.size) this.settings.mapSize = chartParams.size;
         if (chartParams.mode) this.settings.mode = chartParams.mode;
+        if (chartParams.name) this.settings.chapterName = chartParams.name;
+        if (chartParams.motto) this.settings.chapterMotto = chartParams.motto;
         this.charter = null;
         this.world = new World({
             onTap: (x, y) => this.onWorldTap(x, y),

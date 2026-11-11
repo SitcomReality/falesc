@@ -155,7 +155,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | Scenario | What it proves |
 | --- | --- |
 | `save-transfer.mjs` | Exports the current charter as JSON, rejects an invalid file, imports it back and restores the report phase. |
-| `chart-link.mjs` | Opens a chart URL into the lobby and checks the copied link carries seed, size and mode. |
+| `chart-link.mjs` | Opens a chart URL into the lobby and checks the copied link carries seed, size, mode, chapter name and motto. |
 | `chapter-name.mjs` | Signs a charter as The Long Table with the motto Every door open., checks both and confirms they survive save/reload. |
 | `open-charter.mjs` | Starts Open Charter, checks the HUD objective and day label, plays past the old limit and confirms no ending. |
 | `charter-archive.mjs` | Abandons a live charter, checks the menu archive and its day/outcome/mode record, clears it and hides the menu button. |

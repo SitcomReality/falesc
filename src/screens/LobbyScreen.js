@@ -140,7 +140,9 @@ export class LobbyScreen {
             const url = chartShareUrl({
                 seed: this.game.settings.mapSeed,
                 size: this.game.settings.mapSize,
-                mode: this.game.settings.mode || 'first-light'
+                mode: this.game.settings.mode || 'first-light',
+                name: this.game.settings.chapterName || '',
+                motto: this.game.settings.chapterMotto || ''
             });
             try {
                 await navigator.clipboard.writeText(url);

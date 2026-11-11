@@ -46,6 +46,7 @@ export class CharterArchiveModal {
             <li class="charter-archive__row charter-archive__row--${escapeHtml(record.outcome)}">
                 <div>
                     <strong>${escapeHtml(record.chapterName || 'Home Chapter')}</strong>
+                    ${record.motto ? `<em class="charter-archive__motto">${escapeHtml(record.motto)}</em>` : ''}
                     <span>${escapeHtml(labelFor(record))}</span>
                 </div>
                 <div class="charter-archive__stats">

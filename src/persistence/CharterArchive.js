@@ -20,6 +20,7 @@ export function recordFromCharter(charter, ending = {}) {
     const stats = charter?.stats?.() || {};
     return {
         chapterName: charter?.player?.name || 'Home Chapter',
+        motto: charter?.motto || null,
         mode: charter?.mode || 'first-light',
         day: ending.day ?? charter?.day ?? 1,
         outcome: ending.outcome || 'abandon',

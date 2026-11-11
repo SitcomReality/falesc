@@ -5268,3 +5268,11 @@ body.is-photo-mode .care-watch {
     text-transform: uppercase;
     cursor: pointer;
 }
+
+.charter-archive__motto {
+    display: block;
+    margin: 1px 0 2px;
+    font-family: var(--display);
+    font-size: 13px;
+    color: var(--wine);
+}

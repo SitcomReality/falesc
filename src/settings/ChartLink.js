@@ -10,18 +10,24 @@ export function readChartParams(search = typeof window !== 'undefined' ? window.
     const seed = Number.parseInt(params.get('seed') ?? '', 10);
     const size = params.get('size');
     const mode = params.get('mode');
+    const name = String(params.get('name') ?? '').replace(/\s+/g, ' ').trim().slice(0, 32);
+    const motto = String(params.get('motto') ?? '').replace(/\s+/g, ' ').trim().slice(0, 60);
     return {
         seed: Number.isInteger(seed) ? seed : null,
         size: SIZES.has(size) ? size : null,
-        mode: MODES.has(mode) ? mode : null
+        mode: MODES.has(mode) ? mode : null,
+        name: name || null,
+        motto: motto || null
     };
 }
 
-export function chartShareUrl({ seed, size, mode }, base = typeof window !== 'undefined' ? window.location.href : 'http://localhost/') {
+export function chartShareUrl({ seed, size, mode, name, motto }, base = typeof window !== 'undefined' ? window.location.href : 'http://localhost/') {
     const url = new URL(base);
     url.search = '';
     url.searchParams.set('seed', String(seed));
     url.searchParams.set('size', size);
     url.searchParams.set('mode', mode);
+    if (name) url.searchParams.set('name', name);
+    if (motto) url.searchParams.set('motto', motto);
     return url.toString();
 }
