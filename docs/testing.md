@@ -172,7 +172,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `amphitheatre.mjs` | Builds the seventh service, the 2×2 Amphitheatre, checks the dock shortcut, capacity/cost, visits and save/reload. |
 | `clinic.mjs` | Builds the sixth service, the 2×2 Clinic, checks the dock shortcut, capacity/cost, cross-day visits and save/reload. |
 | `bathhouse.mjs` | Builds the fifth service, checks its 2×2 footprint, capacity 5, late opening, visits and saved state. |
-| `service-district.mjs` | Builds three connected services, checks the named district and bonus, the service record and save/reload. |
+| `service-district.mjs` | Builds three connected services, checks the named district/bonus and world label, the service record and save/reload. |
 | `service-adjacency.mjs` | Builds a player canteen beside a rival service, checks the mixed-neighbour quality bonus, the service record and save/reload. |
 | `service-floors.mjs` | Adds two floors to an active canteen, checks capacity/upkeep/lumen, the floor button hiding at three floors, the world plaque and save/reload. |
 | `service-vibe.mjs` | Switches a working canteen from Efficient to Lively, checks the policy and save/reload without changing capacity or upkeep. |

@@ -1,6 +1,7 @@
 import { World } from './world/World.js';
 import { PatronageFlow } from './world/PatronageFlow.js';
 import { TransitGate } from './world/TransitGate.js';
+import { DistrictOverlay } from './world/DistrictOverlay.js';
 import { Charter } from './charter/Charter.js';
 import { ResidentCrowd } from './residents/ResidentCrowd.js';
 import { ScreenStateMachine } from './state/ScreenStateMachine.js';
@@ -61,6 +62,7 @@ export class FalescGame {
         });
         this.patronageFlow = new PatronageFlow({ layer: this.world.overlayLayer });
         this.transitGate = new TransitGate({ layer: this.world.overlayLayer });
+        this.districtOverlay = new DistrictOverlay({ layer: this.world.overlayLayer });
         this.saveManager = new SaveManager();
         this.audio = new Soundscape();
         document.addEventListener('pointerdown', () => this.audio.unlock(), { once: true });
@@ -172,6 +174,7 @@ export class FalescGame {
         this.crowd.setCharter(this.charter);
         this.patronageFlow.setCharter(this.charter);
         this.transitGate.setCharter(this.charter);
+        this.districtOverlay.setCharter(this.charter);
         this.gameScreen?.setPatronageState?.(false);
         this.crowd.sync();
         this.syncViews();
@@ -200,6 +203,7 @@ export class FalescGame {
         this.crowd.setCharter(this.charter);
         this.patronageFlow.setCharter(this.charter);
         this.transitGate.setCharter(this.charter);
+        this.districtOverlay.setCharter(this.charter);
         this.gameScreen?.setPatronageState?.(false);
         this.crowd.sync();
         this.syncViews();
@@ -244,6 +248,7 @@ export class FalescGame {
         this.patronageFlow.hide();
         this.patronageFlow.setCharter(null);
         this.transitGate.clear();
+        this.districtOverlay.clear();
         this.clearKeyboardCursor();
         this.visitorCard.hide();
         this.gameScreen?.setPatronageState?.(false);
@@ -264,6 +269,7 @@ export class FalescGame {
         this.world.rebuildPaths(this.charter.allServices);
         this.patronageFlow.refresh();
         this.transitGate.refresh();
+        this.districtOverlay.refresh();
         this.gameScreen.updateHud(true);
     }
 

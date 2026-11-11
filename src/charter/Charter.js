@@ -662,6 +662,7 @@ export class Charter {
 
     refreshDistricts() {
         const services = this.allServices;
+        this.districtGroups = [];
         for (const service of services) {
             service.districtId = null;
             service.districtName = null;
@@ -705,6 +706,19 @@ export class Charter {
                 member.districtBonus = Math.round(bonus * 100) / 100;
                 member.districtSize = component.length;
             }
+            const center = component.reduce((point, member) => ({
+                x: point.x + (member.container?.x || 0),
+                y: point.y + (member.container?.y || 0)
+            }), { x: 0, y: 0 });
+            this.districtGroups.push({
+                id,
+                name: `${base}${suffix}`,
+                bonus: Math.round(bonus * 100) / 100,
+                size: component.length,
+                x: center.x / component.length,
+                y: center.y / component.length,
+                members: component.map((member) => member.id)
+            });
         }
     }
 

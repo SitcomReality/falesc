@@ -89,6 +89,7 @@ after any behavioural change.
 | `src/App.js` | Pure entrypoint: `new FalescGame()` |
 | `src/FalescGame.js` | Coordinator: charter lifecycle, screens/modals, day playback, save, debug API, ticker |
 | `src/world/World.js` | Pixi application, layered scene, camera/input, map and mineral generation |
+| `src/world/DistrictOverlay.js` | World labels for named service districts |
 | `src/world/PatronageFlow.js` | World-space arcs from homes to residents' last choices |
 | `src/charter/Charter.js` | The run model: day, player chapter, rivals, roster, services, reports, ending |
 | `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |

@@ -43,8 +43,13 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.ok(card.includes('District'));
     assert.ok(card.includes(built.district));
     await page.pause(300);
+    const groups = await page.evaluate("window.__falesc.app.charter.districtGroups.map((group) => ({ name: group.name, size: group.size }))");
+    assert.ok(groups.some((group) => group.name === built.district));
     await screenshot('service-district-card.png');
     await page.click('[data-testid=structure-close]');
+    await page.evaluate(`(() => { const app = window.__falesc.app; const group = app.charter.districtGroups.find((entry) => entry.name === ${JSON.stringify(built.district)}); app.world.camera.position.x = group.x; app.world.camera.position.y = group.y; app.world.camera.zoom = 1; app.world.camera.updateTransform(); })()`);
+    await page.pause(500);
+    await screenshot('service-district-labels.png');
 
     await page.evaluate("window.__falesc.app.saveGame()");
     await page.reload();
