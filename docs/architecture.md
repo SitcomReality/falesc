@@ -84,7 +84,8 @@ src/
   persistence/
     SaveManager.js
   debug/
-    DebugApi.js              window.__falesc console surface, CharterArchive.js           versioned localStorage save v2
+    DebugApi.js              window.__falesc console surface
+    CharterArchive.js        versioned localStorage save v2
   residents/
     Resident.js              plain model: traits, needs, affinity, memory
     ResidentFactory.js       seeded 15-name roster, 6 founders
@@ -145,7 +146,7 @@ visual rig.
      temporary `screen × 5` world rectangle centred on camera.
 3. Creates `ResidentCrowd` bound to `objectLayer`/`shadowLayer`.
 4. Creates `SaveManager` and `ScreenStateMachine`.
-5. Creates an `OverlayManager` and the four dialogs (`BuildModal`,
+5. Creates an `OverlayManager` and the modal stack (`BuildModal`,
    `ServiceCardModal`, `BulletinModal`, `ResidentCardModal`). The manager owns
    the scrim body class, HUD `inert`, input lock, focus restore and Tab trap;
    dialogs can stack.
@@ -272,8 +273,8 @@ Key commands:
   construction, reset daily service state, assign homes, add arrivals, let
   `RivalAI` make one move per rival, remember `pendingArrivals`, and build the
   next bulletin.
-- `addArrivals()` — if flourishing ≥ 20 and beds are spare, activate up to two
-  waiting residents. Residents who already departed are never re-admitted.
+- `addArrivals()` — if flourishing ≥ 20 and beds are spare, activate one waiting
+  resident per day. Residents who already departed are never re-admitted.
 - `evaluateEnding(report)` — First Light: population < 4 is defeat, meeting 12
   housed + flourishing 62 is immediate victory, the limit without both is
   defeat. Contest: at the limit, most Devotion wins unless shared flourishing is
@@ -650,8 +651,8 @@ visits, hearts and closure; rivals restore identity, doctrine, budget, works and
 services. `pendingArrivals` keeps the current morning's new residents for
 the next report; `lastReport` is a compact summary (no playback events) shown on
 the restored report screen. Unknown or structurally invalid saves are cleared,
-not partially loaded. Save v1 is intentionally abandoned. There is no
-export/import. Reloading during `DAY` returns to the last planning save; reloading on `REPORT`
+not partially loaded. Save v1 is intentionally abandoned. The menu can export
+the current save as JSON and import a replacement. Reloading during `DAY` returns to the last planning save; reloading on `REPORT`
 restores the report and does not replay the day.
 
 ## 10. World generation
@@ -681,7 +682,8 @@ minerals from a seeded RNG.
 | `large` | 1 × `9×9` + 2 × `3×3` + 4 × `2×2` | 82 |
 
 Minerals spawn outside the build grid on random islands. Their rocks/crystals
-use per-item seeded variation. The home shard is the only buildable sector.
+use per-item seeded variation. The home shard, commons isle and garden isle
+are the buildable sectors.
 
 ## 11. Rendering and the world
 

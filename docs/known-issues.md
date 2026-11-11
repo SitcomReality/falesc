@@ -234,7 +234,7 @@ evidence.
 - `FalescGame.saveGame()` writes in `PLAYING` and `REPORT`, so reloading on the
   report restores it. Reloading during `DAY` returns to the last planning save
   and loses that day's result.
-- There is no export/import, backup or UI "clear save" action.
+- There is no automatic cloud sync, backup or UI "clear save" action.
 
 **Impact**
 
