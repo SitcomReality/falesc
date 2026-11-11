@@ -87,5 +87,8 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.ok(result.votes > 0);
     await screenshot('campaign-result.png');
     await page.click('[data-testid=confluence-close]');
+    await page.waitFor("window.__falesc.snapshot().state === 'STEWARDSHIP'");
+    await page.evaluate("document.querySelector('[data-testid=stewardship-commons_assembly]').click()");
+    await page.click('[data-testid=stewardship-confirm]');
     await page.waitFor("window.__falesc.snapshot().state === 'END'");
 }

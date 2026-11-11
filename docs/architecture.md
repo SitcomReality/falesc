@@ -51,6 +51,7 @@ src/
   confluence/
     Pledges.js               the four shared campaign promises
     Campaign.js              final-days promises and player choice
+    Stewardship.js           post-vote governing promises
     ConfluenceVote.js        the deterministic resident vote
   charter/
     Charter.js               run model: day, player chapter, rivals, roster, services, ending
@@ -86,7 +87,8 @@ src/
     ResidentCrowd.js         owns visible agents and playback timelines
   screens/
     MenuScreen.js, LobbyScreen.js, GameScreen.js,
-    DayScreen.js, ReportScreen.js, ConfluenceScreen.js, EndScreen.js
+    DayScreen.js, ReportScreen.js, ConfluenceScreen.js,
+    StewardshipScreen.js, EndScreen.js
   services/
     ServiceBuilding.js       service model plus its Pixi container
     ServiceManager.js        placement, occupancy, housing, promotion, visits
@@ -94,7 +96,7 @@ src/
   simulation/
     DaySimulator.js          deterministic day: drift, choice, queues, report
   state/
-    GamePhase.js             MENU/LOBBY/PLAYING/DAY/REPORT/CONFLUENCE/END
+    GamePhase.js             MENU/LOBBY/PLAYING/DAY/REPORT/CONFLUENCE/STEWARDSHIP/END
     ScreenStateMachine.js    screen registry and phase changes
   ui/
     BuildModal.js, ServiceCardModal.js, BulletinModal.js,
@@ -176,6 +178,7 @@ service, agent or overlay between runs.
 | `DAY` | Deterministic playback at 1×/2×/4× with Skip | `DayScreen` |
 | `REPORT` | Evening broadsheet / charter record | `ReportScreen` |
 | `CONFLUENCE` | Final pledge and resident vote | `ConfluenceScreen` |
+| `STEWARDSHIP` | Winning chapter's governing promise | `StewardshipScreen` |
 | `END` | Victory, defeat or abandon | `EndScreen` |
 
 `ScreenStateMachine` is a small registry: it hides the active screen, shows the

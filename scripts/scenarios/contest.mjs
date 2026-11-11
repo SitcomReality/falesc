@@ -156,6 +156,13 @@ export default async function ({ page, assert, screenshot, log }) {
     assert.ok(['victory', 'defeat'].includes(vote.ending.outcome));
     await screenshot('confluence-result.png');
     await page.click('[data-testid=confluence-close]');
+    await page.waitFor("window.__falesc.snapshot().state === 'STEWARDSHIP'");
+    assert.ok(await page.visible('[data-testid=stewardship-screen]'));
+    await screenshot('stewardship.png');
+    await page.evaluate("document.querySelector('[data-testid=stewardship-universal_care]').click()");
+    await page.click('[data-testid=stewardship-confirm]');
     await page.waitFor("window.__falesc.snapshot().state === 'END'");
     assert.ok(await page.visible('[data-testid=end-screen]'));
+    const stewardship = await page.evaluate("window.__falesc.app.charter.ending.stewardship");
+    assert.equal(stewardship.id, 'universal_care');
 }

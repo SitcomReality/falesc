@@ -148,7 +148,7 @@ export class ConfluenceScreen {
                         <ul class="confluence-result__counts">${counts}</ul>
                         <p class="confluence__note">The commons is a promise, not a prize. Whoever holds it must keep the doors open.</p>
                         <button type="button" class="btn btn--primary" data-testid="confluence-close">
-                            Accept the Confluence <span class="btn__arrow" aria-hidden="true">→</span>
+                            ${result.outcome === 'victory' ? 'Take stewardship' : 'Accept the Confluence'} <span class="btn__arrow" aria-hidden="true">→</span>
                         </button>
                     </section>
                     <section>
@@ -158,7 +158,10 @@ export class ConfluenceScreen {
                 </div>
             </div>
         `;
-        this.container.querySelector('[data-testid=confluence-close]').addEventListener('click', () => this.game.finishCharter());
+        this.container.querySelector('[data-testid=confluence-close]').addEventListener('click', () => {
+            if (result.outcome === 'victory') this.game.showStewardship();
+            else this.game.finishCharter();
+        });
         requestAnimationFrame(() => {
             this.container.querySelector('[data-testid=confluence-close]')?.focus({ preventScroll: true });
         });

@@ -23,7 +23,7 @@ Severity is about impact on the slice, not effort:
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Only the home shard is playable; there is no archipelago layer |
 | 3 | Medium | No building layers, retrofit, modules, finishes or player-set policy |
-| 4 | Medium | Contest strategy is shallow and the festival programme is scripted |
+| 4 | Medium | The festival programme is scripted and stewardship is epilogue-only |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
 | 7 | Low | Save v1 is discarded, a mid-`DAY` reload loses the day, and there is no export/import |
@@ -115,7 +115,7 @@ no new geometry), then modules, then shells/retrofit. Keep the "no spreadsheet"
 test: every option must show up in a resident's choice or the report. Extend
 `ServiceCardModal` and the placement preview before adding more programs.
 
-### 4. Contest strategy is shallow and the festival programme is scripted
+### 4. The festival programme is scripted and stewardship is epilogue-only
 
 **Evidence**
 
@@ -132,17 +132,19 @@ test: every option must show up in a resident's choice or the report. Extend
   pressure plus doctrine, and can grow through housing. They still make one move
   per day and do not plan a long-term service mix or respond to the player's
   specific moves.
-- There are no auctions, stewardship or multi-round public judgment. The Commons
-  Beacon is still non-buildable endgame data.
+- A player winner chooses one of four stewardship promises, but it changes only
+  the epilogue text and end record. There are no auctions, systemic stewardship
+  effects or multi-round public judgment; the Commons Beacon is still
+  non-buildable endgame data.
 - D3/D4 in [design/decisions.md](design/decisions.md) deliberately defer
   auctions and stewardship.
 
 **Impact**
 
-Competition is visible, the economy is shared and the run now has a campaign
-with festival days and a social finale, but it is still a short scripted
-programme rather than the full multi-round Confluence festival. Rival play
-remains reactive rather than strategic.
+Competition is visible, the economy is shared and the run now has a campaign,
+a social finale and a governing promise, but the festival is still a short
+scripted programme and stewardship is an epilogue choice rather than a system.
+Rival play remains reactive rather than strategic.
 
 **Suggested direction**
 
@@ -333,7 +335,7 @@ These are no longer open:
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
-- **Contest economy, campaign and Confluence preview.** Two rival chapters, shared services/residents, rival housing/economy/closures, recovery and need-pressure builds, Devotion standings, the patronage-flow overlay, a three-day campaign with a festival programme and rival promises, and a pledge/vote Confluence finale are implemented and covered by `contest.mjs`, `contest-recovery.mjs`, `campaign.mjs` and `confluence-defeat.mjs`.
+- **Contest economy, campaign and Confluence preview.** Two rival chapters, shared services/residents, rival housing/economy/closures, recovery and need-pressure builds, Devotion standings, the patronage-flow overlay, a three-day campaign with a festival programme and rival promises, a pledge/vote Confluence finale and a post-vote stewardship epilogue are implemented and covered by `contest.mjs`, `contest-recovery.mjs`, `campaign.mjs` and `confluence-defeat.mjs`.
 - **Safer destructive actions.** Abandoning a charter is a two-step confirmation
   and the save is cleared only after the confirmation.
 - **Truthful choice feedback.** "I come here often" is per resident, "open late"

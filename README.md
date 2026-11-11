@@ -8,9 +8,9 @@ enough for the chapter to flourish.
 This build is the **First Light vertical slice**. One playable home shard, four
 needs, four services, a paused planning day, a deterministic playback, and an
 evening broadsheet. A **Contest preview** adds two rival chapters, a shared lumen
-economy, shared residents and rival housing on the same shard, ending in a
-three-day campaign and a **Confluence vote**; the full multi-round festival,
-auctions, stewardship and shared-commons layer are the design target beyond that.
+economy, shared residents and rival housing on the same shard, ending in a three-day campaign, a **Confluence vote** and a post-vote
+**stewardship** promise; the full multi-round festival, auctions and
+shared-commons layer are the design target beyond that.
 
 Built with vanilla ES modules and [Pixi.js](https://pixijs.com/) 7. There is no
 build step: `index.html` loads `src/App.js`, which starts `src/FalescGame.js`,
@@ -22,9 +22,9 @@ the game makes no network requests at runtime.
 > goes unmet for days, and can empty the chapter. Balance is generous and not yet
 > tuned; only the home shard is playable. A two-rival Contest preview is
 > available, with rival upkeep, contributions, housing, Devotion standings, a
-> three-day campaign and a final Confluence vote. The full multi-round festival,
-> deeper rival strategy, building layers, auctions and multiplayer are not
-> implemented. A patronage
+> three-day campaign, a final Confluence vote and a stewardship epilogue. The
+> full multi-round festival, deeper rival strategy, building layers, auctions,
+> systemic stewardship and multiplayer are not implemented. A patronage
 > flow overlay is available in the Contest standings card (or `P`). See [docs/known-issues.md](docs/known-issues.md).
 
 ## Run it locally

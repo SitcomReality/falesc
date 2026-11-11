@@ -56,7 +56,7 @@ standings, patronage, a patronage-flow overlay and a most-beloved-chapter end at
 the day limit. Rivals also recover from closures and choose builds by need
 pressure, the last three days run a three-event campaign with rival promises and
 matching service appeal, and the day limit convenes a pledge/vote Confluence. A long-term rival plan, multi-round
-festival events, auctions and stewardship remain.
+festival events, auctions and systemic stewardship remain.
 
 **Not started:** the rest of Phase 2, Phase 3 (layers, modules, finishes,
 policy, retrofit), Phase 4 (scenarios, Confluence vote, stewardship), Phase 5

@@ -5,8 +5,9 @@
 > refined Phase 0 and Phase 1: warm nebula void, floating shards, service
 > buildings with doors, residents with needs, planning → playback → report, and
 > a civic-energy economy. A Contest preview and Confluence pledge/vote are in
-> the build, including a three-day festival campaign; the full multi-round festival and
-> building layers are still absent. The sea/island/plant imagery in §7 and the building silhouettes
+> the build, including a three-day festival campaign and a stewardship epilogue;
+> the full multi-round festival, systemic stewardship and building layers are
+> still absent. The sea/island/plant imagery in §7 and the building silhouettes
 > there are prototype-era and superseded by the void world in
 > [design/world.md](design/world.md); the economy and loop in §8 and the
 > milestones in §11 are retained as prototype history. The Prism Tide tagline,

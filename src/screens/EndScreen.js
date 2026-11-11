@@ -38,6 +38,7 @@ export class EndScreen {
                     <div class="end__stat"><dt>Devotion</dt><dd data-role="devotion">0</dd></div>
                     <div class="end__stat"><dt>Flourishing</dt><dd data-role="flourishing">0</dd></div>
                     <div class="end__stat"><dt>Lumen in hand</dt><dd data-role="lumen">0</dd></div>
+                    <div class="end__stat"><dt>Stewardship</dt><dd data-role="stewardship">—</dd></div>
                 </dl>
             </div>
             <div class="end__medal" data-role="medal" aria-hidden="true">◇</div>
@@ -56,6 +57,7 @@ export class EndScreen {
         this.devotionEl = aside.querySelector('[data-role=devotion]');
         this.flourishingEl = aside.querySelector('[data-role=flourishing]');
         this.lumenEl = aside.querySelector('[data-role=lumen]');
+        this.stewardshipEl = aside.querySelector('[data-role=stewardship]');
         this.medalEl = aside.querySelector('[data-role=medal]');
 
         main.querySelector('[data-testid=end-menu]').addEventListener('click', () => this.gsm.setState('MENU'));
@@ -72,7 +74,7 @@ export class EndScreen {
 
         if (outcome === 'victory') {
             this.titleEl.textContent = ending.title || 'The commons holds.';
-            this.copyEl.textContent = ending.message || 'Twelve Tidelanders, a full larder, and a flourishing worth celebrating. The Confluence has done its work.';
+            this.copyEl.textContent = `${ending.message || 'Twelve Tidelanders, a full larder, and a flourishing worth celebrating. The Confluence has done its work.'}${ending.stewardship ? ` ${ending.stewardship.epilogue}` : ''}`;
             this.medalEl.textContent = '✦';
         } else if (outcome === 'defeat') {
             this.titleEl.textContent = ending.title || 'The lights go out.';
@@ -91,6 +93,7 @@ export class EndScreen {
         this.devotionEl.textContent = (stats.devotion ?? charter?.devotion ?? 0).toFixed(1);
         this.flourishingEl.textContent = String(Math.round(stats.flourishing ?? charter?.flourishing ?? 0));
         this.lumenEl.textContent = String(stats.lumen ?? charter?.lumen ?? 0);
+        this.stewardshipEl.textContent = ending.stewardship?.name || '—';
         this.container.style.display = 'flex';
         requestAnimationFrame(() => {
             this.container.querySelector('[data-testid=end-menu]')?.focus({ preventScroll: true });

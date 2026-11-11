@@ -283,6 +283,21 @@ The report is the day's story as a broadsheet:
 - **Abandon:** the charter menu asks for confirmation, then ends the run early as
   a voluntary departure and clears the save.
 
+## Stewardship
+
+If the player wins the Confluence, the result screen leads to a **stewardship**
+choice. The winning chapter chooses one governing promise:
+
+- **Universal Care** — care by right, not by luck.
+- **The Open Table** — the next arrival is expected.
+- **Commons Assembly** — residents choose the works.
+- **Garden Charter** — beauty is infrastructure.
+
+The stewardship changes the epilogue and the charter record, not the resolved
+day. A rival winner takes stewardship without a player choice and the run ends
+on the defeat record.
+
+
 The end screen shows days weathered, residents, Devotion, Flourishing and lumen,
 plus the outcome and a quote. It offers **Return to the drift** (menu) or **New
 charter** (lobby). Ending a run clears the save.

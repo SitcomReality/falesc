@@ -3279,3 +3279,183 @@ body.has-modal > canvas {
     font-size: 10px;
     line-height: 1.3;
 }
+
+/* Stewardship ------------------------------------------------------------ */
+
+.screen--stewardship {
+    align-items: center;
+    justify-content: center;
+    padding: clamp(14px, 3vw, 42px);
+    background:
+        radial-gradient(ellipse at 50% 42%, transparent 24%, rgba(28, 13, 36, 0.58) 100%);
+    z-index: 42;
+}
+
+.stewardship__sheet {
+    width: min(1040px, 100%);
+    max-height: 100%;
+    overflow: auto;
+    padding: clamp(20px, 3vw, 38px);
+}
+
+.stewardship__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--ink);
+}
+
+.stewardship__title {
+    margin: 5px 0 8px;
+    font-family: var(--display);
+    font-variation-settings: 'SOFT' 60, 'WONK' 1, 'opsz' 72;
+    font-size: clamp(34px, 4.5vw, 58px);
+    line-height: 0.94;
+    letter-spacing: -0.035em;
+}
+
+.stewardship__lede {
+    max-width: 56ch;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.stewardship__score {
+    flex: none;
+    min-width: 190px;
+    padding: 10px 12px;
+    background: var(--mint-soft);
+    border: var(--border);
+    border-radius: var(--radius);
+}
+
+.stewardship__score ul {
+    display: flex;
+    gap: 10px;
+    margin: 5px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.stewardship__score li {
+    display: grid;
+    gap: 1px;
+    font-size: 11px;
+}
+
+.stewardship__score li span {
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 7px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.stewardship__score li strong {
+    font-family: var(--display);
+    font-size: 22px;
+    line-height: 1;
+}
+
+.stewardship__score small {
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.stewardship__label {
+    margin: 20px 0 10px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.stewardship-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.stewardship-card {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    padding: 13px;
+    border: 1.5px solid rgba(33, 18, 37, 0.4);
+    border-radius: var(--radius);
+    background: rgba(255, 242, 216, 0.35);
+    cursor: pointer;
+}
+
+.stewardship-card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.stewardship-card__kicker {
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 7px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.stewardship-card strong {
+    font-family: var(--display);
+    font-size: 21px;
+    line-height: 1;
+}
+
+.stewardship-card__copy {
+    color: var(--ink-soft);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.stewardship-card.is-selected {
+    background: var(--mint-soft);
+    border-color: var(--ink);
+    box-shadow: var(--shadow-hard);
+    transform: translate(-1px, -1px);
+}
+
+.stewardship-card:focus-within {
+    outline: 3px solid var(--wine);
+    outline-offset: 2px;
+}
+
+.stewardship__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(33, 18, 37, 0.28);
+}
+
+.stewardship__note {
+    max-width: 52ch;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+    .screen--stewardship { padding: 0; align-items: stretch; }
+    .stewardship__sheet { max-height: 100%; border-radius: 0; }
+    .stewardship__head { flex-direction: column; gap: 10px; }
+    .stewardship__score { width: 100%; }
+    .stewardship-grid { grid-template-columns: 1fr; }
+    .stewardship__foot { flex-direction: column; align-items: stretch; }
+    .stewardship__title { font-size: 38px; }
+}

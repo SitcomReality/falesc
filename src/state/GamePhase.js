@@ -12,5 +12,6 @@ export const GamePhase = {
     DAY: 'DAY',
     REPORT: 'REPORT',
     CONFLUENCE: 'CONFLUENCE',
+    STEWARDSHIP: 'STEWARDSHIP',
     END: 'END'
 };
