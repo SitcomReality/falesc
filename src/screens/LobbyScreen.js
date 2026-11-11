@@ -47,6 +47,30 @@ export class LobbyScreen {
             this.game.startCharter();
         });
 
+        const nameField = document.createElement('div');
+        nameField.className = 'field';
+        const nameLabel = document.createElement('label');
+        nameLabel.className = 'field__label';
+        nameLabel.htmlFor = 'lobby-chapter-name-field';
+        nameLabel.textContent = 'Chapter name';
+        this.chapterInput = document.createElement('input');
+        this.chapterInput.className = 'input';
+        this.chapterInput.id = 'lobby-chapter-name-field';
+        this.chapterInput.type = 'text';
+        this.chapterInput.maxLength = 32;
+        this.chapterInput.placeholder = 'Home Chapter';
+        this.chapterInput.dataset.testid = 'lobby-chapter-name';
+        this.chapterInput.value = this.game.settings.chapterName || 'Home Chapter';
+        this.chapterInput.addEventListener('change', () => {
+            const next = this.chapterInput.value.replace(/\s+/g, ' ').trim().slice(0, 32);
+            this.game.settings.chapterName = next || 'Home Chapter';
+            this.chapterInput.value = this.game.settings.chapterName;
+        });
+        const nameHint = document.createElement('span');
+        nameHint.className = 'field__hint';
+        nameHint.textContent = 'The name the other chapters will read in the standings.';
+        nameField.append(nameLabel, this.chapterInput, nameHint);
+
         const seedField = document.createElement('div');
         seedField.className = 'field';
 
@@ -65,6 +89,7 @@ export class LobbyScreen {
         this.seedInput.inputMode = 'numeric';
         this.seedInput.placeholder = 'e.g. 40421';
         this.seedInput.value = this.game.settings.mapSeed;
+        this.chapterInput.value = this.game.settings.chapterName || 'Home Chapter';
         this.seedInput.dataset.testid = 'lobby-seed';
 
         const randomBtn = document.createElement('button');
@@ -172,7 +197,7 @@ export class LobbyScreen {
         actions.append(startBtn, backBtn);
         backBtn.addEventListener('click', () => this.gsm.setState('MENU'));
 
-        form.append(seedField, sizeField, modeField, actions);
+        form.append(nameField, seedField, sizeField, modeField, actions);
         sheet.appendChild(form);
 
         const chart = document.createElement('aside');
@@ -265,6 +290,7 @@ export class LobbyScreen {
     show() {
         this.container.style.display = 'flex';
         this.seedInput.value = this.game.settings.mapSeed;
+        this.chapterInput.value = this.game.settings.chapterName || 'Home Chapter';
         this._setSize(this.game.settings.mapSize);
         this._setMode(this.game.settings.mode || 'first-light');
     }

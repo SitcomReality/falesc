@@ -583,6 +583,7 @@ body > canvas {
     align-items: center;
     justify-content: center;
     padding: clamp(16px, 4vw, 56px);
+    overflow-y: auto;
     background:
         radial-gradient(ellipse at 50% 50%, transparent 20%, rgba(28, 13, 36, 0.36) 100%);
 }
@@ -591,7 +592,7 @@ body > canvas {
     display: grid;
     grid-template-columns: minmax(0, 1.06fr) minmax(300px, 0.94fr);
     width: min(1080px, 100%);
-    max-height: 100%;
+    max-height: none;
     gap: clamp(18px, 3vw, 34px);
     align-items: stretch;
 }

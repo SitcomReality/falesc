@@ -70,7 +70,8 @@ export class FalescGame {
         this.settings = {
             mapSeed: Math.floor(Math.random() * 1000000),
             mapSize: 'medium',
-            mode: 'first-light'
+            mode: 'first-light',
+            chapterName: 'Home Chapter'
         };
         this.charter = null;
         this.world = new World({
@@ -226,6 +227,7 @@ export class FalescGame {
             seed,
             mapSize: size,
             mode: this.settings.mode || 'first-light',
+            chapterName: this.settings.chapterName || 'Home Chapter',
             map: this.world.map,
             parentContainer: this.world.objectLayer,
             legacy

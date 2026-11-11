@@ -11,6 +11,7 @@ export function serializeCharter(charter) {
         seed: charter.seed,
         mapSize: charter.mapSize,
         mode: charter.mode,
+        chapterName: charter.name,
         day: charter.day,
         dayLimit: charter.dayLimit,
         lumen: charter.lumen,
@@ -47,6 +48,9 @@ export function serializeCharter(charter) {
 /** Rehydrate a charter in place. Unknown or missing pieces fall back to a fresh run. */
 export function restoreCharter(charter, saved) {
     charter.mode = saved.mode || 'first-light';
+    const chapterName = String(saved.chapterName ?? '').replace(/\s+/g, ' ').trim().slice(0, 32);
+    charter.name = chapterName || 'Home Chapter';
+    charter.player.name = charter.name;
     charter.day = saved.day || 1;
     charter.dayLimit = saved.dayLimit || BALANCE.dayLimits[charter.mapSize] || 14;
     charter.lumen = Number.isFinite(saved.lumen) ? saved.lumen : BALANCE.startingLumen;

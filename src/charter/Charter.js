@@ -30,7 +30,7 @@ import { ConfluenceVote } from '../confluence/ConfluenceVote.js';
  * layer listens; it never owns the rules.
  */
 export class Charter {
-    constructor({ seed, mapSize = 'medium', mode = 'first-light', map = null, parentContainer = null, saved = null, legacy = null }) {
+    constructor({ seed, mapSize = 'medium', mode = 'first-light', chapterName = null, map = null, parentContainer = null, saved = null, legacy = null }) {
         this.legacy = legacy || saved?.legacy || null;
         this.legacyNote = null;
         this.legacyBonus = this.legacy?.policyId === 'open_table'
@@ -43,7 +43,7 @@ export class Charter {
         this.mode = mode;
         this.map = map;
         this.homeSector = map?.homeSector || null;
-        this.name = 'Home Chapter';
+        this.name = cleanChapterName(chapterName || saved?.chapterName);
         this.occupancy = new Map();
         const playerLumen = mode === 'contest' ? BALANCE.contest.startingLumen : BALANCE.startingLumen;
         this.player = {
@@ -1379,3 +1379,7 @@ export class Charter {
     }
 }
 
+function cleanChapterName(value) {
+    const cleaned = String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, 32);
+    return cleaned || 'Home Chapter';
+}
