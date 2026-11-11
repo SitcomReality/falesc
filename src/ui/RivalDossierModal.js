@@ -1,3 +1,4 @@
+import { escapeHtml } from './html.js';
 /**
  * A rival chapter's public dossier: doctrine, plan, residents, Devotion and the
  * services it currently operates. Read-only.
@@ -104,10 +105,3 @@ function doctrineLine(doctrine) {
             : 'A chapter with a balanced doctrine.';
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

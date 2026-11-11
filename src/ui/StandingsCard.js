@@ -1,4 +1,5 @@
 import { COMMONS_POLICY_BY_ID } from '../commons/CommonsPolicies.js';
+import { escapeHtml } from './html.js';
 
 /**
  * Live Devotion standings for the Contest preview. Hidden in First Light.
@@ -108,7 +109,7 @@ export class StandingsCard {
         if (signature === this.signature) return;
         this.signature = signature;
         this.listEl.innerHTML = ordered.map((chapter, index) => `
-            <li class="standings-row${chapter.isPlayer ? ' is-player' : ''}" ${chapter.isPlayer ? '' : `data-chapter-id="${chapter.id}" tabindex="0" role="button" aria-label="Open ${escapeHtml(chapter.name)} dossier"`}>
+            <li class="standings-row${chapter.isPlayer ? ' is-player' : ''}" ${chapter.isPlayer ? '' : `data-chapter-id="${chapter.id}" tabindex="0" role="button" aria-label="Open ${escapeHtml(chapter.name)} dossier. Rank ${index + 1}, ${chapter.devotion.toFixed(1)} hearts, ${chapter.residents} residents, ${chapter.visits} visits${chapter.plan ? `, ${chapter.plan.saving ? 'saving for' : 'planning'} ${escapeHtml(chapter.plan.name)}` : ''}"`}>
                 <span class="standings-row__rank">${index + 1}</span>
                 <span class="standings-row__dot" style="background:${chapter.colour}"></span>
                 <span class="standings-row__name">${escapeHtml(chapter.name)}${chapter.isPlayer ? ' (you)' : ''}</span>
@@ -119,10 +120,3 @@ export class StandingsCard {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

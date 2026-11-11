@@ -1,5 +1,6 @@
 import { PLEDGES } from '../confluence/Pledges.js';
 import { NEEDS } from '../design/needs.js';
+import { escapeHtml } from './html.js';
 
 /**
  * Campaign promise chooser. Rivals publish their promises; the player picks
@@ -146,10 +147,3 @@ export class CampaignModal {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

@@ -1,4 +1,5 @@
 import { RETROFIT_MODULES } from '../services/RetrofitModules.js';
+import { escapeHtml } from './html.js';
 
 /**
  * Retrofit choice: one module per service, with a real trade between seats,
@@ -123,10 +124,3 @@ export class RetrofitModal {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

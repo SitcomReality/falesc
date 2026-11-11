@@ -1,5 +1,6 @@
 import { BALANCE } from '../design/balance.js';
 import { COMMONS_POLICIES, COMMONS_POLICY_BY_ID, commonsComfortFor } from '../commons/CommonsPolicies.js';
+import { escapeHtml } from './html.js';
 
 /**
  * Shared Commons Beacon fund. Every chapter can put lumen into the same civic
@@ -253,10 +254,3 @@ export class CommonsModal {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

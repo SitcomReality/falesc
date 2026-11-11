@@ -7,7 +7,7 @@ import { ANIMATION_STATES } from '../constants.js';
  * a service, and emerges with a small need glyph.
  */
 export class ResidentAgent {
-    constructor({ resident, character, homePoint }) {
+    constructor({ resident, character, homePoint, reducedMotion = false }) {
         this.resident = resident;
         this.character = character;
         this.homePoint = { ...homePoint };
@@ -20,6 +20,7 @@ export class ResidentAgent {
         this.character.y = homePoint.y;
         this.character.state = ANIMATION_STATES.IDLE;
         this.character.speed = 0.07;
+        this.reducedMotion = Boolean(reducedMotion);
         this.createBubble();
     }
 
@@ -164,8 +165,10 @@ export class ResidentAgent {
     updateAmbient(dt) {
         this.character.state = ANIMATION_STATES.IDLE;
         this.character.speed = 0.07;
-        this.character.x += Math.sin(this.character.frame + dt) * 0.002;
-        this.character.y += Math.cos(this.character.frame + dt) * 0.002;
+        if (!this.reducedMotion) {
+            this.character.x += Math.sin(this.character.frame + dt) * 0.002;
+            this.character.y += Math.cos(this.character.frame + dt) * 0.002;
+        }
         this.updateBubble(dt);
     }
 

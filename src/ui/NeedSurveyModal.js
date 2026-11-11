@@ -1,4 +1,5 @@
 import { NEEDS } from '../design/needs.js';
+import { escapeHtml } from './html.js';
 
 /**
  * A read-only demand snapshot for planning: how urgent each need is, how many
@@ -109,10 +110,3 @@ function careReason(resident) {
     return urgent ? `${urgent[0]} ${Math.round(urgent[1])}` : 'needs care';
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

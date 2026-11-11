@@ -374,7 +374,7 @@ export class GameScreen {
             }
             if (event.key === 'r' || event.key === 'R') {
                 event.preventDefault();
-                this.game.showResidentRoster();
+                this.game.openResidentRoster();
                 return;
             }
             if (event.key === 'p' || event.key === 'P') {
@@ -546,6 +546,7 @@ export class GameScreen {
         else nextHint = 'Every need has a door. Open the day, read the report and decide what the chapter needs next.';
         const showHint = !this.game.hintDismissed;
         this.hintEl.classList.toggle('is-hidden', !showHint);
+        this.hintEl.hidden = !showHint;
         if (showHint) this._setText(this.hintCopy, 'hint', nextHint);
         this._cache.force = force;
     }

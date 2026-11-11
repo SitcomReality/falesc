@@ -99,11 +99,6 @@ export function installDebugApi(game) {
                         chapters: report.chapters || [],
                         campaignEvent: report.campaignEvent || null,
                         request: report.request || null,
-                        visitors: report.visitors || 0,
-                        visitorFees: report.visitorFees || 0,
-                        playerVisitorFees: report.playerVisitorFees || 0,
-                        visitorDetails: (report.visitorDetails || []).map((visitor) => ({ ...visitor })),
-                        stayedVisitors: report.stayedVisitors || 0,
                         commons: report.commons || null,
                         population: report.population,
                         quotes: report.quotes,
@@ -193,8 +188,8 @@ export function installDebugApi(game) {
                 return game.togglePatronage();
             },
             showResidents() {
-                game.showResidentRoster();
-                return game.residentCard.isOpen;
+                game.openResidentRoster();
+                return game.residentRoster.isOpen;
             },
             openResident(id) {
                 game.openResident(id);

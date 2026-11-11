@@ -1,4 +1,5 @@
 import { FLOOR_PLANS } from '../services/FloorPlans.js';
+import { escapeHtml } from './html.js';
 
 /**
  * Floor-plan choice: the shell above a service can sleep, host or open to the
@@ -119,10 +120,3 @@ export class FloorPlanModal {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

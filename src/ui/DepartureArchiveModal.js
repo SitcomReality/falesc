@@ -1,4 +1,5 @@
 import { TEMPERAMENT_BY_ID } from '../design/traits.js';
+import { escapeHtml } from './html.js';
 
 /**
  * The residents who left the charter. A small paper memorial, not a management
@@ -100,10 +101,3 @@ function initials(name) {
     return String(name || '?').split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

@@ -406,7 +406,7 @@ body > canvas {
 }
 
 .btn--small {
-    min-height: 38px;
+    min-height: 44px;
     padding: 8px 14px;
     font-size: 13px;
     box-shadow: 3px 3px 0 var(--btn-shadow);
@@ -1416,7 +1416,7 @@ body > canvas {
     .objective-card { top: 72px; left: 10px; padding: 8px 10px; }
     .chart__seed { display: none; }
     .objective-card__name { font-size: 15px; margin: 3px 0 5px; }
-    .objective-card__foot { display: none; }
+    .objective-card__foot { display: flex; gap: 8px; font-size: 9px; }
     .hud__bottom { left: 10px; right: 10px; bottom: 10px; }
     .blueprints {
         display: flex;
@@ -1430,7 +1430,7 @@ body > canvas {
         flex: 0 0 46%;
     }
     .blueprint { min-height: 82px; }
-    .hud__hint { top: 160px; bottom: auto; font-size: 12px; }
+    .hud__hint { top: 262px; bottom: auto; font-size: 12px; }
     .screen--menu { padding: 22px; align-items: flex-end; }
     .menu__title { font-size: clamp(52px, 17.5vw, 92px); letter-spacing: -0.045em; }
     .menu__tagline { margin: 18px 0 22px; font-size: 18px; }
@@ -2844,7 +2844,8 @@ body.has-modal > canvas {
 
 .standings-card__flows {
     margin: 0 0 8px;
-    padding: 3px 7px;
+    min-height: 28px;
+    padding: 5px 9px;
     border: 1.5px solid var(--ink);
     border-radius: 999px;
     background: transparent;
@@ -3172,7 +3173,8 @@ body.has-modal > canvas {
 }
 
 .standings-card__campaign button {
-    padding: 3px 7px;
+    min-height: 26px;
+    padding: 5px 8px;
     border: 1.5px solid var(--ink);
     border-radius: 999px;
     background: transparent;
@@ -3580,7 +3582,8 @@ body.has-modal > canvas {
 /* Visitor invitations ---------------------------------------------------- */
 
 .btn--tiny {
-    padding: 4px 8px;
+    min-height: 36px;
+    padding: 8px 10px;
     font-size: 9px;
     line-height: 1.1;
     white-space: nowrap;
@@ -4973,4 +4976,14 @@ html.is-high-contrast .standings-card,
 html.is-high-contrast .charter-menu,
 html.is-high-contrast .build-dock {
     border-width: 2px;
+}
+
+.hint[hidden] {
+    display: none;
+}
+
+html.is-high-contrast :focus-visible {
+    outline-color: var(--ink);
+    outline-width: 3px;
+    box-shadow: 0 0 0 2px var(--paper);
 }

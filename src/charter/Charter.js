@@ -22,6 +22,7 @@ import { SeededRandom } from '../map/SeededRandom.js';
 import { chooseCampaignPledge, createRivalChapters, planRivalDay } from '../chapters/RivalAI.js';
 import { Campaign } from '../confluence/Campaign.js';
 import { PLEDGE_BY_ID } from '../confluence/Pledges.js';
+import { ConfluenceVote } from '../confluence/ConfluenceVote.js';
 
 /**
  * A charter is the whole run: day, lumen, works, cast, services and the report
@@ -336,6 +337,22 @@ export class Charter {
 
     get campaignEvent() {
         return this.campaign?.eventFor?.(this.day) || null;
+    }
+
+    resolveConfluence(pledgeId) {
+        if (!this.confluenceReady) return null;
+        const result = ConfluenceVote.tally(this, pledgeId);
+        this.confluenceReady = false;
+        this.ending = result.ending;
+        this.refreshDerived();
+        return result;
+    }
+
+    applyStewardship(policy) {
+        if (!policy || !this.ending?.confluence || this.ending.outcome !== 'victory') return false;
+        this.stewardship = { ...policy };
+        this.ending.stewardship = { ...policy };
+        return true;
     }
 
     sponsorCampaign(needId) {

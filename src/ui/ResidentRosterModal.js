@@ -1,4 +1,5 @@
 import { NEEDS } from '../design/needs.js';
+import { escapeHtml } from './html.js';
 
 /**
  * A scannable roster of everyone currently present. The card remains the place
@@ -110,10 +111,3 @@ function initials(name) {
     return String(name || '?').split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

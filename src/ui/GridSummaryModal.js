@@ -1,3 +1,4 @@
+import { escapeHtml } from './html.js';
 /**
  * A readable grid summary for keyboard and assistive-tech players: one table
  * per buildable isle, every cell named and its occupant described. This is a
@@ -111,10 +112,3 @@ function initials(name) {
     return String(name || '?').split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

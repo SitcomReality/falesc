@@ -1,4 +1,5 @@
 import { readArchive, clearArchive } from '../persistence/CharterArchive.js';
+import { escapeHtml } from './html.js';
 
 /**
  * Past charters, newest first. Read-only except for a deliberate clear.
@@ -105,10 +106,3 @@ function labelFor(record) {
     return `${mode} · ${outcome}${record.commons === 'lit' ? ' · Beacon lit' : ''}`;
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

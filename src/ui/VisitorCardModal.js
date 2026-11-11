@@ -1,6 +1,7 @@
 import { NEEDS } from '../design/needs.js';
 import { BALANCE } from '../design/balance.js';
 import { describeTraits } from '../design/traits.js';
+import { escapeHtml } from './html.js';
 
 /**
  * A visitor's own card. The report row is the invitation surface; this card is
@@ -128,10 +129,3 @@ function initials(name) {
     return String(name || '?').split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

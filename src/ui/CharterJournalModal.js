@@ -1,3 +1,4 @@
+import { escapeHtml } from './html.js';
 /**
  * The charter journal: short, player-facing milestones. It is not a report or a
  * replay, just the decisions and arrivals worth remembering.
@@ -79,10 +80,3 @@ export class CharterJournalModal {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

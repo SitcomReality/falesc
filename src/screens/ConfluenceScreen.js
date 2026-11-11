@@ -1,5 +1,5 @@
-import { ConfluenceVote } from '../confluence/ConfluenceVote.js';
 import { PLEDGES, PLEDGE_BY_ID } from '../confluence/Pledges.js';
+import { escapeHtml } from '../ui/html.js';
 
 /**
  * The final public vote. The player makes one pledge to the archipelago, then
@@ -97,7 +97,7 @@ export class ConfluenceScreen {
         });
         this.container.querySelector('[data-testid=confluence-vote]').addEventListener('click', () => this.vote());
         requestAnimationFrame(() => {
-            this.container.querySelector('[data-testid=confluence-vote]')?.focus({ preventScroll: true });
+            (this.container.querySelector('input[name=confluence-pledge]:not(:disabled)') || this.container.querySelector('[data-testid=confluence-vote]'))?.focus({ preventScroll: true });
         });
     }
 
@@ -105,10 +105,9 @@ export class ConfluenceScreen {
         const charter = this.game.charter;
         if (!charter || !charter.confluenceReady) return;
         const pledgeId = this.container.querySelector('input[name=confluence-pledge]:checked')?.value;
-        const result = ConfluenceVote.tally(charter, pledgeId);
+        const result = charter.resolveConfluence(pledgeId);
+        if (!result) return;
         this.result = result;
-        charter.confluenceReady = false;
-        charter.ending = result.ending;
         this.renderResult(result);
     }
 
@@ -172,10 +171,3 @@ export class ConfluenceScreen {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

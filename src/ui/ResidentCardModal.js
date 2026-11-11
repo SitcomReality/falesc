@@ -1,6 +1,7 @@
 import { NEEDS } from '../design/needs.js';
 import { TEMPERAMENT_BY_ID, STANDARD_BY_ID, RHYTHM_BY_ID } from '../design/traits.js';
 import { needIcon } from './icons.js';
+import { escapeHtml } from './html.js';
 
 /**
  * The resident card is the player's window into a person: traits, needs, home,
@@ -30,7 +31,7 @@ export class ResidentCardModal {
                     <span class="resident-card__avatar" data-role="avatar" aria-hidden="true">M</span>
                     <div>
                         <p class="kicker" style="color:var(--wine)">Resident record</p>
-                        <h3 class="modal__title" id="resident-name" data-role="name">Mira</h3>
+                        <h3 class="modal__title" id="resident-name" data-role="name" tabindex="-1">Mira</h3>
                     </div>
                 </div>
                 <button type="button" class="modal__close" data-testid="resident-close" aria-label="Close resident card">×</button>
@@ -101,6 +102,7 @@ export class ResidentCardModal {
         if (total === 0) return;
         this.index = (this.index + direction + total) % total;
         this.render(this.residents[this.index]);
+        requestAnimationFrame(() => this.nameEl?.focus?.({ preventScroll: true }));
     }
 
     render(resident) {
@@ -178,10 +180,3 @@ export class ResidentCardModal {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

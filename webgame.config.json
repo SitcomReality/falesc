@@ -186,7 +186,7 @@
     },
     {
       "name": "open the resident roster",
-      "eval": "window.__falesc.showResidents()"
+      "eval": "(() => { const resident = window.__falesc.snapshot().residents[0]; return window.__falesc.openResident(resident.id); })()"
     },
     {
       "name": "resident card is visible",

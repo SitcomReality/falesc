@@ -30,14 +30,25 @@ export class OverlayManager {
 
     open(owner, { panel, initialFocus = null, restoreFocus = null } = {}) {
         if (!panel || this.stack.some((entry) => entry.owner === owner)) return false;
+        const first = this.stack.length === 0;
+        const previous = this.stack[this.stack.length - 1] || null;
+        const screens = first
+            ? [...document.querySelectorAll('.screen')].filter((screen) => !screen.contains(panel))
+            : [];
         this.stack.push({
             owner,
             panel,
-            restoreFocus: restoreFocus || document.activeElement
+            restoreFocus: restoreFocus || document.activeElement,
+            inertScreens: screens
         });
         document.body.classList.add('has-modal');
         const hud = this.hud;
         if (hud) hud.setAttribute('inert', '');
+        for (const screen of screens) screen.setAttribute('inert', '');
+        if (previous) {
+            previous.panel.setAttribute('inert', '');
+            previous.panel.setAttribute('aria-hidden', 'true');
+        }
         this.inputManager?.setModalOpen?.(true);
         requestAnimationFrame(() => {
             if (!this.isTop(owner)) return;
@@ -51,6 +62,7 @@ export class OverlayManager {
         const index = this.stack.findIndex((entry) => entry.owner === owner);
         if (index === -1) return null;
         const [entry] = this.stack.splice(index, 1);
+        for (const screen of entry.inertScreens || []) screen.removeAttribute('inert');
         if (this.stack.length === 0) {
             document.body.classList.remove('has-modal');
             this.hud?.removeAttribute('inert');
@@ -58,6 +70,8 @@ export class OverlayManager {
             if (restoreFocus) entry.restoreFocus?.focus?.({ preventScroll: true });
         } else {
             const top = this.stack[this.stack.length - 1];
+            top.panel.removeAttribute('inert');
+            top.panel.removeAttribute('aria-hidden');
             if (restoreFocus) firstFocusable(top.panel)?.focus?.({ preventScroll: true });
         }
         return entry;

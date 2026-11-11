@@ -12,6 +12,7 @@ export class ResidentCrowd {
         this.shadowLayer = shadowLayer;
         this.agents = new Map();
         this.charter = null;
+        this.reducedMotion = false;
     }
 
     setCharter(charter) {
@@ -43,10 +44,16 @@ export class ResidentCrowd {
         const agent = new ResidentAgent({
             resident,
             character,
-            homePoint: { x: 0, y: 0 }
+            homePoint: { x: 0, y: 0 },
+            reducedMotion: this.reducedMotion
         });
         this.agents.set(resident.id, agent);
         return agent;
+    }
+
+    setReducedMotion(value) {
+        this.reducedMotion = Boolean(value);
+        for (const agent of this.agents.values()) agent.reducedMotion = this.reducedMotion;
     }
 
     homePointFor(resident, index) {

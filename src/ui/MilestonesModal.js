@@ -3,6 +3,7 @@
  * not a second objective system or a source of rewards.
  */
 import { readMilestones } from '../persistence/MilestoneArchive.js';
+import { escapeHtml } from './html.js';
 
 export class MilestonesModal {
     constructor({ game, overlays }) {
@@ -87,10 +88,3 @@ export class MilestonesModal {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

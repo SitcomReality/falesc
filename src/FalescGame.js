@@ -81,6 +81,7 @@ export class FalescGame {
             objectLayer: this.world.objectLayer,
             shadowLayer: this.world.shadowLayer
         });
+        this.crowd.setReducedMotion(this.motion === 'reduced');
         this.patronageFlow = new PatronageFlow({ layer: this.world.overlayLayer });
         this.transitGate = new TransitGate({ layer: this.world.overlayLayer });
         this.districtOverlay = new DistrictOverlay({ layer: this.world.overlayLayer });
@@ -787,6 +788,7 @@ export class FalescGame {
     toggleMotion() {
         this.motion = this.motion === 'reduced' ? 'full' : 'reduced';
         writeMotion(this.motion);
+        this.crowd?.setReducedMotion(this.motion === 'reduced');
         this.gameScreen?.updateHud?.(true);
         this.gameScreen?.toast?.(this.motion === 'reduced' ? 'Reduced motion on.' : 'Reduced motion off.', 'mint', 1800);
         return this.motion;
@@ -1044,8 +1046,7 @@ export class FalescGame {
     chooseStewardship(policyId) {
         const policy = STEWARDSHIP_BY_ID[policyId];
         if (!policy || !this.charter?.ending?.confluence || this.charter.ending.outcome !== 'victory') return false;
-        this.charter.stewardship = { ...policy };
-        this.charter.ending.stewardship = { ...policy };
+        if (!this.charter.applyStewardship(policy)) return false;
         writeLegacy({ policyId, chapterName: this.charter.player.name, day: this.charter.day });
         this.finishCharter();
         return true;
@@ -1109,13 +1110,6 @@ export class FalescGame {
         if (!this.charter || this.screenStateMachine.state !== GamePhase.PLAYING) return;
         const bulletin = this.charter.bulletin || this.charter.buildBulletin([]);
         this.bulletinModal.show(bulletin);
-    }
-
-    showResidentRoster() {
-        if (!this.charter) return;
-        const residents = this.charter.activeResidents;
-        if (residents.length === 0) return;
-        this.residentCard.show(residents[0], 0);
     }
 
     openResident(residentId) {

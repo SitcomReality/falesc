@@ -4,6 +4,7 @@ import { SERVICE_HOURS } from '../services/ServicePolicies.js';
 import { SERVICE_VIBES } from '../services/ServiceVibes.js';
 import { SERVICE_ACCESS } from '../services/ServiceAccess.js';
 import { FLOOR_PLANS } from '../services/FloorPlans.js';
+import { escapeHtml } from './html.js';
 
 /**
  * The paper almanac. A read-only reference for every system that is easy to
@@ -116,10 +117,3 @@ export class FieldGuideModal {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

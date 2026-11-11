@@ -6,6 +6,7 @@ import { SERVICE_VIBES, SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
 import { SERVICE_ACCESS, SERVICE_ACCESS_BY_ID } from '../services/ServiceAccess.js';
 import { FLOOR_PLAN_BY_ID } from '../services/FloorPlans.js';
 import { finishCost } from '../services/BuildingFinishes.js';
+import { escapeHtml } from './html.js';
 
 /**
  * Service record: the same card is used for inspection, reopening a closed
@@ -275,14 +276,8 @@ export class ServiceCardModal {
 
     addFloor() {
         if (!this.isOpen || !this.service) return;
-        const service = this.service;
-        const result = this.onFloor(service);
-        if (result?.ok === false) {
-            this.errorEl.textContent = result.error || 'That floor cannot be added.';
-            return;
-        }
-        this.hide();
-        this.show(service);
+        const result = this.onFloor(this.service);
+        if (result?.ok === false) this.errorEl.textContent = result.error || 'That floor cannot be added.';
     }
 
     requestRetrofit() {
@@ -322,10 +317,3 @@ export class ServiceCardModal {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

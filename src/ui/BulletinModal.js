@@ -1,3 +1,4 @@
+import { escapeHtml } from './html.js';
 /**
  * The morning bulletin: a paused paper card with three pieces of news — an
  * unmet need, an arrival or complaint, and a line of word of mouth.
@@ -88,10 +89,3 @@ export class BulletinModal {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}

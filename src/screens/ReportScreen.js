@@ -1,6 +1,7 @@
 import { NEEDS } from '../design/needs.js';
 import { BALANCE } from '../design/balance.js';
 import { COMMONS_POLICY_BY_ID } from '../commons/CommonsPolicies.js';
+import { escapeHtml } from '../ui/html.js';
 
 /**
  * The evening broadsheet. This is the emotional payoff: visits, hearts,
@@ -106,7 +107,7 @@ export class ReportScreen {
                 <header class="report__head">
                     <div>
                         <p class="kicker" style="color:var(--wine)">${escapeHtml(kicker)}</p>
-                        <h1 class="report__title">${escapeHtml(title)}</h1>
+                        <h1 class="report__title" tabindex="-1">${escapeHtml(title)}</h1>
                     </div>
                     <span class="report__edition">FALESC · ${String(report.day).padStart(2, '0')}</span>
                 </header>
@@ -168,7 +169,7 @@ export class ReportScreen {
         });
         this.container.style.display = 'flex';
         requestAnimationFrame(() => {
-            this.container.querySelector('[data-testid=report-continue]')?.focus({ preventScroll: true });
+            this.container.querySelector('.report__title')?.focus({ preventScroll: true });
         });
     }
 
@@ -177,10 +178,3 @@ export class ReportScreen {
     }
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-}
