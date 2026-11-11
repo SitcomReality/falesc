@@ -193,6 +193,7 @@ export class FalescGame {
     /* ------------------------------------------------------------------ */
 
     startCharter() {
+        this.setWorldVisible(true);
         const seed = Number.isInteger(this.settings.mapSeed) ? this.settings.mapSeed : 1;
         const size = this.settings.mapSize || 'medium';
         this.initializeWorld(seed, size);
