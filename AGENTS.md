@@ -63,7 +63,7 @@ after any behavioural change.
 | `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
 | `src/state/` | `GamePhase` constants and `ScreenStateMachine` |
 | `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, end |
-| `src/ui/` | Build/service/bulletin/resident modals, survey chart, chatter, icons |
+| `src/ui/` | Shared `OverlayManager`, build/service/bulletin/resident modals, survey chart, chatter, icons |
 | `src/map/` | Seeded single-pass island generation, packing, grids, sector art, paths |
 | `src/character/`, `src/Character.js` | Procedural chibi rig and animation |
 | `src/minerals/` | Seeded static rock/crystal scenery |
