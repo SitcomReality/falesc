@@ -247,6 +247,7 @@ export class ServiceManager {
                 upkeepBonus: entry.upkeepBonus,
                 floors: entry.floors,
                 floorPlans: entry.floorPlans || [],
+                condition: entry.condition ?? 100,
                 fixed: entry.fixed,
                 finish: entry.finish,
                 modules: entry.modules,

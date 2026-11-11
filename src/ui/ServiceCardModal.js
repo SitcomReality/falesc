@@ -13,8 +13,9 @@ import { finishCost } from '../services/BuildingFinishes.js';
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, overlays, game }) {
+    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, onRepair, overlays, game }) {
         this.onDemolish = onDemolish;
+        this.onRepair = onRepair;
         this.onReopen = onReopen;
         this.onRetrofit = onRetrofit;
         this.onHours = onHours;
@@ -31,7 +32,7 @@ export class ServiceCardModal {
         this.container.dataset.testid = 'structure-modal-scrim';
 
         this.panel = document.createElement('div');
-        this.panel.className = 'modal';
+        this.panel.className = 'modal service-card';
         this.panel.dataset.testid = 'structure-modal';
         this.panel.setAttribute('role', 'dialog');
         this.panel.setAttribute('aria-modal', 'true');
@@ -72,6 +73,7 @@ export class ServiceCardModal {
                 <button type="button" class="btn btn--mint" data-testid="structure-upgrade" hidden>Retrofit</button>
                 <button type="button" class="btn btn--paper" data-testid="structure-floor" hidden>Add a floor · 4</button>
                 <button type="button" class="btn btn--mint" data-testid="structure-reopen" hidden>Reopen</button>
+                <button type="button" class="btn btn--mint" data-testid="structure-repair" hidden>Repair · 3</button>
                 <button type="button" class="btn btn--danger" data-testid="structure-demolish">Dismantle</button>
             </div>
         `;
@@ -91,6 +93,7 @@ export class ServiceCardModal {
         this.noteEl = this.panel.querySelector('[data-role=note]');
         this.errorEl = this.panel.querySelector('[data-role=error]');
         this.demolishBtn = this.panel.querySelector('[data-testid=structure-demolish]');
+        this.repairBtn = this.panel.querySelector('[data-testid=structure-repair]');
         this.reopenBtn = this.panel.querySelector('[data-testid=structure-reopen]');
         this.upgradeBtn = this.panel.querySelector('[data-testid=structure-upgrade]');
         this.floorBtn = this.panel.querySelector('[data-testid=structure-floor]');
@@ -106,6 +109,7 @@ export class ServiceCardModal {
         this.panel.querySelector('[data-testid=structure-close]').addEventListener('click', () => this.hide());
         this.panel.querySelector('[data-testid=structure-cancel]').addEventListener('click', () => this.hide());
         this.demolishBtn.addEventListener('click', () => this.demolish());
+        this.repairBtn.addEventListener('click', () => this.repair());
         this.reopenBtn.addEventListener('click', () => this.reopen());
         this.upgradeBtn.addEventListener('click', () => this.requestRetrofit());
         this.floorBtn.addEventListener('click', () => this.addFloor());
@@ -147,6 +151,7 @@ export class ServiceCardModal {
             ${service.adjacencyBonus ? `<div><dt>Neighbours</dt><dd>+${service.adjacencyBonus.toFixed(2)} quality · ${service.adjacencyNeighbours || 0} door${service.adjacencyNeighbours === 1 ? '' : 's'}</dd></div>` : ''}
             ${service.districtName ? `<div><dt>District</dt><dd>${escapeHtml(service.districtName)} · +${service.districtBonus.toFixed(2)} quality · ${service.districtSize} doors</dd></div>` : ''}
             <div><dt>Condition</dt><dd>${service.retrofits?.length ? `Retrofitted · ${service.retrofits.map((id) => escapeHtml(RETROFIT_BY_ID[id]?.name || id)).join(' + ')}` : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
+            <div><dt>Wear</dt><dd>${Math.round(service.condition ?? 100)}%</dd></div>
             <div><dt>Hours</dt><dd>${escapeHtml(SERVICE_HOURS_BY_ID[service.policy?.hours]?.name || 'As built')}</dd></div>
             <div><dt>Door</dt><dd>${service.entrance ? `cell ${service.entrance.u}, ${service.entrance.v}` : '—'}</dd></div>
         `;
@@ -173,6 +178,9 @@ export class ServiceCardModal {
             : rivalService
                 ? "A rival chapter's service cannot be dismantled."
                 : service.fixed ? 'The Welcome Post is part of the charter.' : '';
+        const canRepair = !rivalService && working && (service.condition ?? 100) < 100;
+        this.repairBtn.hidden = !canRepair;
+        this.repairBtn.disabled = !canRepair || (this.game?.charter?.lumen || 0) < 3;
         const canUpgrade = !rivalService && !service.fixed && working && (service.retrofits?.length || 0) < 2;
         this.upgradeBtn.hidden = !canUpgrade;
         this.upgradeBtn.disabled = !canUpgrade || (this.game?.charter?.lumen || 0) < RETROFIT_MIN_COST;
@@ -207,6 +215,16 @@ export class ServiceCardModal {
             panel: this.panel,
             initialFocus: () => this.panel.querySelector('[data-testid=structure-cancel]')
         });
+    }
+
+    repair() {
+        if (!this.isOpen || !this.service) return;
+        const service = this.service;
+        const result = this.onRepair(service);
+        if (result?.ok) {
+            this.hide();
+            this.show(service);
+        }
     }
 
     demolish() {

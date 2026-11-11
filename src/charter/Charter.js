@@ -885,6 +885,20 @@ export class Charter {
         return { ...result, cost, funded };
     }
 
+    repairService(service) {
+        if (!service || (service.chapterId && service.chapterId !== 'player')) {
+            return { ok: false, error: "A rival chapter's service cannot be repaired." };
+        }
+        if (service.condition >= 100) return { ok: false, error: 'This service is already in good repair.' };
+        const cost = 3;
+        if (this.lumen < cost) return { ok: false, error: `A repair costs ${cost} lumen.` };
+        this.lumen -= cost;
+        service.condition = 100;
+        service.refreshGraphics();
+        this.refreshDerived();
+        return { ok: true, cost, condition: service.condition };
+    }
+
     setServiceAccess(service, accessId) {
         if (!service || (service.chapterId && service.chapterId !== 'player')) {
             return { ok: false, error: "A rival chapter's access cannot be changed." };
@@ -1189,7 +1203,13 @@ export class Charter {
         for (const rival of this.rivals) {
             rival.works = BALANCE.contest.rivalWorksPerDay;
             rival.services.promoteUnderConstruction();
-            for (const service of rival.services.services) service.resetDaily();
+            for (const service of rival.services.services) {
+                service.resetDaily();
+                if (service.condition < 50 && rival.lumen >= 3) {
+                    rival.lumen -= 3;
+                    service.condition = 100;
+                }
+            }
         }
         this.refreshAdjacency();
         this.assignHomes();

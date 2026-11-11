@@ -4945,3 +4945,13 @@ html.is-reduced-motion *::after {
     text-align: center;
     padding-bottom: 3px;
 }
+
+.service-card .modal__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.service-card .modal__actions .btn {
+    width: 100%;
+}

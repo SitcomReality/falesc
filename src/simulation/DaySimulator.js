@@ -188,7 +188,8 @@ export class DaySimulator {
         const match = isPrimary ? 1 : 0.46;
         const quality = ((program.quality || 1) + (service.qualityBonus || 0) + (service.adjacencyBonus || 0) + (service.districtBonus || 0) + serviceQualityModifier(service) + (this.charter.campaign?.qualityBonusFor(service.chapterId, program.need) || 0))
             * (service.finish === 'grand' ? 1.1 : service.finish === 'humble' ? 0.9 : 1)
-            * accessFitFor(service, resident);
+            * accessFitFor(service, resident)
+            * (0.85 + (service.condition ?? 100) / 100 * 0.15);
         const vibe = vibeFit(resident.traits.temperament, service.policy?.vibe || program.vibe);
         const standards = standardFit(resident.traits.standards, service.finish);
         const distance = this.distanceToService(resident, service);
@@ -560,6 +561,11 @@ export class DaySimulator {
             at: charter.day
         };
 
+        for (const [serviceId, visits] of this.serviceVisits.entries()) {
+            const service = this.charter.allServices.find((entry) => entry.id === serviceId);
+            if (!service) continue;
+            service.condition = Math.max(0, Math.round((service.condition ?? 100) - Math.min(8, visits * 0.6)));
+        }
         if (this.departures.length > 0) {
             report.message = this.departures.length === 1
                 ? `${this.departures[0].name} left the chapter.`

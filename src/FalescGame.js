@@ -106,6 +106,7 @@ export class FalescGame {
         this.serviceCard = new ServiceCardModal({
             game: this,
             onDemolish: (service) => this.dismantleService(service),
+            onRepair: (service) => this.repairService(service),
             onReopen: (service) => this.reopenService(service),
             onRetrofit: (service) => this.openRetrofit(service),
             onHours: (service, hoursId) => this.setServiceHours(service, hoursId),
@@ -786,6 +787,16 @@ export class FalescGame {
         this.gameScreen?.updateHud?.(true);
         this.gameScreen?.toast?.(this.motion === 'reduced' ? 'Reduced motion on.' : 'Reduced motion off.', 'mint', 1800);
         return this.motion;
+    }
+
+    repairService(service) {
+        if (!this.charter) return { ok: false, error: 'No charter.' };
+        const result = this.charter.repairService(service);
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast(`${service.name} is back in good repair.`, 'mint', 1800);
+        return result;
     }
 
     showChapterDossier(chapterId) {
