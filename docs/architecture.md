@@ -1,6 +1,9 @@
 # Architecture
 
 This document describes how FALESC boots, updates, renders, and changes state.
+It describes the **Prism Tide prototype** as implemented today. For the refined
+design direction see [design-refinement.md](design-refinement.md) and the
+implementation plan in [design/implementation.md](design/implementation.md).
 For setup and commands see [development.md](development.md); for tests see
 [testing.md](testing.md); for the visual system see [design-vision.md](design-vision.md).
 

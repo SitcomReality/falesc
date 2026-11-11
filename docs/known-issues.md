@@ -1,5 +1,11 @@
 # Known issues and technical debt
 
+> **Design context:** issues **#1 (placement policy and upgrades)** and
+> **#4 (NPC navigation)** are prerequisites for the refined design, not just
+> limitations of the prototype. See
+> [design/implementation.md](design/implementation.md#5-prerequisites) and
+> [design-refinement.md](design-refinement.md).
+
 This document records issues that are larger than a safe drive-by fix. It is a
 living list: when something is fixed, move it to “Fixed during the Prism Tide
 overhaul” and update any tests/docs that referenced it.
@@ -172,7 +178,7 @@ The world geometry, character palettes/proportions, mineral variation, and NPC
 decision seeds are deterministic per seed, but animation phase and NPC positions
 still depend on elapsed frame time. A full-viewport baseline would be flaky.
 `#minimap` or the build dock could be baselined once the visual flow is settled;
-see [testing.md](testing.md#8-visual-regression-not-enabled).
+see [testing.md](testing.md#8-visual-regression).
 
 ## Fixed during the Prism Tide overhaul
 

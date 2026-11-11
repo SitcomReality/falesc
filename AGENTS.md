@@ -11,6 +11,12 @@ archipelago with coral/mint/cream UI, local Fraunces/Jost/Space Mono fonts, and 
 lumen economy. Read [docs/design-vision.md](docs/design-vision.md) before making
 visual changes; it is the guardrail against generic dark-dashboard styling.
 
+**Design direction.** The current build is the **Prism Tide prototype**. The
+refined direction — resident needs, service buildings, care-based competition
+and the Confluence — is in
+[docs/design-refinement.md](docs/design-refinement.md). Read it before changing
+the game loop; the Prism Tide loop is prototype-era, not the plan.
+
 ## Start here
 
 ```bash
@@ -101,11 +107,13 @@ The CLI equivalents are documented in [docs/testing.md](docs/testing.md). Run
 
 ## Where to read more
 
+- [docs/design-refinement.md](docs/design-refinement.md) — refined design overview, pillars, decisions, scope
+- [docs/design/](docs/design/) — component docs: residents, buildings, economy, competition, world, implementation, roadmap, decisions
 - [docs/design-vision.md](docs/design-vision.md) — identity, palette, typography, UX guardrails
 - [docs/architecture.md](docs/architecture.md) — detailed runtime and system design
 - [docs/development.md](docs/development.md) — local setup, vendoring, common tasks
 - [docs/testing.md](docs/testing.md) — checks, smoke test, scenarios, manual checklist
-- [docs/gameplay.md](docs/gameplay.md) — controls, economy, tides, victory
+- [docs/gameplay.md](docs/gameplay.md) — prototype-era controls, economy, tides, victory
 - [docs/known-issues.md](docs/known-issues.md) — remaining limitations and risks
 
 ## Practical notes

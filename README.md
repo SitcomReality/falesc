@@ -10,6 +10,12 @@ build step: `index.html` loads `src/App.js` directly and an import map points at
 the vendored Pixi build. Fonts and art are local; the game makes no network
 requests at runtime.
 
+> **Design direction:** the current build is the **Prism Tide prototype**. The
+> refined design — resident needs, service buildings, care-based competition and
+> the Confluence — is in
+> [docs/design-refinement.md](docs/design-refinement.md). The "How to play"
+> section below describes the prototype; it is not the intended final loop.
+
 ## Run it locally
 
 Requirements: Node.js 18+ (only for the dev server and checks). There is nothing
