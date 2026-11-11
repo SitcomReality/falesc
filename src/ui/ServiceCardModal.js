@@ -4,6 +4,7 @@ import { RETROFIT_BY_ID, RETROFIT_MIN_COST } from '../services/RetrofitModules.j
 import { SERVICE_HOURS, SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
 import { SERVICE_VIBES, SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
 import { SERVICE_ACCESS, SERVICE_ACCESS_BY_ID } from '../services/ServiceAccess.js';
+import { SERVICE_FOCUS } from '../services/ServiceFocus.js';
 import { FLOOR_PLAN_BY_ID } from '../services/FloorPlans.js';
 import { finishCost } from '../services/BuildingFinishes.js';
 import { escapeHtml } from './html.js';
@@ -14,7 +15,7 @@ import { escapeHtml } from './html.js';
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, onRepair, onOpenResident, overlays, game }) {
+    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, onFocus, onRepair, onOpenResident, overlays, game }) {
         this.onDemolish = onDemolish;
         this.onRepair = onRepair;
         this.onOpenResident = onOpenResident;
@@ -24,6 +25,7 @@ export class ServiceCardModal {
         this.onFloor = onFloor;
         this.onVibe = onVibe;
         this.onAccess = onAccess;
+        this.onFocus = onFocus;
         this.overlays = overlays;
         this.game = game;
         this.isOpen = false;
@@ -67,6 +69,9 @@ export class ServiceCardModal {
                 <label class="service-hours" data-role="access-wrap" hidden>Welcome
                     <select data-testid="service-access">${SERVICE_ACCESS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
                 </label>
+                <label class="service-hours" data-role="focus-wrap" hidden>Focus
+                    <select data-testid="service-focus"></select>
+                </label>
             </div>
             <div class="service-interior" data-role="interior"></div>
             <div class="service-regulars" data-role="regulars" hidden></div>
@@ -96,6 +101,8 @@ export class ServiceCardModal {
         this.vibeSelect = this.panel.querySelector('[data-testid=service-vibe]');
         this.accessWrap = this.panel.querySelector('[data-role=access-wrap]');
         this.accessSelect = this.panel.querySelector('[data-testid=service-access]');
+        this.focusWrap = this.panel.querySelector('[data-role=focus-wrap]');
+        this.focusSelect = this.panel.querySelector('[data-testid=service-focus]');
         this.noteEl = this.panel.querySelector('[data-role=note]');
         this.errorEl = this.panel.querySelector('[data-role=error]');
         this.demolishBtn = this.panel.querySelector('[data-testid=structure-demolish]');
@@ -122,6 +129,7 @@ export class ServiceCardModal {
         this.hoursSelect.addEventListener('change', () => this.changeHours(this.hoursSelect.value));
         this.vibeSelect.addEventListener('change', () => this.changeVibe(this.vibeSelect.value));
         this.accessSelect.addEventListener('change', () => this.changeAccess(this.accessSelect.value));
+        this.focusSelect.addEventListener('change', () => this.changeFocus(this.focusSelect.value));
         this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
     }
 
@@ -223,6 +231,17 @@ export class ServiceCardModal {
         const canFloor = !rivalService && !service.fixed && working && (service.floors || 1) < 3;
         this.floorBtn.hidden = !canFloor;
         this.floorBtn.disabled = !canFloor || (this.game?.charter?.lumen || 0) < 4;
+        const canSetFocus = !rivalService && working && Boolean(program?.secondaryNeed);
+        this.focusWrap.hidden = !canSetFocus;
+        if (canSetFocus) {
+            const currentFocus = service.policy?.focus || 'balanced';
+            this.focusSelect.innerHTML = [
+                `<option value="balanced">Both needs</option>`,
+                `<option value="primary">${escapeHtml(need ? `${need.name} first` : 'Primary need')}</option>`,
+                `<option value="secondary">${escapeHtml(secondary ? `${secondary.name} first` : 'Secondary need')}</option>`
+            ].join('');
+            this.focusSelect.value = SERVICE_FOCUS.some((entry) => entry.id === currentFocus) ? currentFocus : 'balanced';
+        }
         const canSetHours = !rivalService && !service.fixed && service.programId !== 'housing' && working;
         this.hoursWrap.hidden = !canSetHours;
         this.hoursSelect.value = SERVICE_HOURS_BY_ID[service.policy?.hours] ? service.policy.hours : 'as_built';
@@ -289,6 +308,18 @@ export class ServiceCardModal {
         const result = this.onAccess(service, accessId);
         if (result?.ok === false) {
             this.errorEl.textContent = result.error || 'That access policy cannot be set.';
+            return;
+        }
+        this.hide();
+        this.show(service);
+    }
+
+    changeFocus(focusId) {
+        if (!this.isOpen || !this.service) return;
+        const service = this.service;
+        const result = this.onFocus(service, focusId);
+        if (result?.ok === false) {
+            this.errorEl.textContent = result.error || 'That focus cannot be set.';
             return;
         }
         this.hide();

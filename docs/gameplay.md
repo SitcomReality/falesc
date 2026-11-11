@@ -181,6 +181,9 @@ now; First Light remains resident-only.
 
 ## Service hours
 
+Dual-need services also choose a **Focus**: both needs, the primary need or the
+secondary need. Matching need visits gain 5%; the other need loses 2%.
+
 Every open, player-built service except housing exposes an **Hours** choice in
 its service record:
 

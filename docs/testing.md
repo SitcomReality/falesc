@@ -198,6 +198,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `housing-residents.mjs` | Opens the Welcome Post record, checks Residents here, a six-bed ground floor and opens a resident. |
 | `service-regulars.mjs` | Visits a Canteen for a day, opens its record, checks the Last seen here names and opens a resident from the list. |
 | `service-condition.mjs` | Wears a Canteen to 42%, checks the wear row and repair button, repairs it for 3 lumen and confirms the condition saves. |
+| `service-focus.mjs` | Builds a Clinic, sets Focus to Rest first, checks the policy and confirms it saves. |
 | `service-access.mjs` | Switches a canteen through Visitors first and Care first, checks the policies and save/reload without changing capacity. |
 | `service-vibe.mjs` | Switches a working canteen from Efficient to Lively, checks the policy and save/reload without changing capacity or upkeep. |
 | `service-hours.mjs` | Switches an open canteen to Round the clock, checks +2 upkeep and save/reload. |

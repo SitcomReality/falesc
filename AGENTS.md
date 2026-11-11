@@ -89,6 +89,7 @@ webgame_smoke --scenario scripts/scenarios/service-floors.mjs
 webgame_smoke --scenario scripts/scenarios/housing-residents.mjs
 webgame_smoke --scenario scripts/scenarios/service-regulars.mjs
 webgame_smoke --scenario scripts/scenarios/service-condition.mjs
+webgame_smoke --scenario scripts/scenarios/service-focus.mjs
 webgame_smoke --scenario scripts/scenarios/service-access.mjs
 webgame_smoke --scenario scripts/scenarios/service-vibe.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
@@ -247,7 +248,8 @@ after any behavioural change.
   service record owns the action and the module is saved. Open services can also
   choose As built, Round the clock, Daylight or Evening hours, plus a free
   Cosy/Lively/Curious/Efficient atmosphere and an Open/Chapter first/Visitors
-  first welcome policy, including Care first for residents in crisis. The nine buildable
+  first welcome policy, including Care first for residents in crisis. Dual-need services
+  can also choose a Focus toward either need. The nine buildable
   services include the 2×2 Bathhouse for Rest + Company, the 2×2 Clinic for
   Rest + Sustenance, the 2×2 Creche for Company + Rest, the 2×2 Amphitheatre
   for Company + Wonder and the 2×2 Observatory for Wonder at night. A build chooses a

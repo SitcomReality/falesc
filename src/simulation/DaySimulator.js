@@ -189,6 +189,7 @@ export class DaySimulator {
         const quality = ((program.quality || 1) + (service.qualityBonus || 0) + (service.adjacencyBonus || 0) + (service.districtBonus || 0) + serviceQualityModifier(service) + (this.charter.campaign?.qualityBonusFor?.(service.chapterId, program.need) || 0))
             * (service.finish === 'grand' ? 1.1 : service.finish === 'humble' ? 0.9 : 1)
             * accessFitFor(service, resident)
+            * focusFitFor(service, need.id)
             * (0.85 + (service.condition ?? 100) / 100 * 0.15);
         const vibe = vibeFit(resident.traits.temperament, service.policy?.vibe || program.vibe);
         const standards = standardFit(resident.traits.standards, service.finish);

@@ -148,6 +148,7 @@ webgame_smoke --scenario scripts/scenarios/service-floors.mjs
 webgame_smoke --scenario scripts/scenarios/housing-residents.mjs
 webgame_smoke --scenario scripts/scenarios/service-regulars.mjs
 webgame_smoke --scenario scripts/scenarios/service-condition.mjs
+webgame_smoke --scenario scripts/scenarios/service-focus.mjs
 webgame_smoke --scenario scripts/scenarios/service-access.mjs
 webgame_smoke --scenario scripts/scenarios/service-vibe.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs

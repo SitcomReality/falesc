@@ -119,6 +119,7 @@ export class FalescGame {
             onFloor: (service) => this.openFloorPlan(service),
             onVibe: (service, vibeId) => this.setServiceVibe(service, vibeId),
             onAccess: (service, accessId) => this.setServiceAccess(service, accessId),
+            onFocus: (service, focusId) => this.setServiceFocus(service, focusId),
             overlays: this.overlays
         });
         this.floorPlan = new FloorPlanModal({
@@ -744,6 +745,15 @@ export class FalescGame {
         this.gameScreen.updateHud(true);
         this.saveGame();
         this.gameScreen.toast(`${service.name} rises to ${service.floors} floors · ${result.plan?.name || 'new floor'}.`, 'mint', 2200);
+        return result;
+    }
+
+    setServiceFocus(service, focusId) {
+        if (!this.charter) return { ok: false, error: 'No charter.' };
+        const result = this.charter.setServiceFocus(service, focusId);
+        if (!result.ok) return result;
+        this.saveGame();
+        this.gameScreen.toast(`${service.name} now leans ${result.focus.name.toLowerCase()}.`, 'mint', 1800);
         return result;
     }
 

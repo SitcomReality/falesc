@@ -7,6 +7,7 @@ import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
 import { SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
 import { SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
 import { SERVICE_ACCESS_BY_ID } from '../services/ServiceAccess.js';
+import { SERVICE_FOCUS_BY_ID } from '../services/ServiceFocus.js';
 import { FLOOR_PLAN_BY_ID } from '../services/FloorPlans.js';
 import { finishFor, finishCost } from '../services/BuildingFinishes.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService, removeCommonsPolicyFromService } from '../commons/CommonsPolicies.js';
@@ -914,6 +915,19 @@ export class Charter {
         service.refreshGraphics();
         this.refreshDerived();
         return { ok: true, cost, condition: service.condition };
+    }
+
+    setServiceFocus(service, focusId) {
+        const focus = SERVICE_FOCUS_BY_ID[focusId];
+        if (!focus) return { ok: false, error: 'That is not a focus.' };
+        if (!service || service.state !== 'ACTIVE' || service.closed) {
+            return { ok: false, error: 'Only an open, working service can choose a focus.' };
+        }
+        if (!service.program?.secondaryNeed) return { ok: false, error: 'This service already has one purpose.' };
+        service.policy = { ...(service.policy || {}), focus: focus.id };
+        service.refreshGraphics();
+        this.refreshDerived();
+        return { ok: true, focus };
     }
 
     setServiceAccess(service, accessId) {
