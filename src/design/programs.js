@@ -193,6 +193,28 @@ export const PROGRAMS = [
         blurb: 'A bright room, low tables and someone watching the little ones. Grown-ups get company; children get a place to be.'
     },
     {
+        id: 'festival_kitchen',
+        name: 'Festival Kitchen',
+        category: 'Festival',
+        need: 'sustenance',
+        capacity: 5,
+        duration: 2.4,
+        open: ['daylight', 'evening'],
+        footprint: { w: 1, h: 1 },
+        cost: 0,
+        upkeep: 0,
+        durationText: 'a festival plate',
+        quality: 1.25,
+        finish: 'comfortable',
+        vibe: 'lively',
+        constructionDays: 0,
+        buildable: false,
+        color: 'saffron',
+        icon: 'canteen',
+        testid: 'program-festival-kitchen',
+        blurb: 'A temporary stall for the festival days. Hot food, no queue, and the whole archipelago invited.'
+    },
+    {
         id: 'observatory',
         name: 'Observatory',
         category: 'Wonder',

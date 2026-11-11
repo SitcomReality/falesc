@@ -333,6 +333,7 @@ export class Charter {
             this.rivals.map((rival) => [rival.id, chooseCampaignPledge(rival, this, campaign)])
         );
         this.campaign = campaign;
+        this.spawnFestivalKitchen();
         return this.campaign;
     }
 
@@ -340,9 +341,46 @@ export class Charter {
         return this.campaign?.eventFor?.(this.day) || null;
     }
 
+    spawnFestivalKitchen() {
+        if (this.services.services.some((service) => service.programId === 'festival_kitchen')) return null;
+        const sector = this.homeSector;
+        if (!sector) return null;
+        for (let v = 0; v < sector.gridSize; v++) {
+            for (let u = 0; u < sector.gridSize; u++) {
+                const check = this.services.canPlace('festival_kitchen', sector.id, u, v);
+                if (!check.ok) continue;
+                const result = this.services.place({
+                    programId: 'festival_kitchen',
+                    sectorId: sector.id,
+                    u,
+                    v,
+                    name: 'Festival Kitchen',
+                    state: 'ACTIVE',
+                    fixed: true
+                });
+                if (result.ok) {
+                    result.service.festival = true;
+                    this.log('campaign', 'A Festival Kitchen opened for the celebration.');
+                    this.refreshDerived();
+                    return result.service;
+                }
+            }
+        }
+        return null;
+    }
+
+    removeFestivalKitchen() {
+        const service = this.services.services.find((entry) => entry.programId === 'festival_kitchen');
+        if (!service) return false;
+        this.services.remove(service);
+        this.refreshDerived();
+        return true;
+    }
+
     resolveConfluence(pledgeId) {
         if (!this.confluenceReady) return null;
         const result = ConfluenceVote.tally(this, pledgeId);
+        this.removeFestivalKitchen();
         this.confluenceReady = false;
         this.ending = result.ending;
         this.refreshDerived();

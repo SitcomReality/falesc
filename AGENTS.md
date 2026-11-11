@@ -72,6 +72,7 @@ webgame_smoke --scenario scripts/scenarios/engine-regression.mjs
 webgame_smoke --scenario scripts/scenarios/contest.mjs
 webgame_smoke --scenario scripts/scenarios/contest-recovery.mjs
 webgame_smoke --scenario scripts/scenarios/confluence-defeat.mjs
+webgame_smoke --scenario scripts/scenarios/festival-kitchen.mjs
 webgame_smoke --scenario scripts/scenarios/campaign.mjs
 webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 webgame_smoke --scenario scripts/scenarios/commons.mjs

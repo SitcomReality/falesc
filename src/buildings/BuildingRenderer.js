@@ -153,6 +153,9 @@ export class BuildingRenderer {
             case 'creche':
                 BuildingRenderer.drawCreche(graphics, state);
                 break;
+            case 'festival_kitchen':
+                BuildingRenderer.drawCanteen(graphics, state);
+                break;
             case 'clinic':
                 BuildingRenderer.drawClinic(graphics, state);
                 break;
