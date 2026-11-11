@@ -95,6 +95,16 @@ export const ICONS = {
         <path d="M24 30c-3-6 2-10 0-16M32 30c-3-6 2-10 0-16M40 30c-3-6 2-10 0-16" stroke="#59E3C2" stroke-width="2" stroke-linecap="round" opacity=".75"/>
         <rect x="29" y="36" width="6" height="11" fill="#211225"/>
     `),
+    clinic: svg(`
+        <path d="M6 49h52" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M12 47V25c0-8 9-14 20-14s20 6 20 14v22" fill="#FFF2D8" stroke="${INK}" stroke-width="2.5"/>
+        <path d="M9 26c3-12 11-18 23-18s20 6 23 18" fill="#A8F5DC" stroke="${INK}" stroke-width="2.5"/>
+        <rect x="18" y="30" width="11" height="9" fill="#FFD36E" stroke="${INK}" stroke-width="1.5"/>
+        <rect x="35" y="30" width="11" height="9" fill="#FFD36E" stroke="${INK}" stroke-width="1.5"/>
+        <rect x="27" y="13" width="10" height="10" rx="2" fill="#59E3C2" stroke="${INK}" stroke-width="2"/>
+        <path d="M32 16v5M29.5 18.5h5" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>
+        <rect x="29" y="38" width="6" height="9" fill="#211225"/>
+    `),
     commons_beacon: svg(`
         <path d="M8 50h48" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
         <path d="M23 49 27 22h10l4 27Z" fill="#C9B6FF" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>

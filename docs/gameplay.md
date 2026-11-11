@@ -275,7 +275,7 @@ line from a resident. From there:
 
 ## Services
 
-All five buildable services cost one work and finish overnight. The Commons
+All six buildable services cost one work and finish overnight. The Commons
 Beacon is a shared funded project, not a buildable program; once lit it is a
 six-seat all-needs shared service.
 

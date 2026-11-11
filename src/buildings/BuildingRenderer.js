@@ -65,6 +65,15 @@ const PROGRAMS = {
             { x: 172, y: 10 }
         ]
     },
+    clinic: {
+        hw: 112,
+        hh: 48,
+        guide: [
+            { x: -104, y: -86 },
+            { x: 0, y: -144 },
+            { x: 104, y: -86 }
+        ]
+    },
     bathhouse: {
         hw: 158,
         hh: 66,
@@ -107,6 +116,9 @@ export class BuildingRenderer {
                 break;
             case 'bathhouse':
                 BuildingRenderer.drawBathhouse(graphics, state);
+                break;
+            case 'clinic':
+                BuildingRenderer.drawClinic(graphics, state);
                 break;
             case 'commons_beacon':
                 BuildingRenderer.drawCommonsBeacon(graphics, state);
@@ -1036,6 +1048,25 @@ export class BuildingRenderer {
     /* ------------------------------------------------------------------ */
     /* Garden Dome — pressurised geodesic glasshouse                       */
     /* ------------------------------------------------------------------ */
+    static drawClinic(graphics, state) {
+        BuildingRenderer.drawHousing(graphics, state);
+        const ink = BuildingRenderer.tone(INK, state);
+        const cream = BuildingRenderer.tone(CREAM, state);
+        const mint = BuildingRenderer.tone(MINT, state);
+        graphics.beginFill(cream, 0.96);
+        graphics.lineStyle(2.5, ink, 1);
+        graphics.drawRoundedRect(-22, -96, 44, 25, 5);
+        graphics.endFill();
+        graphics.beginFill(mint, 1);
+        graphics.lineStyle(2, ink, 1);
+        graphics.drawRoundedRect(-16, -90, 32, 13, 3);
+        graphics.endFill();
+        graphics.beginFill(cream, 1);
+        graphics.drawRect(-3, -89, 6, 11);
+        graphics.drawRect(-9, -84, 18, 5);
+        graphics.endFill();
+    }
+
     static drawBathhouse(graphics, state) {
         BuildingRenderer.drawTeaHouse(graphics, state);
         const trim = BuildingRenderer.tone(CREAM, state);

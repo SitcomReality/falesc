@@ -273,7 +273,7 @@ not a tooltip essay.
 - 12–15 named residents.
 - Four needs: Sustenance, Rest, Company, Wonder.
 - Three traits, one value each.
-- One island, five services: Housing, Canteen, Tea House, Garden Dome, Bathhouse.
+- One island, six services: Housing, Canteen, Tea House, Garden Dome, Bathhouse, Clinic.
 - Patronage and Devotion tracked, but no rivals yet.
 - Resident card with needs, traits, last choice and why.
 - Enter/exit and queues working for at least the Canteen and Tea House.

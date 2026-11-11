@@ -61,6 +61,7 @@ webgame_smoke --scenario scripts/scenarios/service-district.mjs
 webgame_smoke --scenario scripts/scenarios/service-adjacency.mjs
 webgame_smoke --scenario scripts/scenarios/service-floors.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
+webgame_smoke --scenario scripts/scenarios/clinic.mjs
 webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
 webgame_smoke --scenario scripts/scenarios/building-finishes.mjs
 webgame_smoke --scenario scripts/scenarios/commons-isle.mjs
@@ -85,7 +86,7 @@ after any behavioural change.
 | `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |
 | `src/confluence/` | Campaign, pledges, stewardship and the deterministic Confluence vote |
 | `src/commons/` | Commons Assembly policies and shared service modifiers |
-| `src/design/` | Needs, traits, five service programs, balance table, names |
+| `src/design/` | Needs, traits, six service programs, balance table, names |
 | `src/services/` | `ServiceBuilding`, `ServiceManager`, `PlacementPolicy` |
 | `src/simulation/DaySimulator.js` | Deterministic day: needs, choices, queues, visits, report |
 | `src/economy/LumenLedger.js` | Contributions from wellbeing, upkeep, closures |
@@ -200,8 +201,9 @@ after any behavioural change.
   `CommonsBallot.js`). One second reading can amend it after a full day. An open player service can hold up to two retrofit
   modules (6–7 lumen each) from Sunroom, Atelier and Night Kitchen. The
   service record owns the action and the module is saved. Open services can also
-  choose As built, Round the clock, Daylight or Evening hours. The five buildable
-  services include the 2×2 Bathhouse for Rest + Company. A build chooses a
+  choose As built, Round the clock, Daylight or Evening hours. The six buildable
+  services include the 2×2 Bathhouse for Rest + Company and the 2×2 Clinic for
+  Rest + Sustenance. A build chooses a
   Humble, Comfortable or Grand shell finish. An open service can add two
   floors for capacity and upkeep. Neighbouring services add a small quality
   bonus, with extra for mixed chapters. Three connected services form a named

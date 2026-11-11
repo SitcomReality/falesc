@@ -24,7 +24,7 @@ no sea, beach or open-air planting. `npm run check` and the smoke test pass.
 
 - one playable home shard plus a Contest commons isle (the other islands are scenery);
 - a seeded 15-name roster with 6 founding residents;
-- four needs (Sustenance, Rest, Company, Wonder) and five buildable services
+- four needs (Sustenance, Rest, Company, Wonder) and six buildable services
   (Housing, Canteen, Tea House, Garden Dome);
 - paused planning, deterministic day playback at 1×/2×/4× with Skip, and an
   evening report;
@@ -46,7 +46,7 @@ no sea, beach or open-air planting. `npm run check` and the smoke test pass.
   social/word-of-mouth departure paths remain a later layer.
 - **Run the acceptance playtest.** `resident-day.mjs` proves the mechanics; the
   fun of watching a choice and reading the "why" still needs a human pass.
-- Decide after that pass whether the five services need more differentiation
+- Decide after that pass whether the six services need more differentiation
   before rivals, or whether the resident loop is strong enough to move on.
 
 **Phase 2 preview is now in the build:** two AI rival chapters, doctrine build
