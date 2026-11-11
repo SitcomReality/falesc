@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { SeededRandom } from '../map/SeededRandom.js';
+import { SeededRandom } from '../../map/SeededRandom.js';
 
 const LINES = [
     'I could use a hot meal.',

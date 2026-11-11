@@ -1,7 +1,7 @@
 import { SERVICE_HOURS } from '../../services/ServicePolicies.js';
 import { SERVICE_VIBES } from '../../services/ServiceVibes.js';
 import { SERVICE_ACCESS } from '../../services/ServiceAccess.js';
-import { escapeHtml } from '../escapeHtml.js';
+import { escapeHtml } from '../chrome/escapeHtml.js';
 
 /** The static service-record panel; `show()` fills its data-role slots. */
 export function serviceCardMarkup() {

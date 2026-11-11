@@ -1,4 +1,4 @@
-import { escapeHtml } from './escapeHtml.js';
+import { escapeHtml } from '../chrome/escapeHtml.js';
 /**
  * The charter journal: short, player-facing milestones. It is not a report or a
  * replay, just the decisions and arrivals worth remembering.

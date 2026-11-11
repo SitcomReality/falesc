@@ -1,6 +1,6 @@
 import { STEWARDSHIP_POLICIES } from '../confluence/Stewardship.js';
 import { PLEDGE_BY_ID } from '../confluence/Pledges.js';
-import { escapeHtml } from '../ui/escapeHtml.js';
+import { escapeHtml } from '../ui/chrome/escapeHtml.js';
 
 /**
  * The winning chapter chooses how to govern the commons. This is the epilogue

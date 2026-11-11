@@ -1,4 +1,4 @@
-import { escapeHtml } from './escapeHtml.js';
+import { escapeHtml } from '../chrome/escapeHtml.js';
 /**
  * A readable grid summary for keyboard and assistive-tech players: one table
  * per buildable isle, every cell named and its occupant described. This is a

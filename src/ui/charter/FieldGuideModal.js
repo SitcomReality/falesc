@@ -1,10 +1,10 @@
-import { NEEDS } from '../design/needs.js';
-import { PROGRAMS } from '../design/programs.js';
-import { SERVICE_HOURS } from '../services/ServicePolicies.js';
-import { SERVICE_VIBES } from '../services/ServiceVibes.js';
-import { SERVICE_ACCESS } from '../services/ServiceAccess.js';
-import { FLOOR_PLANS } from '../services/FloorPlans.js';
-import { escapeHtml } from './escapeHtml.js';
+import { NEEDS } from '../../design/needs.js';
+import { PROGRAMS } from '../../design/programs.js';
+import { SERVICE_HOURS } from '../../services/ServicePolicies.js';
+import { SERVICE_VIBES } from '../../services/ServiceVibes.js';
+import { SERVICE_ACCESS } from '../../services/ServiceAccess.js';
+import { FLOOR_PLANS } from '../../services/FloorPlans.js';
+import { escapeHtml } from '../chrome/escapeHtml.js';
 
 /**
  * The paper almanac. A read-only reference for every system that is easy to

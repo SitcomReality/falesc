@@ -1,6 +1,6 @@
-import { readArchive, clearArchive, restoreArchive } from '../persistence/CharterArchive.js';
-import { readDriftRank } from '../persistence/DriftRank.js';
-import { escapeHtml } from './escapeHtml.js';
+import { readArchive, clearArchive, restoreArchive } from '../../persistence/CharterArchive.js';
+import { readDriftRank } from '../../persistence/DriftRank.js';
+import { escapeHtml } from '../chrome/escapeHtml.js';
 
 /**
  * Past charters, newest first. Read-only except for a deliberate clear.

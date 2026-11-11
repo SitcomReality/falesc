@@ -2,8 +2,8 @@
  * A short checklist of firsts and civic milestones. It is guidance and a record,
  * not a second objective system or a source of rewards.
  */
-import { readMilestones } from '../persistence/MilestoneArchive.js';
-import { escapeHtml } from './escapeHtml.js';
+import { readMilestones } from '../../persistence/MilestoneArchive.js';
+import { escapeHtml } from '../chrome/escapeHtml.js';
 
 export class MilestonesModal {
     constructor({ game, overlays }) {

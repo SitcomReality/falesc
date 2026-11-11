@@ -1,5 +1,5 @@
 import { PLEDGES, PLEDGE_BY_ID } from '../confluence/Pledges.js';
-import { escapeHtml } from '../ui/escapeHtml.js';
+import { escapeHtml } from '../ui/chrome/escapeHtml.js';
 
 /**
  * The final public vote. The player makes one pledge to the archipelago, then

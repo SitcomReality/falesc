@@ -1,5 +1,5 @@
-import { RETROFIT_MODULES } from '../services/RetrofitModules.js';
-import { escapeHtml } from './escapeHtml.js';
+import { RETROFIT_MODULES } from '../../services/RetrofitModules.js';
+import { escapeHtml } from '../chrome/escapeHtml.js';
 
 /**
  * Retrofit choice: one module per service, with a real trade between seats,

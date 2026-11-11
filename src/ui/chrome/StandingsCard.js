@@ -1,4 +1,4 @@
-import { COMMONS_POLICY_BY_ID } from '../commons/CommonsPolicies.js';
+import { COMMONS_POLICY_BY_ID } from '../../commons/CommonsPolicies.js';
 import { escapeHtml } from './escapeHtml.js';
 
 /**

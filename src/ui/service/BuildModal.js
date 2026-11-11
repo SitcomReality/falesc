@@ -1,6 +1,6 @@
-import { programIcon } from './icons.js';
-import { NEED_BY_ID } from '../design/needs.js';
-import { BUILDING_FINISHES, finishFor, finishCost } from '../services/BuildingFinishes.js';
+import { programIcon } from '../chrome/icons.js';
+import { NEED_BY_ID } from '../../design/needs.js';
+import { BUILDING_FINISHES, finishFor, finishCost } from '../../services/BuildingFinishes.js';
 
 /**
  * Build dialog for a service. Shares the paper-card language and the focus trap

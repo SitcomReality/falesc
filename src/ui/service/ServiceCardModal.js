@@ -1,6 +1,6 @@
-import { programIcon } from './icons.js';
-import { serviceCardMarkup } from './serviceCard/ServiceCardMarkup.js';
-import { buildServiceCardView } from './serviceCard/ServiceCardView.js';
+import { programIcon } from '../chrome/icons.js';
+import { serviceCardMarkup } from './ServiceCardMarkup.js';
+import { buildServiceCardView } from './ServiceCardView.js';
 
 /**
  * Service record: the same card is used for inspection, reopening a closed

@@ -1,7 +1,7 @@
-import { NEEDS } from '../design/needs.js';
-import { TEMPERAMENT_BY_ID, STANDARD_BY_ID, RHYTHM_BY_ID } from '../design/traits.js';
-import { needIcon } from './icons.js';
-import { escapeHtml } from './escapeHtml.js';
+import { NEEDS } from '../../design/needs.js';
+import { TEMPERAMENT_BY_ID, STANDARD_BY_ID, RHYTHM_BY_ID } from '../../design/traits.js';
+import { needIcon } from '../chrome/icons.js';
+import { escapeHtml } from '../chrome/escapeHtml.js';
 
 /**
  * The resident card is the player's window into a person: traits, needs, home,

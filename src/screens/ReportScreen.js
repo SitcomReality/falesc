@@ -1,7 +1,7 @@
 import { NEEDS } from '../design/needs.js';
 import { BALANCE } from '../design/balance.js';
 import { COMMONS_POLICY_BY_ID } from '../commons/CommonsPolicies.js';
-import { escapeHtml } from '../ui/escapeHtml.js';
+import { escapeHtml } from '../ui/chrome/escapeHtml.js';
 
 /**
  * The evening broadsheet. This is the emotional payoff: visits, hearts,

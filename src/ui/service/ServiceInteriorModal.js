@@ -1,5 +1,5 @@
-import { escapeHtml } from './escapeHtml.js';
-import { FLOOR_PLAN_BY_ID } from '../services/FloorPlans.js';
+import { escapeHtml } from '../chrome/escapeHtml.js';
+import { FLOOR_PLAN_BY_ID } from '../../services/FloorPlans.js';
 
 /**
  * A room-by-room view of an open service. The service record shows the stack;

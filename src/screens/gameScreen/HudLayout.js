@@ -1,8 +1,8 @@
 import { BUILDABLE_PROGRAMS } from '../../design/programs.js';
 import { NEED_BY_ID } from '../../design/needs.js';
 import { BALANCE } from '../../design/balance.js';
-import { programIcon, ICONS } from '../../ui/icons.js';
-import { StandingsCard } from '../../ui/StandingsCard.js';
+import { programIcon, ICONS } from '../../ui/chrome/icons.js';
+import { StandingsCard } from '../../ui/chrome/StandingsCard.js';
 
 /** Builds the planning HUD DOM, wires its controls and stores element refs on the screen. */
 export function buildHudLayout(screen) {

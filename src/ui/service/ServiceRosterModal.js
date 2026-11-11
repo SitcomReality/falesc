@@ -1,4 +1,4 @@
-import { escapeHtml } from './escapeHtml.js';
+import { escapeHtml } from '../chrome/escapeHtml.js';
 
 /**
  * A compact list of every player service with its state, condition and visits.
