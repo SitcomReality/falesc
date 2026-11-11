@@ -5103,3 +5103,25 @@ body.is-photo-mode .standings-card,
 body.is-photo-mode .care-watch {
     display: none !important;
 }
+
+.blueprint__count {
+    position: absolute;
+    top: 28px;
+    right: 6px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--mint);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 14px;
+    text-align: center;
+}
+
+.blueprint__count[hidden] {
+    display: none;
+}

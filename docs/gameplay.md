@@ -741,3 +741,7 @@ half-loaded.
 - **Crowd movement has no local avoidance.** Agents follow precomputed paths and
   can overlap visually.
 - Some open issues remain; see [known-issues.md](known-issues.md).
+
+
+Each service card carries a small count of how many of that program the
+player has already built.

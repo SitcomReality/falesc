@@ -172,6 +172,7 @@ export class GameScreen {
             button.innerHTML = `
                 <span class="blueprint__icon" aria-hidden="true">${programIcon(program.id)}</span>
                 <span class="blueprint__name">${program.name}</span>
+                <span class="blueprint__count" data-role="count" hidden></span>
                 <span class="blueprint__need">${need ? `${need.glyph} ${need.name}` : 'civic'}${secondary ? ` + ${secondary.name}` : ''} · ${program.durationText}</span>
                 <span class="blueprint__meta">
                     <span class="blueprint__cost" data-role="cost">${program.cost} lumen</span>
@@ -478,6 +479,14 @@ export class GameScreen {
         const selectedName = PROGRAM_BY_ID[this.game.selectedProgramId]?.name || 'Service';
         const spare = charter.contest ? charter.totalSpareBeds : charter.spareBeds;
         this._setText(this.worksNote, 'worksNote', `${charter.works} ${charter.works === 1 ? 'work' : 'works'} left · ${spare} spare ${spare === 1 ? 'bed' : 'beds'}`);
+        for (const [programId, button] of this.programButtons) {
+            const count = charter.services.services.filter((service) => service.programId === programId).length;
+            const badge = button.querySelector('[data-role=count]');
+            if (!badge) continue;
+            badge.hidden = count === 0;
+            badge.textContent = count ? String(count) : '';
+            badge.title = count ? `${count} built` : '';
+        }
         this._setText(this.dockNote, 'dockNote', charter.works > 0
             ? `${selectedName} armed${this.game.selectedProgramId ? ' · choose a plot' : ''}`
             : 'No works left. Open the day.');
