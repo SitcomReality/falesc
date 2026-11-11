@@ -53,12 +53,13 @@ export class LumenLedger {
      * Resolve one chapter's day. Mutates its lumen and service closures. The
      * player gets the same rules as a rival, including housing protection.
      */
-    static resolveChapter(chapter, residents, dividendPerResident = 0) {
+    static resolveChapter(chapter, residents, dividendPerResident = 0, visitorFees = 0) {
         const services = chapter.services;
         const dividend = LumenLedger.dividendFor(residents, dividendPerResident);
         const contributions = LumenLedger.projectedContributionsFor(chapter, residents, dividendPerResident);
         const upkeepBefore = LumenLedger.projectedUpkeepFor(chapter);
-        let lumen = chapter.lumen + contributions - upkeepBefore;
+        const visitorIncome = Math.max(0, Number(visitorFees) || 0);
+        let lumen = chapter.lumen + contributions + visitorIncome - upkeepBefore;
         const closures = [];
 
         if (lumen < 0) {
@@ -83,7 +84,7 @@ export class LumenLedger {
         }
 
         const upkeepAfter = LumenLedger.projectedUpkeepFor(chapter);
-        const net = contributions - upkeepAfter;
+        const net = contributions + visitorIncome - upkeepAfter;
         const finalLumen = Math.max(0, lumen);
         chapter.lumen = finalLumen;
         return {
@@ -93,6 +94,7 @@ export class LumenLedger {
             residents: residents.length,
             dividend,
             contributions,
+            visitorFees: visitorIncome,
             upkeep: upkeepAfter,
             upkeepBefore,
             net,
@@ -101,19 +103,24 @@ export class LumenLedger {
         };
     }
 
-    static resolveDay(charter, report) {
+    static resolveDay(charter, report, visitorFees = {}) {
         const dividend = charter.contest ? BALANCE.contest.civicDividend : 0;
         const summaries = charter.chapters.map((chapter) => {
             const residents = LumenLedger.residentsFor(chapter, charter);
-            return LumenLedger.resolveChapter(chapter, residents, dividend);
+            const fee = Number(visitorFees[chapter.id]) || 0;
+            return LumenLedger.resolveChapter(chapter, residents, dividend, fee);
         });
         const player = summaries.find((entry) => entry.isPlayer) || summaries[0];
+        const totalVisitorFees = summaries.reduce((sum, entry) => sum + (entry.visitorFees || 0), 0);
 
         report.contributions = player.contributions;
         report.dividend = player.dividend || 0;
+        report.visitorFees = totalVisitorFees;
+        report.playerVisitorFees = player.visitorFees || 0;
+        report.visitorFeesByChapter = { ...visitorFees };
         report.upkeep = player.upkeep;
         report.upkeepBefore = player.upkeepBefore;
-        report.net = player.net;
+        report.net = player.contributions + (player.visitorFees || 0) - player.upkeep;
         report.lumenAfter = player.lumen;
         report.closures = player.closures;
         report.chapters = (report.chapters || charter.chapters.map((chapter) => ({

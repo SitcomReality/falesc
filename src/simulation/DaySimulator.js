@@ -30,12 +30,14 @@ export class DaySimulator {
         this.affinityBefore = new Map();
         this.pendingArrivals = [...(charter.pendingArrivals || [])];
         this.departures = [];
+        this.visitorFees = {};
     }
 
     run() {
         const charter = this.charter;
+        const people = charter.presentResidents;
         const needBefore = new Map();
-        for (const resident of charter.activeResidents) {
+        for (const resident of people) {
             needBefore.set(resident.id, { ...resident.needs });
             this.affinityBefore.set(resident.id, { ...resident.affinity });
         }
@@ -43,7 +45,7 @@ export class DaySimulator {
         const loads = new Map();
         this.phaseLoad = loads;
         for (const phase of DAY_PHASES) {
-            for (const resident of charter.activeResidents) {
+            for (const resident of people) {
                 this.applyPhaseDrift(resident, phase);
                 if (phase.id === 'night') continue;
                 this.chooseAndSchedule(resident, phase, needBefore, loads);
@@ -63,7 +65,7 @@ export class DaySimulator {
         if (this.departures.length > 0) charter.refreshDerived();
 
         const report = this.buildReport(needBefore);
-        LumenLedger.resolveDay(charter, report);
+        LumenLedger.resolveDay(charter, report, this.visitorFees);
 
         for (const service of charter.allServices) {
             service.resetDaily();
@@ -247,6 +249,9 @@ export class DaySimulator {
             * standardFit(resident.traits.standards, service.finish);
         resident.adjustNeed(need.id, -effect);
         service.recordVisit(BALANCE.services.serviceHeart);
+        if (resident.visitor && service.chapterId !== 'commons') {
+            this.visitorFees[service.chapterId] = (this.visitorFees[service.chapterId] || 0) + BALANCE.visitors.fee;
+        }
         const urgencyBonus = needValue >= 70 ? BALANCE.services.urgentVisitAffinity : 0;
         resident.addAffinity(BALANCE.services.visitAffinity + urgencyBonus, service.chapterId);
         resident.clearUnmetDay(need.id);
@@ -404,6 +409,8 @@ export class DaySimulator {
         charter.flourishing = wellbeing;
         charter.devotion = charter.devotionByChapter.player || 0;
         const campaignEvent = this.campaignEvent;
+        const visitors = this.charter.visitors || [];
+        const visitorFees = Object.values(this.visitorFees).reduce((sum, value) => sum + value, 0);
         const commons = this.charter.commons ? {
             active: Boolean(this.charter.commons.active),
             fund: this.charter.commons.fund,
@@ -458,6 +465,9 @@ export class DaySimulator {
             flourishing: wellbeing,
             devotion: charter.devotion,
             campaignEvent,
+            visitors: visitors.length,
+            visitorFees,
+            visitorFeesByChapter: { ...this.visitorFees },
             commons,
             devotionByChapter,
             patronageByChapter,

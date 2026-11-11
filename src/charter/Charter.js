@@ -2,6 +2,7 @@ import { BALANCE } from '../design/balance.js';
 import { NEEDS } from '../design/needs.js';
 import { PROGRAM_BY_ID, servesNeed, isOpenAt } from '../design/programs.js';
 import { ResidentFactory } from '../residents/ResidentFactory.js';
+import { VisitorFactory } from '../residents/VisitorFactory.js';
 import { ServiceManager } from '../services/ServiceManager.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
@@ -56,6 +57,8 @@ export class Charter {
                 idPrefix: 'commons'
             })
             : null;
+        this.visitors = [];
+        this.visitorCell = null;
         this.commons = {
             target: BALANCE.commons.target,
             fund: 0,
@@ -127,6 +130,10 @@ export class Charter {
 
     get activeResidents() {
         return this.roster.filter((resident) => resident.active);
+    }
+
+    get presentResidents() {
+        return [...this.activeResidents, ...this.visitors];
     }
 
     get playerResidents() {
@@ -498,8 +505,24 @@ export class Charter {
         return { ok: true, cost };
     }
 
+    spawnVisitors() {
+        if (this.mode !== 'contest') {
+            this.visitors = [];
+            return [];
+        }
+        const count = VisitorFactory.countFor(this.seed, this.day);
+        this.visitors = VisitorFactory.create(this.seed, this.day, count);
+        this.visitorCell = this.commonsCell || null;
+        return this.visitors;
+    }
+
+    clearVisitors() {
+        this.visitors = [];
+    }
+
     openDay() {
         if (this.ending) return { report: this.lastReport, events: [] };
+        this.spawnVisitors();
         const simulation = new DaySimulator(this).run();
         this.lastReport = simulation.report;
         this.report = simulation.report;
@@ -512,6 +535,7 @@ export class Charter {
     beginNextDay() {
         if (this.ending) return { ended: true, ending: this.ending };
         if (this.confluenceReady) return { ended: true, confluence: true };
+        this.clearVisitors();
         this.day += 1;
         this.works = BALANCE.worksPerDay;
         const promoted = this.services.promoteUnderConstruction();
@@ -840,6 +864,7 @@ export class Charter {
             confluenceReady: this.confluenceReady,
             campaign: this.campaign?.toJSON() || null,
             commons: { ...this.commons },
+            visitors: this.visitors.length,
             totalSpareBeds: this.totalSpareBeds,
             rivals: this.rivals.length,
             devotionByChapter: this.devotionByChapter

@@ -110,6 +110,16 @@ weight to their chapters. The programme is shown in the campaign dialog, the
 HUD campaign card and the bulletin. The promise is carried into the Confluence
 screen and cannot be changed there.
 
+## Day visitors
+
+On every Contest day, **2–3 day-trippers** arrive from the outer isles. They
+are not residents: they have no bed, no vote and no place in the roster, and
+they leave when the next day begins. They do use the archipelago's services and
+pay **1 lumen per visit** to the chapter whose door they use. Their fees appear
+in the evening report and the chapter ledgers; their visits count in the
+event's totals and can crowd queues. The Commons Beacon charges no fee. Visitors
+are a Contest feature for now; First Light remains resident-only.
+
 ## The Commons Beacon
 
 Every Contest starts with a reserved **Commons Beacon** site and a shared fund

@@ -315,6 +315,14 @@ The **Commons Beacon** is a shared project rather than a chapter service.
 `commons`-owned `ServiceManager`; the site counts for occupancy and renders as
 a ghost. `Charter.contributeCommons()` accepts player or rival lumen, records
 contributors and flips the service to ACTIVE at 20. While active,
+`VisitorFactory` creates 2–3 transient visitors per Contest day. They are
+ordinary `Resident` models flagged `visitor`, included in `Charter.presentResidents`
+for the phase loop and the crowd, but excluded from `activeResidents`, housing,
+arrivals, Devotion and votes. `Charter.beginNextDay()` clears them. A visitor
+visit adds `BALANCE.visitors.fee` to `DaySimulator.visitorFees`; `LumenLedger`
+adds that to the owning chapter and reports `visitorFees` separately. Visitors
+are not serialized.
+
 `DaySimulator.applyNightRest()` eases every need by `BALANCE.commons.comfort`
 (3) after the home rest, and `servesNeed()` lets the six-seat Beacon answer any
 need as a shared visitable service. `CommonsModal` is the contribution UI. The site,

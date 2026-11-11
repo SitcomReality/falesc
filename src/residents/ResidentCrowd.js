@@ -20,14 +20,15 @@ export class ResidentCrowd {
 
     sync() {
         if (!this.charter) return;
-        const activeIds = new Set(this.charter.activeResidents.map((resident) => resident.id));
+        const present = this.charter.presentResidents;
+        const activeIds = new Set(present.map((resident) => resident.id));
         for (const [id, agent] of this.agents) {
             if (!activeIds.has(id)) {
                 agent.destroy();
                 this.agents.delete(id);
             }
         }
-        for (const resident of this.charter.activeResidents) {
+        for (const resident of present) {
             if (!this.agents.has(resident.id)) this.createAgent(resident);
         }
         this.placeAtHomes();
@@ -50,7 +51,7 @@ export class ResidentCrowd {
 
     homePointFor(resident, index) {
         const home = this.charter?.services.housingFor(resident);
-        const cell = home?.entrance || this.charter?.commonsCell;
+        const cell = home?.entrance || (resident.visitor ? this.charter?.visitorCell : this.charter?.commonsCell);
         const sector = this.charter?.homeSector;
         if (!cell || !sector) return { x: sector?.centerX || 0, y: sector?.centerY || 0 };
         const point = sector._project(cell.u + 0.5, cell.v + 0.5);
@@ -63,7 +64,7 @@ export class ResidentCrowd {
 
     placeAtHomes() {
         if (!this.charter) return;
-        this.charter.activeResidents.forEach((resident, index) => {
+        this.charter.presentResidents.forEach((resident, index) => {
             const agent = this.agents.get(resident.id);
             if (!agent) return;
             const point = this.homePointFor(resident, index);
@@ -84,7 +85,7 @@ export class ResidentCrowd {
             byResident.get(event.residentId).push(event);
         }
         this.placeAtHomes();
-        for (const resident of this.charter.activeResidents) {
+        for (const resident of this.charter.presentResidents) {
             const agent = this.agents.get(resident.id);
             if (!agent) continue;
             agent.setHidden(false);
@@ -124,7 +125,7 @@ export class ResidentCrowd {
     nearestResident(x, y, maxDistance = 72) {
         let best = null;
         for (const [id, agent] of this.agents) {
-            if (agent.hidden) continue;
+            if (agent.hidden || agent.resident?.visitor) continue;
             const distance = Math.hypot(agent.character.x - x, agent.character.y - y);
             if (distance <= maxDistance && (!best || distance < best.distance)) {
                 best = { id, distance, resident: agent.resident };

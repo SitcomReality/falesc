@@ -9,7 +9,7 @@ This build is the **First Light vertical slice**. One playable home shard, four
 needs, four services, a paused planning day, a deterministic playback, and an
 evening broadsheet. A **Contest preview** adds two rival chapters, a shared lumen
 economy, shared residents and rival housing on the same shard, ending in a three-day campaign, a **Confluence vote**, a post-vote
-**stewardship** promise and a fundable **Commons Beacon**; the full multi-round festival, auctions and a
+**stewardship** promise, a fundable **Commons Beacon** and transient **day visitors**; the full multi-round festival, auctions and a
 separate shared-commons layer are the design target beyond that.
 
 Built with vanilla ES modules and [Pixi.js](https://pixijs.com/) 7. There is no
@@ -54,6 +54,9 @@ so any static file server works, but ES modules require `http://`, not `file://`
   then click a free plot on the home shard and name the place.
 - Fund the shared **Commons Beacon** from the HUD card; every chapter can give
   lumen, and once lit it eases every resident's needs at night.
+- On Contest days, watch for 2–3 **day visitors**. They use services and pay a
+  small fee to the chapter whose door they choose, but they leave before the
+  next day and never join the resident vote.
 - In the last three Contest days, choose a **campaign promise** from the
   standings card or the automatic campaign dialog. Rivals publish theirs, and a
   three-day festival programme makes matching services more magnetic.
@@ -101,6 +104,7 @@ webgame_smoke --scenario scripts/scenarios/confluence-defeat.mjs
 webgame_smoke --scenario scripts/scenarios/campaign.mjs
 webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 webgame_smoke --scenario scripts/scenarios/commons.mjs
+webgame_smoke --scenario scripts/scenarios/visitors.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```
 

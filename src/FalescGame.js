@@ -516,6 +516,7 @@ export class FalescGame {
         }
         this.selectedProgramId = defaultProgramId();
         this.hintDismissed = false;
+        this.crowd.sync();
         this.syncViews();
         this.screenStateMachine.setState(GamePhase.PLAYING);
         if (this.charter.campaign?.active && !this.charter.campaign.playerPledge) {
@@ -736,6 +737,7 @@ export class FalescGame {
                     works: charter?.works || 0,
                     actionsRemaining: charter?.works || 0,
                     population: charter?.population || 0,
+                    visitors: charter?.visitors?.length || 0,
                     housedPopulation: charter?.housedPopulation || 0,
                     housingCapacity: charter?.housingCapacity || 0,
                     spareBeds: charter?.spareBeds || 0,
@@ -790,6 +792,10 @@ export class FalescGame {
                         heartsLost: report.heartsLost,
                         contributions: report.contributions,
                         dividend: report.dividend || 0,
+                        visitors: report.visitors || 0,
+                        visitorFees: report.visitorFees || 0,
+                        playerVisitorFees: report.playerVisitorFees || 0,
+                        visitorFeesByChapter: report.visitorFeesByChapter || {},
                         upkeep: report.upkeep,
                         net: report.net,
                         lumenAfter: report.lumenAfter,
@@ -801,6 +807,9 @@ export class FalescGame {
                         devotionByChapter: report.devotionByChapter || {},
                         chapters: report.chapters || [],
                         campaignEvent: report.campaignEvent || null,
+                        visitors: report.visitors || 0,
+                        visitorFees: report.visitorFees || 0,
+                        playerVisitorFees: report.playerVisitorFees || 0,
                         commons: report.commons || null,
                         population: report.population,
                         quotes: report.quotes,

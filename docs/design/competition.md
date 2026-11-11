@@ -228,6 +228,13 @@ The vote must not feel arbitrary. Before the result:
 - Show which residents are abstaining and why.
 - Let the player read the room, not guess.
 
+### Visitors
+
+The current Contest brings **2–3 day visitors** each day. They use services and
+pay a small visitor fee to the chapter whose door they use, but they do not
+stay, vote or join the resident roster. A fuller visitor arc, return visits and
+a path from visitor to resident remain target.
+
 ### The Commons Beacon
 
 The Aurora Beacon becomes the **Commons Beacon**: a shared wonder built by all

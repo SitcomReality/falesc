@@ -22,8 +22,8 @@ substantially implemented for one shared shard, including a **Contest preview**
 with two AI rivals, a shared lumen economy, shared residents, rival housing,
 recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
 a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
-a fundable shared Commons Beacon that becomes a six-seat all-needs civic service.
-The full multi-round festival, auctions, systemic stewardship, deeper rival
+a fundable shared Commons Beacon that becomes a six-seat all-needs civic service,
+and transient day visitors who pay for service visits. The full multi-round festival, auctions, systemic stewardship, deeper rival
 strategy, layers and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
@@ -49,6 +49,7 @@ webgame_smoke --scenario scripts/scenarios/confluence-defeat.mjs
 webgame_smoke --scenario scripts/scenarios/campaign.mjs
 webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 webgame_smoke --scenario scripts/scenarios/commons.mjs
+webgame_smoke --scenario scripts/scenarios/visitors.mjs
 ```
 
 The CLI equivalents and the full scenario list are in
@@ -73,7 +74,7 @@ after any behavioural change.
 | `src/services/` | `ServiceBuilding`, `ServiceManager`, `PlacementPolicy` |
 | `src/simulation/DaySimulator.js` | Deterministic day: needs, choices, queues, visits, report |
 | `src/economy/LumenLedger.js` | Contributions from wellbeing, upkeep, closures |
-| `src/residents/` | `Resident` model, seeded factory, visual agent, crowd |
+| `src/residents/` | `Resident` model, seeded resident/visitor factories, visual agent, crowd |
 | `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
 | `src/state/` | `GamePhase` constants and `ScreenStateMachine` |
 | `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, Confluence, stewardship, end |
@@ -83,7 +84,7 @@ after any behavioural change.
 | `src/minerals/` | Seeded static rock/crystal scenery |
 | `src/buildings/BuildingRenderer.js` | Service silhouettes (art only; no building model) |
 | `src/persistence/SaveManager.js` | Versioned `localStorage` save v2 (model data only) |
-| `scripts/scenarios/` | Browser regressions for the resident loop, economy, saves, maps, determinism, victory, mobile |
+| `scripts/scenarios/` | Browser regressions for the resident/visitor loop, economy, saves, maps, determinism, victory, mobile |
 | `vendor/` | Pinned Pixi.js build and license (committed; no fetch at runtime) |
 | `webgame.config.json` | Main browser smoke configuration and steps |
 
@@ -170,7 +171,10 @@ after any behavioural change.
   the final vote uses both. A player victory then chooses one of four stewardship
   promises for the epilogue; a rival winner skips that choice. A shared Commons
   Beacon can be funded by every chapter; once lit it gives every resident a
-  nightly comfort and opens as a six-seat all-needs shared service. This is a first pass; a separate shared-commons island,
+  nightly comfort and opens as a six-seat all-needs shared service. Contest days
+  also bring 2–3 transient visitors who use services, pay 1 lumen per visit and
+  leave before the next day; they are not residents, voters or save entries.
+  This is a first pass; a separate shared-commons island,
   a larger multi-round festival, auctions and systemic stewardship effects are
   still missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do

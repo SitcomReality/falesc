@@ -16,7 +16,8 @@ export class Resident {
         homeChapterId = 'player',
         affinity = 0.8,
         memory = null,
-        paletteSeed = 1
+        paletteSeed = 1,
+        visitor = false
     }) {
         this.id = id;
         this.name = name;
@@ -47,6 +48,7 @@ export class Resident {
             ...(memory || {})
         };
         this.paletteSeed = paletteSeed;
+        this.visitor = Boolean(visitor);
         this.state = active ? 'idle' : 'waiting';
         this.position = null;
     }

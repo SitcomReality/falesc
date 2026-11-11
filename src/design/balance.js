@@ -8,6 +8,11 @@ export const BALANCE = {
     campaign: {
         days: 3
     },
+    visitors: {
+        min: 2,
+        max: 3,
+        fee: 1
+    },
     commons: {
         target: 20,
         rivalDaily: 1,
