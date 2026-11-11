@@ -26,6 +26,7 @@ import { PLEDGE_BY_ID } from '../confluence/Pledges.js';
 import { ConfluenceVote } from '../confluence/ConfluenceVote.js';
 import * as CommonsAssembly from './CommonsAssembly.js';
 import * as CommonsPurse from './CommonsPurse.js';
+import * as CampaignRoom from './CampaignRoom.js';
 import { milestones as charterMilestones, careWatch as charterCareWatch, needSurvey as charterNeedSurvey, standings as charterStandings, historyEntry as charterHistoryEntry, stats as charterStats } from './CharterProjections.js';
 
 /**
@@ -333,18 +334,7 @@ export class Charter {
     }
 
     startCampaign() {
-        if (!this.contest || this.campaign) return this.campaign;
-        const campaign = new Campaign({
-            startedDay: this.day,
-            dayLimit: this.dayLimit,
-            seed: this.seed
-        });
-        campaign.rivalPledges = Object.fromEntries(
-            this.rivals.map((rival) => [rival.id, chooseCampaignPledge(rival, this, campaign)])
-        );
-        this.campaign = campaign;
-        this.spawnFestivalKitchen();
-        return this.campaign;
+        return CampaignRoom.startCampaign(this);
     }
 
     get campaignEvent() {
@@ -352,87 +342,28 @@ export class Charter {
     }
 
     festivalKitchenNeed() {
-        return this.campaign?.eventsFor?.(this.day)?.[0]?.need || 'sustenance';
+        return CampaignRoom.festivalKitchenNeed(this);
     }
-
     updateFestivalKitchenNeed() {
-        const service = this.services.services.find((entry) => entry.programId === 'festival_kitchen');
-        if (!service || !this.campaign?.active) return false;
-        service.setNeedOverride(this.festivalKitchenNeed());
-        return true;
+        return CampaignRoom.updateFestivalKitchenNeed(this);
     }
-
     spawnFestivalKitchen() {
-        if (this.services.services.some((service) => service.programId === 'festival_kitchen')) return null;
-        const sector = this.homeSector;
-        if (!sector) return null;
-        for (let v = 0; v < sector.gridSize; v++) {
-            for (let u = 0; u < sector.gridSize; u++) {
-                const check = this.services.canPlace('festival_kitchen', sector.id, u, v);
-                if (!check.ok) continue;
-                const result = this.services.place({
-                    programId: 'festival_kitchen',
-                    sectorId: sector.id,
-                    u,
-                    v,
-                    name: 'Festival Kitchen',
-                    state: 'ACTIVE',
-                    fixed: true
-                });
-                if (result.ok) {
-                    result.service.festival = true;
-                    result.service.setNeedOverride(this.festivalKitchenNeed());
-                    this.log('campaign', 'A Festival Kitchen opened for the celebration.');
-                    this.refreshDerived();
-                    return result.service;
-                }
-            }
-        }
-        return null;
+        return CampaignRoom.spawnFestivalKitchen(this);
     }
-
     removeFestivalKitchen() {
-        const service = this.services.services.find((entry) => entry.programId === 'festival_kitchen');
-        if (!service) return false;
-        this.services.remove(service);
-        this.refreshDerived();
-        return true;
+        return CampaignRoom.removeFestivalKitchen(this);
     }
-
     resolveConfluence(pledgeId) {
-        if (!this.confluenceReady) return null;
-        const result = ConfluenceVote.tally(this, pledgeId);
-        this.removeFestivalKitchen();
-        this.confluenceReady = false;
-        this.ending = result.ending;
-        this.refreshDerived();
-        return result;
+        return CampaignRoom.resolveConfluence(this, pledgeId);
     }
-
     applyStewardship(policy) {
-        if (!policy || !this.ending?.confluence || this.ending.outcome !== 'victory') return false;
-        this.stewardship = { ...policy };
-        this.ending.stewardship = { ...policy };
-        return true;
+        return CampaignRoom.applyStewardship(this, policy);
     }
-
     sponsorCampaign(needId) {
-        if (!this.campaign?.active) return { ok: false, reason: 'There is no festival to sponsor.' };
-        if (this.campaign.sponsored) return { ok: false, reason: 'Your chapter already sponsored a bell.' };
-        if (this.lumen < 5) return { ok: false, reason: 'A sponsored bell costs 5 lumen.' };
-        const event = this.campaign.sponsor(needId, this.day);
-        if (!event) return { ok: false, reason: 'That needs a festival bell.' };
-        this.lumen -= 5;
-        this.refreshDerived();
-        return { ok: true, event, cost: 5 };
+        return CampaignRoom.sponsorCampaign(this, needId);
     }
-
     setCampaignPledge(pledgeId) {
-        if (!this.campaign?.active) return { ok: false, reason: 'The campaign has not started.' };
-        if (!PLEDGE_BY_ID[pledgeId]) return { ok: false, reason: 'That is not a campaign promise.' };
-        this.campaign.setPlayerPledge(pledgeId);
-        this.log('campaign', `Campaign promise: ${this.campaign.playerPledgeName}.`);
-        return { ok: true, campaign: this.campaign };
+        return CampaignRoom.setCampaignPledge(this, pledgeId);
     }
 
     setupTransit() {
