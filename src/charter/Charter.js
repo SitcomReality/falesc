@@ -92,6 +92,7 @@ export class Charter {
             capital: 0,
             capitalContributors: {},
             active: false,
+            level: 1,
             contributors: {},
             activatedDay: null,
             serviceId: null,
@@ -534,6 +535,20 @@ export class Charter {
         this.assignHomes();
         this.refreshDerived();
         return { ok: true, policy };
+    }
+
+    upgradeCommons() {
+        if (!this.commons.active) return { ok: false, reason: 'Light the Beacon first.' };
+        if ((this.commons.level || 1) >= BALANCE.commons.annexMax) return { ok: false, reason: 'The Beacon already has both annexes.' };
+        if ((this.commons.capital || 0) < BALANCE.commons.annexCost) return { ok: false, reason: `An annex costs ${BALANCE.commons.annexCost} capital.` };
+        const service = this.commonsManager?.findById(this.commons.serviceId);
+        if (!service) return { ok: false, reason: 'The Beacon is not standing.' };
+        this.commons.capital -= BALANCE.commons.annexCost;
+        this.commons.level = (this.commons.level || 1) + 1;
+        service.capacity += BALANCE.commons.annexCapacity;
+        service.refreshGraphics();
+        this.refreshDerived();
+        return { ok: true, level: this.commons.level, capacity: service.capacity, cost: BALANCE.commons.annexCost };
     }
 
     activateCommons() {
@@ -1477,6 +1492,7 @@ export class Charter {
         if (saved.commons) {
             const serviceEntries = Array.isArray(saved.commons.service) ? saved.commons.service : [];
             this.commons = {
+                level: Math.max(1, Number(saved.commons.level) || 1),
                 target: saved.commons.target || BALANCE.commons.target,
                 fund: Number(saved.commons.fund) || 0,
                 purse: Number(saved.commons.purse) || 0,

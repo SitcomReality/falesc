@@ -67,7 +67,8 @@ export function removeCommonsPolicyFromService(service) {
 
 export function commonsComfortFor(charter) {
     const policy = COMMONS_POLICY_BY_ID[charter?.commons?.policy];
-    return BALANCE.commons.comfort + (policy?.comfort || 0);
+    const annex = Math.max(0, (charter?.commons?.level || 1) - 1) * BALANCE.commons.annexComfort;
+    return BALANCE.commons.comfort + annex + (policy?.comfort || 0);
 }
 
 export function commonsRestRecoveryFor(charter) {

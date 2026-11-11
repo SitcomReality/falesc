@@ -1,5 +1,5 @@
 import { BALANCE } from '../design/balance.js';
-import { COMMONS_POLICIES, COMMONS_POLICY_BY_ID } from '../commons/CommonsPolicies.js';
+import { COMMONS_POLICIES, COMMONS_POLICY_BY_ID, commonsComfortFor } from '../commons/CommonsPolicies.js';
 
 /**
  * Shared Commons Beacon fund. Every chapter can put lumen into the same civic
@@ -7,13 +7,14 @@ import { COMMONS_POLICIES, COMMONS_POLICY_BY_ID } from '../commons/CommonsPolici
  * every resident, not a private service.
  */
 export class CommonsModal {
-    constructor({ onContribute, onPurse, onCapital, onNominate, onVote, onSecondReading, overlays }) {
+    constructor({ onContribute, onPurse, onCapital, onNominate, onVote, onSecondReading, onAnnex, overlays }) {
         this.onContribute = onContribute;
         this.onPurse = onPurse;
         this.onCapital = onCapital;
         this.onNominate = onNominate;
         this.onVote = onVote;
         this.onSecondReading = onSecondReading;
+        this.onAnnex = onAnnex;
         this.overlays = overlays;
         this.isOpen = false;
         this.charter = null;
@@ -120,8 +121,9 @@ export class CommonsModal {
                     </div>
                     <button type="button" class="modal__close" data-testid="commons-close-x" aria-label="Close commons">×</button>
                 </div>
-                <p class="modal__blurb">The fund is full. The Beacon is a shared place for every resident: it eases every need by ${BALANCE.commons.comfort + (policy?.comfort || 0)} each night${policy?.restRecovery ? ' and gives one more Rest back in bed' : ''}, and its door is open for ${visits} visits so far. ${sharedWorks} shared work${sharedWorks === 1 ? '' : 's'} stand on the outer commons isle.</p>
+                <p class="modal__blurb">The fund is full. The Beacon is a shared place for every resident: it eases every need by ${commonsComfortFor(this.charter)} each night${policy?.restRecovery ? ' and gives one more Rest back in bed' : ''}, and its door is open for ${visits} visits so far. ${sharedWorks} shared work${sharedWorks === 1 ? '' : 's'} stand on the outer commons isle.</p>
                 <p class="commons-purse">Commons purse <strong>${purse}</strong> lumen · shared upkeep <strong>${upkeep}</strong> / day · capital budget <strong>${capital}</strong>. Every chapter gives ${BALANCE.commons.levyPerChapter} when shared works stand.</p>
+                ${(commons.level || 1) < BALANCE.commons.annexMax ? `<button type="button" class="btn btn--mint" data-testid="commons-annex" ${capital >= BALANCE.commons.annexCost ? '' : 'disabled'}>Add an annex · ${BALANCE.commons.annexCost} capital</button>` : ''}
                 ${assemblyHtml}
                 <h4 class="campaign-modal__label">Given so far</h4>
                 <ul class="commons-contributors">${contributors || '<li><span>The commons</span><strong>—</strong></li>'}</ul>
@@ -168,6 +170,7 @@ export class CommonsModal {
                 </div>
             `;
         }
+        this.panel.querySelector('[data-testid=commons-annex]')?.addEventListener('click', () => this.annex());
         this.panel.querySelectorAll('[data-testid^=commons-close]').forEach((button) => button.addEventListener('click', () => this.hide()));
         this.panel.querySelector('[data-testid=commons-give-5]')?.addEventListener('click', () => this.give(5));
         this.panel.querySelector('[data-testid=commons-give-10]')?.addEventListener('click', () => this.give(10));
@@ -232,6 +235,12 @@ export class CommonsModal {
         }
         if (event.key !== 'Tab') return;
         this.overlays.trapTab(event, this.panel);
+    }
+
+    annex() {
+        const result = this.onAnnex?.();
+        if (result?.ok) this.render();
+        return result;
     }
 
     hide() {

@@ -69,6 +69,7 @@ webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 webgame_smoke --scenario scripts/scenarios/commons-rival-work.mjs
 webgame_smoke --scenario scripts/scenarios/commons-rival-capital.mjs
+webgame_smoke --scenario scripts/scenarios/commons-annex.mjs
 webgame_smoke --scenario scripts/scenarios/commons-capital.mjs
 webgame_smoke --scenario scripts/scenarios/commons-purse.mjs
 webgame_smoke --scenario scripts/scenarios/retrofit.mjs

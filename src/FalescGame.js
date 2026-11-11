@@ -163,6 +163,7 @@ export class FalescGame {
             onNominate: (policyId) => this.nominateCommonsPolicy(policyId),
             onVote: () => this.resolveCommonsAssembly(),
             onSecondReading: () => this.callSecondReading(),
+            onAnnex: () => this.upgradeCommons(),
             overlays: this.overlays
         });
 
@@ -418,6 +419,16 @@ export class FalescGame {
         this.gameScreen.updateHud(true);
         this.saveGame();
         this.gameScreen.toast(`${result.policy.name} wins the Commons Assembly.`, 'mint', 2600);
+        return result;
+    }
+
+    upgradeCommons() {
+        if (!this.charter) return { ok: false, reason: 'No charter.' };
+        const result = this.charter.upgradeCommons();
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast('The Beacon gains an annex.', 'mint', 2200);
         return result;
     }
 

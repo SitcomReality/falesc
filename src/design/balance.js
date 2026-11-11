@@ -22,6 +22,10 @@ export const BALANCE = {
         rivalDaily: 1,
         minRivalLumen: 6,
         comfort: 3,
+        annexCost: 8,
+        annexMax: 2,
+        annexCapacity: 1,
+        annexComfort: 1,
         builderAffinity: 0.03,
         levyPerChapter: 1
     },
