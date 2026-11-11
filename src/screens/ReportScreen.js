@@ -69,7 +69,7 @@ export class ReportScreen {
             .filter((service) => service.condition < 60)
             .slice(0, 4);
         const wornNote = worn.length
-            ? `<p class="report__warning">Worn: ${worn.map((service) => `${escapeHtml(service.name)} (${Math.round(service.condition)}%)`).join(', ')}. Repair from the pause menu or a service record.</p>`
+            ? `<p class="report__warning report__warning--action">Worn: ${worn.map((service) => `${escapeHtml(service.name)} (${Math.round(service.condition)}%)`).join(', ')}. <button type="button" class="btn btn--tiny btn--paper" data-testid="report-repair-all">Repair all</button></p>`
             : '';
         const festival = report.campaignEvent
             ? `<p class="report__warning">Festival programme: <strong>${escapeHtml(report.campaignEvent.title)}</strong> — ${escapeHtml(report.campaignEvent.blurb)}</p>`
@@ -160,6 +160,10 @@ export class ReportScreen {
                 </footer>
             </div>
         `;
+        this.container.querySelector('[data-testid=report-repair-all]')?.addEventListener('click', () => {
+            const result = this.game.repairAllServices();
+            if (result.ok) this.show();
+        });
         this.container.querySelector('[data-testid=report-continue]').addEventListener('click', () => {
             if (ending) this.game.finishCharter();
             else if (confluence) this.game.showConfluence();

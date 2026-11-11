@@ -17,4 +17,7 @@ export default async function ({ page, assert, screenshot }) {
     assert.ok(text.includes('40%'));
     await page.pause(300);
     await screenshot('report-worn.png');
+    await page.click('[data-testid=report-repair-all]');
+    await page.waitFor("!document.body.textContent.includes('Worn:')");
+    assert.equal(await page.evaluate("window.__falesc.app.charter.services.services.every((service) => service.condition === 100)"), true);
 }

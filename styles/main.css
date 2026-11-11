@@ -5224,3 +5224,17 @@ body.is-photo-mode .care-watch {
     background: var(--coral);
     color: var(--paper);
 }
+
+.report__warning--action {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.report__warning--action .btn {
+    min-height: 28px;
+    padding: 4px 9px;
+    font-size: 8px;
+    box-shadow: 2px 2px 0 var(--btn-shadow);
+}
