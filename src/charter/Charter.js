@@ -686,7 +686,7 @@ export class Charter {
         const needIds = NEEDS.map((need) => need.id);
         return [
             { id: 'first_build', label: 'Raise a service', done: this.services.services.some((service) => !service.fixed) },
-            { id: 'all_needs', label: 'Serve all four needs', done: needIds.every((needId) => open.some((service) => servesNeed(service.program, needId))) },
+            { id: 'all_needs', label: 'Serve every need', done: needIds.every((needId) => open.some((service) => servesNeed(service.program, needId))) },
             { id: 'six_housed', label: 'House six Tidelanders', done: this.housedPopulation >= 6 },
             { id: 'full_house', label: 'House twelve Tidelanders', done: this.housedPopulation >= 12 },
             { id: 'flourishing', label: 'Reach a flourishing of 62', done: this.flourishing >= BALANCE.end.comfortableFlourishing },

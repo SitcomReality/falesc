@@ -58,7 +58,7 @@ export class FieldGuideModal {
             <p class="modal__blurb">Plan in daylight, open the day, watch it play, then read the report. Nothing here is a rule the game does not already use.</p>
             <div class="field-guide__body">
                 <section>
-                    <h4>The four needs</h4>
+                    <h4>The five needs</h4>
                     ${NEEDS.map((need) => `<p><strong>${escapeHtml(need.name)}.</strong> ${escapeHtml(need.blurb)}</p>`).join('')}
                 </section>
                 <section>

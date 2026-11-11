@@ -193,6 +193,28 @@ export const PROGRAMS = [
         blurb: 'A bright room, low tables and someone watching the little ones. Grown-ups get company; children get a place to be.'
     },
     {
+        id: 'workshop',
+        name: 'Workshop',
+        category: 'Purpose',
+        need: 'purpose',
+        capacity: 3,
+        duration: 2.6,
+        open: ['daylight', 'evening'],
+        footprint: { w: 2, h: 2 },
+        cost: 5,
+        upkeep: 2,
+        durationText: 'a good shift',
+        quality: 1.2,
+        finish: 'comfortable',
+        vibe: 'curious',
+        constructionDays: 1,
+        buildable: true,
+        color: 'saffron',
+        icon: 'workshop',
+        testid: 'program-workshop',
+        blurb: 'A bench, a tool wall and something worth making. Residents come here to be useful, not just comfortable.'
+    },
+    {
         id: 'festival_kitchen',
         name: 'Festival Kitchen',
         category: 'Festival',

@@ -51,7 +51,9 @@ function createStartingNeeds(rng, index, founding) {
     const needs = {};
     const urgentNeed = NEEDS[index % NEEDS.length];
     for (const need of NEEDS) {
-        if (founding && need.id === urgentNeed.id) {
+        if (need.id === 'purpose') {
+            needs[need.id] = 0;
+        } else if (founding && need.id === urgentNeed.id) {
             needs[need.id] = 66 + rng.next() * 12;
         } else if (!founding && need.id === urgentNeed.id) {
             needs[need.id] = 52 + rng.next() * 16;

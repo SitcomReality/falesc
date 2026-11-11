@@ -107,6 +107,7 @@ webgame_smoke --scenario scripts/scenarios/service-access.mjs
 webgame_smoke --scenario scripts/scenarios/service-vibe.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
 webgame_smoke --scenario scripts/scenarios/creche.mjs
+webgame_smoke --scenario scripts/scenarios/workshop.mjs
 webgame_smoke --scenario scripts/scenarios/observatory.mjs
 webgame_smoke --scenario scripts/scenarios/amphitheatre.mjs
 webgame_smoke --scenario scripts/scenarios/clinic.mjs
@@ -138,7 +139,7 @@ after any behavioural change.
 | `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |
 | `src/confluence/` | Campaign, pledges, stewardship and the deterministic Confluence vote |
 | `src/commons/` | Commons Assembly policies and shared service modifiers |
-| `src/design/` | Needs, traits, nine service programs, balance table, names |
+| `src/design/` | Needs, traits, ten service programs, balance table, names |
 | `src/services/` | `ServiceBuilding`, `ServiceManager`, `PlacementPolicy` |
 | `src/simulation/DaySimulator.js` | Deterministic day: needs, choices, queues, visits, report |
 | `src/economy/LumenLedger.js` | Contributions from wellbeing, upkeep, closures |
@@ -262,10 +263,10 @@ after any behavioural change.
   choose As built, Round the clock, Daylight or Evening hours, plus a free
   Cosy/Lively/Curious/Efficient atmosphere and an Open/Chapter first/Visitors
   first welcome policy, including Care first for residents in crisis. Dual-need services
-  can also choose a Focus toward either need. The nine buildable
+  can also choose a Focus toward either need. The ten buildable
   services include the 2×2 Bathhouse for Rest + Company, the 2×2 Clinic for
-  Rest + Sustenance, the 2×2 Creche for Company + Rest, the 2×2 Amphitheatre
-  for Company + Wonder and the 2×2 Observatory for Wonder at night. A build chooses a
+  Rest + Sustenance, the 2×2 Creche for Company + Rest, the 2×2 Workshop for Purpose, the 2×2
+  Amphitheatre for Company + Wonder and the 2×2 Observatory for Wonder at night. A build chooses a
   Humble, Comfortable or Grand shell finish. An open service can add two
   floors with Dormer, Common Room or Roof Garden plans. Neighbouring services add a small quality
   bonus, with extra for mixed chapters. Three connected services form a named

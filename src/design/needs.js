@@ -1,5 +1,7 @@
 /**
- * The four needs of the First Light slice.
+ * The five needs of the First Light slice. Purpose is a slower civic need: it
+ * drives the Workshop and daily requests, but flourishing is measured on the
+ * four core needs so early balance stays legible.
  *
  * Urgency runs from 0 (satisfied) to 100 (urgent). Needs rise across the four
  * day phases and are reduced by a service visit or a night at home. The numbers
@@ -46,12 +48,23 @@ export const NEEDS = [
         blurb: 'Something green behind glass, a view, a thing worth pointing at.',
         reason: 'I wanted to see something wonderful',
         baseRise: { morning: 1, afternoon: 3, evening: 3, night: 1 }
+    },
+    {
+        id: 'purpose',
+        name: 'Purpose',
+        short: 'Purpose',
+        glyph: '✶',
+        color: '#FFD36E',
+        blurb: 'Work worth doing, a craft to tend, a reason to be useful.',
+        reason: 'I wanted work that mattered',
+        baseRise: { morning: 1, afternoon: 1, evening: 2, night: 1 }
     }
 ];
 
 export const NEED_BY_ID = Object.fromEntries(NEEDS.map((need) => [need.id, need]));
 
 export const NEED_IDS = NEEDS.map((need) => need.id);
+export const CORE_NEED_IDS = NEED_IDS.filter((id) => id !== 'purpose');
 
 export function clampNeed(value) {
     return Math.max(0, Math.min(100, Math.round(value * 10) / 10));
@@ -68,8 +81,8 @@ export function mostUrgentNeed(needs) {
 
 export function averageUrgency(needs) {
     if (!needs) return 0;
-    const total = NEEDS.reduce((sum, need) => sum + Number(needs[need.id] ?? 0), 0);
-    return total / NEEDS.length;
+    const total = CORE_NEED_IDS.reduce((sum, id) => sum + Number(needs[id] ?? 0), 0);
+    return total / CORE_NEED_IDS.length;
 }
 
 /** 0–100 wellbeing derived only from need satisfaction. */

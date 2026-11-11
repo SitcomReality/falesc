@@ -29,7 +29,7 @@ simulation.
 ## Controls
 
 The menu's **How to play** button and the pause menu's **Field guide** open a
-paper almanac of the four needs, the day loop, every service, hours, atmosphere,
+paper almanac of the five needs, the day loop, every service, hours, atmosphere,
 welcome, floor plans, the commons and the Contest. It is built from the same
 data as the game and never changes a rule.
 
@@ -382,7 +382,7 @@ signal, not a separate warning system.
 ## Milestones
 
 The pause menu's **Milestones** is a read-only checklist of firsts: first
-service, all four needs, six and twelve housed, flourishing 62, a district, an
+service, all five needs, six and twelve housed, flourishing 62, a district, an
 upper floor, a retrofit, the Beacon, an Assembly, an annex, a trial guest and a
 garden-isle build. Milestones grant no lumen. Completing one in any charter stores it in
 `falesc.milestones.v1`; later charters show it with a star and an **earned**
@@ -456,7 +456,7 @@ line from a resident. From there:
 
 ## Services
 
-All nine buildable services cost one work and finish overnight. Active services
+All ten buildable services cost one work and finish overnight. Active services
 wear with use: every day with visits lowers **wear** by up to 8 points. Lower
 wear reduces quality (down to 85% at zero). A working player service at under
 100% can be repaired for **3 lumen**, restoring it to full. The pause menu's
@@ -487,7 +487,7 @@ secondary does not replace a bed.
 
 ## Needs and choices
 
-There are four needs, each tracked from **0 (satisfied)** to **100 (urgent)**:
+There are five needs, each tracked from **0 (satisfied)** to **100 (urgent)**:
 
 | Need | Satisfied by | Flavour |
 | --- | --- | --- |
@@ -495,8 +495,9 @@ There are four needs, each tracked from **0 (satisfied)** to **100 (urgent)**:
 | **Rest** | A bed at night | A quiet room and enough night to use it. |
 | **Company** | Tea House | A shared table and a reason to linger. |
 | **Wonder** | Garden Dome | Something green behind glass. |
+| **Purpose** | Workshop | Work worth doing, a craft to tend. |
 
-Needs rise through the four day phases — morning, afternoon, evening, night —
+Flourishing and lumen are measured from the four core needs; Purpose drives choices, visits and daily requests. Needs rise through the four day phases — morning, afternoon, evening, night —
 at rates modified by the resident's **rhythm**. A visit to a service reduces the
 chosen need: a primary match gives a large reduction, a secondary match a
 smaller one. Need satisfaction determines **wellbeing**
@@ -584,7 +585,7 @@ The report is the day's story as a broadsheet:
 
 - **Visits** and **Hearts gained** (with a small loss note when affinity falls),
   **Contributions**, **Upkeep**, **Lumen**, **Flourishing**.
-- **Needs at dusk** for all four needs.
+- **Needs at dusk** for all five needs.
 - **Doors and visits** — every service, including those with zero visits.
 - **Word of mouth** — up to three resident quotes, or a quiet fallback.
 - **Complaints** — up to five, with the resident's own words.

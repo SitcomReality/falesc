@@ -156,6 +156,9 @@ export class BuildingRenderer {
             case 'festival_kitchen':
                 BuildingRenderer.drawCanteen(graphics, state);
                 break;
+            case 'workshop':
+                BuildingRenderer.drawWorkshop(graphics, state);
+                break;
             case 'clinic':
                 BuildingRenderer.drawClinic(graphics, state);
                 break;
@@ -1461,6 +1464,24 @@ export class BuildingRenderer {
             graphics.drawCircle(-46 + light * 23, -62 - (light % 2) * 5, 3.2);
         }
         graphics.endFill();
+    }
+
+    static drawWorkshop(graphics, state) {
+        BuildingRenderer.drawHousing(graphics, state);
+        const gold = BuildingRenderer.tone(0xFFD36E, state);
+        const ink = BuildingRenderer.tone(INK, state);
+        graphics.beginFill(gold, 1);
+        graphics.lineStyle(2, ink, 1);
+        graphics.drawRect(-46, -76, 22, 14);
+        graphics.endFill();
+        graphics.beginFill(0xC9B6FF, 1);
+        graphics.drawRect(22, -76, 22, 14);
+        graphics.endFill();
+        graphics.lineStyle(2, ink, 1);
+        graphics.moveTo(-42, -62);
+        graphics.lineTo(-28, -62);
+        graphics.moveTo(26, -62);
+        graphics.lineTo(40, -62);
     }
 
     static drawCreche(graphics, state) {

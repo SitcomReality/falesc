@@ -123,6 +123,14 @@ export const ICONS = {
         <circle cx="51" cy="18" r="4" fill="#FFD36E" stroke="${INK}" stroke-width="1.5"/>
         <path d="M51 22v9" stroke="${INK}" stroke-width="1.5"/>
     `),
+    workshop: svg(`
+        <path d="M8 50h52" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M16 47V30l19-13 19 13v17" fill="#FFF2D8" stroke="${INK}" stroke-width="2.5"/>
+        <path d="M13 30 35 15l22 15" fill="#FFD36E" stroke="${INK}" stroke-width="2.5"/>
+        <rect x="25" y="34" width="20" height="13" fill="#C9B6FF" stroke="${INK}" stroke-width="1.5"/>
+        <path d="M30 47v-7h10v7" fill="#FF6B5E" stroke="${INK}" stroke-width="1.5"/>
+        <path d="M20 24h8M42 24h8" stroke="${INK}" stroke-width="2"/>
+    `),
     observatory: svg(`
         <path d="M6 50h52" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
         <path d="M12 47V31c0-10 9-18 20-18s20 8 20 18v16" fill="#FFF2D8" stroke="${INK}" stroke-width="2.5"/>

@@ -28,7 +28,7 @@ export default async function ({ page, assert, screenshot }) {
     assert.ok(text.includes('urgent'));
     assert.ok(text.includes('seats'));
     const rows = await page.evaluate("document.querySelectorAll('.need-survey__row').length");
-    assert.equal(rows, 4);
+    assert.equal(rows, 5);
     await page.pause(300);
     await screenshot('need-survey.png');
     await page.click('[data-testid=need-survey-done]');

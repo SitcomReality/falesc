@@ -55,7 +55,7 @@ export class NeedSurveyModal {
                 </div>
                 <button type="button" class="modal__close" data-testid="need-survey-close" aria-label="Close need survey">×</button>
             </div>
-            <p class="modal__blurb">Urgency is the average of the four needs. A resident is counted as urgent from 65. Capacity counts open seats that serve the need.</p>
+            <p class="modal__blurb">Urgency is the average of the four core needs; Purpose is tracked separately. A resident is counted as urgent from 65. Capacity counts open seats that serve the need.</p>
             <div class="need-survey__rows">
                 ${NEEDS.map((need) => {
                     const row = survey.find((entry) => entry.id === need.id) || { average: 0, urgent: 0, services: 0, capacity: 0 };

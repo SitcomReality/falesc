@@ -3,7 +3,7 @@
 > **Status: working design, partially built (2026-11-11).** The four key forks
 > are decided; see [decisions.md](design/decisions.md). The **First Light
 > vertical slice** now implements most of **Phase 0 and Phase 1**: the warm
-> nebula void, floating shards, four needs, nine buildable service programs,
+> nebula void, floating shards, five needs, ten buildable service programs,
 > planning, deterministic day playback, the evening report, wellbeing-driven
 > lumen, Devotion/Flourishing, resident cards with a "why", and save v2. A
 > **Contest preview** adds two AI rivals, shared residents/services, rival
@@ -215,7 +215,7 @@ model in [buildings.md](design/buildings.md); the economy in
 the full game.
 
 - One island, 12–15 named residents.
-- Four needs: Sustenance, Rest, Company, Wonder.
+- Five needs: Sustenance, Rest, Company, Wonder, Purpose.
 - Four services: Housing, Canteen, Tea House, Garden Dome.
 - Plan → playback → report; Devotion and Flourishing.
 - Lumen from resident wellbeing; upkeep; construction.

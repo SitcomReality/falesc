@@ -63,7 +63,7 @@ src/
   design/
     balance.js               tuning table, day phases, goals, day limits
     names.js                 seeded Tidelander name pool
-    needs.js                 four needs, urgency and wellbeing helpers
+    needs.js                 five needs, urgency and wellbeing helpers
     programs.js              service program data, buildable list, footprints
     traits.js                temperament, standards, rhythm
   economy/
@@ -329,7 +329,7 @@ tries the resident's chapter first and then any chapter with a spare bed.
 room, breaking ties by Devotion, so a rival that builds housing can grow its own
 population without arrivals piling onto the leader. In the last three days
 `Charter.startCampaign()` creates a `Campaign`: it shuffles a three-day festival
-programme from the four needs, then each rival publishes a doctrine/need-pressure
+programme from the five needs, then each rival publishes a doctrine/need-pressure
 promise (also weighted by the programme), and `CampaignModal` lets the player
 choose one of the same four. On a day whose festival event matches a chapter's
 promise, `DaySimulator` gives that chapter's services a 1.12 choice-appeal

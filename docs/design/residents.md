@@ -9,7 +9,7 @@
 > Tidelanders' choices visible. If the resident loop is not fun, no amount of
 > buildings, rivals or art will save the game.
 >
-> **Status note (2026-11-11):** First Light implements four needs, three trait
+> **Status note (2026-11-11):** First Light implements five needs, three trait
 > axes, deterministic choice with a "why", queues/alternatives, enter/exit,
 > arrivals, departures (homelessness or chronic 92+ needs), the resident card and
 > Devotion. Care/Purpose, relationships, portraits and the fuller schedule
@@ -273,7 +273,7 @@ not a tooltip essay.
 - 12–15 named residents.
 - Four needs: Sustenance, Rest, Company, Wonder.
 - Three traits, one value each.
-- One island, nine services: Housing, Canteen, Tea House, Garden Dome, Bathhouse, Clinic, Amphitheatre, Creche, Observatory.
+- One island, ten services: Housing, Canteen, Tea House, Garden Dome, Bathhouse, Clinic, Amphitheatre, Creche, Workshop, Observatory.
 - Patronage and Devotion tracked, but no rivals yet.
 - Resident card with needs, traits, last choice and why.
 - Enter/exit and queues working for at least the Canteen and Tea House.
