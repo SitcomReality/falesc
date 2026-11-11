@@ -48,7 +48,7 @@ The CLI equivalents are documented in [docs/testing.md](docs/testing.md). Run
 | `src/buildings/` | Building model, lifecycle, placement manager, illustrated renderer |
 | `src/character/`, `src/ai/` | Procedural character rendering, seeded palettes, land-aware NPCs |
 | `src/minerals/` | Seeded rock/crystal scenery |
-| `src/ui/` | Build dialog, blueprint icons, framed survey chart (minimap) |
+| `src/ui/` | Build dialog, blueprint icons, framed survey chart, ambient chatter |
 | `src/persistence/` | Versioned localStorage saves (model data only) |
 | `scripts/scenarios/` | Browser regressions for victory, persistence, maps, NPCs, determinism |
 | `vendor/` | Pinned Pixi.js build and license (committed; no fetch at runtime) |

@@ -277,7 +277,7 @@ src/
   character/                procedural character rendering/animation
   ai/                       crowd manager and land-aware NPC controller
   minerals/                 seeded static rock/crystal scenery
-  ui/                       build dialog, icons, survey chart
+  ui/                       build dialog, icons, survey chart, chatter
   persistence/              versioned localStorage save
 styles/main.css             design tokens, backdrop, all chrome
 assets/fonts/               OFL fonts and licenses

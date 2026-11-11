@@ -16,6 +16,7 @@ import { SeededRandom } from './map/SeededRandom.js';
 import { BuildingManager } from './buildings/BuildingManager.js';
 import { BuildingRenderer } from './buildings/BuildingRenderer.js';
 import { drawSettlementPaths } from './map/SettlementPaths.js';
+import { ChatterManager } from './ui/ChatterManager.js';
 import { BLUEPRINT_BY_ID, BEACON_ID, DEFAULT_BLUEPRINT_ID, AFFINITY_RANGE, effectiveCost } from './buildings/blueprints.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { Minimap } from './ui/Minimap.js';
@@ -27,6 +28,7 @@ class GameApp {
         this.minerals = [];
         this.map = null;
         this.frameCount = 0;
+        this.tideMood = -1;
 
         // Setup Pixi. The canvas is transparent: the illustrated Glass Sea
         // backdrop lives in the DOM behind it.
@@ -52,6 +54,7 @@ class GameApp {
         this.shadowLayer = new PIXI.Container();
         this.interactionLayer = new PIXI.Container();
         this.characterLayer = new PIXI.Container();
+        this.overlayLayer = new PIXI.Container();
 
         // Z-Index sorting enabled
         this.characterLayer.sortableChildren = true;
@@ -70,6 +73,7 @@ class GameApp {
         this.worldContainer.addChild(this.shadowLayer);
         this.worldContainer.addChild(this.interactionLayer);
         this.worldContainer.addChild(this.characterLayer);
+        this.worldContainer.addChild(this.overlayLayer);
 
         // AI System
         this.crowdManager = new CrowdManager(this.app);
@@ -143,6 +147,9 @@ class GameApp {
 
         // Minimap (2D canvas overlay)
         this.minimap = new Minimap(this);
+
+        // Ambient speech bubbles live above the world but below DOM chrome.
+        this.chatter = new ChatterManager(this.overlayLayer, this);
 
         // Keep the camera centred on the same world point when the window resizes.
         this.app.renderer.on('resize', () => {
@@ -575,6 +582,8 @@ class GameApp {
         this.crowdManager.setWorldBounds(this.MAP_WIDTH, this.MAP_HEIGHT);
 
         this.buildingManager.setMap(this.map);
+        this.chatter.reseed(this.stateManager.settings.mapSeed);
+        this.chatter.clear();
         this.stateManager.selectedBlueprint = DEFAULT_BLUEPRINT_ID;
         this.stateManager.hintDismissed = false;
 
@@ -643,6 +652,7 @@ class GameApp {
         this.minerals = [];
 
         this.buildingManager.clear();
+        this.chatter.clear();
 
         if (this.map) {
             this.map.destroy();
@@ -701,6 +711,7 @@ class GameApp {
             });
 
             this.buildingManager.update(dtSeconds);
+            this.chatter.update(dtSeconds);
 
             const shouldSort = Math.floor(this.app.ticker.lastTime / (1000 / 60)) % 10 === 0;
             if (shouldSort) this.characterLayer.sortChildren();
@@ -709,6 +720,17 @@ class GameApp {
         // Keep the survey chart painted even before a world exists: it gives
         // the menu a quiet "no survey" card and ensures the 2D surface the test
         // harness samples is never a blank canvas on first load.
+        // Let the Glass Sea move toward dusk as the charter's tide limit nears.
+        // This is a single CSS custom property and a slow filter transition, so
+        // it costs nothing per frame after the value changes.
+        const mood = [GameState.PLAYING, GameState.INTERSTITIAL, GameState.END].includes(state)
+            ? Math.min(1, Math.max(0, (this.stateManager.currentTurn - 1) / Math.max(1, this.stateManager.dayLimit - 1)))
+            : 0;
+        if (Math.abs(mood - this.tideMood) > 0.001) {
+            this.tideMood = mood;
+            document.documentElement.style.setProperty('--tide-progress', mood.toFixed(3));
+        }
+
         if (this.frameCount % 3 === 0) {
             this.minimap.update();
         }

@@ -145,6 +145,10 @@ the islands.
 - Procedural shore dressing: palms, grass tufts, flowers, tide pools, shells,
   driftwood, tiny lanterns, ruined columns. Dense enough to feel alive, sparse
   enough to keep the build grid readable.
+- Occasional hand-written speech bubbles above Tidelanders (“The crystals are
+  humming again.”). Ambient, rare, and never blocking the HUD.
+- The Glass Sea slowly moves toward dusk as the tide limit approaches. The last
+  few days should feel warmer and heavier, not just numerically closer.
 - Paths connect placed buildings to the island edge, growing as the settlement
   grows (later milestone).
 

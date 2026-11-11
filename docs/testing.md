@@ -192,7 +192,8 @@ Run `npm run dev`, open the printed URL, and check:
       save) Continue charter work. No layout overflow at 1280×720.
 - [ ] Lobby: seed, Roll, size cards, Sign the charter, Back to the water.
 - [ ] Menu → Lobby → Start Game shows an island map, 15 characters, crystals,
-      rocks, palms, and the HUD.
+      rocks, palms, and the HUD; an occasional Tidelander speech bubble appears
+      after a while.
 - [ ] WASD/arrow keys pan; the camera stops cleanly at the cluster edge.
 - [ ] Mouse wheel zooms toward the cursor; zoom respects camera min/max.
 - [ ] Middle-mouse drag pans; releasing outside the window does not leave the

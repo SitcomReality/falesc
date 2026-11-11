@@ -260,6 +260,8 @@ Inside `worldContainer`:
 4. `interactionLayer` — hover cell highlight and the armed-blueprint ghost.
 5. `characterLayer` — characters, minerals, buildings; `sortableChildren` sorts
    by `zIndex` derived from ground Y.
+6. `overlayLayer` — ambient Tidelander speech bubbles (`ChatterManager`), above
+   all world objects but below DOM chrome.
 
 The Pixi canvas is WebGL and transparent. Behind it, `index.html` renders an
 inline SVG scene (gradient sky, sun, clouds, birds, distant islands, sea,
@@ -270,6 +272,10 @@ A separate Canvas2D `#minimap` sits in the survey chart at bottom-left, above th
 game canvas but below the menu/end screens. It draws a deep-water chart, island
 coastlines, buildings, the Beacon halo, and the camera viewport; it updates every
 third frame even before a world exists.
+
+`--tide-progress` is updated from the game loop and drives a slow CSS filter on
+the illustrated backdrop, so the Glass Sea darkens toward dusk as the tide limit
+approaches.
 
 ## 10. Persistence
 
