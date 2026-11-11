@@ -241,13 +241,14 @@ after any behavioural change.
   Cosy/Lively/Curious/Efficient atmosphere and an Open/Chapter first/Visitors
   first welcome policy, including Care first for residents in crisis. The nine buildable
   services include the 2×2 Bathhouse for Rest + Company, the 2×2 Clinic for
-  Rest + Sustenance, the 2×2 Amphitheatre for Company + Wonder and the 2×2
-  Observatory for Wonder at night. A build chooses a
+  Rest + Sustenance, the 2×2 Creche for Company + Rest, the 2×2 Amphitheatre
+  for Company + Wonder and the 2×2 Observatory for Wonder at night. A build chooses a
   Humble, Comfortable or Grand shell finish. An open service can add two
   floors with Dormer, Common Room or Roof Garden plans. Neighbouring services add a small quality
   bonus, with extra for mixed chapters. Three connected services form a named
-  district with a small shared bonus. In Contest, a second
-  commons isle is buildable and residents reach it through reserved shuttle gates.
+  district with a small shared bonus. In Contest, a second commons isle and a
+  third garden isle are buildable and residents reach both through reserved
+  shuttle gates.
   Open Charter uses the same three isles without rivals or a campaign. This is a
   first pass; a fuller archipelago, a larger multi-round festival, auctions and
   deeper legacy effects are still missing.
