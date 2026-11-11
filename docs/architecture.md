@@ -361,13 +361,14 @@ as an ordinary resident.
 (3) after the home rest, and `servesNeed()` lets the six-seat Beacon answer any
 need as a shared visitable service. `VisitorCardModal` shows a visitor's traits, needs, affinity and last choice
 behind the report's visitor row. `CommonsModal` is the contribution and Assembly UI. `src/commons/CommonsPolicies.js`
-defines the four one-time policies (Shared Table, Open Beds, Commons Garden,
-Night Watch). `CommonsBallot.petitionFor()` records residents' petition signatures.
+defines the four policies (Shared Table, Open Beds, Commons Garden, Night Watch). `CommonsBallot.petitionFor()` records residents' petition signatures.
 `Charter.nominateCommonsPolicy()` records the player's nomination and the two
 rival nominations, then adds the petition policy to the finalists; `resolveCommonsAssembly()` runs the deterministic
 resident ballot in `CommonsBallot.js`, then `Charter.chooseCommonsPolicy()`
 applies the winning capacity/comfort modifiers to every existing service and
-stores the policy. `Charter.build()` and `RivalAI` apply it to later builds. Night Watch is
+stores the policy. `Charter.callSecondReading()` opens one amendment after a
+full day; `removeCommonsPolicyFromService()` reverts the old capacity tags before
+the new policy applies. `Charter.build()` and `RivalAI` apply it to later builds. Night Watch is
 read by `commonsComfortFor()` and `commonsRestRecoveryFor()`. The site,
 contributors and service persist in the `commons` save block.
 
