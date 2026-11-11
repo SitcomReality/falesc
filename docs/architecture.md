@@ -113,6 +113,7 @@ src/
   world/
     World.js                 Pixi app, layers, camera/input, map and minerals
     PatronageFlow.js         world-space last-choice arcs on the overlay layer
+    DistrictOverlay.js       read-only names above connected service districts
 ```
 
 There is no `GameStateManager`, `TurnScheduler`, `BuildingManager`, `Building`,
