@@ -65,8 +65,9 @@ export class ReportScreen {
         const festival = report.campaignEvent
             ? `<p class="report__warning">Festival programme: <strong>${escapeHtml(report.campaignEvent.title)}</strong> — ${escapeHtml(report.campaignEvent.blurb)}</p>`
             : '';
+        const commonsVisits = report.patronageByChapter?.commons || 0;
         const commonsNote = report.commons
-            ? `<p class="report__warning">${report.commons.active ? 'The Commons Beacon is lit: every need eases by ${report.commons.comfort} at night.' : `Commons Beacon fund: ${report.commons.fund} / ${report.commons.target} lumen.`}</p>`
+            ? `<p class="report__warning">${report.commons.active ? `The Commons Beacon is lit: every need eases by ${report.commons.comfort} at night, and ${commonsVisits} visits found its door.` : `Commons Beacon fund: ${report.commons.fund} / ${report.commons.target} lumen.`}</p>`
             : '';
 
         this.container.innerHTML = `

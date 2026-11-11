@@ -170,7 +170,7 @@ export class DaySimulator {
 
     scoreService(resident, service, need, urgency, phase) {
         const program = service.program;
-        const isPrimary = program.need === need.id;
+        const isPrimary = program.need === need.id || program.id === 'commons_beacon';
         const match = isPrimary ? 1 : 0.46;
         const quality = (program.quality || 1) * (service.finish === 'grand' ? 1.1 : service.finish === 'humble' ? 0.9 : 1);
         const vibe = vibeFit(resident.traits.temperament, service.policy?.vibe || program.vibe);
@@ -241,7 +241,7 @@ export class DaySimulator {
         };
 
         const needValue = resident.needs[need.id];
-        const isPrimary = service.program.need === need.id;
+        const isPrimary = service.program.need === need.id || service.program.id === 'commons_beacon';
         const effect = (isPrimary ? BALANCE.services.primaryEffect : BALANCE.services.secondaryEffect)
             * (service.program.quality || 1)
             * standardFit(resident.traits.standards, service.finish);

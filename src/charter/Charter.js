@@ -338,6 +338,7 @@ export class Charter {
     }
 
     serviceLabel(service) {
+        if (service.chapterId === 'commons') return service.name;
         return service.chapter?.isPlayer || !service.chapter
             ? service.name
             : `${service.chapter.name}'s ${service.name}`;

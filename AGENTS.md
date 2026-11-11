@@ -22,7 +22,8 @@ substantially implemented for one shared shard, including a **Contest preview**
 with two AI rivals, a shared lumen economy, shared residents, rival housing,
 recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
 a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
-a fundable shared Commons Beacon. The full multi-round festival, auctions, systemic stewardship, deeper rival
+a fundable shared Commons Beacon that becomes a six-seat all-needs civic service.
+The full multi-round festival, auctions, systemic stewardship, deeper rival
 strategy, layers and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
@@ -168,8 +169,8 @@ after any behavioural change.
   promises more magnetic, rivals publish promises, the player chooses one, and
   the final vote uses both. A player victory then chooses one of four stewardship
   promises for the epilogue; a rival winner skips that choice. A shared Commons
-  Beacon can be funded by every chapter and gives every resident a nightly
-  comfort once lit. This is a first pass; a separate shared-commons island,
+  Beacon can be funded by every chapter; once lit it gives every resident a
+  nightly comfort and opens as a six-seat all-needs shared service. This is a first pass; a separate shared-commons island,
   a larger multi-round festival, auctions and systemic stewardship effects are
   still missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do

@@ -106,14 +106,14 @@ export const PROGRAMS = [
         category: 'Civic',
         need: null,
         secondaryNeed: null,
-        capacity: 0,
-        duration: 0,
-        open: [],
+        capacity: 6,
+        duration: 1,
+        open: ['morning', 'afternoon', 'evening', 'night'],
         footprint: { w: 2, h: 2 },
         cost: 12,
         upkeep: 0,
         durationText: 'the shared wonder',
-        quality: 1,
+        quality: 1.1,
         finish: 'grand',
         vibe: 'curious',
         constructionDays: 2,
@@ -139,7 +139,9 @@ export function programNeed(program) {
 
 /** Does this program serve the given need (primary or secondary)? */
 export function servesNeed(program, needId) {
-    return Boolean(program && (program.need === needId || program.secondaryNeed === needId));
+    if (!program) return false;
+    if (program.id === 'commons_beacon') return true;
+    return program.need === needId || program.secondaryNeed === needId;
 }
 
 /** Is the program open during this phase? */

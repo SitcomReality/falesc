@@ -57,6 +57,8 @@ export class CommonsModal {
                 return `<li><span>${escapeHtml(chapter?.name || id)}</span><strong>${value}</strong></li>`;
             }).join('');
         if (commons.active) {
+            const service = this.charter.commonsManager?.findById(this.charter.commons.serviceId);
+            const visits = service?.visits || 0;
             this.panel.innerHTML = `
                 <div class="modal__head">
                     <div>
@@ -65,7 +67,7 @@ export class CommonsModal {
                     </div>
                     <button type="button" class="modal__close" data-testid="commons-close-x" aria-label="Close commons">×</button>
                 </div>
-                <p class="modal__blurb">The fund is full. The Beacon gives every resident a little more room to be well: each night it eases every need by ${BALANCE.commons.comfort}.</p>
+                <p class="modal__blurb">The fund is full. The Beacon is a shared place for every resident: it eases every need by ${BALANCE.commons.comfort} each night, and its door is open for ${visits} visits so far.</p>
                 <ul class="commons-contributors">${contributors || '<li><span>The commons</span><strong>—</strong></li>'}</ul>
                 <div class="modal__actions">
                     <button type="button" class="btn btn--primary" data-testid="commons-close">Close</button>

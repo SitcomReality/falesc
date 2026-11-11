@@ -39,6 +39,7 @@ export class EndScreen {
                     <div class="end__stat"><dt>Flourishing</dt><dd data-role="flourishing">0</dd></div>
                     <div class="end__stat"><dt>Lumen in hand</dt><dd data-role="lumen">0</dd></div>
                     <div class="end__stat"><dt>Stewardship</dt><dd data-role="stewardship">—</dd></div>
+                    <div class="end__stat" data-role="commons-stat" hidden><dt>Commons</dt><dd data-role="commons">—</dd></div>
                 </dl>
             </div>
             <div class="end__medal" data-role="medal" aria-hidden="true">◇</div>
@@ -58,6 +59,8 @@ export class EndScreen {
         this.flourishingEl = aside.querySelector('[data-role=flourishing]');
         this.lumenEl = aside.querySelector('[data-role=lumen]');
         this.stewardshipEl = aside.querySelector('[data-role=stewardship]');
+        this.commonsStat = aside.querySelector('[data-role=commons-stat]');
+        this.commonsEl = aside.querySelector('[data-role=commons]');
         this.medalEl = aside.querySelector('[data-role=medal]');
 
         main.querySelector('[data-testid=end-menu]').addEventListener('click', () => this.gsm.setState('MENU'));
@@ -69,12 +72,20 @@ export class EndScreen {
         const ending = charter?.ending || this.game.endResult || { outcome: 'abandon' };
         const outcome = ending.outcome || 'abandon';
         const stats = charter?.stats() || {};
+        const commons = charter?.commons || null;
+        this.commonsStat.hidden = !commons;
+        if (commons) {
+            this.commonsEl.textContent = commons.active ? 'Lit' : `${commons.fund} / ${commons.target}`;
+        }
         this.container.classList.remove('end--victory', 'end--defeat', 'end--abandon');
         this.container.classList.add(`end--${outcome}`);
 
         if (outcome === 'victory') {
             this.titleEl.textContent = ending.title || 'The commons holds.';
-            this.copyEl.textContent = `${ending.message || 'Twelve Tidelanders, a full larder, and a flourishing worth celebrating. The Confluence has done its work.'}${ending.stewardship ? ` ${ending.stewardship.epilogue}` : ''}`;
+            const commonsLine = commons?.active
+                ? ` The Commons Beacon was lit by ${contributionLine(charter)}. Every resident still feels its ease at night.`
+                : '';
+            this.copyEl.textContent = `${ending.message || 'Twelve Tidelanders, a full larder, and a flourishing worth celebrating. The Confluence has done its work.'}${ending.stewardship ? ` ${ending.stewardship.epilogue}` : ''}${commonsLine}`;
             this.medalEl.textContent = '✦';
         } else if (outcome === 'defeat') {
             this.titleEl.textContent = ending.title || 'The lights go out.';
@@ -103,4 +114,15 @@ export class EndScreen {
     hide() {
         this.container.style.display = 'none';
     }
+}
+
+function contributionLine(charter) {
+    const entries = Object.entries(charter?.commons?.contributors || {})
+        .filter(([, value]) => value > 0)
+        .sort((a, b) => b[1] - a[1]);
+    if (entries.length === 0) return 'the archipelago';
+    return entries.map(([id, value]) => {
+        const chapter = charter.chapterById(id);
+        return `${chapter?.name || id} (${value})`;
+    }).join(', ');
 }

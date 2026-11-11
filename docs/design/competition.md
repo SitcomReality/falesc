@@ -243,8 +243,9 @@ chapters during the final days.
   not.
 
 **Current preview:** the Beacon can be funded from the start of the Contest,
-not only the final days. It gives a nightly multi-need comfort; contributor
-prestige and a final-days ritual are still target.
+not only the final days. It gives a nightly multi-need comfort and a six-seat
+all-needs shared service; contributor prestige and a final-days ritual are still
+target.
 
 This is the one place where the old Beacon earns its keep: a shared ritual, not
 a private victory.

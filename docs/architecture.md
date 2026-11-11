@@ -316,7 +316,8 @@ The **Commons Beacon** is a shared project rather than a chapter service.
 a ghost. `Charter.contributeCommons()` accepts player or rival lumen, records
 contributors and flips the service to ACTIVE at 20. While active,
 `DaySimulator.applyNightRest()` eases every need by `BALANCE.commons.comfort`
-(3) after the home rest. `CommonsModal` is the contribution UI. The site,
+(3) after the home rest, and `servesNeed()` lets the six-seat Beacon answer any
+need as a shared visitable service. `CommonsModal` is the contribution UI. The site,
 contributors and service persist in the `commons` save block.
 
 The **patronage-flow overlay** (`src/world/PatronageFlow.js`) is a read-only Pixi
