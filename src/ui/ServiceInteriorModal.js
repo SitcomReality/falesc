@@ -60,6 +60,17 @@ export class ServiceInteriorModal {
         this.overlays.close(this);
     }
 
+    moveResident(residentId, floor) {
+        if (!this.housing || !this.game?.charter) return;
+        const resident = this.game.charter.activeResidents.find((entry) => entry.id === residentId);
+        const rooms = this.floors || [];
+        const target = rooms[floor];
+        if (!resident || !target) return;
+        if (target.occupants.length >= target.seats) return;
+        resident.homeFloor = floor;
+        this.render();
+    }
+
     render() {
         const service = this.service;
         const program = service.program;
@@ -79,11 +90,14 @@ export class ServiceInteriorModal {
         const here = residents.filter((resident) => housing
             ? resident.homeServiceId === service.id
             : resident.memory?.lastChoice?.serviceId === service.id);
-        for (const floor of floors) {
+        floors.forEach((floor, index) => {
+            floor.index = index;
             floor.occupants = housing
-                ? here.filter((resident) => resident.homeFloor === floors.indexOf(floor))
+                ? here.filter((resident) => resident.homeFloor === index)
                 : [];
-        }
+        });
+        this.floors = floors;
+        this.housing = housing;
         const people = here.length
             ? here.slice(0, 8).map((resident) => `<li><strong>${escapeHtml(resident.name)}</strong><span>${escapeHtml(resident.lastChoice || 'a familiar face')}</span></li>`).join('')
             : '<li class="service-interior__empty">No one is inside just now.</li>';
@@ -102,7 +116,7 @@ export class ServiceInteriorModal {
                         <span class="kicker">${floor.label}</span>
                         <strong>${escapeHtml(floor.plan?.name || program?.name || 'Service')}</strong>
                         <span>${floor.seats} ${housing ? 'beds' : 'seats'}${floor.plan ? ` · +${(floor.plan.quality || 0).toFixed(2)} quality` : ''}</span>
-                        ${floor.occupants.length ? `<span class="interior-room__people">${floor.occupants.map((resident) => escapeHtml(resident.name)).join(', ')}</span>` : ''}
+                        ${floor.occupants.length ? `<span class="interior-room__people">${floor.occupants.map((resident) => `${escapeHtml(resident.name)}${housing ? ` <button type="button" class="interior-room__move" data-move-resident="${escapeHtml(resident.id)}" data-move-floor="${floor.index + 1}" data-move-direction="up" aria-label="Move ${escapeHtml(resident.name)} up" ${floor.index + 1 >= floors.length || (floors[floor.index + 1]?.occupants.length || 0) >= (floors[floor.index + 1]?.seats || 0) ? 'disabled' : ''}>↑</button><button type="button" class="interior-room__move" data-move-resident="${escapeHtml(resident.id)}" data-move-floor="${floor.index - 1}" data-move-direction="down" aria-label="Move ${escapeHtml(resident.name)} down" ${floor.index === 0 || (floors[floor.index - 1]?.occupants.length || 0) >= (floors[floor.index - 1]?.seats || 0) ? 'disabled' : ''}>↓</button>` : ''}`).join(', ')}</span>` : ''}
                     </article>
                 `).join('')}
             </div>
@@ -112,6 +126,10 @@ export class ServiceInteriorModal {
                 <button type="button" class="btn btn--paper" data-testid="service-interior-done">Back to the record</button>
             </div>
         `;
+        this.panel.querySelectorAll('[data-move-resident]').forEach((button) => button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            this.moveResident(button.dataset.moveResident, Number(button.dataset.moveFloor));
+        }));
         this.panel.querySelector('[data-testid=service-interior-close]')?.addEventListener('click', (event) => {
             event.stopPropagation();
             this.hide();

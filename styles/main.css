@@ -5396,3 +5396,20 @@ body.is-photo-mode .care-watch {
     border-top: 1px solid rgba(33, 18, 37, 0.25);
     padding-top: 4px;
 }
+
+.interior-room__move {
+    padding: 0 3px;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-size: 10px;
+    line-height: 1.1;
+    cursor: pointer;
+}
+
+.interior-room__move:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
