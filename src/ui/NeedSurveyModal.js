@@ -1,5 +1,5 @@
 import { NEEDS } from '../design/needs.js';
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 
 /**
  * A read-only demand snapshot for planning: how urgent each need is, how many

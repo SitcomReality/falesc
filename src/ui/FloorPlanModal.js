@@ -1,5 +1,5 @@
 import { FLOOR_PLANS } from '../services/FloorPlans.js';
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 
 /**
  * Floor-plan choice: the shell above a service can sleep, host or open to the

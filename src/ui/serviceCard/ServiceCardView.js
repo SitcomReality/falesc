@@ -6,7 +6,7 @@ import { SERVICE_ACCESS_BY_ID } from '../../services/ServiceAccess.js';
 import { SERVICE_FOCUS } from '../../services/ServiceFocus.js';
 import { FLOOR_PLAN_BY_ID } from '../../services/FloorPlans.js';
 import { finishCost } from '../../services/BuildingFinishes.js';
-import { escapeHtml } from '../html.js';
+import { escapeHtml } from '../escapeHtml.js';
 
 /**
  * Everything the service card shows for one service: the fact rows, the

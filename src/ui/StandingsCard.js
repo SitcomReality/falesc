@@ -1,5 +1,5 @@
 import { COMMONS_POLICY_BY_ID } from '../commons/CommonsPolicies.js';
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 
 /**
  * Live Devotion standings for the Contest preview. Hidden in First Light.

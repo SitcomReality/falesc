@@ -3,7 +3,7 @@
  * not a second objective system or a source of rewards.
  */
 import { readMilestones } from '../persistence/MilestoneArchive.js';
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 
 export class MilestonesModal {
     constructor({ game, overlays }) {

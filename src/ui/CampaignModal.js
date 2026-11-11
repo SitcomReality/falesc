@@ -1,6 +1,6 @@
 import { PLEDGES } from '../confluence/Pledges.js';
 import { NEEDS } from '../design/needs.js';
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 
 /**
  * Campaign promise chooser. Rivals publish their promises; the player picks

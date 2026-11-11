@@ -1,5 +1,5 @@
 import { TEMPERAMENT_BY_ID } from '../design/traits.js';
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 
 /**
  * The residents who left the charter. A small paper memorial, not a management

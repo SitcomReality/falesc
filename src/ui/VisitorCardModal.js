@@ -1,7 +1,7 @@
 import { NEEDS } from '../design/needs.js';
 import { BALANCE } from '../design/balance.js';
 import { describeTraits } from '../design/traits.js';
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 
 /**
  * A visitor's own card. The report row is the invitation surface; this card is

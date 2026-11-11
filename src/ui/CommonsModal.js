@@ -1,6 +1,6 @@
 import { BALANCE } from '../design/balance.js';
 import { COMMONS_POLICIES, COMMONS_POLICY_BY_ID, commonsComfortFor } from '../commons/CommonsPolicies.js';
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 
 /**
  * Shared Commons Beacon fund. Every chapter can put lumen into the same civic

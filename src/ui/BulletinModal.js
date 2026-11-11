@@ -1,4 +1,4 @@
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 /**
  * The morning bulletin: a paused paper card with three pieces of news — an
  * unmet need, an arrival or complaint, and a line of word of mouth.

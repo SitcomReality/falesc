@@ -1,4 +1,4 @@
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 import { FLOOR_PLAN_BY_ID } from '../services/FloorPlans.js';
 
 /**

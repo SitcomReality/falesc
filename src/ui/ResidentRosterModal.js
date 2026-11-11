@@ -1,5 +1,5 @@
 import { NEEDS } from '../design/needs.js';
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 
 /**
  * A scannable roster of everyone currently present. The card remains the place

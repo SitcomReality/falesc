@@ -1,4 +1,4 @@
-import { escapeHtml } from './html.js';
+import { escapeHtml } from './escapeHtml.js';
 /**
  * A rival chapter's public dossier: doctrine, plan, residents, Devotion and the
  * services it currently operates. Read-only.
