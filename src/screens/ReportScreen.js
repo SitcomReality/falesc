@@ -21,12 +21,13 @@ export class ReportScreen {
             return;
         }
         const ending = this.game.charter.ending;
+        const confluence = Boolean(this.game.charter.confluenceReady && !ending);
         const title = ending
             ? ending.title
-            : report.message || 'The day is done.';
+            : confluence ? report.message || 'The Confluence is called.' : report.message || 'The day is done.';
         const kicker = ending
             ? `Charter record · Day ${report.day}`
-            : `Evening report · Day ${String(report.day).padStart(2, '0')}`;
+            : confluence ? `The Confluence · Day ${report.day}` : `Evening report · Day ${String(report.day).padStart(2, '0')}`;
         const visits = report.serviceVisits || {};
         const serviceRows = this.game.charter.allServices.map((service) => `
             <li>
@@ -100,7 +101,7 @@ export class ReportScreen {
                 <footer class="report__foot">
                     <p>${escapeHtml(report.message || '')}</p>
                     <button type="button" class="btn btn--primary" data-testid="report-continue">
-                        ${ending ? 'Read the charter record' : `Begin Day ${String(report.day + 1).padStart(2, '0')}`}
+                        ${ending ? 'Read the charter record' : confluence ? 'Convene the Confluence' : `Begin Day ${String(report.day + 1).padStart(2, '0')}`}
                         <span class="btn__arrow" aria-hidden="true">→</span>
                     </button>
                 </footer>
@@ -108,6 +109,7 @@ export class ReportScreen {
         `;
         this.container.querySelector('[data-testid=report-continue]').addEventListener('click', () => {
             if (ending) this.game.finishCharter();
+            else if (confluence) this.game.showConfluence();
             else this.game.beginNextDay();
         });
         this.container.style.display = 'flex';

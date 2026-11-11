@@ -9,6 +9,7 @@ import { LobbyScreen } from './screens/LobbyScreen.js';
 import { GameScreen } from './screens/GameScreen.js';
 import { DayScreen } from './screens/DayScreen.js';
 import { ReportScreen } from './screens/ReportScreen.js';
+import { ConfluenceScreen } from './screens/ConfluenceScreen.js';
 import { EndScreen } from './screens/EndScreen.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { ServiceCardModal } from './ui/ServiceCardModal.js';
@@ -84,11 +85,13 @@ export class FalescGame {
         this.gameScreen = new GameScreen(this.screenStateMachine, this);
         this.dayScreen = new DayScreen(this);
         this.reportScreen = new ReportScreen(this);
+        this.confluenceScreen = new ConfluenceScreen(this);
         this.screenStateMachine.registerScreen(GamePhase.MENU, new MenuScreen(this.screenStateMachine, this));
         this.screenStateMachine.registerScreen(GamePhase.LOBBY, new LobbyScreen(this.screenStateMachine, this));
         this.screenStateMachine.registerScreen(GamePhase.PLAYING, this.gameScreen);
         this.screenStateMachine.registerScreen(GamePhase.DAY, this.dayScreen);
         this.screenStateMachine.registerScreen(GamePhase.REPORT, this.reportScreen);
+        this.screenStateMachine.registerScreen(GamePhase.CONFLUENCE, this.confluenceScreen);
         this.screenStateMachine.registerScreen(GamePhase.END, new EndScreen(this.screenStateMachine, this));
 
         this.minimap = new Minimap(this);
@@ -442,6 +445,10 @@ export class FalescGame {
 
     beginNextDay() {
         if (!this.charter || this.screenStateMachine.state !== GamePhase.REPORT) return false;
+        if (this.charter.confluenceReady) {
+            this.showConfluence();
+            return true;
+        }
         if (this.charter.ending) {
             this.finishCharter();
             return true;
@@ -460,6 +467,12 @@ export class FalescGame {
             this.gameScreen.toast(`${result.arrivals.length} new Tidelander${result.arrivals.length === 1 ? '' : 's'} at the Welcome Post.`, 'mint');
         }
         this.saveGame();
+        return true;
+    }
+
+    showConfluence() {
+        if (!this.charter?.confluenceReady) return false;
+        this.screenStateMachine.setState(GamePhase.CONFLUENCE);
         return true;
     }
 
@@ -528,6 +541,10 @@ export class FalescGame {
             this.residentCard.hide();
             this.world.clearHover();
         }
+        if (phase === GamePhase.CONFLUENCE) {
+            this.patronageFlow.hide();
+            this.gameScreen.setPatronageState(false);
+        }
         if (phase === GamePhase.END) this.saveManager.clear();
         if (phase === GamePhase.MENU || phase === GamePhase.LOBBY) {
             this.playback = null;
@@ -578,7 +595,7 @@ export class FalescGame {
 
         const day = this.charter?.day || 1;
         const limit = this.charter?.dayLimit || 14;
-        const mood = [GamePhase.PLAYING, GamePhase.DAY, GamePhase.REPORT, GamePhase.END].includes(state)
+        const mood = [GamePhase.PLAYING, GamePhase.DAY, GamePhase.REPORT, GamePhase.CONFLUENCE, GamePhase.END].includes(state)
             ? Math.min(1, Math.max(0, (day - 1) / Math.max(1, limit - 1)))
             : 0;
         if (Math.abs(mood - this.tideMood) > 0.001) {
@@ -709,6 +726,7 @@ export class FalescGame {
                         outcome: report.outcome || null
                     } : null,
                     ending: charter?.ending || null,
+                    confluenceReady: Boolean(charter?.confluenceReady),
                     chapters: charter?.standings?.() || [],
                     devotionByChapter: charter?.devotionByChapter || {},
                     buildModalOpen: game.buildModal.isOpen,
@@ -752,6 +770,9 @@ export class FalescGame {
             },
             openDay() {
                 return game.openDay();
+            },
+            showConfluence() {
+                return game.showConfluence();
             },
             skipDay() {
                 return game.skipDay();

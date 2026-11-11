@@ -8,8 +8,9 @@ enough for the chapter to flourish.
 This build is the **First Light vertical slice**. One playable home shard, four
 needs, four services, a paused planning day, a deterministic playback, and an
 evening broadsheet. A **Contest preview** adds two rival chapters, a shared lumen
-economy, shared residents and rival housing on the same shard; the full shared
-commons and the Confluence vote are the design target beyond that.
+economy, shared residents and rival housing on the same shard, ending in a
+**Confluence vote**; the full festival campaign, auctions, stewardship and
+shared-commons layer are the design target beyond that.
 
 Built with vanilla ES modules and [Pixi.js](https://pixijs.com/) 7. There is no
 build step: `index.html` loads `src/App.js`, which starts `src/FalescGame.js`,
@@ -20,10 +21,10 @@ the game makes no network requests at runtime.
 > the day, read the report, repeat. Residents arrive, leave when a need or a bed
 > goes unmet for days, and can empty the chapter. Balance is generous and not yet
 > tuned; only the home shard is playable. A two-rival Contest preview is
-> available, with rival upkeep, contributions, housing and Devotion standings;
-> the Confluence vote, deeper rival strategy, building layers, auctions and
-> multiplayer are not implemented. A patronage flow overlay is available in
-> the Contest standings card (or `P`). See [docs/known-issues.md](docs/known-issues.md).
+> available, with rival upkeep, contributions, housing, Devotion standings and a
+> final Confluence vote. The full festival campaign, deeper rival strategy,
+> building layers, auctions and multiplayer are not implemented. A patronage
+> flow overlay is available in the Contest standings card (or `P`). See [docs/known-issues.md](docs/known-issues.md).
 
 ## Run it locally
 
@@ -89,6 +90,7 @@ webgame_smoke --scenario scripts/scenarios/overlay-stack.mjs
 webgame_smoke --scenario scripts/scenarios/report-save.mjs
 webgame_smoke --scenario scripts/scenarios/contest.mjs
 webgame_smoke --scenario scripts/scenarios/contest-recovery.mjs
+webgame_smoke --scenario scripts/scenarios/confluence-defeat.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```
 
@@ -122,9 +124,11 @@ local save v2.
 The **Contest preview** is present: two rival chapters build services and
 housing, pay upkeep from their own residents' contributions, share the same
 residents and occupancy, and compete for Devotion; standings and patronage
-appear in the HUD and report, and the day limit crowns the most-beloved chapter.
-Still absent: the full shared commons, Confluence vote and a deeper rival
-strategy beyond need-pressure builds/recovery, building layers or retrofit,
-auctions, audio, multiplayer, or a keyboard build cursor. A patronage-flow
+appear in the HUD and report. At the day limit the archipelago convenes a
+**Confluence**: the player makes one pledge, every resident votes, and the result
+becomes the charter record. Still absent: the full festival campaign, shared
+commons, auctions/stewardship and a deeper rival strategy beyond
+need-pressure builds/recovery, building layers or retrofit, audio, multiplayer,
+or a keyboard build cursor. A patronage-flow
 overlay now traces each resident's last choice from home to door. The Commons Beacon silhouette exists as endgame art but
 is not buildable. See [docs/known-issues.md](docs/known-issues.md).

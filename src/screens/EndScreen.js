@@ -71,11 +71,11 @@ export class EndScreen {
         this.container.classList.add(`end--${outcome}`);
 
         if (outcome === 'victory') {
-            this.titleEl.textContent = 'The commons holds.';
+            this.titleEl.textContent = ending.title || 'The commons holds.';
             this.copyEl.textContent = ending.message || 'Twelve Tidelanders, a full larder, and a flourishing worth celebrating. The Confluence has done its work.';
             this.medalEl.textContent = '✦';
         } else if (outcome === 'defeat') {
-            this.titleEl.textContent = 'The lights go out.';
+            this.titleEl.textContent = ending.title || 'The lights go out.';
             this.copyEl.textContent = ending.message || 'The charter closed before the chapter found its rhythm. The islands will be here when you try again.';
             this.medalEl.textContent = '≈';
         } else {

@@ -23,7 +23,7 @@ Severity is about impact on the slice, not effort:
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Only the home shard is playable; there is no archipelago layer |
 | 3 | Medium | No building layers, retrofit, modules, finishes or player-set policy |
-| 4 | Medium | Contest rival strategy is still shallow and the Confluence vote is absent |
+| 4 | Medium | Contest strategy is shallow and the Confluence is a one-pledge vote |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
 | 7 | Low | Save v1 is discarded, a mid-`DAY` reload loses the day, and there is no export/import |
@@ -115,35 +115,36 @@ no new geometry), then modules, then shells/retrofit. Keep the "no spreadsheet"
 test: every option must show up in a resident's choice or the report. Extend
 `ServiceCardModal` and the placement preview before adding more programs.
 
-### 4. Contest rival strategy is still shallow and the vote is absent
+### 4. Contest strategy is shallow and the Confluence is a one-pledge vote
 
 **Evidence**
 
 - The Contest preview has two AI chapters, doctrine biases, shared
   services/occupancy, shared residents, rival Welcome Houses, per-chapter lumen,
   contributions, upkeep and closures, a rival bulletin move, Devotion standings,
-  a patronage-flow overlay and a most-beloved-chapter end at the day limit.
+  a patronage-flow overlay, and a final Confluence pledge/vote.
 - Rivals reopen services lost to a shortfall, choose builds by shared need
   pressure plus doctrine, and can grow through housing. They still make one move
   per day and do not plan a long-term service mix or respond to the player's
   specific moves.
-- The patronage overlay traces last choices, but there is no full survey screen
-  comparing patronage over time; the Confluence festival and public vote remain
-  absent, and the Commons Beacon is still non-buildable endgame data.
+- The Confluence is one pledge followed by a deterministic resident tally; there
+  is no festival campaign, rival pledges, auctions, stewardship or multi-round
+  public judgment. The Commons Beacon is still non-buildable endgame data.
 - D3/D4 in [design/decisions.md](design/decisions.md) deliberately defer
-  auctions, stewardship and the full vote.
+  auctions and stewardship.
 
 **Impact**
 
-Competition is visible and the economy is shared, but rival play is reactive
-rather than strategic, and the final judgment is still a simple Devotion
-comparison instead of a festival and vote.
+Competition is visible, the economy is shared and the run now has a social
+finale, but the finale is still a short vote rather than the full Confluence
+festival. Rival play remains reactive rather than strategic.
 
 **Suggested direction**
 
-Add a small long-term rival plan and a richer patronage survey view, then follow
-[design/roadmap.md](design/roadmap.md) into the Confluence festival/vote. Do not
-add auctions or human multiplayer early.
+Add a small long-term rival plan and a richer festival campaign with rival
+pledges before considering auctions or stewardship. Follow
+[design/roadmap.md](design/roadmap.md). Do not add auctions or human multiplayer
+early.
 
 ### 5. No keyboard build cursor
 
@@ -327,7 +328,7 @@ These are no longer open:
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
-- **Contest economy preview.** Two rival chapters, shared services/residents, rival housing/economy/closures, recovery and need-pressure builds, Devotion standings, the patronage-flow overlay and a day-limit winner are implemented and covered by `contest.mjs` and `contest-recovery.mjs`.
+- **Contest economy and Confluence preview.** Two rival chapters, shared services/residents, rival housing/economy/closures, recovery and need-pressure builds, Devotion standings, the patronage-flow overlay and a pledge/vote Confluence finale are implemented and covered by `contest.mjs`, `contest-recovery.mjs` and `confluence-defeat.mjs`.
 - **Safer destructive actions.** Abandoning a charter is a two-step confirmation
   and the save is cleared only after the confirmation.
 - **Truthful choice feedback.** "I come here often" is per resident, "open late"

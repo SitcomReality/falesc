@@ -53,6 +53,7 @@ export class Charter {
         this.report = null;
         this.lastReport = null;
         this.ending = null;
+        this.confluenceReady = false;
         this.bulletin = null;
         this.history = [];
         this.commonsCell = null;
@@ -411,6 +412,7 @@ export class Charter {
 
     beginNextDay() {
         if (this.ending) return { ended: true, ending: this.ending };
+        if (this.confluenceReady) return { ended: true, confluence: true };
         this.day += 1;
         this.works = BALANCE.worksPerDay;
         const promoted = this.services.promoteUnderConstruction();
@@ -485,30 +487,10 @@ export class Charter {
             };
         } else if (this.contest) {
             if (this.day >= this.dayLimit) {
-                const standings = this.standings().sort((a, b) => b.devotion - a.devotion);
-                const winner = standings[0];
-                if (this.flourishing < BALANCE.end.sharedSurvival) {
-                    this.ending = {
-                        outcome: 'defeat',
-                        day: this.day,
-                        title: 'No one wins the Confluence.',
-                        message: `The archipelago emptied before the vote. A flourishing of ${this.flourishing} is below the survival line; the evacuation ships take everyone.`
-                    };
-                } else if (winner?.isPlayer) {
-                    this.ending = {
-                        outcome: 'victory',
-                        day: this.day,
-                        title: 'The Confluence chooses you.',
-                        message: `Your chapter is the most beloved, with ${winner.devotion.toFixed(1)} Devotion. The commons holds, for now.`
-                    };
-                } else {
-                    this.ending = {
-                        outcome: 'defeat',
-                        day: this.day,
-                        title: `${winner?.name || 'Another chapter'} wins the Confluence.`,
-                        message: `Your chapter gathered ${this.devotion.toFixed(1)} Devotion against ${winner?.devotion?.toFixed(1) || '0'} for the winner. There is another charter in the drift.`
-                    };
-                }
+                this.confluenceReady = true;
+                report.outcome = 'confluence';
+                report.message = 'The day limit is here. The archipelago gathers for the Confluence; make one pledge and call the vote.';
+                report.confluenceReady = true;
             }
         } else if (this.housedPopulation >= BALANCE.end.firstLightPopulation && this.flourishing >= BALANCE.end.comfortableFlourishing) {
             // First Light is a goal, not a survival timer: meeting both targets
@@ -641,6 +623,7 @@ export class Charter {
             flourishing: this.flourishing,
             devotion: this.devotion,
             ending: this.ending,
+            confluenceReady: this.confluenceReady,
             pendingArrivals: this.pendingArrivals,
             lastReport: summarizeReport(this.lastReport),
             residents: this.roster.map((resident) => resident.toJSON()),
@@ -656,6 +639,7 @@ export class Charter {
         this.lumen = Number.isFinite(saved.lumen) ? saved.lumen : BALANCE.startingLumen;
         this.works = Number.isFinite(saved.works) ? saved.works : BALANCE.worksPerDay;
         this.ending = saved.ending || null;
+        this.confluenceReady = Boolean(saved.confluenceReady);
         this.pendingArrivals = Array.isArray(saved.pendingArrivals) ? saved.pendingArrivals : [];
         this.roster = ResidentFactory.fromSave(saved.residents || []);
         if (this.roster.length === 0) this.roster = ResidentFactory.createRoster(this.seed, BALANCE.rosterSize);
@@ -698,6 +682,7 @@ export class Charter {
             services: this.services.services.length,
             activeServices: this.services.activeServices.length,
             mode: this.mode,
+            confluenceReady: this.confluenceReady,
             totalSpareBeds: this.totalSpareBeds,
             rivals: this.rivals.length,
             devotionByChapter: this.devotionByChapter

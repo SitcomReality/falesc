@@ -2,8 +2,8 @@
 
 > **Status note:** this describes the **First Light vertical slice** and the
 > **Contest preview** as built today. It is no longer the Prism Tide prototype.
-> The wider design — full rival economy, shared commons, the Confluence vote,
-> building layers — is in [design-refinement.md](design-refinement.md) and
+> The wider design — full festival campaign, shared commons, auctions and
+> stewardship, building layers — is in [design-refinement.md](design-refinement.md) and
 > [design/](design/). Gameplay facts here are the current build; the design
 > target is elsewhere.
 
@@ -69,7 +69,7 @@ The lobby offers two modes:
 | Mode | What it is |
 | --- | --- |
 | **First Light** | The solo tutorial slice: one chapter, one shard, the 12-resident / flourishing-62 goal. |
-| **The Contest** | A two-rival preview on the same shard. **The Gardener** and **The Host** each start with three residents, a four-bed Welcome House, 15 lumen and a doctrine. They build, pay upkeep and receive contributions under the same rules as the player. Residents choose between all chapters' doors, and the day limit crowns the most-beloved chapter. |
+| **The Contest** | A two-rival preview on the same shard. **The Gardener** and **The Host** each start with three residents, a four-bed Welcome House, 15 lumen and a doctrine. They build, pay upkeep and receive contributions under the same rules as the player. Residents choose between all chapters' doors. At the day limit the **Confluence** convenes: the player makes one pledge, every resident votes, and the most votes wins. |
 
 In Contest mode the First Light objective card is replaced by a live **Devotion**
 standings card. Each chapter begins with a fixed Welcome House (four beds) and
@@ -252,9 +252,12 @@ The report is the day's story as a broadsheet:
   successfully immediately; the day limit is the deadline, not a survival timer.
 - **First Light defeat:** the population falls below **4** at the end of a day,
   or the day limit arrives without both goals.
-- **Contest:** at the day limit, the chapter with the most **Devotion** wins. If
-  shared flourishing is below the survival line, nobody wins. The preview does
-  not run the full Confluence festival/vote yet.
+- **Contest:** at the day limit the report hands over to the **Confluence**.
+  Choose one pledge, then call the vote. Each active resident votes for the
+  chapter they trust most; the player's pledge adds weight when it matches that
+  resident's most urgent need. The most votes wins, with Devotion as the
+  tie-break. If shared flourishing is below the survival line, nobody wins.
+  This is a first-pass festival and vote, not the full campaign/auction design.
 - **Abandon:** the charter menu asks for confirmation, then ends the run early as
   a voluntary departure and clears the save.
 
@@ -343,8 +346,8 @@ yet.
   them.
 - **The Contest is a preview.** Rivals build services and housing, pay upkeep,
   receive contributions, reopen lost services and react to need pressure, but
-  their planning is still one move per day and the full Confluence
-  festival/vote is not implemented.
+  their planning is still one move per day. The Confluence has a pledge and a
+  resident vote, not the full festival campaign, auctions or stewardship.
 - **No auctions, stewardship, petitions or multiplayer.** The Multiplayer button
   is a disabled placeholder.
 - **No audio.**

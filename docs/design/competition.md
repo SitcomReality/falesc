@@ -10,8 +10,9 @@
 > **Status:** a two-rival Contest preview now exists in code: shared services and
 > residents, rival Welcome Houses and housing growth, per-chapter lumen,
 > contributions, upkeep and closures, Devotion standings, a patronage-flow
-> overlay, doctrine/need-pressure builds and reopen recovery. A long-term rival
-> plan, the full survey view and the Confluence vote remain target.
+> overlay, doctrine/need-pressure builds, reopen recovery and a pledge/vote Confluence
+> finale. A long-term rival plan, the full festival campaign, auctions and
+> stewardship remain target.
 >
 > The competition is for **patronage and love**, not profit. Rivals win residents
 > by being better hosts. There is no price war, no landlord rent, and no cash
@@ -209,9 +210,10 @@ a vote.
 
 ### The vote
 
-- Each resident votes for the chapter they love most, weighted by their
-  wellbeing. A miserable resident abstains.
-- The chapter with the most votes wins. Ties are broken by shared Flourishing.
+- Each active resident votes for the chapter they trust most, weighted by
+  affinity, home chapter, their last choice and the player's one pledge. The
+  first pass does not abstain miserable residents; the tally is deterministic.
+- The chapter with the most votes wins. Ties are broken by Devotion.
 - If Flourishing is below the survival threshold, the archipelago is evacuated
   and **nobody wins**. This is the anti-race-to-the-bottom rule.
 

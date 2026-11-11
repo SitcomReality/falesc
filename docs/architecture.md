@@ -47,7 +47,9 @@ src/
     CharacterRenderer.js     static geometry, limb posing
   chapters/
     RivalChapter.js          rival identity, budget, works and services
-    RivalAI.js               doctrine build order and opening services
+    RivalAI.js               doctrine/need-pressure builds and recovery
+  confluence/
+    ConfluenceVote.js        pledges and the deterministic resident vote
   charter/
     Charter.js               run model: day, player chapter, rivals, roster, services, ending
   controls/
@@ -82,7 +84,7 @@ src/
     ResidentCrowd.js         owns visible agents and playback timelines
   screens/
     MenuScreen.js, LobbyScreen.js, GameScreen.js,
-    DayScreen.js, ReportScreen.js, EndScreen.js
+    DayScreen.js, ReportScreen.js, ConfluenceScreen.js, EndScreen.js
   services/
     ServiceBuilding.js       service model plus its Pixi container
     ServiceManager.js        placement, occupancy, housing, promotion, visits
@@ -90,7 +92,7 @@ src/
   simulation/
     DaySimulator.js          deterministic day: drift, choice, queues, report
   state/
-    GamePhase.js             MENU/LOBBY/PLAYING/DAY/REPORT/END
+    GamePhase.js             MENU/LOBBY/PLAYING/DAY/REPORT/CONFLUENCE/END
     ScreenStateMachine.js    screen registry and phase changes
   ui/
     BuildModal.js, ServiceCardModal.js, BulletinModal.js,
@@ -171,6 +173,7 @@ service, agent or overlay between runs.
 | `PLAYING` | Paused planning and HUD | `GameScreen` |
 | `DAY` | Deterministic playback at 1×/2×/4× with Skip | `DayScreen` |
 | `REPORT` | Evening broadsheet / charter record | `ReportScreen` |
+| `CONFLUENCE` | Final pledge and resident vote | `ConfluenceScreen` |
 | `END` | Victory, defeat or abandon | `EndScreen` |
 
 `ScreenStateMachine` is a small registry: it hides the active screen, shows the
@@ -285,8 +288,12 @@ its own residents' contributions, and a shortfall closes its non-housing
 services in the usual order. Rivals therefore have a real budget, can fall short
 and can grow through housing. Their AI reopens a lost service when it can afford
 the cost, then chooses the next build from shared need pressure plus doctrine.
-The end at the day limit compares Devotion; shared Flourishing below the
-survival line produces a no-winner defeat.
+At the day limit the contest does not pick a winner from Devotion directly:
+`Charter.evaluateEnding()` sets `confluenceReady`, and the report hands over to
+the Confluence screen. `ConfluenceVote.tally()` gives each active resident one
+vote based on per-chapter affinity, home loyalty, last choice, a pledge bonus
+and a seeded tie-break. The winner becomes the charter ending; shared
+Flourishing below the survival line produces a no-winner defeat.
 
 The **patronage-flow overlay** (`src/world/PatronageFlow.js`) is a read-only Pixi
 layer over the world. When toggled from the standings card or with `P`, it draws
@@ -530,7 +537,7 @@ It stores:
   "charter": {
     "seed": 12345, "mapSize": "medium", "day": 3, "dayLimit": 14,
     "lumen": 12, "works": 2, "flourishing": 63.5, "devotion": 8.3,
-    "mode": "contest", "ending": null, "pendingArrivals": [], "lastReport": {},
+    "mode": "contest", "ending": null, "confluenceReady": true, "pendingArrivals": [], "lastReport": {},
     "residents": [], "services": [], "rivals": []
   },
   "camera": { "x": 0, "y": 0, "zoom": 0.5 }

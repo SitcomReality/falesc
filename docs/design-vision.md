@@ -4,7 +4,8 @@
 > the guardrail. The **First Light vertical slice** now implements most of the
 > refined Phase 0 and Phase 1: warm nebula void, floating shards, service
 > buildings with doors, residents with needs, planning → playback → report, and
-> a civic-energy economy. Rivals, the Confluence vote and building layers are
+> a civic-energy economy. A Contest preview and Confluence pledge/vote are in
+> the build; the full festival campaign and building layers are
 > still absent. The sea/island/plant imagery in §7 and the building silhouettes
 > there are prototype-era and superseded by the void world in
 > [design/world.md](design/world.md); the economy and loop in §8 and the
