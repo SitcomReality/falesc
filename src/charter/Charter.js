@@ -64,13 +64,14 @@ export class Charter {
             idPrefix: 'player'
         });
         this.player.services = this.services;
-        this.commonsSector = mode === 'contest' ? map.commonsSector : null;
-        this.gardenSector = mode === 'contest' ? map.gardenSector : null;
-        if (map.commonsSector) map.commonsEnabled = mode === 'contest';
-        if (map.gardenSector) map.gardenEnabled = mode === 'contest';
+        const outerIsles = mode === 'contest' || mode === 'open';
+        this.commonsSector = outerIsles ? map.commonsSector : null;
+        this.gardenSector = outerIsles ? map.gardenSector : null;
+        if (map.commonsSector) map.commonsEnabled = outerIsles;
+        if (map.gardenSector) map.gardenEnabled = outerIsles;
         this.transit = { home: null, commons: null, garden: null };
         this.commonsChapter = { id: 'commons', name: 'The Commons', colour: '#FFD36E', isPlayer: false };
-        this.commonsManager = mode === 'contest'
+        this.commonsManager = outerIsles
             ? new ServiceManager({
                 map,
                 parentContainer,
@@ -136,6 +137,8 @@ export class Charter {
         if (this.mode === 'contest') {
             this.createRivals();
             this.lastRivalMoves = this.rivals.map((rival) => rival.lastMove).filter(Boolean);
+        }
+        if (this.commonsSector) {
             this.setupCommons();
             this.setupTransit();
         }
@@ -410,7 +413,7 @@ export class Charter {
     }
 
     contributeCommons(chapter, amount) {
-        if (!this.contest || !this.commonsManager || this.commons.active) return { ok: false, reason: 'The Commons is not taking contributions.' };
+        if (!this.commonsManager || this.commons.active) return { ok: false, reason: 'The Commons is not taking contributions.' };
         const needed = Math.max(0, this.commons.target - this.commons.fund);
         const value = Math.max(0, Math.min(Math.trunc(amount), chapter?.lumen || 0, needed));
         if (!value) return { ok: false, reason: 'No lumen to give.' };

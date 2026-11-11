@@ -74,6 +74,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-field-guide">Field guide</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-need-survey">Need survey</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-ledger">Ledger</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="open-commons-menu" hidden>The commons</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-departures" hidden>Past residents</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="sound-toggle" aria-pressed="false">Sound: off</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="motion-toggle" aria-pressed="false">Motion: full</button>
@@ -252,6 +253,10 @@ export class GameScreen {
             this._setPauseOpen(false);
             this.game.openLedger();
         });
+        this.pausePanel.querySelector('[data-testid=open-commons-menu]').addEventListener('click', () => {
+            this._setPauseOpen(false);
+            this.game.showCommons();
+        });
         this.departuresButton = this.pausePanel.querySelector('[data-testid=open-departures]');
         this.departuresButton.addEventListener('click', () => {
             this._setPauseOpen(false);
@@ -401,6 +406,7 @@ export class GameScreen {
         this.container.classList.toggle('is-contest', contest);
         this.container.classList.toggle('is-campaign', Boolean(charter.campaign?.active));
         const departed = charter.departedResidents?.length || 0;
+        this.pausePanel.querySelector('[data-testid=open-commons-menu]').hidden = !charter.commonsSector;
         const motion = this.game.motion === 'reduced';
         this.motionButton.textContent = motion ? 'Motion: reduced' : 'Motion: full';
         this.motionButton.setAttribute('aria-pressed', String(motion));

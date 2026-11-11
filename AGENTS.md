@@ -233,8 +233,9 @@ after any behavioural change.
   bonus, with extra for mixed chapters. Three connected services form a named
   district with a small shared bonus. In Contest, a second
   commons isle is buildable and residents reach it through reserved shuttle gates.
-  This is a first pass; a fuller archipelago, a larger multi-round festival,
-  auctions and deeper legacy effects are still missing.
+  Open Charter uses the same three isles without rivals or a campaign. This is a
+  first pass; a fuller archipelago, a larger multi-round festival, auctions and
+  deeper legacy effects are still missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
   not remove the survey chart without adjusting `canvasSelectors` and the smoke
   test.

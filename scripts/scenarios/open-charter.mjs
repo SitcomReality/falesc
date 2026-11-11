@@ -15,8 +15,21 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.equal(opened.dayLabel, '/ open');
     assert.equal(opened.deadline, 'No deadline');
     assert.equal(opened.name, 'Build without a deadline');
+    const outer = await page.evaluate(`({ commons: window.__falesc.app.charter.commonsSector?.id || null, garden: window.__falesc.app.charter.gardenSector?.id || null, transit: Boolean(window.__falesc.app.charter.transit.commons), commonsButton: !document.querySelector('[data-testid=open-commons-menu]').hidden })`);
+    log(JSON.stringify({ outer }));
+    assert.ok(outer.commons);
+    assert.ok(outer.garden);
+    assert.equal(outer.transit, true);
     await page.pause(300);
     await screenshot('open-charter.png');
+    await page.click('[data-testid=hud-menu]');
+    await page.click('[data-testid=open-commons-menu]');
+    await page.waitFor("window.__falesc.app.commonsModal.isOpen === true");
+    const commonsText = await page.text('[data-testid=commons-modal]');
+    assert.ok(commonsText.includes('Beacon'));
+    await page.click('[data-testid=commons-close-x]');
+    await page.waitFor("window.__falesc.app.commonsModal.isOpen === false");
+    await page.pause(200);
 
     await page.evaluate("window.__falesc.app.charter.day = 998");
     await page.evaluate("window.__falesc.openDay()");

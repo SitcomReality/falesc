@@ -90,7 +90,7 @@ The lobby offers two modes:
 | Mode | What it is |
 | --- | --- |
 | **First Light** | The solo tutorial slice: one chapter, one shard, the 12-resident / flourishing-62 goal. |
-| **Open Charter** | A sandbox on one shard: no day limit, no victory or defeat, and no campaign. Abandon from the charter menu when finished. |
+| **Open Charter** | A sandbox across the home, commons and garden isles: no day limit, no victory or defeat, no rivals and no campaign. The Commons Beacon can still be funded and the Assembly held. Abandon from the charter menu when finished. |
 | **The Contest** | A two-rival preview on the same shard. **The Gardener** and **The Host** each start with three residents, a four-bed Welcome House, 15 lumen and a doctrine. They build, pay upkeep and receive contributions under the same rules as the player. Residents choose between all chapters' doors. In the last three days the **campaign** opens: rivals publish promises and the player chooses one. At the day limit the **Confluence** convenes and every resident votes. |
 
 In Contest mode the First Light objective card is replaced by a live **Devotion**
