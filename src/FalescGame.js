@@ -159,6 +159,7 @@ export class FalescGame {
         this.crowd.setCharter(null);
         this.selectedProgramId = defaultProgramId();
         this.pendingBuildLocation = null;
+        this.world.clearHover();
         this.world.rebuildPaths([]);
     }
 
@@ -482,7 +483,10 @@ export class FalescGame {
         this.residentCard.show(residents[index], index);
     }
 
-    onPhaseChanged(phase) {
+    onPhaseChanged(phase, previous) {
+        if (previous === GamePhase.DAY && phase !== GamePhase.DAY) {
+            this.crowd.resetToPlanningPositions();
+        }
         if (phase !== GamePhase.PLAYING) {
             this.buildModal.hide(false);
             this.serviceCard.hide();
