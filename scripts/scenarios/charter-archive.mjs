@@ -42,6 +42,10 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.click('[data-testid=charter-archive-clear]');
     const afterClear = await page.text('[data-testid=charter-archive]');
     assert.ok(afterClear.includes('No charters have closed yet.'));
+    await page.click('[data-testid=charter-archive-undo]');
+    assert.equal(await page.evaluate("document.querySelectorAll('.charter-archive__row').length"), 1);
+    await page.click('[data-testid=charter-archive-clear]');
+    await page.click('[data-testid=charter-archive-clear]');
     await page.click('[data-testid=charter-archive-done]');
     await page.waitFor("window.__falesc.app.charterArchive.isOpen === false");
     assert.equal(await page.visible('[data-testid=menu-archive]'), false);

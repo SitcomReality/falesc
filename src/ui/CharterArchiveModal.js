@@ -1,4 +1,4 @@
-import { readArchive, clearArchive } from '../persistence/CharterArchive.js';
+import { readArchive, clearArchive, restoreArchive } from '../persistence/CharterArchive.js';
 import { escapeHtml } from './html.js';
 
 /**
@@ -12,6 +12,7 @@ export class CharterArchiveModal {
         this.filter = 'all';
         this.sort = 'newest';
         this.confirmingClear = false;
+        this.removed = null;
         this.container = document.createElement('div');
         this.container.className = 'modal-scrim';
         this.container.dataset.testid = 'charter-archive-scrim';
@@ -34,6 +35,7 @@ export class CharterArchiveModal {
             if (filter) {
                 this.filter = filter.dataset.testid.replace('archive-filter-', '');
                 this.confirmingClear = false;
+        this.removed = null;
                 this.render();
                 return;
             }
@@ -41,6 +43,7 @@ export class CharterArchiveModal {
             if (sort) {
                 this.sort = sort.dataset.testid.replace('archive-sort-', '');
                 this.confirmingClear = false;
+        this.removed = null;
                 this.render();
             }
         });
@@ -102,17 +105,26 @@ export class CharterArchiveModal {
             ${rows ? `<ol class="charter-archive__list">${rows}</ol>` : '<p class="modal__note">No charters have closed yet.</p>'}
             <div class="modal__actions">
                 <button type="button" class="btn btn--paper" data-testid="charter-archive-done">Back to the menu</button>
+                ${this.removed ? '<button type="button" class="btn btn--mint" data-testid="charter-archive-undo">Undo clear</button>' : ''}
                 ${rows ? `<button type="button" class="btn btn--danger" data-testid="charter-archive-clear">${this.confirmingClear ? 'Really clear?' : `Clear ${this.filter === 'all' ? 'archive' : this.filter === 'first-light' ? 'First Light' : 'Contest'}`}</button>` : ''}
             </div>
         `;
         this.panel.querySelectorAll('[data-testid^=charter-archive-close], [data-testid=charter-archive-done]').forEach((button) => button.addEventListener('click', () => this.hide()));
+        this.panel.querySelector('[data-testid=charter-archive-undo]')?.addEventListener('click', () => {
+            if (!this.removed) return;
+            restoreArchive(this.removed);
+            this.removed = null;
+            this.render();
+        });
         this.panel.querySelector('[data-testid=charter-archive-clear]')?.addEventListener('click', () => {
             if (!this.confirmingClear) {
                 this.confirmingClear = true;
                 this.render();
                 return;
             }
-            clearArchive(this.filter === 'all' ? null : this.filter);
+            const mode = this.filter === 'all' ? null : this.filter;
+            this.removed = (mode ? readArchive().filter((record) => (record.mode || 'first-light') === mode) : readArchive());
+            clearArchive(mode);
             this.confirmingClear = false;
             this.onClear?.();
             this.render();
@@ -136,6 +148,7 @@ export class CharterArchiveModal {
         this.filter = 'all';
         this.sort = 'newest';
         this.confirmingClear = false;
+        this.removed = null;
         this.container.style.display = 'none';
         this.container.classList.remove('is-open');
         this.container.setAttribute('aria-hidden', 'true');

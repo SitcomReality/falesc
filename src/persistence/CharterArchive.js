@@ -34,6 +34,15 @@ export function recordFromCharter(charter, ending = {}) {
     };
 }
 
+export function restoreArchive(records = []) {
+    try {
+        localStorage.setItem(ARCHIVE_KEY, JSON.stringify(records.slice(0, ARCHIVE_LIMIT)));
+    } catch {
+        return false;
+    }
+    return true;
+}
+
 export function recordCharter(record) {
     const archive = [record, ...readArchive()].slice(0, ARCHIVE_LIMIT);
     try {
