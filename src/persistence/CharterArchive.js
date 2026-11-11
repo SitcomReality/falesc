@@ -43,9 +43,14 @@ export function recordCharter(record) {
     return record;
 }
 
-export function clearArchive() {
+export function clearArchive(mode = null) {
     try {
-        localStorage.removeItem(ARCHIVE_KEY);
+        if (mode) {
+            const remaining = readArchive().filter((record) => (record.mode || 'first-light') !== mode);
+            localStorage.setItem(ARCHIVE_KEY, JSON.stringify(remaining));
+        } else {
+            localStorage.removeItem(ARCHIVE_KEY);
+        }
     } catch {
         // Storage can be unavailable; the menu simply has no archive.
     }

@@ -86,12 +86,12 @@ export class CharterArchiveModal {
             ${rows ? `<ol class="charter-archive__list">${rows}</ol>` : '<p class="modal__note">No charters have closed yet.</p>'}
             <div class="modal__actions">
                 <button type="button" class="btn btn--paper" data-testid="charter-archive-done">Back to the menu</button>
-                ${rows ? '<button type="button" class="btn btn--danger" data-testid="charter-archive-clear">Clear archive</button>' : ''}
+                ${rows ? `<button type="button" class="btn btn--danger" data-testid="charter-archive-clear">Clear ${this.filter === 'all' ? 'archive' : this.filter === 'first-light' ? 'First Light' : 'Contest'}</button>` : ''}
             </div>
         `;
         this.panel.querySelectorAll('[data-testid^=charter-archive-close], [data-testid=charter-archive-done]').forEach((button) => button.addEventListener('click', () => this.hide()));
         this.panel.querySelector('[data-testid=charter-archive-clear]')?.addEventListener('click', () => {
-            clearArchive();
+            clearArchive(this.filter === 'all' ? null : this.filter);
             this.onClear?.();
             this.render();
         });
