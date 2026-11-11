@@ -22,7 +22,7 @@ no sea, beach or open-air planting. `npm run check` and the smoke test pass.
 
 **Phase 1 is substantially implemented** as the **First Light vertical slice**:
 
-- one playable home shard (the other islands are scenery);
+- one playable home shard plus a Contest commons isle (the other islands are scenery);
 - a seeded 15-name roster with 6 founding residents;
 - four needs (Sustenance, Rest, Company, Wonder) and five buildable services
   (Housing, Canteen, Tea House, Garden Dome);
@@ -58,8 +58,8 @@ pressure, the last three days run a three-event campaign with rival promises and
 matching service appeal, and the day limit convenes a pledge/vote Confluence.
 A player winner chooses a stewardship promise, and the archipelago can fund a
 shared Commons Beacon for a nightly multi-need comfort and a first Assembly
-ballot, and 2–3 day visitors trade with the services. A separate shared-commons
-island, long-term rival plan, multi-round festival events, auctions and systemic
+ballot, and 2–3 day visitors trade with the services. A fully shared-commons
+archipelago, long-term rival plan, multi-round festival events, auctions and systemic
 stewardship remain.
 
 **Not started:** the rest of Phase 2, Phase 3 (layers, modules, finishes,

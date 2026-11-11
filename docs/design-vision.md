@@ -7,8 +7,8 @@
 > a civic-energy economy. A Contest preview and Confluence pledge/vote are in
 > the build, including a three-day festival campaign, a stewardship epilogue and
 > a shared Commons Beacon, a first Commons Assembly petition/ballot, day visitors and a
-> one-step retrofit; the full multi-round festival, a separate shared
-> commons, systemic stewardship and building layers are still absent. The
+> one-step retrofit; the full multi-round festival, a fully shared
+> commons archipelago, systemic stewardship and building layers are still absent. The
 > sea/island/plant imagery in §7 and the building silhouettes
 > there are prototype-era and superseded by the void world in
 > [design/world.md](design/world.md); the economy and loop in §8 and the

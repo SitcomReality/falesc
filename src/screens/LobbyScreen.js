@@ -36,7 +36,7 @@ export class LobbyScreen {
         sheet.innerHTML = `
             <p class="eyebrow" style="color:var(--wine)">Charter office · sheet no. 03</p>
             <h2 class="lobby__title">Choose your drift.</h2>
-            <p class="lobby__lede">A charter begins with a seed, a shard, and one stubborn lamp. Pick the shape of your archipelago. The other islands are scenery for now; the home shard is yours to care for.</p>
+            <p class="lobby__lede">A charter begins with a seed, a shard, and one stubborn lamp. Pick the shape of your archipelago. In the Contest, the outer commons isle is also buildable; other islands are scenery for now.</p>
         `;
 
         const form = document.createElement('form');

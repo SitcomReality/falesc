@@ -1,5 +1,6 @@
 import { World } from './world/World.js';
 import { PatronageFlow } from './world/PatronageFlow.js';
+import { TransitGate } from './world/TransitGate.js';
 import { Charter } from './charter/Charter.js';
 import { ResidentCrowd } from './residents/ResidentCrowd.js';
 import { ScreenStateMachine } from './state/ScreenStateMachine.js';
@@ -55,6 +56,7 @@ export class FalescGame {
             shadowLayer: this.world.shadowLayer
         });
         this.patronageFlow = new PatronageFlow({ layer: this.world.overlayLayer });
+        this.transitGate = new TransitGate({ layer: this.world.overlayLayer });
         this.saveManager = new SaveManager();
         this.screenStateMachine = new ScreenStateMachine();
 
@@ -149,6 +151,7 @@ export class FalescGame {
         });
         this.crowd.setCharter(this.charter);
         this.patronageFlow.setCharter(this.charter);
+        this.transitGate.setCharter(this.charter);
         this.gameScreen?.setPatronageState?.(false);
         this.crowd.sync();
         this.syncViews();
@@ -176,6 +179,7 @@ export class FalescGame {
         });
         this.crowd.setCharter(this.charter);
         this.patronageFlow.setCharter(this.charter);
+        this.transitGate.setCharter(this.charter);
         this.gameScreen?.setPatronageState?.(false);
         this.crowd.sync();
         this.syncViews();
@@ -219,6 +223,7 @@ export class FalescGame {
         }
         this.patronageFlow.hide();
         this.patronageFlow.setCharter(null);
+        this.transitGate.clear();
         this.gameScreen?.setPatronageState?.(false);
         this.chatter?.clear();
         this.buildModal.hide(false);
@@ -235,6 +240,7 @@ export class FalescGame {
         this.crowd.sync();
         this.world.rebuildPaths(this.charter.allServices);
         this.patronageFlow.refresh();
+        this.transitGate.refresh();
         this.gameScreen.updateHud(true);
     }
 
@@ -407,11 +413,13 @@ export class FalescGame {
     }
 
     findGridTarget(x, y) {
-        const home = this.world.homeSector;
-        if (!home) return null;
-        const cell = home.getGridCell(x, y);
-        if (cell.u < 0 || cell.v < 0 || cell.u >= home.gridSize || cell.v >= home.gridSize) return null;
-        return { sector: home, u: Math.floor(cell.u), v: Math.floor(cell.v) };
+        const sectors = [this.world.homeSector, this.charter?.commonsSector].filter(Boolean);
+        for (const sector of sectors) {
+            const cell = sector.getGridCell(x, y);
+            if (cell.u < 0 || cell.v < 0 || cell.u >= sector.gridSize || cell.v >= sector.gridSize) continue;
+            return { sector, u: Math.floor(cell.u), v: Math.floor(cell.v) };
+        }
+        return null;
     }
 
     onWorldTap(x, y) {
@@ -429,7 +437,9 @@ export class FalescGame {
         const existing = this.charter.services.serviceAt(target.sector.id, target.u, target.v);
         if (existing) {
             this.world.clearHover();
-            if (existing.chapterId === 'commons') {
+            if (existing.isTransit) {
+                this.gameScreen.toast('The shuttle docks here. Build on the outer isle from the same dock.', 'mint', 2200);
+            } else if (existing.chapterId === 'commons') {
                 this.showCommons();
             } else {
                 this.serviceCard.show(existing);
@@ -910,13 +920,15 @@ export class FalescGame {
             findFreeCell(programId = null) {
                 if (!game.charter || !game.world.map) return null;
                 const program = PROGRAM_BY_ID[programId || game.selectedProgramId] || PROGRAM_BY_ID[defaultProgramId()];
-                const home = game.world.homeSector;
-                for (let v = 0; v < home.gridSize; v++) {
-                    for (let u = 0; u < home.gridSize; u++) {
-                        const check = game.charter.services.canPlace(program.id, home.id, u, v);
-                        if (!check.ok) continue;
-                        const pos = home._project(u + 0.5, v + 0.5);
-                        return { sectorId: home.id, u, v, x: pos.x, y: pos.y, programId: program.id };
+                const sectors = [game.world.homeSector, game.charter.commonsSector].filter(Boolean);
+                for (const sector of sectors) {
+                    for (let v = 0; v < sector.gridSize; v++) {
+                        for (let u = 0; u < sector.gridSize; u++) {
+                            const check = game.charter.services.canPlace(program.id, sector.id, u, v);
+                            if (!check.ok) continue;
+                            const pos = sector._project(u + 0.5, v + 0.5);
+                            return { sectorId: sector.id, u, v, x: pos.x, y: pos.y, programId: program.id };
+                        }
                     }
                 }
                 return null;

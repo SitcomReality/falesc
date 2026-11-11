@@ -15,12 +15,12 @@ export const PLACEMENT_REASONS = {
 export function evaluatePlacement({ map, program, sectorId, u, v, occupiedCells }) {
     if (!map) return { ok: false, reason: PLACEMENT_REASONS.NO_MAP };
     if (!program) return { ok: false, reason: 'Unknown service.' };
-    if (map.homeSector && sectorId !== map.homeSector.id) {
-        return { ok: false, reason: PLACEMENT_REASONS.NOT_HOME };
-    }
-
     const sector = map.sectors.find((entry) => entry.id === sectorId);
     if (!sector) return { ok: false, reason: PLACEMENT_REASONS.NOT_HOME };
+    const buildable = sector.id === map.homeSector?.id || (map.commonsEnabled && sector.commons);
+    if (!buildable) {
+        return { ok: false, reason: PLACEMENT_REASONS.NOT_HOME };
+    }
 
     const anchorU = Math.floor(u);
     const anchorV = Math.floor(v);

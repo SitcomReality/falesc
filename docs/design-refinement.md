@@ -11,7 +11,7 @@
 > standings, a patronage-flow overlay, a three-day festival campaign, a
 > pledge/vote Confluence, a stewardship epilogue and a fundable shared Commons
 > Beacon, a first Commons Assembly petition/ballot, transient day visitors and a one-step
-> service retrofit. The full multi-round festival, a separate shared-commons island,
+> service retrofit. The full multi-round festival, a fully shared-commons archipelago,
 > auctions, systemic stewardship, building layers and multiplayer are **not**
 > implemented. This document and the component docs in `docs/design/`
 > describe the direction; where they conflict with the source, the source wins.

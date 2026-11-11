@@ -112,6 +112,11 @@ export class MapGenerator {
             if (sector.gridSize === best.gridSize && sector.centerY < best.centerY) return sector;
             return best;
         }, null);
+        this.commonsSector = this.sectors
+            .filter((sector) => sector !== this.homeSector)
+            .sort((a, b) => b.gridSize - a.gridSize || a.centerX - b.centerX)[0] || null;
+        if (this.commonsSector) this.commonsSector.commons = true;
+        this.commonsEnabled = false;
     }
 
     findPlacement(layout, placed, minSpacing) {

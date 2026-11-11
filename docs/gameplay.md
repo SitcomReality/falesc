@@ -123,6 +123,17 @@ invited to stay from the evening report; they join the resident roster, keep
 their name and memory, and can vote in the Confluence. Visitors are a Contest
 feature for now; First Light remains resident-only.
 
+## The outer commons isle
+
+In the Contest, one second, smaller island is marked as the **outer commons
+isle**. It is buildable by the player and reachable by residents through a
+reserved **shuttle gate** on each shard. A dashed shuttle line joins the gates;
+residents walk to the home gate, cross, and walk to the service door.
+
+Only the commons isle and the home shard are buildable. The other floating
+islands remain scenery. Rivals do not build on the commons isle, and its
+services are still player-owned for now; shared ownership is future work.
+
 ## Retrofit
 
 An open player service can be retrofitted once from its service record. Choose
@@ -179,8 +190,9 @@ work and the program's lumen cost immediately, and places the service as
 `PENDING`. At the start of the next planning day it becomes `ACTIVE` and starts
 accepting visits and drawing upkeep.
 
-You can only build on the **home shard** — the largest, topmost island. The
-other islands are scenery for now. Placement checks the footprint, occupancy,
+You can build on the **home shard** and, in the Contest, the **outer commons
+isle** (the second-largest sector). Every other island is scenery. Placement
+checks the footprint, occupancy,
 and that a free door cell exists on the service edge. The door cell is reserved:
 you cannot build on it, and clicking it opens the service record.
 
@@ -380,8 +392,9 @@ Departures make the population-below-four defeat reachable: demolish or fail to 
 | Medium | 6 | one 8×8 + two 3×3 + three 2×2 | 64 | 14 |
 | Large | 7 | one 9×9 + two 3×3 + four 2×2 | 82 | 16 |
 
-Only the **home shard** (largest, topmost) is playable; the rest are generated
-scenery. The seed determines island shapes and packing, the fifteen-person
+The **home shard** (largest, topmost) is playable in both modes. In the Contest,
+the second-largest sector is the **outer commons isle** and is also buildable;
+the rest are generated scenery. The seed determines island shapes and packing, the fifteen-person
 roster and their traits, character palettes and proportions, mineral variations,
 and the day's small novelty terms. The same seed and the same actions produce
 the same day.
@@ -444,11 +457,10 @@ yet.
 - **Population pressure is real but sparse.** Departures only trigger after two
   homeless nights or three days at 92+ need; there is no broader wellbeing or
   word-of-mouth departure yet.
-- **Only the home shard is playable.** Other islands are scenery; there is no
-  transit or archipelago layer.
-- **No building layers, modules, finishes, policies or retrofit.** The model
-  carries default finish/policy values for future use; the player cannot choose
-  them.
+- **Only the home shard and one Contest commons isle are playable.** Other
+  islands are scenery; there is no fuller archipelago layer or shared ownership.
+- **No building layers, multi-slot modules or player-set service policy.** One
+  retrofit module and one service record per building are implemented.
 - **The Contest is a preview.** Rivals build services and housing, pay upkeep,
   receive contributions, reopen lost services and react to need pressure, but
   their planning is still one move per day. The campaign now has three festival

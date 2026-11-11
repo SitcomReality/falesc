@@ -77,6 +77,10 @@ export class World {
         return this.map?.homeSector || null;
     }
 
+    get commonsSector() {
+        return this.map?.commonsSector || null;
+    }
+
     get bounds() {
         return this.map?.bounds || null;
     }

@@ -19,7 +19,11 @@ export class DaySimulator {
     constructor(charter) {
         this.charter = charter;
         this.rng = new SeededRandom(charter.seed + charter.day * 104729 + 17);
-        this.navigator = new IslandNavigator(charter.homeSector, charter.allServices);
+        this.homeNavigator = new IslandNavigator(charter.homeSector, charter.allServices);
+        this.commonsNavigator = charter.commonsSector
+            ? new IslandNavigator(charter.commonsSector, charter.allServices)
+            : null;
+        this.navigator = this.homeNavigator;
         this.campaignEvent = charter.campaign?.eventFor?.(charter.day) || null;
         this.events = [];
         this.complaints = [];
@@ -197,17 +201,52 @@ export class DaySimulator {
         const home = this.charter.homeFor(resident);
         const origin = home?.entrance || service.entrance;
         if (!origin || !service.entrance) return 4;
+        if (service.sectorId !== this.charter.homeSector.id) return 8;
         return Math.abs(origin.u - service.entrance.u) + Math.abs(origin.v - service.entrance.v);
+    }
+
+    routeTo(resident, service) {
+        const homeCell = this.homeCell(resident);
+        const homeSectorId = this.charter.homeSector.id;
+        if (service.sectorId === homeSectorId || !this.commonsNavigator) {
+            const cells = this.homeNavigator.path(homeCell, service.entrance) || [homeCell, service.entrance];
+            const worldPath = this.homeNavigator.worldPath(cells);
+            return {
+                worldPath,
+                returnWorldPath: [...worldPath].reverse(),
+                length: this.homeNavigator.pathLength(cells),
+                doorPoint: worldPath[worldPath.length - 1] || { x: 0, y: 0 }
+            };
+        }
+        const gates = this.charter.transit;
+        if (!gates?.home || !gates?.commons) {
+            const worldPath = this.homeNavigator.worldPath([homeCell, service.entrance]);
+            return {
+                worldPath,
+                returnWorldPath: [...worldPath].reverse(),
+                length: this.homeNavigator.pathLength([homeCell, service.entrance]),
+                doorPoint: worldPath[worldPath.length - 1] || { x: 0, y: 0 }
+            };
+        }
+        const homeCells = this.homeNavigator.path(homeCell, gates.home) || [homeCell, gates.home];
+        const commonsCells = this.commonsNavigator.path(gates.commons, service.entrance) || [gates.commons, service.entrance];
+        const homeWorld = this.homeNavigator.worldPath(homeCells);
+        const commonsWorld = this.commonsNavigator.worldPath(commonsCells);
+        const worldPath = [...homeWorld, ...commonsWorld];
+        return {
+            worldPath,
+            returnWorldPath: [...worldPath].reverse(),
+            length: this.homeNavigator.pathLength(homeCells) + this.commonsNavigator.pathLength(commonsCells) + 6,
+            doorPoint: commonsWorld[commonsWorld.length - 1] || { x: 0, y: 0 }
+        };
     }
 
     scheduleVisit(resident, service, need, phase, queueIndex, needBefore) {
         const phaseIndex = DAY_PHASES.findIndex((entry) => entry.id === phase.id);
         const phaseStart = phaseIndex * BALANCE.playback.phaseSeconds;
         const phaseEnd = phaseStart + BALANCE.playback.phaseSeconds - 0.15;
-        const homeCell = this.homeCell(resident);
-        const path = this.navigator.path(homeCell, service.entrance) || [homeCell, service.entrance];
-        const returnPath = [...path].reverse();
-        const pathLength = this.navigator.pathLength(path);
+        const route = this.routeTo(resident, service);
+        const pathLength = route.length;
         let travel = Math.max(
             BALANCE.playback.minTravel,
             Math.min(BALANCE.playback.maxTravel, pathLength / BALANCE.playback.travelSpeed)
@@ -237,9 +276,7 @@ export class DaySimulator {
         const enterTime = arriveTime + queueWait;
         const exitTime = enterTime + useDuration;
         const returnTime = Math.min(phaseEnd, exitTime + travel);
-        const doorPoint = path.length > 0
-            ? this.navigator.cellCenter(path[path.length - 1].u, path[path.length - 1].v)
-            : { x: 0, y: 0 };
+        const doorPoint = route.doorPoint;
         const queuePoint = {
             x: doorPoint.x + 16 * queueIndex,
             y: doorPoint.y + 8 * queueIndex
@@ -271,8 +308,8 @@ export class DaySimulator {
             reason
         });
 
-        const worldPath = this.navigator.worldPath(path);
-        const returnWorldPath = this.navigator.worldPath(returnPath);
+        const worldPath = route.worldPath;
+        const returnWorldPath = route.returnWorldPath;
         const event = {
             id: `e${this.events.length + 1}`,
             residentId: resident.id,

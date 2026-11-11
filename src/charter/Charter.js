@@ -7,6 +7,7 @@ import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService } from '../commons/CommonsPolicies.js';
 import { nominateForRival, petitionFor, resolveCommonsBallot } from '../commons/CommonsBallot.js';
 import { ServiceManager } from '../services/ServiceManager.js';
+import { cellKey } from '../services/PlacementPolicy.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
 import { summarizeReport } from '../simulation/ReportSummary.js';
@@ -50,6 +51,9 @@ export class Charter {
             idPrefix: 'player'
         });
         this.player.services = this.services;
+        this.commonsSector = mode === 'contest' ? map.commonsSector : null;
+        if (map.commonsSector) map.commonsEnabled = mode === 'contest';
+        this.transit = { home: null, commons: null };
         this.commonsChapter = { id: 'commons', name: 'The Commons', colour: '#FFD36E', isPlayer: false };
         this.commonsManager = mode === 'contest'
             ? new ServiceManager({
@@ -111,6 +115,7 @@ export class Charter {
             this.createRivals();
             this.lastRivalMoves = this.rivals.map((rival) => rival.lastMove).filter(Boolean);
             this.setupCommons();
+            this.setupTransit();
         }
         this.assignHomes();
         this.refreshDerived();
@@ -279,6 +284,43 @@ export class Charter {
         if (!PLEDGE_BY_ID[pledgeId]) return { ok: false, reason: 'That is not a campaign promise.' };
         this.campaign.setPlayerPledge(pledgeId);
         return { ok: true, campaign: this.campaign };
+    }
+
+    setupTransit() {
+        if (!this.commonsSector) return;
+        const home = this.findTransitCell(this.homeSector, this.commonsSector);
+        const commons = this.findTransitCell(this.commonsSector, this.homeSector);
+        if (!home || !commons) return;
+        this.transit = {
+            home: { sectorId: this.homeSector.id, ...home },
+            commons: { sectorId: this.commonsSector.id, ...commons }
+        };
+        this.reserveTransit(this.transit.home);
+        this.reserveTransit(this.transit.commons);
+    }
+
+    findTransitCell(sector, other) {
+        if (!sector || !other) return null;
+        let best = null;
+        for (let v = 0; v < sector.gridSize; v++) {
+            for (let u = 0; u < sector.gridSize; u++) {
+                if (this.services.isCellOccupied(sector.id, u, v)) continue;
+                const point = sector._project(u + 0.5, v + 0.5);
+                const distance = Math.hypot(point.x - other.centerX, point.y - other.centerY);
+                if (!best || distance < best.distance) best = { u, v, distance };
+            }
+        }
+        return best ? { u: best.u, v: best.v } : null;
+    }
+
+    reserveTransit(gate) {
+        if (!gate) return;
+        this.occupancy.set(cellKey(gate.sectorId, gate.u, gate.v), {
+            isTransit: true,
+            sectorId: gate.sectorId,
+            u: gate.u,
+            v: gate.v
+        });
     }
 
     setupCommons() {
@@ -912,6 +954,10 @@ export class Charter {
             ending: this.ending,
             confluenceReady: this.confluenceReady,
             campaign: this.campaign?.toJSON() || null,
+            transit: {
+                home: this.transit.home ? { ...this.transit.home } : null,
+                commons: this.transit.commons ? { ...this.transit.commons } : null
+            },
             commons: {
                 ...this.commons,
                 service: this.commonsManager?.serialize() || []
@@ -952,6 +998,14 @@ export class Charter {
             this.createRivals();
         }
         this.lastRivalMoves = this.rivals.map((rival) => rival.lastMove).filter(Boolean);
+        if (saved.transit?.home && saved.transit?.commons) {
+            this.transit = {
+                home: { ...saved.transit.home },
+                commons: { ...saved.transit.commons }
+            };
+            this.reserveTransit(this.transit.home);
+            this.reserveTransit(this.transit.commons);
+        }
         if (saved.commons) {
             const serviceEntries = Array.isArray(saved.commons.service) ? saved.commons.service : [];
             this.commons = {
@@ -976,6 +1030,9 @@ export class Charter {
             if (this.commonsManager) this.commonsManager.restore(serviceEntries);
         } else if (this.contest) {
             this.setupCommons();
+        }
+        if (this.commonsSector && (!this.transit.home || !this.transit.commons)) {
+            this.setupTransit();
         }
         if (this.commons.active && !this.commons.policy && this.commons.assembly.stage === 'none') {
             this.commons.assembly.stage = 'nominations';

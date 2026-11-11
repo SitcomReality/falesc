@@ -21,7 +21,7 @@ Severity is about impact on the slice, not effort:
 | # | Severity | Issue |
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
-| 2 | Medium | Only the home shard is playable; there is no archipelago layer |
+| 2 | Medium | Only the home shard and one Contest commons isle are buildable; there is no archipelago layer |
 | 3 | Medium | No building layers or player-set policy; one retrofit module choice exists |
 | 4 | Medium | The festival programme is scripted and stewardship is epilogue-only |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
@@ -72,16 +72,18 @@ delayed or traded off. Remove or wire the unused affinity knobs. Keep
 `victory.mjs` as the end-to-end guard, and add a tighter "close run" scenario
 when the curve is chosen.
 
-### 2. Only the home shard is playable
+### 2. Only the home shard and one commons isle are playable
 
 **Evidence**
 
-- `PlacementPolicy.evaluatePlacement()` rejects any sector other than
-  `map.homeSector` with "The chapter can only build on its home island for now."
-- `FalescGame.findGridTarget()` only projects into the home sector.
+- `PlacementPolicy.evaluatePlacement()` allows `map.homeSector` and, in the
+  Contest, one marked `commonsSector`; every other sector still rejects.
+- `FalescGame.findGridTarget()` projects into home and the Contest commons isle.
+- Residents reach the commons isle through a reserved shuttle gate and a
+  cross-island route; rivals still build only on the home shard.
 - Other generated islands have scenery and minerals but no buildable grid.
-- The shared Commons Beacon is a project on the home shard, not a separate
-  common island with its own services or assembly.
+- The Commons Beacon is still a project on the home shard, not a shared building
+  owned by the commons isle.
   interaction, services, transit or residents.
 
 **Impact**
@@ -94,8 +96,8 @@ the camera has settled on the home shard.
 
 Keep the home shard as the Phase 1 scope, but make the boundary explicit in the
 lobby and HUD. The next step is the Phase 2 shared commons, not quietly enabling
-placement on scenery. Add a second buildable sector only with its own
-navigation, ownership and camera affordances.
+placement on scenery. Add further islands only with their own navigation, ownership and camera
+affordances. The commons isle is the first proof of cross-island transit.
 
 ### 3. No building layers or player-set policy
 
@@ -391,6 +393,7 @@ These are no longer open:
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
 - **Service retrofit.** An active player service can install one of Sunroom, Atelier or Night Kitchen; the module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
+- **Outer commons isle.** A second buildable shard in the Contest, reached by reserved shuttle gates; player services on it earn cross-island visits. Covered by `commons-isle.mjs`.
 - **Commons Assembly ballot and petition.** A lit Beacon lets residents petition, each chapter nominate and all residents vote; existing and future services inherit the winner's capacity or comfort effect. Covered by `commons-assembly.mjs`.
 - **Day visitors.** 2–3 transient Contest visitors arrive each day, use services, pay visitor fees and leave before the next day unless invited to stay. Covered by `visitors.mjs` and `visitor-stay.mjs`.
 - **Shared Commons Beacon.** A reserved 2×2 shared civic project can be funded by the player and rivals; when lit it applies a nightly multi-need comfort and becomes a six-seat all-needs service. It is covered by `commons.mjs`.

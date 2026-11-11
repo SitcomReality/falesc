@@ -275,6 +275,16 @@ addition to capacity; `Charter.upgradeService()` installs one module from
 `src/services/RetrofitModules.js`, and `ServiceManager.upkeepFor()` charges its
 upkeep.
 
+### Cross-island commons isle
+
+In Contest mode `Charter` marks the second-largest sector as `commonsSector`
+and sets `map.commonsEnabled`. `PlacementPolicy` accepts that sector as well as
+the home shard. `Charter.setupTransit()` reserves a free gate cell on each
+shard; `DaySimulator.routeTo()` composes a home path, the cross-void shuttle
+leg and a commons path, then emits world-space points for `ResidentAgent`.
+`TransitGate` draws the two pads and the dashed link (read-only). Rivals still
+search only `rival.services.map.homeSector`.
+
 ### Contest preview
 
 In `contest` mode `Charter.createRivals()` builds `RivalChapter` instances for

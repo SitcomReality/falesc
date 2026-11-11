@@ -18,7 +18,7 @@ that document is prototype-era; the current world is the void described in
 
 **Design direction.** The refined design — resident needs, service buildings,
 planning plus playback, care-based competition and the Confluence — is
-substantially implemented for one shared shard, including a **Contest preview**
+substantially implemented across a home shard and a Contest commons isle, including a **Contest preview**
 with two AI rivals, a shared lumen economy, shared residents, rival housing,
 recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
 a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
@@ -54,6 +54,7 @@ webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 webgame_smoke --scenario scripts/scenarios/retrofit.mjs
 webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
+webgame_smoke --scenario scripts/scenarios/commons-isle.mjs
 ```
 
 The CLI equivalents and the full scenario list are in
@@ -116,9 +117,10 @@ after any behavioural change.
 - **No gameplay timers.** Day timing is ticker-driven. The only `setTimeout` is
   the HUD toast; focus moves use `requestAnimationFrame`. Do not add
   `setTimeout`/`setInterval` for simulation.
-- **One playable shard.** Placement is home-shard only. Other islands are
-  scenery until the archipelago layer exists; do not quietly make them
-  buildable.
+- **One home shard plus one commons isle.** Contest placement also accepts the
+  marked second sector (`map.commonsSector`) via `map.commonsEnabled`; every
+  other island remains scenery. Do not make further islands buildable without
+  their own navigation and ownership.
 - **Keep generated output out of git.** `.artifacts/`, `node_modules/`, logs and
   local env files are ignored. Scenarios are source; screenshots are not.
 - **Test after changes.** `npm run check` catches broken imports and syntax; the
@@ -185,8 +187,9 @@ after any behavioural change.
   `CommonsBallot.js`). An open player service can be retrofitted once for 6
   lumen; Sunroom, Atelier or Night Kitchen trade seats, quality and upkeep. The
   service record owns the action and the module is saved. The five buildable
-  services include the 2×2 Bathhouse for Rest + Company.
-  This is a first pass; a separate shared-commons island,
+  services include the 2×2 Bathhouse for Rest + Company. In Contest, a second
+  commons isle is buildable and residents reach it through reserved shuttle gates.
+  This is a first pass; shared ownership across a fuller commons archipelago,
   a larger multi-round festival, auctions and systemic stewardship effects are
   still missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
