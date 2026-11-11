@@ -1,6 +1,6 @@
 import { Sector } from './Sector.js';
 import { SeededRandom } from './SeededRandom.js';
-import { TILE_WIDTH } from '../constants.js';
+import { TILE_WIDTH } from './TileMetrics.js';
 import { generateShape } from './ShapeGenerator.js';
 
 /**

@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { MineralRenderer } from './MineralRenderer.js';
-import { MINERAL_TYPES, MINERAL_PALETTES } from '../constants.js';
+import { MINERAL_TYPES, MINERAL_PALETTES } from './MineralCatalog.js';
 
 export class MineralStructure {
     constructor(x, y, type = MINERAL_TYPES.ROCK, paletteId, rng = null) {

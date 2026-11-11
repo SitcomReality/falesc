@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js';
-import { MINERAL_TYPES, MINERAL_PALETTES } from '../constants.js';
+import { MINERAL_TYPES, MINERAL_PALETTES } from './MineralCatalog.js';
 import { RockRenderer } from './RockRenderer.js';
 import { CrystalRenderer } from './CrystalRenderer.js';
-import { drawShadowForStructure } from './MineralUtils.js';
+import { drawShadowForStructure } from './StructureShadow.js';
 
 export class MineralRenderer {
     static initStructure(struct) {

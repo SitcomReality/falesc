@@ -94,7 +94,7 @@ offline development and fails the harness's `noExternalRequests` check.
    map is not vendored.
 3. Replace the file, update `vendor/README.md` (version, source, notes).
 4. Run `npm run check` and the browser smoke test.
-5. For a Pixi major version, update `src/world/World.js` and `src/Camera.js`
+5. For a Pixi major version, update `src/world/World.js` and `src/world/Camera.js`
    for the new application/canvas API before anything else.
 
 The old `src/UI.js` sandbox controller and `lil-gui` were removed during the
@@ -121,7 +121,7 @@ reintroduce a hidden debug GUI without a test and a design reason.
   `src/design/programs.js`; needs and traits live beside them. The day loop is
   ticker-driven (`FalescGame.update()`); do not add gameplay `setTimeout` or
   `setInterval` calls.
-- World units are pixels. Grid constants live in `src/constants.js`
+- World units are pixels. Grid constants live in `src/map/TileMetrics.js`
   (`TILE_WIDTH = 512`, `TILE_HEIGHT = 256`).
 - Prefer small, focused changes. Do not reformat whole files or mix a feature
   with a large refactor.
@@ -282,10 +282,10 @@ vendor/                     pinned Pixi + license/provenance
 src/
   App.js                    pure entrypoint: new FalescGame()
   FalescGame.js             coordinator, screens, day playback, save, debug API
-  Camera.js                 world transform, clamp, pointer/touch input
-  Character.js              procedural chibi character container
-  constants.js              palettes, animation states, tile sizes, minerals
+  art/ShapeMetrics.js       shared drawing proportions
+  character/                Character, CharacterStyle, animation, renderer
   world/World.js            Pixi app, layers, camera/input, map and minerals
+  world/Camera.js           world transform, clamp, pointer/touch input
   charter/Charter.js        run model: day, lumen, works, roster, services, ending
   design/                   needs, traits, programs, balance, names
   services/                 ServiceBuilding, ServiceManager, PlacementPolicy

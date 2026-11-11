@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js';
-import { TILE_WIDTH, TILE_HEIGHT } from '../constants.js';
+import { TILE_WIDTH, TILE_HEIGHT } from './TileMetrics.js';
 import { generateShape } from './ShapeGenerator.js';
 import { drawSectorGraphics } from './SectorGraphics.js';
-import { projectGridToWorld, isPointInIsoGrid, worldToGrid } from './GridUtils.js';
+import { projectGridToWorld, isPointInIsoGrid, worldToGrid } from './IsometricProjection.js';
 
 /**
  * A Sector represents one island region on the map.
@@ -43,7 +43,7 @@ export class Sector {
         this._project = (u, v) => projectGridToWorld(u, v, this.centerX, this.centerY, this.gridSize, TILE_WIDTH, TILE_HEIGHT);
     }
 
-    // Delegates to GridUtils for point-in-grid checks
+    // Delegates to IsometricProjection for point-in-grid checks
     isPointInGrid(x, y) {
         return isPointInIsoGrid(x, y, this.centerX, this.centerY, this.gridSize, TILE_WIDTH, TILE_HEIGHT);
     }

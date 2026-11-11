@@ -1,4 +1,4 @@
-import { Character } from '../Character.js';
+import { Character } from '../character/Character.js';
 import { SeededRandom } from '../map/SeededRandom.js';
 import { ResidentAgent } from './ResidentAgent.js';
 

@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js';
-import { PALETTES } from './constants.js';
-import { CharacterAnimation } from './character/CharacterAnimation.js';
-import { CharacterRenderer } from './character/CharacterRenderer.js';
-import { ANIMATION_STATES } from './constants.js';
+import { PALETTES } from './CharacterStyle.js';
+import { CharacterAnimation } from './CharacterAnimation.js';
+import { CharacterRenderer } from './CharacterRenderer.js';
+import { ANIMATION_STATES } from './CharacterStyle.js';
 
 export class Character {
     constructor(x, y, rng = null) {

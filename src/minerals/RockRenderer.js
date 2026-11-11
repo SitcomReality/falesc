@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { SHAPES } from '../constants.js';
+import { SHAPES } from '../art/ShapeMetrics.js';
 
 let RANDOM = Math.random;
 const rand = () => RANDOM();

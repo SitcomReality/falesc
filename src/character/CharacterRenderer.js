@@ -1,4 +1,4 @@
-import { SHAPES } from '../constants.js';
+import { SHAPES } from '../art/ShapeMetrics.js';
 
 export class CharacterRenderer {
     constructor(character) {

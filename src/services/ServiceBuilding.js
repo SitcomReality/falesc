@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js';
 import { programNeed, footprintCells } from '../design/programs.js';
 import { BuildingRenderer } from '../buildings/BuildingRenderer.js';
-import { projectGridToWorld } from '../map/GridUtils.js';
-import { TILE_WIDTH, TILE_HEIGHT } from '../constants.js';
+import { projectGridToWorld } from '../map/IsometricProjection.js';
+import { TILE_WIDTH, TILE_HEIGHT } from '../map/TileMetrics.js';
 
 let nextServiceNumber = 1;
 

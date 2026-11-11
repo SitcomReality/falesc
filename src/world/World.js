@@ -1,10 +1,10 @@
 import * as PIXI from 'pixi.js';
-import { Camera } from '../Camera.js';
+import { Camera } from './Camera.js';
 import { InputManager } from '../controls/InputManager.js';
 import { MapGenerator } from '../map/MapGenerator.js';
 import { SeededRandom } from '../map/SeededRandom.js';
 import { MineralStructure } from '../minerals/MineralStructure.js';
-import { MINERAL_TYPES, MINERAL_PALETTES } from '../constants.js';
+import { MINERAL_TYPES, MINERAL_PALETTES } from '../minerals/MineralCatalog.js';
 import { drawSettlementPaths } from '../map/SettlementPaths.js';
 
 const MINERAL_COUNTS = { small: 46, medium: 64, large: 82 };

@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { ANIMATION_STATES } from '../constants.js';
+import { ANIMATION_STATES } from '../character/CharacterStyle.js';
 
 /**
  * The visual side of one resident. It owns the chibi Character, walks a

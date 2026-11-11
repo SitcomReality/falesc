@@ -1,4 +1,4 @@
-import { TILE_WIDTH, TILE_HEIGHT } from '../constants.js';
+import { TILE_WIDTH, TILE_HEIGHT } from './TileMetrics.js';
 
 export function projectGridToWorld(u, v, centerX, centerY, gridSize, tileWidth, tileHeight) {
     // Center the grid coordinates

@@ -37,12 +37,13 @@ sit above it.
 src/
   App.js                     pure entrypoint
   FalescGame.js              application coordinator
-  Camera.js                  world transform, clamp, pointer/touch input
-  Character.js               procedural chibi character container
-  constants.js               palettes, animation states, tile size, mineral palettes
+  art/
+    ShapeMetrics.js          shared drawing proportions (rig, ink outline)
   buildings/
     BuildingRenderer.js      illustrated service silhouettes (art only)
   character/
+    Character.js             procedural chibi character container
+    CharacterStyle.js        chibi palettes and animation states
     CharacterAnimation.js    IDLE/WALK/RUN/BEND animation
     CharacterRenderer.js     static geometry, limb posing
   chapters/
@@ -69,7 +70,8 @@ src/
   economy/
     LumenLedger.js           contributions, upkeep, closure order
   map/
-    GridUtils.js             isometric projection and inverse
+    IsometricProjection.js   isometric projection and inverse
+    TileMetrics.js           TILE_WIDTH / TILE_HEIGHT
     MapGenerator.js          seeded single-pass shapes, AABB packing, world rect
     Sector.js                one island: shape, grid, graphics
     SectorGraphics.js        void shadow, keel, top surface, grid, vacuum props
@@ -77,8 +79,9 @@ src/
     SettlementPaths.js       curved paths from services to the square
     ShapeGenerator.js        organic island silhouettes
   minerals/
+    MineralCatalog.js        mineral types and seeded palettes
     CrystalRenderer.js, RockRenderer.js, MineralRenderer.js,
-    MineralStructure.js, MineralUtils.js
+    MineralStructure.js, StructureShadow.js
   navigation/
     IslandNavigator.js       per-island A* to doors
   persistence/
@@ -119,6 +122,7 @@ src/
     RivalDossierModal.js, CharterJournalModal.js, MilestonesModal.js,
     ResidentRosterModal.js, GridSummaryModal.js, icons.js
   world/
+    Camera.js                world transform, clamp, pointer/touch input
     World.js                 Pixi app, layers, camera/input, map and minerals
     PatronageFlow.js         world-space last-choice arcs on the overlay layer
     DistrictOverlay.js       read-only names above connected service districts

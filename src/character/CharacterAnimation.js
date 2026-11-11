@@ -1,4 +1,4 @@
-import { ANIMATION_STATES } from '../constants.js';
+import { ANIMATION_STATES } from './CharacterStyle.js';
 
 export class CharacterAnimation {
     constructor(character) {

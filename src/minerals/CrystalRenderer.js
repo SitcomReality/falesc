@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
-import { SHAPES } from '../constants.js';
-import { clamp } from './MineralUtils.js';
+import { SHAPES } from '../art/ShapeMetrics.js';
+
 
 /**
  * Responsible for drawing individual crystals and composing clusters.
@@ -51,7 +51,7 @@ export class CrystalRenderer {
                 tilt = side * Math.min(maxLean * 0.85, Math.abs(tilt) + edgeLeanFactor);
             }
 
-            tilt = clamp(tilt, -maxLean, maxLean);
+            tilt = Math.max(-maxLean, Math.min(maxLean, tilt));
 
             crystals.push({
                 scale: scale * variation.sizeMultiplier,
