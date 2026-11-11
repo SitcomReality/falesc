@@ -157,7 +157,8 @@ export class FalescGame {
             game: this,
             overlays: this.overlays,
             onOpenService: (service) => this.serviceCard.show(service),
-            onRepairService: (service) => this.repairService(service)
+            onRepairService: (service) => this.repairService(service),
+            onRepairAll: () => this.repairAllServices()
         });
         this.residentRoster = new ResidentRosterModal({
             game: this,

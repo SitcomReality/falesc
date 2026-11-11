@@ -5,11 +5,12 @@ import { escapeHtml } from './html.js';
  * Rows open the full service record.
  */
 export class ServiceRosterModal {
-    constructor({ game, overlays, onOpenService, onRepairService }) {
+    constructor({ game, overlays, onOpenService, onRepairService, onRepairAll }) {
         this.game = game;
         this.overlays = overlays;
         this.onOpenService = onOpenService;
         this.onRepairService = onRepairService;
+        this.onRepairAll = onRepairAll;
         this.isOpen = false;
         this.showAll = false;
         this.container = document.createElement('div');
@@ -68,6 +69,7 @@ export class ServiceRosterModal {
             <p class="modal__blurb">Every player service in one place. Open a row for hours, focus, floors, repairs and the people who use it.</p>
             <div class="service-roster__list">${rows || '<p class="report__quiet">No player services yet.</p>'}</div>
             <div class="modal__actions">
+                ${this.showAll ? '' : `<button type="button" class="btn btn--mint" data-testid="service-roster-repair-all" ${services.some((service) => service.condition < 100) ? '' : 'disabled'}>Repair all</button>`}
                 <button type="button" class="btn btn--paper" data-testid="service-roster-done">Back to planning</button>
             </div>
         `;
@@ -75,6 +77,10 @@ export class ServiceRosterModal {
         this.panel.querySelector('[data-testid=service-roster-all]')?.addEventListener('click', () => {
             this.showAll = !this.showAll;
             this.render();
+        });
+        this.panel.querySelector('[data-testid=service-roster-repair-all]')?.addEventListener('click', () => {
+            const result = this.onRepairAll?.();
+            if (result?.ok) this.render();
         });
         this.panel.querySelectorAll('[data-service-id]').forEach((row) => {
             const open = () => {
