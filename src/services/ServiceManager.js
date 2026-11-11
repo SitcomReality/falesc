@@ -3,6 +3,7 @@ import { serviceUpkeepModifier } from './ServicePolicies.js';
 import { computeAdjacency } from './ServiceAdjacency.js';
 import { evaluatePlacement, cellKey } from './PlacementPolicy.js';
 import { ServiceBuilding } from './ServiceBuilding.js';
+import { FLOOR_PLAN_BY_ID } from './FloorPlans.js';
 
 /**
  * Owns every service in the chapter: placement, footprints, doors, opening
@@ -164,6 +165,7 @@ export class ServiceManager {
             const used = usedByService.get(service.id) || 0;
             if (used < service.capacity) {
                 resident.homeServiceId = service.id;
+                resident.homeFloor = floorFor(service, used);
                 return service;
             }
         }
@@ -268,4 +270,15 @@ export class ServiceManager {
     serialize() {
         return this.services.map((service) => service.toJSON());
     }
+}
+
+function floorFor(service, used) {
+    const upper = (service.floorPlans || []).reduce((sum, id) => sum + (FLOOR_PLAN_BY_ID[id]?.housingCapacity || 0), 0);
+    const seats = [Math.max(0, service.capacity - upper), ...(service.floorPlans || []).map((id) => FLOOR_PLAN_BY_ID[id]?.housingCapacity || 0)];
+    let remaining = used;
+    for (let index = 0; index < seats.length; index++) {
+        if (remaining < seats[index]) return index;
+        remaining -= seats[index];
+    }
+    return 0;
 }

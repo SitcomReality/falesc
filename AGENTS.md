@@ -98,6 +98,7 @@ webgame_smoke --scenario scripts/scenarios/housing-residents.mjs
 webgame_smoke --scenario scripts/scenarios/service-rename.mjs
 webgame_smoke --scenario scripts/scenarios/service-roster-repair-all.mjs
 webgame_smoke --scenario scripts/scenarios/service-roster-worn.mjs
+webgame_smoke --scenario scripts/scenarios/housing-floor-save.mjs
 webgame_smoke --scenario scripts/scenarios/housing-interior.mjs
 webgame_smoke --scenario scripts/scenarios/service-interior.mjs
 webgame_smoke --scenario scripts/scenarios/service-roster-all.mjs

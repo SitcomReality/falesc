@@ -13,6 +13,7 @@ export class Resident {
         needs,
         active = true,
         homeServiceId = null,
+        homeFloor = null,
         homeChapterId = 'player',
         affinity = 0.8,
         memory = null,
@@ -29,6 +30,7 @@ export class Resident {
         }
         this.active = active;
         this.homeServiceId = homeServiceId;
+        this.homeFloor = Number.isInteger(homeFloor) ? homeFloor : null;
         this.homeChapterId = homeChapterId;
         this.affinity = {};
         if (typeof affinity === 'number') {
@@ -170,6 +172,7 @@ export class Resident {
             needs: { ...this.needs },
             active: this.active,
             homeServiceId: this.homeServiceId,
+            homeFloor: this.homeFloor,
             homeChapterId: this.homeChapterId,
             affinity: { ...this.affinity },
             memory: JSON.parse(JSON.stringify(this.memory)),

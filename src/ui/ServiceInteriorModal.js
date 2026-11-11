@@ -79,10 +79,10 @@ export class ServiceInteriorModal {
         const here = residents.filter((resident) => housing
             ? resident.homeServiceId === service.id
             : resident.memory?.lastChoice?.serviceId === service.id);
-        let roomCursor = 0;
         for (const floor of floors) {
-            floor.occupants = housing ? here.slice(roomCursor, roomCursor + floor.seats) : [];
-            roomCursor += floor.seats;
+            floor.occupants = housing
+                ? here.filter((resident) => resident.homeFloor === floors.indexOf(floor))
+                : [];
         }
         const people = here.length
             ? here.slice(0, 8).map((resident) => `<li><strong>${escapeHtml(resident.name)}</strong><span>${escapeHtml(resident.lastChoice || 'a familiar face')}</span></li>`).join('')
