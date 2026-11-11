@@ -54,6 +54,7 @@ import { DAY_PHASES, BALANCE } from './design/balance.js';
 import { BuildingRenderer } from './buildings/BuildingRenderer.js';
 import { installDebugApi } from './debug/DebugApi.js';
 import * as DayPlayback from './app/DayPlayback.js';
+import * as ServiceActions from './app/ServiceActions.js';
 import { defaultProgramId } from './design/programs.js';
 import { BuildCursor } from './controls/BuildCursor.js';
 
@@ -649,25 +650,7 @@ export class FalescGame {
     }
 
     finalizeBuild(name, finish = 'comfortable') {
-        const charter = this.charter;
-        if (!charter || !this.pendingBuildLocation) return { ok: false, error: 'Choose a free plot first.' };
-        if (this.screenStateMachine.state !== GamePhase.PLAYING) return { ok: false, error: 'The day has already begun.' };
-        const result = charter.build({
-            programId: this.selectedProgramId,
-            sectorId: this.pendingBuildLocation.sectorId,
-            u: this.pendingBuildLocation.u,
-            v: this.pendingBuildLocation.v,
-            name,
-            finish
-        });
-        if (!result.ok) return result;
-        this.pendingBuildLocation = null;
-        this.hintDismissed = true;
-        this.syncViews();
-        this.audio.play('build');
-        this.gameScreen.toast(`${result.service.name} breaks ground — opens tomorrow.`, 'mint');
-        this.saveGame();
-        return { ok: true };
+        return ServiceActions.finalizeBuild(this, name, finish);
     }
 
     openRetrofit(service) {
@@ -686,32 +669,13 @@ export class FalescGame {
     }
 
     renameService(service, name) {
-        if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.renameService(service, name);
-        if (!result.ok) return result;
-        this.saveGame();
-        this.gameScreen.toast(`${result.name} it is.`, 'mint', 1600);
-        return result;
+        return ServiceActions.renameService(this, service, name);
     }
-
     repairAllServices() {
-        if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.repairAllServices();
-        if (!result.ok) return { ok: false, error: 'Every service is already in good repair.' };
-        this.saveGame();
-        this.gameScreen.updateHud(true);
-        this.gameScreen.toast(`${result.count} service${result.count === 1 ? '' : 's'} repaired for ${result.spent} lumen.`, 'mint', 2200);
-        return result;
+        return ServiceActions.repairAllServices(this);
     }
-
     repairService(service) {
-        if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.repairService(service);
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.gameScreen.toast(`${service.name} is back in good repair.`, 'mint', 1800);
-        return result;
+        return ServiceActions.repairService(this, service);
     }
 
     showChapterDossier(chapterId) {
@@ -786,84 +750,28 @@ export class FalescGame {
     }
 
     addFloor(service, planId = 'dormer') {
-        if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.addFloor(service, planId);
-        if (!result.ok) return result;
-        this.crowd.sync();
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.gameScreen.toast(`${service.name} rises to ${service.floors} floors · ${result.plan?.name || 'new floor'}.`, 'mint', 2200);
-        return result;
+        return ServiceActions.addFloor(this, service, planId);
     }
-
     setServiceFocus(service, focusId) {
-        if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.setServiceFocus(service, focusId);
-        if (!result.ok) return result;
-        this.saveGame();
-        this.gameScreen.toast(`${service.name} now leans ${result.focus.name.toLowerCase()}.`, 'mint', 1800);
-        return result;
+        return ServiceActions.setServiceFocus(this, service, focusId);
     }
-
     setServiceAccess(service, accessId) {
-        if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.setServiceAccess(service, accessId);
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.gameScreen.toast(`${service.name} now welcomes ${accessId === 'open' ? 'everyone equally' : accessId === 'chapter' ? 'its chapter first' : 'visitors first'}.`, 'mint', 2000);
-        return result;
+        return ServiceActions.setServiceAccess(this, service, accessId);
     }
-
     setServiceVibe(service, vibeId) {
-        if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.setServiceVibe(service, vibeId);
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.gameScreen.toast(`${service.name} feels more ${vibeId}.`, 'mint', 1800);
-        return result;
+        return ServiceActions.setServiceVibe(this, service, vibeId);
     }
-
     setServiceHours(service, hoursId) {
-        if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.setServiceHours(service, hoursId);
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.gameScreen.toast(`${service.name} switches to ${SERVICE_HOURS_BY_ID[hoursId]?.name || hoursId}.`, 'mint', 2000);
-        return result;
+        return ServiceActions.setServiceHours(this, service, hoursId);
     }
-
     upgradeService(service, moduleId) {
-        if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.upgradeService(service, moduleId);
-        if (!result.ok) return result;
-        this.syncViews();
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.gameScreen.toast(`${service.name} reopens with a grander finish.`, 'mint', 2200);
-        return result;
+        return ServiceActions.upgradeService(this, service, moduleId);
     }
-
     dismantleService(service) {
-        if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.dismantle(service);
-        if (!result.ok) return result;
-        this.syncViews();
-        this.gameScreen.toast(`${result.name} dismantled — +${result.refund} lumen.`, 'sun');
-        this.saveGame();
-        return result;
+        return ServiceActions.dismantleService(this, service);
     }
-
     reopenService(service) {
-        if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.reopen(service);
-        if (!result.ok) return result;
-        this.syncViews();
-        this.gameScreen.toast(`${service.name} reopens — −${result.cost} lumen.`, 'mint');
-        this.saveGame();
-        return result;
+        return ServiceActions.reopenService(this, service);
     }
 
     /* ------------------------------------------------------------------ */
