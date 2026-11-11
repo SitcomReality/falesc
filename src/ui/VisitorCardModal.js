@@ -64,9 +64,12 @@ export class VisitorCardModal {
         const lastChoice = visitor.memory.lastChoice;
         this.panel.innerHTML = `
             <div class="modal__head">
-                <div>
-                    <p class="kicker" style="color:var(--wine)">Day visitor${visitor.returned ? ' · returning' : ''}</p>
-                    <h3 class="modal__title" id="visitor-card-title">${escapeHtml(visitor.name)}</h3>
+                <div class="visitor-card__identity">
+                    <span class="visitor-card__avatar" aria-hidden="true">${escapeHtml(initials(visitor.name))}</span>
+                    <div>
+                        <p class="kicker" style="color:var(--wine)">Day visitor${visitor.returned ? ' · returning' : ''}</p>
+                        <h3 class="modal__title" id="visitor-card-title">${escapeHtml(visitor.name)}</h3>
+                    </div>
                 </div>
                 <button type="button" class="modal__close" data-testid="visitor-close-x" aria-label="Close visitor card">×</button>
             </div>
@@ -79,6 +82,7 @@ export class VisitorCardModal {
             <h4 class="campaign-modal__label">Needs</h4>
             <div class="visitor-card__needs">${needs}</div>
             <p class="modal__note">${lastChoice ? `Last door: “${escapeHtml(lastChoice.reason)}”` : 'They kept to the square today.'}</p>
+            <div class="visitor-card__history" data-testid="visitor-history">${(visitor.memory.recentVisits || []).slice(-3).reverse().map((visit) => `<p><span>Day ${visit.day}</span><strong>${escapeHtml(visit.serviceName || visit.serviceId)}</strong><small>${escapeHtml(visit.reason || '')}</small></p>`).join('') || '<p class="modal__note">No visits yet.</p>'}</div>
             <p class="modal__error" data-role="visitor-error" aria-live="polite"></p>
             <div class="modal__actions">
                 <button type="button" class="btn btn--paper" data-testid="visitor-close">Keep them as a visitor</button>
@@ -118,6 +122,10 @@ export class VisitorCardModal {
         this.container.setAttribute('aria-hidden', 'true');
         this.overlays.close(this);
     }
+}
+
+function initials(name) {
+    return String(name || '?').split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
 }
 
 function escapeHtml(value) {

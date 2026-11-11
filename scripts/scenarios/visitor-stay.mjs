@@ -48,6 +48,9 @@ export default async function ({ page, assert, log, screenshot }) {
     const cardText = await page.text('[data-testid=visitor-card]');
     assert.ok(cardText.includes('Player affinity'));
     assert.ok(cardText.includes('Offer a trial stay'));
+    assert.ok(await page.visible('.visitor-card__avatar'));
+    const history = await page.text('[data-testid=visitor-history]');
+    assert.ok(history.length > 0);
     await screenshot('visitor-card.png');
     await page.click('[data-testid=visitor-close]');
     await page.waitFor("window.__falesc.app.visitorCard.isOpen === false");
