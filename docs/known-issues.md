@@ -28,12 +28,11 @@ Severity is about impact on the slice, not effort:
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
 | 7 | Low | Save v1 is discarded, a mid-`DAY` reload loses the day, and there is no export/import |
 | 8 | Low | The resident card stops at the last choice; no portrait or visit history |
-| 9 | Low | Overlay/focus management is still per-modal rather than a shared stack |
-| 10 | Low | Crowd movement has no local avoidance |
-| 11 | Low | No audio, and the multiplayer button remains a disabled placeholder |
-| 12 | Low | WebGL context loss is not handled |
-| 13 | Low | Visual regression is not enabled and no baseline is committed |
-| 14 | Low | Minor teardown and cleanup gaps remain |
+| 9 | Low | Crowd movement has no local avoidance |
+| 10 | Low | No audio, and the multiplayer button remains a disabled placeholder |
+| 11 | Low | WebGL context loss is not handled |
+| 12 | Low | Visual regression is not enabled and no baseline is committed |
+| 13 | Low | Minor teardown and cleanup gaps remain |
 
 ## Open issues
 
@@ -231,30 +230,7 @@ short history.
 Add a small current-mood portrait and a recent-visits list (the data is already
 saved). Keep the card scannable: one reason, one face, three recent doors.
 
-### 9. Overlay/focus management is per-modal
-
-**Evidence**
-
-- `BuildModal`, `ServiceCardModal`, `BulletinModal` and `ResidentCardModal` each
-  duplicate scrim, focus trap, `inert` HUD handling and focus restore.
-- There is no shared overlay stack, no nested-dialog ordering, and no central
-  `destroy` for screens. `ScreenStateMachine` only shows/hides.
-- The HUD is marked `inert` while a modal is open, which is an improvement over
-  the old prototype, but the pattern will not scale to more overlays.
-
-**Impact**
-
-The current four overlays work and are testable, but a fifth or a nested
-confirmation would be another copy. Screens are permanent objects with no
-teardown.
-
-**Suggested direction**
-
-Introduce a small `OverlayManager`/focus scope that owns the active dialog,
-applies `inert`, stacks modals and restores focus. Give screens an optional
-`destroy`. Keep the current `data-testid` hooks stable.
-
-### 10. Crowd movement has no local avoidance
+### 9. Crowd movement has no local avoidance
 
 **Evidence**
 
@@ -277,7 +253,7 @@ Keep model queues authoritative. If visual crowding becomes a problem, add
 simple local avoidance or queue-slot positions in `ResidentAgent`; do not add a
 second physical simulation that disagrees with the report.
 
-### 11. No audio; multiplayer is a placeholder
+### 10. No audio; multiplayer is a placeholder
 
 - There is no audio subsystem, music or SFX.
 - The menu keeps a disabled **Multiplayer — later** button. There is no
@@ -286,7 +262,7 @@ second physical simulation that disagrees with the report.
 
 Keep the button disabled until it is real; do not make it open an alert.
 
-### 12. WebGL context loss is not handled
+### 11. WebGL context loss is not handled
 
 Headless Firefox occasionally logs "WebGL context was lost" from Pixi. Smoke
 screenshots still render and the run passes, but there is no
@@ -295,7 +271,7 @@ real browser this can leave a blank canvas until reload. Add a listener that
 surfaces a reload prompt, or recreate the renderer/application, and treat the
 headless warning as environment noise only when screenshots confirm rendering.
 
-### 13. Visual regression is not enabled
+### 12. Visual regression is not enabled
 
 The world geometry, roster, traits and mineral variation are seeded, and the day
 simulation is deterministic, but character animation phase, ambient chatter and
@@ -304,7 +280,7 @@ be flaky, and none is committed. `#minimap` or the service dock could be
 baselined once the ambient flow is settled; see
 [testing.md](testing.md#8-visual-regression).
 
-### 14. Minor teardown and cleanup
+### 13. Minor teardown and cleanup
 
 - `InputManager.destroy()` exists but is never called; `Camera` has no destroy
   for its window/document listeners. Both are singletons today.
@@ -345,6 +321,7 @@ These are no longer open:
 - **Departures and returns.** Homeless nights and chronic high needs now remove residents from the model and the shard; the next bulletin and the report announce arrivals/departures, and the population defeat is reachable.
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
+- **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
 - **Safer destructive actions.** Abandoning a charter is a two-step confirmation
   and the save is cleared only after the confirmation.
 - **Truthful choice feedback.** "I come here often" is per resident, "open late"

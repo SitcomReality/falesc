@@ -76,6 +76,7 @@ webgame_smoke --scenario scripts/scenarios/resident-day.mjs
 webgame_smoke --scenario scripts/scenarios/economy.mjs
 webgame_smoke --scenario scripts/scenarios/persistence.mjs
 webgame_smoke --scenario scripts/scenarios/departure.mjs
+webgame_smoke --scenario scripts/scenarios/overlay-stack.mjs
 webgame_smoke --scenario scripts/scenarios/report-save.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```

@@ -7,15 +7,13 @@ import { NEED_BY_ID } from '../design/needs.js';
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, inputManager, game }) {
+    constructor({ onDemolish, onReopen, overlays, game }) {
         this.onDemolish = onDemolish;
         this.onReopen = onReopen;
-        this.inputManager = inputManager;
+        this.overlays = overlays;
         this.game = game;
         this.isOpen = false;
         this.service = null;
-        this.lastFocused = null;
-        this.inertHud = null;
 
         this.container = document.createElement('div');
         this.container.className = 'modal-scrim';
@@ -84,7 +82,6 @@ export class ServiceCardModal {
         if (this.isOpen) return;
         this.isOpen = true;
         this.service = service;
-        this.lastFocused = document.activeElement;
 
         const program = service.program;
         const need = program?.need ? NEED_BY_ID[program.need] : null;
@@ -128,13 +125,9 @@ export class ServiceCardModal {
         this.container.style.display = 'flex';
         this.container.classList.add('is-open');
         this.container.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('has-modal');
-        this.inertHud = document.querySelector('[data-testid=game-hud]');
-        if (this.inertHud) this.inertHud.setAttribute('inert', '');
-        if (this.inputManager?.setModalOpen) this.inputManager.setModalOpen(true);
-
-        requestAnimationFrame(() => {
-            if (this.isOpen) this.panel.querySelector('[data-testid=structure-cancel]')?.focus({ preventScroll: true });
+        this.overlays.open(this, {
+            panel: this.panel,
+            initialFocus: () => this.panel.querySelector('[data-testid=structure-cancel]')
         });
     }
 
@@ -166,20 +159,7 @@ export class ServiceCardModal {
             return;
         }
         if (event.key !== 'Tab') return;
-        event.stopPropagation();
-        const focusable = Array.from(
-            this.panel.querySelectorAll('button:not(:disabled), [tabindex]:not([tabindex="-1"])')
-        ).filter((element) => element.offsetParent !== null);
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-        }
+        this.overlays.trapTab(event, this.panel);
     }
 
     hide() {
@@ -189,13 +169,6 @@ export class ServiceCardModal {
         this.container.style.display = 'none';
         this.container.classList.remove('is-open');
         this.container.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('has-modal');
-        if (this.inertHud) {
-            this.inertHud.removeAttribute('inert');
-            this.inertHud = null;
-        }
-        if (this.inputManager?.setModalOpen) this.inputManager.setModalOpen(false);
-        if (this.lastFocused?.focus) this.lastFocused.focus({ preventScroll: true });
-        this.lastFocused = null;
+        this.overlays.close(this);
     }
 }

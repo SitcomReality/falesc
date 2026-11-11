@@ -214,6 +214,9 @@ export class GameScreen {
             }
         };
         this.menuButton.addEventListener('click', () => this._setPauseOpen(this.pausePanel.hidden));
+        this.pausePanel.addEventListener('keydown', (event) => {
+            if (event.key === 'Tab') this.game.overlays.trapTab(event, this.pausePanel);
+        });
         this.pausePanel.querySelector('[data-testid=resume-game]').addEventListener('click', () => this._setPauseOpen(false));
         this.pausePanel.querySelector('[data-testid=open-bulletin]').addEventListener('click', () => {
             this._setPauseOpen(false);

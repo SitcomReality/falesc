@@ -13,6 +13,7 @@ import { BuildModal } from './ui/BuildModal.js';
 import { ServiceCardModal } from './ui/ServiceCardModal.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { ResidentCardModal } from './ui/ResidentCardModal.js';
+import { OverlayManager } from './ui/OverlayManager.js';
 import { Minimap } from './ui/Minimap.js';
 import { ChatterManager } from './ui/ChatterManager.js';
 import { SaveManager } from './persistence/SaveManager.js';
@@ -56,25 +57,25 @@ export class FalescGame {
         this.playback = null;
         this.playbackSpeed = 1;
         this.endResult = null;
+        this.overlays = new OverlayManager({ inputManager: this.world.input });
 
         this.buildModal = new BuildModal({
             onBuild: (name) => this.finalizeBuild(name),
             onCancel: () => { this.pendingBuildLocation = null; },
-            inputManager: this.world.input
+            overlays: this.overlays
         });
         this.serviceCard = new ServiceCardModal({
             game: this,
             onDemolish: (service) => this.dismantleService(service),
             onReopen: (service) => this.reopenService(service),
-            inputManager: this.world.input
+            overlays: this.overlays
         });
         this.bulletinModal = new BulletinModal({
-            onClose: () => { this.world.input.setModalOpen(false); },
-            inputManager: this.world.input
+            overlays: this.overlays
         });
         this.residentCard = new ResidentCardModal({
             game: this,
-            inputManager: this.world.input
+            overlays: this.overlays
         });
 
         this.gameScreen = new GameScreen(this.screenStateMachine, this);
@@ -462,12 +463,7 @@ export class FalescGame {
     /* ------------------------------------------------------------------ */
 
     hasBlockingModal() {
-        return Boolean(
-            this.buildModal?.isOpen
-            || this.serviceCard?.isOpen
-            || this.bulletinModal?.isOpen
-            || this.residentCard?.isOpen
-        );
+        return this.overlays.isOpen;
     }
 
     showBulletin() {

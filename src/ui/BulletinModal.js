@@ -3,12 +3,10 @@
  * unmet need, an arrival or complaint, and a line of word of mouth.
  */
 export class BulletinModal {
-    constructor({ onClose, inputManager }) {
+    constructor({ onClose, overlays }) {
         this.onClose = onClose;
-        this.inputManager = inputManager;
+        this.overlays = overlays;
         this.isOpen = false;
-        this.lastFocused = null;
-        this.inertHud = null;
 
         this.container = document.createElement('div');
         this.container.className = 'modal-scrim';
@@ -50,7 +48,6 @@ export class BulletinModal {
     show(bulletin) {
         if (!bulletin || this.isOpen) return;
         this.isOpen = true;
-        this.lastFocused = document.activeElement;
         this.titleEl.textContent = `Day ${String(bulletin.day).padStart(2, '0')}`;
         this.itemsEl.innerHTML = bulletin.items.map((item, index) => `
             <article class="bulletin__item">
@@ -64,12 +61,9 @@ export class BulletinModal {
         `).join('');
         this.container.style.display = 'flex';
         this.container.classList.add('is-open');
-        document.body.classList.add('has-modal');
-        this.inertHud = document.querySelector('[data-testid=game-hud]');
-        if (this.inertHud) this.inertHud.setAttribute('inert', '');
-        if (this.inputManager?.setModalOpen) this.inputManager.setModalOpen(true);
-        requestAnimationFrame(() => {
-            if (this.isOpen) this.continueBtn.focus({ preventScroll: true });
+        this.overlays.open(this, {
+            panel: this.panel,
+            initialFocus: () => this.continueBtn
         });
     }
 
@@ -78,14 +72,7 @@ export class BulletinModal {
         this.isOpen = false;
         this.container.style.display = 'none';
         this.container.classList.remove('is-open');
-        document.body.classList.remove('has-modal');
-        if (this.inertHud) {
-            this.inertHud.removeAttribute('inert');
-            this.inertHud = null;
-        }
-        if (this.inputManager?.setModalOpen) this.inputManager.setModalOpen(false);
-        if (this.lastFocused?.focus) this.lastFocused.focus({ preventScroll: true });
-        this.lastFocused = null;
+        this.overlays.close(this);
         if (this.onClose) this.onClose();
     }
 
@@ -97,18 +84,7 @@ export class BulletinModal {
             return;
         }
         if (event.key !== 'Tab') return;
-        event.stopPropagation();
-        const focusable = Array.from(this.panel.querySelectorAll('button:not(:disabled)'));
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-        }
+        this.overlays.trapTab(event, this.panel);
     }
 }
 

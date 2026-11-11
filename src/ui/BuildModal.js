@@ -6,14 +6,12 @@ import { NEED_BY_ID } from '../design/needs.js';
  * contract of the rest of the overlays. `onBuild(name)` returns `{ok}`.
  */
 export class BuildModal {
-    constructor({ onBuild, onCancel, inputManager }) {
+    constructor({ onBuild, onCancel, overlays }) {
         this.onBuild = onBuild;
         this.onCancel = onCancel;
-        this.inputManager = inputManager;
+        this.overlays = overlays;
         this.isOpen = false;
-        this.lastFocused = null;
         this.program = null;
-        this.inertHud = null;
 
         this.container = document.createElement('div');
         this.container.className = 'modal-scrim';
@@ -89,7 +87,6 @@ export class BuildModal {
         this.program = program;
         this.lumen = lumen;
         this.works = works;
-        this.lastFocused = document.activeElement;
 
         const need = NEED_BY_ID[program.need];
         const secondary = program.secondaryNeed ? NEED_BY_ID[program.secondaryNeed] : null;
@@ -121,13 +118,9 @@ export class BuildModal {
         this.container.style.display = 'flex';
         this.container.classList.add('is-open');
         this.container.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('has-modal');
-        this.inertHud = document.querySelector('[data-testid=game-hud]');
-        if (this.inertHud) this.inertHud.setAttribute('inert', '');
-        if (this.inputManager?.setModalOpen) this.inputManager.setModalOpen(true);
-
-        requestAnimationFrame(() => {
-            if (this.isOpen) this.input.focus({ preventScroll: true });
+        this.overlays.open(this, {
+            panel: this.panel,
+            initialFocus: () => this.input
         });
     }
 
@@ -152,20 +145,7 @@ export class BuildModal {
             return;
         }
         if (event.key !== 'Tab') return;
-        event.stopPropagation();
-        const focusable = Array.from(
-            this.panel.querySelectorAll('button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])')
-        ).filter((el) => el.offsetParent !== null);
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-        }
+        this.overlays.trapTab(event, this.panel);
     }
 
     hide(cancelled = true) {
@@ -174,14 +154,7 @@ export class BuildModal {
         this.container.style.display = 'none';
         this.container.classList.remove('is-open');
         this.container.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('has-modal');
-        if (this.inertHud) {
-            this.inertHud.removeAttribute('inert');
-            this.inertHud = null;
-        }
-        if (this.inputManager?.setModalOpen) this.inputManager.setModalOpen(false);
-        if (this.lastFocused?.focus) this.lastFocused.focus({ preventScroll: true });
-        this.lastFocused = null;
+        this.overlays.close(this);
         if (cancelled && this.onCancel) this.onCancel();
     }
 }

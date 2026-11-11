@@ -91,7 +91,7 @@ src/
     ScreenStateMachine.js    screen registry and phase changes
   ui/
     BuildModal.js, ServiceCardModal.js, BulletinModal.js,
-    ResidentCardModal.js, Minimap.js, ChatterManager.js, icons.js
+    OverlayManager.js, ResidentCardModal.js, Minimap.js, ChatterManager.js, icons.js
   world/
     World.js                 Pixi app, layers, camera/input, map and minerals
 ```
@@ -118,9 +118,10 @@ visual rig.
      temporary `screen × 5` world rectangle centred on camera.
 3. Creates `ResidentCrowd` bound to `objectLayer`/`shadowLayer`.
 4. Creates `SaveManager` and `ScreenStateMachine`.
-5. Creates `BuildModal`, `ServiceCardModal`, `BulletinModal` and
-   `ResidentCardModal`; each takes the input manager so camera keys are ignored
-   while a dialog is open.
+5. Creates an `OverlayManager` and the four dialogs (`BuildModal`,
+   `ServiceCardModal`, `BulletinModal`, `ResidentCardModal`). The manager owns
+   the scrim body class, HUD `inert`, input lock, focus restore and Tab trap;
+   dialogs can stack.
 6. Creates `GameScreen`, `DayScreen`, `ReportScreen`; registers one screen per
    phase (`MenuScreen`, `LobbyScreen`, `GameScreen`, `DayScreen`,
    `ReportScreen`, `EndScreen`).
@@ -418,8 +419,8 @@ left/right edges, then the top edge. `cellKey()` is shared with the navigator.
 4. `finalizeBuild(name)` re-validates, calls `charter.build()`, syncs views,
    toasts, and autosaves.
 5. The build dialog is a real dialog: scrim, `role="dialog"`, labelled title,
-   focus trap, Escape cancels, Enter submits, focus restored on close, HUD
-   marked `inert`, input manager locked.
+   shared `OverlayManager` (focus trap, Escape cancels, Enter submits, focus
+   restored on close, HUD `inert` until the overlay stack is empty).
 6. Cancel/phase change clears the pending plot. A failed build keeps the dialog
    open with an inline reason.
 7. Service records handle dismantle (half cost, no work, not the Welcome Post)
