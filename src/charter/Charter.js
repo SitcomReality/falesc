@@ -24,6 +24,8 @@ import { chooseCampaignPledge, createRivalChapters, planRivalDay } from '../chap
 import { Campaign } from '../confluence/Campaign.js';
 import { PLEDGE_BY_ID } from '../confluence/Pledges.js';
 import { ConfluenceVote } from '../confluence/ConfluenceVote.js';
+import * as CommonsAssembly from './CommonsAssembly.js';
+import * as CommonsPurse from './CommonsPurse.js';
 import { milestones as charterMilestones, careWatch as charterCareWatch, needSurvey as charterNeedSurvey, standings as charterStandings, historyEntry as charterHistoryEntry, stats as charterStats } from './CharterProjections.js';
 
 /**
@@ -497,158 +499,31 @@ export class Charter {
     }
 
     contributeCommons(chapter, amount) {
-        if (!this.commonsManager || this.commons.active) return { ok: false, reason: 'The Commons is not taking contributions.' };
-        const needed = Math.max(0, this.commons.target - this.commons.fund);
-        const value = Math.max(0, Math.min(Math.trunc(amount), chapter?.lumen || 0, needed));
-        if (!value) return { ok: false, reason: 'No lumen to give.' };
-        chapter.lumen -= value;
-        this.commons.fund += value;
-        this.commons.contributors[chapter.id] = (this.commons.contributors[chapter.id] || 0) + value;
-        let activated = false;
-        if (this.commons.fund >= this.commons.target) {
-            activated = this.activateCommons();
-        }
-        return { ok: true, activated, fund: this.commons.fund, active: this.commons.active };
+        return CommonsAssembly.contributeCommons(this, chapter, amount);
     }
-
     contributeCapital(amount) {
-        const value = Math.max(0, Math.min(Math.trunc(amount), this.player.lumen));
-        if (!value) return { ok: false, reason: 'No lumen to give.' };
-        this.player.lumen -= value;
-        this.commons.capital += value;
-        this.refreshDerived();
-        return { ok: true, capital: this.commons.capital, gave: value };
+        return CommonsAssembly.contributeCapital(this, amount);
     }
-
     contributePurse(amount) {
-        const value = Math.max(0, Math.min(Math.trunc(amount), this.player.lumen));
-        if (!value) return { ok: false, reason: 'No lumen to give.' };
-        this.player.lumen -= value;
-        this.commons.purse += value;
-        if (this.commons.purse >= this.sharedUpkeepTotal(true)) {
-            for (const service of this.sharedWorkServices()) service.closed = false;
-        }
-        this.refreshDerived();
-        return { ok: true, purse: this.commons.purse, gave: value };
+        return CommonsAssembly.contributePurse(this, amount);
     }
-
     callSecondReading() {
-        if (!this.commons.active) return { ok: false, reason: 'Light the Beacon first.' };
-        if (!this.commons.policy) return { ok: false, reason: 'The first reading has not finished.' };
-        if (this.commons.assembly.reading >= 2) return { ok: false, reason: 'The commons has already held its second reading.' };
-        if (this.commons.assembly.stage !== 'resolved') return { ok: false, reason: 'The first reading is still open.' };
-        if (this.day <= (this.commons.chosenDay || this.day)) return { ok: false, reason: 'Let the chosen policy stand for one full day first.' };
-        this.commons.assembly = {
-            ...this.commons.assembly,
-            stage: 'nominations',
-            reading: 2,
-            playerNomination: null,
-            nominations: {},
-            finalists: [],
-            votes: [],
-            counts: {},
-            winnerId: null,
-            petition: petitionFor(this.activeResidents),
-            day: this.day
-        };
-        return { ok: true, policy: COMMONS_POLICY_BY_ID[this.commons.policy], assembly: this.commons.assembly };
+        return CommonsAssembly.callSecondReading(this);
     }
-
     nominateCommonsPolicy(policyId) {
-        if (!this.commons.active) return { ok: false, reason: 'Light the Beacon before calling an assembly.' };
-        if (this.commons.policy && this.commons.assembly.reading < 2) return { ok: false, reason: 'The assembly has already chosen.' };
-        if (this.commons.assembly.stage !== 'nominations') return { ok: false, reason: 'Nominations are closed.' };
-        const policy = COMMONS_POLICY_BY_ID[policyId];
-        if (!policy) return { ok: false, reason: 'That is not a Commons policy.' };
-        const nominations = { player: policy.id };
-        for (const rival of this.rivals) nominations[rival.id] = nominateForRival(rival);
-        const petition = this.commons.assembly.petition || petitionFor(this.activeResidents);
-        const finalists = [...new Set([...Object.values(nominations), petition?.policyId].filter(Boolean))];
-        this.commons.assembly = {
-            ...this.commons.assembly,
-            stage: 'ballot',
-            playerNomination: policy.id,
-            nominations,
-            finalists,
-            votes: [],
-            counts: {},
-            winnerId: null,
-            petition,
-            day: this.day
-        };
-        return { ok: true, policy, nominations, finalists };
+        return CommonsAssembly.nominateCommonsPolicy(this, policyId);
     }
-
     resolveCommonsAssembly() {
-        if (!this.commons.active) return { ok: false, reason: 'Light the Beacon first.' };
-        if (this.commons.policy && this.commons.assembly.reading < 2) return { ok: false, reason: 'The assembly has already chosen.' };
-        if (this.commons.assembly.stage !== 'ballot') return { ok: false, reason: 'There is no ballot to call.' };
-        const result = resolveCommonsBallot(this.activeResidents, this.commons.assembly.finalists);
-        if (!result.winnerId) return { ok: false, reason: 'No one voted.' };
-        const chosen = this.chooseCommonsPolicy(result.winnerId);
-        if (!chosen.ok) return chosen;
-        this.commons.assembly.stage = 'resolved';
-        this.commons.assembly.votes = result.votes;
-        this.commons.assembly.counts = result.counts;
-        this.commons.assembly.winnerId = result.winnerId;
-        this.log('commons', `The Commons Assembly chose ${chosen.policy.name}.`);
-        return { ok: true, policy: chosen.policy, result };
+        return CommonsAssembly.resolveCommonsAssembly(this);
     }
-
     chooseCommonsPolicy(policyId) {
-        if (!this.commons.active) return { ok: false, reason: 'Light the Beacon before calling an assembly.' };
-        if (this.commons.policy && this.commons.assembly.reading < 2) return { ok: false, reason: 'The assembly has already chosen.' };
-        const policy = COMMONS_POLICY_BY_ID[policyId];
-        if (!policy) return { ok: false, reason: 'That is not a Commons policy.' };
-        this.commons.policy = policy.id;
-        this.commons.chosenDay = this.day;
-        if (this.commons.assembly.stage !== 'resolved') {
-            this.commons.assembly.stage = 'resolved';
-            this.commons.assembly.winnerId = policy.id;
-        }
-        for (const chapter of this.chapters) {
-            for (const service of chapter.services.services) {
-                removeCommonsPolicyFromService(service);
-                applyCommonsPolicyToService(service, policy.id);
-            }
-        }
-        for (const service of this.commonsManager?.services || []) {
-            removeCommonsPolicyFromService(service);
-            applyCommonsPolicyToService(service, policy.id);
-        }
-        this.assignHomes();
-        this.refreshDerived();
-        return { ok: true, policy };
+        return CommonsAssembly.chooseCommonsPolicy(this, policyId);
     }
-
     upgradeCommons() {
-        if (!this.commons.active) return { ok: false, reason: 'Light the Beacon first.' };
-        if ((this.commons.level || 1) >= BALANCE.commons.annexMax) return { ok: false, reason: 'The Beacon already has both annexes.' };
-        if ((this.commons.capital || 0) < BALANCE.commons.annexCost) return { ok: false, reason: `An annex costs ${BALANCE.commons.annexCost} capital.` };
-        const service = this.commonsManager?.findById(this.commons.serviceId);
-        if (!service) return { ok: false, reason: 'The Beacon is not standing.' };
-        this.commons.capital -= BALANCE.commons.annexCost;
-        this.commons.level = (this.commons.level || 1) + 1;
-        service.capacity += BALANCE.commons.annexCapacity;
-        service.refreshGraphics();
-        this.refreshDerived();
-        this.log('commons', `The Beacon gained annex ${this.commons.level}.`);
-        return { ok: true, level: this.commons.level, capacity: service.capacity, cost: BALANCE.commons.annexCost };
+        return CommonsAssembly.upgradeCommons(this);
     }
-
     activateCommons() {
-        if (!this.commonsManager || this.commons.active) return false;
-        const service = this.commonsManager.findById(this.commons.serviceId);
-        if (!service) return false;
-        service.state = 'ACTIVE';
-        service.daysRemaining = 0;
-        service.refreshGraphics();
-        this.commons.active = true;
-        this.commons.activatedDay = this.day;
-        if (this.commons.assembly.stage === 'none') this.commons.assembly.stage = 'nominations';
-        if (!this.commons.assembly.petition) this.commons.assembly.petition = petitionFor(this.activeResidents);
-        this.log('commons', 'The Commons Beacon was lit.');
-        return true;
+        return CommonsAssembly.activateCommons(this);
     }
 
     createRivals() {
@@ -1170,44 +1045,10 @@ export class Charter {
     }
 
     collectCommonsLevy() {
-        if (this.sharedWorkServices().length === 0) return { collected: 0 };
-        let collected = 0;
-        for (const chapter of this.chapters) {
-            if (chapter.lumen < BALANCE.commons.levyPerChapter) continue;
-            chapter.lumen -= BALANCE.commons.levyPerChapter;
-            collected += BALANCE.commons.levyPerChapter;
-        }
-        this.commons.purse += collected;
-        if (this.commons.purse >= this.sharedUpkeepTotal(true)) {
-            for (const service of this.sharedWorkServices()) service.closed = false;
-        }
-        return { collected, purse: this.commons.purse };
+        return CommonsPurse.collectCommonsLevy(this);
     }
-
     settleCommonsPurse(report) {
-        if (this.sharedWorkServices().length === 0) return;
-        const services = this.sharedWorkServices().filter((service) => service.state === 'ACTIVE' && !service.closed);
-        const upkeep = services.reduce((sum, service) => sum + (this.commonsManager.upkeepFor(service) || 0), 0);
-        const purseBefore = this.commons.purse;
-        report.commonsPurseBefore = purseBefore;
-        report.commonsUpkeep = upkeep;
-        report.commonsClosed = [];
-        if (services.length === 0 || upkeep <= 0) {
-            report.commonsPurse = this.commons.purse;
-            return;
-        }
-        if (this.commons.purse >= upkeep) {
-            this.commons.purse -= upkeep;
-            report.commonsPurse = this.commons.purse;
-            report.commonsSpent = upkeep;
-            return;
-        }
-        for (const service of services) {
-            service.closed = true;
-            report.commonsClosed.push({ id: service.id, name: service.name });
-        }
-        this.commons.purse = 0;
-        report.commonsPurse = 0;
+        return CommonsPurse.settleCommonsPurse(this, report);
     }
 
     spawnVisitors() {
