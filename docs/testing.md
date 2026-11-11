@@ -173,6 +173,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `service-floors.mjs` | Adds two floors to an active canteen, checks capacity/upkeep/lumen, the floor button hiding at three floors, the world plaque and save/reload. |
 | `service-hours.mjs` | Switches an open canteen to Round the clock, checks +2 upkeep and save/reload. |
 | `retrofit.mjs` | Builds a canteen, waits for it to open, opens the retrofit chooser, installs the Atelier, checks +0.22 quality/+1 upkeep (capacity unchanged) and save/reload. |
+| `commons-capital.mjs` | Gives 10 lumen to the shared capital budget, builds a commons canteen entirely from it, and checks the remaining capital and save/reload. |
 | `commons-purse.mjs` | Builds two shared works, checks the levy and upkeep, verifies the shared doors close together, then tops up the purse manually and reopens them. |
 | `commons-assembly.mjs` | Lights the Beacon, checks the petition, nominates Open Beds, lets residents vote, verifies the policy applies to existing and new services, then calls a second reading and checks capacity does not stack. |
 | `visitor-return.mjs` | Charmed but unhoused visitors are remembered up to two, return on a later day with the same name/affinity, and are marked returning in the report. |

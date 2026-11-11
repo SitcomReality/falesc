@@ -7,9 +7,10 @@ import { COMMONS_POLICIES, COMMONS_POLICY_BY_ID } from '../commons/CommonsPolici
  * every resident, not a private service.
  */
 export class CommonsModal {
-    constructor({ onContribute, onPurse, onNominate, onVote, onSecondReading, overlays }) {
+    constructor({ onContribute, onPurse, onCapital, onNominate, onVote, onSecondReading, overlays }) {
         this.onContribute = onContribute;
         this.onPurse = onPurse;
+        this.onCapital = onCapital;
         this.onNominate = onNominate;
         this.onVote = onVote;
         this.onSecondReading = onSecondReading;
@@ -59,6 +60,7 @@ export class CommonsModal {
         const sharedWorks = (this.charter.commonsManager?.services || [])
             .filter((service) => service.chapterId === 'commons' && service.id !== commons.serviceId && service.state === 'ACTIVE').length;
         const purse = commons.purse || 0;
+        const capital = commons.capital || 0;
         const upkeep = this.charter.sharedUpkeepTotal(true);
         const contributors = Object.entries(commons.contributors || {})
             .filter(([, value]) => value > 0)
@@ -119,13 +121,15 @@ export class CommonsModal {
                     <button type="button" class="modal__close" data-testid="commons-close-x" aria-label="Close commons">×</button>
                 </div>
                 <p class="modal__blurb">The fund is full. The Beacon is a shared place for every resident: it eases every need by ${BALANCE.commons.comfort + (policy?.comfort || 0)} each night${policy?.restRecovery ? ' and gives one more Rest back in bed' : ''}, and its door is open for ${visits} visits so far. ${sharedWorks} shared work${sharedWorks === 1 ? '' : 's'} stand on the outer commons isle.</p>
-                <p class="commons-purse">Commons purse <strong>${purse}</strong> lumen · shared upkeep <strong>${upkeep}</strong> / day. Every chapter gives ${BALANCE.commons.levyPerChapter} when shared works stand.</p>
+                <p class="commons-purse">Commons purse <strong>${purse}</strong> lumen · shared upkeep <strong>${upkeep}</strong> / day · capital budget <strong>${capital}</strong>. Every chapter gives ${BALANCE.commons.levyPerChapter} when shared works stand.</p>
                 ${assemblyHtml}
                 <h4 class="campaign-modal__label">Given so far</h4>
                 <ul class="commons-contributors">${contributors || '<li><span>The commons</span><strong>—</strong></li>'}</ul>
                 <div class="modal__actions">
                     <button type="button" class="btn btn--paper" data-testid="commons-purse-5" ${player.lumen >= 5 ? '' : 'disabled'}>Give 5 to the purse</button>
                     <button type="button" class="btn btn--paper" data-testid="commons-purse-10" ${player.lumen >= 10 ? '' : 'disabled'}>Give 10 to the purse</button>
+                    <button type="button" class="btn btn--paper" data-testid="commons-capital-5" ${player.lumen >= 5 ? '' : 'disabled'}>Give 5 to capital</button>
+                    <button type="button" class="btn btn--paper" data-testid="commons-capital-10" ${player.lumen >= 10 ? '' : 'disabled'}>Give 10 to capital</button>
                     <button type="button" class="btn btn--primary" data-testid="commons-close">Close</button>
                 </div>
             `;
@@ -142,7 +146,7 @@ export class CommonsModal {
                     <button type="button" class="modal__close" data-testid="commons-close-x" aria-label="Close commons">×</button>
                 </div>
                 <p class="modal__blurb">A shared tower of prism glass, funded by every chapter. When it is lit, every resident sleeps a little easier: each night it eases every need. ${sharedWorks} shared work${sharedWorks === 1 ? '' : 's'} already stand on the outer commons isle.</p>
-                <p class="commons-purse">Commons purse <strong>${purse}</strong> lumen · shared upkeep <strong>${upkeep}</strong> / day. Every chapter gives ${BALANCE.commons.levyPerChapter} when shared works stand.</p>
+                <p class="commons-purse">Commons purse <strong>${purse}</strong> lumen · shared upkeep <strong>${upkeep}</strong> / day · capital budget <strong>${capital}</strong>. Every chapter gives ${BALANCE.commons.levyPerChapter} when shared works stand.</p>
                 <div class="commons-progress">
                     <div class="commons-progress__track"><i style="width:${Math.min(100, Math.round(commons.fund / commons.target * 100))}%"></i></div>
                     <strong>${commons.fund} / ${commons.target} lumen</strong>
@@ -158,6 +162,10 @@ export class CommonsModal {
                     <button type="button" class="btn btn--paper" data-testid="commons-purse-5" ${canGive5 ? '' : 'disabled'}>Give 5 to the purse</button>
                     <button type="button" class="btn btn--paper" data-testid="commons-purse-10" ${canGive10 ? '' : 'disabled'}>Give 10 to the purse</button>
                 </div>
+                <div class="modal__actions">
+                    <button type="button" class="btn btn--paper" data-testid="commons-capital-5" ${canGive5 ? '' : 'disabled'}>Give 5 to capital</button>
+                    <button type="button" class="btn btn--paper" data-testid="commons-capital-10" ${canGive10 ? '' : 'disabled'}>Give 10 to capital</button>
+                </div>
             `;
         }
         this.panel.querySelectorAll('[data-testid^=commons-close]').forEach((button) => button.addEventListener('click', () => this.hide()));
@@ -165,6 +173,8 @@ export class CommonsModal {
         this.panel.querySelector('[data-testid=commons-give-10]')?.addEventListener('click', () => this.give(10));
         this.panel.querySelector('[data-testid=commons-purse-5]')?.addEventListener('click', () => this.givePurse(5));
         this.panel.querySelector('[data-testid=commons-purse-10]')?.addEventListener('click', () => this.givePurse(10));
+        this.panel.querySelector('[data-testid=commons-capital-5]')?.addEventListener('click', () => this.giveCapital(5));
+        this.panel.querySelector('[data-testid=commons-capital-10]')?.addEventListener('click', () => this.giveCapital(10));
         this.panel.querySelector('[data-testid=commons-second-reading]')?.addEventListener('click', () => this.callSecondReading());
         this.panel.querySelectorAll('[data-testid^=commons-policy-]').forEach((button) => {
             button.addEventListener('click', () => this.nominate(button.dataset.policy));
@@ -174,6 +184,12 @@ export class CommonsModal {
 
     callSecondReading() {
         const result = this.onSecondReading();
+        if (!result?.ok) return;
+        this.render();
+    }
+
+    giveCapital(amount) {
+        const result = this.onCapital(amount);
         if (!result?.ok) return;
         this.render();
     }

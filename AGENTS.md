@@ -55,6 +55,7 @@ webgame_smoke --scenario scripts/scenarios/visitors.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
+webgame_smoke --scenario scripts/scenarios/commons-capital.mjs
 webgame_smoke --scenario scripts/scenarios/commons-purse.mjs
 webgame_smoke --scenario scripts/scenarios/retrofit.mjs
 webgame_smoke --scenario scripts/scenarios/service-district.mjs
@@ -210,8 +211,7 @@ after any behavioural change.
   district with a small shared bonus. In Contest, a second
   commons isle is buildable and residents reach it through reserved shuttle gates.
   This is a first pass; a fuller archipelago, a larger multi-round festival,
-  auctions, shared capital budgeting and deeper legacy effects are still
-  missing.
+  auctions and deeper legacy effects are still missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
   not remove the survey chart without adjusting `canvasSelectors` and the smoke
   test.

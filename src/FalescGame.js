@@ -119,6 +119,7 @@ export class FalescGame {
         this.commonsModal = new CommonsModal({
             onContribute: (amount) => this.contributeCommons(amount),
             onPurse: (amount) => this.contributePurse(amount),
+            onCapital: (amount) => this.contributeCapital(amount),
             onNominate: (policyId) => this.nominateCommonsPolicy(policyId),
             onVote: () => this.resolveCommonsAssembly(),
             onSecondReading: () => this.callSecondReading(),
@@ -309,6 +310,17 @@ export class FalescGame {
         this.reportScreen.show();
         this.saveGame();
         this.gameScreen.toast(`${result.trial.name} begins a trial stay.`, 'mint', 2400);
+        return result;
+    }
+
+    contributeCapital(amount) {
+        if (!this.charter) return { ok: false, reason: 'No charter.' };
+        const result = this.charter.contributeCapital(amount);
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.audio.play('mint');
+        this.gameScreen.toast(`${result.gave} lumen into the shared capital budget.`, 'mint', 2200);
         return result;
     }
 
@@ -579,13 +591,14 @@ export class FalescGame {
             this.gameScreen.toast(check.reason, 'coral');
             return false;
         }
-        const affordable = this.charter.canBuild(program.id);
+        const sharedCapital = sector.commons ? (this.charter.commons?.capital || 0) : 0;
+        const affordable = this.charter.canBuild(program.id, 'comfortable', sharedCapital);
         if (!affordable.ok) {
             this.gameScreen.toast(affordable.reason, 'coral');
             return false;
         }
         this.pendingBuildLocation = { sectorId: sector.id, u, v };
-        this.buildModal.show(program, { lumen: this.charter.lumen, works: this.charter.works });
+        this.buildModal.show(program, { lumen: this.charter.lumen + sharedCapital, works: this.charter.works });
         return true;
     }
 
@@ -629,14 +642,15 @@ export class FalescGame {
             this.gameScreen.toast(check.reason, 'coral');
             return;
         }
-        const affordable = this.charter.canBuild(program.id);
+        const sharedCapital = target.sector.commons ? (this.charter.commons?.capital || 0) : 0;
+        const affordable = this.charter.canBuild(program.id, 'comfortable', sharedCapital);
         if (!affordable.ok) {
             this.gameScreen.toast(affordable.reason, 'coral');
             return;
         }
         this.pendingBuildLocation = { sectorId: target.sector.id, u: target.u, v: target.v };
         this.world.clearHover();
-        this.buildModal.show(program, { lumen: this.charter.lumen, works: this.charter.works });
+        this.buildModal.show(program, { lumen: this.charter.lumen + sharedCapital, works: this.charter.works });
     }
 
     finalizeBuild(name, finish = 'comfortable') {

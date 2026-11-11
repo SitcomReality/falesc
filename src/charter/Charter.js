@@ -83,6 +83,7 @@ export class Charter {
             target: BALANCE.commons.target,
             fund: 0,
             purse: 0,
+            capital: 0,
             active: false,
             contributors: {},
             activatedDay: null,
@@ -399,6 +400,15 @@ export class Charter {
         return { ok: true, activated, fund: this.commons.fund, active: this.commons.active };
     }
 
+    contributeCapital(amount) {
+        const value = Math.max(0, Math.min(Math.trunc(amount), this.player.lumen));
+        if (!value) return { ok: false, reason: 'No lumen to give.' };
+        this.player.lumen -= value;
+        this.commons.capital += value;
+        this.refreshDerived();
+        return { ok: true, capital: this.commons.capital, gave: value };
+    }
+
     contributePurse(amount) {
         const value = Math.max(0, Math.min(Math.trunc(amount), this.player.lumen));
         if (!value) return { ok: false, reason: 'No lumen to give.' };
@@ -709,26 +719,28 @@ export class Charter {
         this.devotion = this.playerDevotion;
     }
 
-    canBuild(programId, finish = 'comfortable') {
+    canBuild(programId, finish = 'comfortable', extraLumen = 0) {
         const program = PROGRAM_BY_ID[programId];
         if (!program || !program.buildable) return { ok: false, reason: 'That program is not available in this charter.' };
         if (this.works <= 0) return { ok: false, reason: 'No works left today. Open the day to reset them.' };
         const cost = finishCost(program, finish);
-        if (this.lumen < cost) {
-            return { ok: false, reason: `Need ${cost - this.lumen} more lumen.` };
+        if (this.lumen + extraLumen < cost) {
+            return { ok: false, reason: `Need ${cost - this.lumen - extraLumen} more lumen.` };
         }
         return { ok: true };
     }
 
     build({ programId, sectorId, u, v, name, finish = 'comfortable' }) {
-        const affordable = this.canBuild(programId, finish);
-        if (!affordable.ok) return affordable;
         const program = PROGRAM_BY_ID[programId];
-        const finishOption = finishFor(finish);
-        const cost = finishCost(program, finish);
-        const resolvedName = !name || name === programId ? program.name : name;
         const sector = this.map.sectors.find((entry) => entry.id === sectorId);
         const shared = Boolean(sector?.commons && this.commonsManager);
+        const capital = shared ? this.commons.capital : 0;
+        const affordable = this.canBuild(programId, finish, capital);
+        if (!affordable.ok) return affordable;
+        const finishOption = finishFor(finish);
+        const cost = finishCost(program, finish);
+        const funded = Math.min(capital, cost);
+        const resolvedName = !name || name === programId ? program.name : name;
         const manager = shared ? this.commonsManager : this.services;
         const result = manager.place({
             programId,
@@ -746,13 +758,14 @@ export class Charter {
         if (!shared && this.legacyBonus?.programs.includes(programId)) {
             result.service.capacity += this.legacyBonus.amount;
         }
-        this.lumen -= cost;
+        if (shared) this.commons.capital -= funded;
+        this.lumen -= (cost - funded);
         this.works -= 1;
         applyCommonsPolicyToService(result.service, this.commons?.policy);
         this.refreshAdjacency();
         this.assignHomes();
         this.refreshDerived();
-        return { ...result, cost };
+        return { ...result, cost, funded };
     }
 
     setServiceHours(service, hoursId) {
@@ -1341,6 +1354,7 @@ export class Charter {
                 target: saved.commons.target || BALANCE.commons.target,
                 fund: Number(saved.commons.fund) || 0,
                 purse: Number(saved.commons.purse) || 0,
+                capital: Number(saved.commons.capital) || 0,
                 active: Boolean(saved.commons.active),
                 contributors: { ...(saved.commons.contributors || {}) },
                 activatedDay: saved.commons.activatedDay || null,

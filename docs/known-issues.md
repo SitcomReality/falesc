@@ -21,7 +21,7 @@ Severity is about impact on the slice, not effort:
 | # | Severity | Issue |
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
-| 2 | Medium | Home shard plus one commons isle are buildable; shared works, a purse and manual top-ups exist, but no shared capital budget or fuller archipelago |
+| 2 | Medium | Home shard plus one commons isle are buildable; shared works, a purse and a capital budget exist, but no fuller archipelago |
 | 3 | Medium | Floors are capacity plaques, not stacked geometry; districts are named clusters, not shaped neighbourhoods |
 | 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
@@ -83,9 +83,9 @@ when the curve is chosen.
   cross-island route; rivals still build only on the home shard.
 - Other generated islands have scenery and minerals but no buildable grid.
 - Services built on the commons isle are shared works owned by The Commons.
-  A commons purse fed by every chapter pays their upkeep, and the player can
-  manually top it up, but there is no shared capital budget and no rival
-  construction there. The Commons Beacon remains a project on the home shard.
+  A commons purse fed by every chapter pays their upkeep; the player can top
+  it up and fund a shared capital budget that pays for commons construction.
+  There is still no rival construction there and no fuller archipelago. The Commons Beacon remains a project on the home shard.
   interaction, services, transit or residents.
 
 **Impact**
@@ -98,8 +98,8 @@ the camera has settled on the home shard.
 
 Keep the home shard as the Phase 1 scope, but make the boundary explicit in the
 lobby and HUD. The next step is the Phase 2 shared commons, not quietly enabling
-placement on scenery. Add a shared capital budget and further islands only with their own navigation,
-ownership and camera affordances. The commons isle is the first
+placement on scenery. Add further islands only with their own navigation, ownership and camera
+affordances. The commons isle is the first
 proof of cross-island transit and shared ownership.
 
 ### 3. Floors are plaques and districts are named clusters
@@ -409,6 +409,7 @@ These are no longer open:
 - **Service retrofit.** An active player service can install up to two of Sunroom, Atelier and Night Kitchen; each module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
 - **Outer commons isle.** A second buildable shard in the Contest, reached by reserved shuttle gates; player services on it earn cross-island visits. Covered by `commons-isle.mjs`.
 - **Stewardship legacy.** A winning stewardship promise is saved in `falesc.legacy.v1` and grants a small starting effect to the next charter. Covered by `campaign.mjs`.
+- **Commons capital budget.** Player gifts pay for shared commons construction before the builder's own lumen. Covered by `commons-capital.mjs`.
 - **Commons purse.** Every chapter gives 1 lumen when shared works stand; the purse pays shared upkeep and closes/reopens the shared doors together. Covered by `commons-purse.mjs`.
 - **Shared commons works.** Buildings raised on the Contest commons isle belong to The Commons, are usable by every resident and credit their builder. Covered by `commons-isle.mjs`.
 - **Commons second reading.** After one full day the Assembly can be called once more to amend its policy; old capacity tags are reverted before the new policy applies. Covered by `commons-assembly.mjs`.
