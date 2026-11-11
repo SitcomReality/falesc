@@ -529,6 +529,13 @@ the same day.
 The lobby chart's "Shards" readout is the mineral count. The survey chart and
 camera fit the whole generated cluster; the camera starts on the home shard.
 
+## Stewardship legacy
+
+A player victory records the chosen stewardship promise in `falesc.legacy.v1`.
+The menu shows it as **A previous charter remembered**: the promise, its effect
+and the day it was made. **Let it go** clears it; otherwise the next charter
+starts with the effect. A rival winner leaves no legacy.
+
 ## Save v2
 
 The game autosaves to `localStorage` under **`falesc.save.v2`** while planning

@@ -39,6 +39,7 @@ Browser verification from this workspace (shared harness):
 ```bash
 webgame_smoke
 webgame_smoke --scenario scripts/scenarios/save-transfer.mjs
+webgame_smoke --scenario scripts/scenarios/legacy-menu.mjs
 webgame_smoke --scenario scripts/scenarios/departure-archive.mjs
 webgame_smoke --scenario scripts/scenarios/field-guide.mjs
 webgame_smoke --scenario scripts/scenarios/sound-toggle.mjs

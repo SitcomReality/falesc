@@ -155,6 +155,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | Scenario | What it proves |
 | --- | --- |
 | `save-transfer.mjs` | Exports the current charter as JSON, rejects an invalid file, imports it back and restores the report phase. |
+| `legacy-menu.mjs` | Seeds a stewardship legacy, checks the menu card and effect text, then clears it and verifies storage is empty. |
 | `departure-archive.mjs` | Records a departure, opens the Past residents archive from the pause menu, checks the day/reason/last door and closes it. |
 | `field-guide.mjs` | Opens the almanac from the menu and the pause menu, checks the service/policy/control sections, and closes it. |
 | `sound-toggle.mjs` | Opens the charter menu, turns the procedural soundscape on and off, checks persistence and the audio context. |

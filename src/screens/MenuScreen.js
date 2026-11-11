@@ -1,3 +1,5 @@
+import { readLegacy, describeLegacy, clearLegacy } from '../confluence/StewardshipLegacy.js';
+
 export class MenuScreen {
     constructor(screenStateMachine, game = null) {
         this.gsm = screenStateMachine;
@@ -22,6 +24,25 @@ export class MenuScreen {
         const tagline = document.createElement('p');
         tagline.className = 'menu__tagline';
         tagline.innerHTML = 'Fully automated luxury egalitarian space communism. <em>Somebody has to do the dishes.</em>';
+
+        const legacy = document.createElement('aside');
+        legacy.className = 'menu__legacy';
+        legacy.dataset.testid = 'menu-legacy';
+        legacy.hidden = true;
+        legacy.innerHTML = `
+            <p class="kicker">A previous charter remembered</p>
+            <strong data-role="legacy-title"></strong>
+            <span data-role="legacy-blurb"></span>
+            <button type="button" class="menu__legacy-clear" data-testid="menu-clear-legacy">Let it go</button>
+        `;
+        this.legacyCard = legacy;
+        this.legacyTitle = legacy.querySelector('[data-role=legacy-title]');
+        this.legacyBlurb = legacy.querySelector('[data-role=legacy-blurb]');
+        this.legacyClear = legacy.querySelector('[data-testid=menu-clear-legacy]');
+        this.legacyClear.addEventListener('click', () => {
+            clearLegacy();
+            legacy.hidden = true;
+        });
 
         const actions = document.createElement('div');
         actions.className = 'menu__actions';
@@ -72,7 +93,7 @@ export class MenuScreen {
         joinBtn.insertAdjacentHTML('beforeend', '<span class="kicker" style="margin-left:4px;opacity:.7">later</span>');
 
         actions.append(startBtn, continueBtn, exportBtn, importBtn, joinBtn);
-        inner.append(eyebrow, title, tagline, actions, this.importInput);
+        inner.append(eyebrow, title, tagline, actions, legacy, this.importInput);
 
         const aside = document.createElement('aside');
         aside.className = 'menu__aside paper';
@@ -111,6 +132,13 @@ export class MenuScreen {
         const canContinue = Boolean(this.game?.saveManager?.hasSave());
         if (this.continueBtn) this.continueBtn.hidden = !canContinue;
         if (this.exportBtn) this.exportBtn.hidden = !canContinue;
+        const legacy = readLegacy();
+        const effect = describeLegacy(legacy);
+        this.legacyCard.hidden = !effect;
+        if (effect) {
+            this.legacyTitle.textContent = effect.title;
+            this.legacyBlurb.textContent = `${effect.blurb}${legacy.day ? ` Left on day ${legacy.day}.` : ''}`;
+        }
         const first = this.container.querySelector('[data-testid=menu-start]');
         if (first) first.focus({ preventScroll: true });
     }

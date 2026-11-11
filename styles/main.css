@@ -4152,3 +4152,54 @@ body.has-modal > canvas {
     font-size: 16px;
     font-weight: 700;
 }
+
+/* Menu legacy ------------------------------------------------------------- */
+.menu__legacy {
+    display: grid;
+    gap: 4px;
+    max-width: 460px;
+    margin-top: 18px;
+    padding: 10px 12px;
+    background: rgba(255, 243, 216, 0.08);
+    border: 1.5px solid rgba(255, 243, 216, 0.35);
+    border-radius: var(--radius);
+    color: var(--paper);
+}
+
+.menu__legacy[hidden] {
+    display: none;
+}
+
+.menu__legacy .kicker {
+    color: var(--mint);
+}
+
+.menu__legacy strong {
+    font-family: var(--display);
+    font-size: 18px;
+    line-height: 1.05;
+}
+
+.menu__legacy span {
+    color: rgba(255, 243, 216, 0.72);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.menu__legacy-clear {
+    justify-self: start;
+    margin-top: 4px;
+    padding: 2px 0;
+    background: none;
+    border: 0;
+    color: var(--coral);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.menu__legacy-clear:hover {
+    text-decoration: underline;
+}
