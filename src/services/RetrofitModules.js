@@ -24,6 +24,16 @@ export const RETROFIT_MODULES = [
         upkeep: 1
     },
     {
+        id: 'caretaker_nook',
+        name: "Caretaker's Nook",
+        kicker: 'A little more care',
+        blurb: 'A small staffed corner. One more seat, a little more quality, one more upkeep.',
+        cost: 5,
+        capacity: 1,
+        quality: 0.03,
+        upkeep: 1
+    },
+    {
         id: 'night_kitchen',
         name: 'Night Kitchen',
         kicker: 'A shared table',
