@@ -65,6 +65,7 @@ export class Charter {
             })
             : null;
         this.visitors = [];
+        this.returningVisitors = [];
         this.visitorCell = null;
         this.commons = {
             target: BALANCE.commons.target,
@@ -658,10 +659,20 @@ export class Charter {
             this.visitors = [];
             return [];
         }
+        const returning = this.returningVisitors.splice(0, this.returningVisitors.length);
+        for (const visitor of returning) visitor.returned = true;
         const count = VisitorFactory.countFor(this.seed, this.day);
-        this.visitors = VisitorFactory.create(this.seed, this.day, count);
+        this.visitors = [...returning, ...VisitorFactory.create(this.seed, this.day, count)];
         this.visitorCell = this.commonsCell || null;
         return this.visitors;
+    }
+
+    rememberVisitors() {
+        const candidates = this.visitors
+            .filter((visitor) => visitor.getAffinity('player') >= BALANCE.visitors.returnAffinity)
+            .sort((a, b) => b.getAffinity('player') - a.getAffinity('player'))
+            .slice(0, BALANCE.visitors.maxReturning);
+        this.returningVisitors = candidates;
     }
 
     clearVisitors() {
@@ -705,6 +716,7 @@ export class Charter {
     beginNextDay() {
         if (this.ending) return { ended: true, ending: this.ending };
         if (this.confluenceReady) return { ended: true, confluence: true };
+        this.rememberVisitors();
         this.clearVisitors();
         this.day += 1;
         this.works = BALANCE.worksPerDay;
@@ -954,6 +966,7 @@ export class Charter {
             ending: this.ending,
             confluenceReady: this.confluenceReady,
             campaign: this.campaign?.toJSON() || null,
+            returningVisitors: this.returningVisitors.map((visitor) => visitor.toJSON()),
             transit: {
                 home: this.transit.home ? { ...this.transit.home } : null,
                 commons: this.transit.commons ? { ...this.transit.commons } : null
@@ -998,6 +1011,7 @@ export class Charter {
             this.createRivals();
         }
         this.lastRivalMoves = this.rivals.map((rival) => rival.lastMove).filter(Boolean);
+        this.returningVisitors = VisitorFactory.restore(saved.returningVisitors || []);
         if (saved.transit?.home && saved.transit?.commons) {
             this.transit = {
                 home: { ...saved.transit.home },

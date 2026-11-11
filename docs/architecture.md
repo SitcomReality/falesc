@@ -339,7 +339,10 @@ arrivals, Devotion and votes. `Charter.beginNextDay()` clears them. A visitor
 visit adds `BALANCE.visitors.fee` to `DaySimulator.visitorFees`; `LumenLedger`
 adds that to the owning chapter and reports `visitorFees` separately. Visitors
 are not serialized. A charmed visitor (`affinity.player >= 0.15`) can be invited
-from the report when the player has a spare bed; `Charter.inviteVisitor()`
+from the report when the player has a spare bed; otherwise they are remembered
+in `returningVisitors` (up to two) and return on a later day with the same
+name, memory and affinity. The returning list is serialized, then moved back
+into `visitors` by `spawnVisitors()`; `Charter.inviteVisitor()`
 clears the visitor flag, adds them to the roster, assigns a bed and saves them
 as an ordinary resident.
 

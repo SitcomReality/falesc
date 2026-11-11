@@ -120,8 +120,10 @@ in the evening report and the chapter ledgers; their visits count in the
 event's totals and can crowd queues. The Commons Beacon charges no fee. A visitor who has spent time with one of
 your services (player affinity at least **0.15**) and a **spare bed** can be
 invited to stay from the evening report; they join the resident roster, keep
-their name and memory, and can vote in the Confluence. Visitors are a Contest
-feature for now; First Light remains resident-only.
+their name and memory, and can vote in the Confluence. A charmed visitor who is
+not offered a bed may return on a later day (up to two at a time), keeping their
+name, memory and affinity; the report marks them **returning**. Visitors are a
+Contest feature for now; First Light remains resident-only.
 
 ## The outer commons isle
 

@@ -51,6 +51,7 @@ webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 webgame_smoke --scenario scripts/scenarios/commons.mjs
 webgame_smoke --scenario scripts/scenarios/visitors.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
+webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 webgame_smoke --scenario scripts/scenarios/retrofit.mjs
 webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
@@ -181,7 +182,8 @@ after any behavioural change.
   nightly comfort and opens as a six-seat all-needs shared service. Contest days
   also bring 2–3 transient visitors who use services, pay 1 lumen per visit and
   leave before the next day. A charmed visitor with a spare bed can be invited
-  from the report and becomes an ordinary resident. Once the Beacon is lit, the
+  from the report and becomes an ordinary resident; charmed visitors who are not
+  invited may return on later days (up to two). Once the Beacon is lit, the
   first Commons Assembly lets residents petition, each chapter nominate and
   residents vote; the winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
   `CommonsBallot.js`). An open player service can be retrofitted once for 6

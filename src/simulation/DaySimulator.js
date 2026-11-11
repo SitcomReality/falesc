@@ -456,7 +456,8 @@ export class DaySimulator {
             wellbeing: Math.round(visitor.wellbeing * 10) / 10,
             visits: visitor.memory.recentVisits?.length || 0,
             affinity: Math.round(visitor.getAffinity('player') * 100) / 100,
-            lastChoice: visitor.memory.lastChoice?.serviceName || null
+            lastChoice: visitor.memory.lastChoice?.serviceName || null,
+            returned: Boolean(visitor.returned)
         }));
         const visitorFees = Object.values(this.visitorFees).reduce((sum, value) => sum + value, 0);
         const commons = this.charter.contest && this.charter.commons ? {

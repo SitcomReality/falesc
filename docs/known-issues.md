@@ -33,7 +33,7 @@ Severity is about impact on the slice, not effort:
 | 11 | Low | WebGL context loss is not handled |
 | 12 | Low | Visual regression is not enabled and no baseline is committed |
 | 13 | Low | Minor teardown and cleanup gaps remain |
-| 14 | Low | Visitors have no card or return arc; overnight stays only through a full residency invite |
+| 14 | Low | Visitors can return, but have no card or trial-stay state |
 | 15 | Low | The Commons Assembly has petitions and one ballot, but no second reading or debate |
 
 ## Open issues
@@ -325,22 +325,23 @@ baselined once the ambient flow is settled; see
 - `VisitorFactory.create()` produces 2–3 transient `Resident` models per Contest
 day, flagged `visitor` and excluded from `activeResidents`, housing, Devotion,
 arrivals and the Confluence vote.
-- They are cleared on the next day and are not serialized.
-- They have no resident card, portrait or return arc; an invited visitor becomes a
-full resident with a bed and a vote, so there is no middle state.
+- Charmed visitors who are not invited are remembered in `returningVisitors`
+(up to two) and return with the same name, memory and affinity. The returning
+list is serialized.
+- They have no visitor card or portrait, and no trial-stay state between a
+returning day-tripper and a full resident.
 - They exist only in Contest mode; First Light remains resident-only.
 
 **Impact**
 
 Visitors give the services a second audience and a visible trade income. A charmed
-visitor can become a resident, but there is no visitor card, no returning
-relationship and no overnight stay without joining.
+visitor can return or become a resident, but there is no visitor card and no
+overnight stay without joining.
 
 **Suggested fix**
 
-Add a visitor card, a small return/relationship track, and a trial-stay state
-before full residency. Consider solo visitors once the First Light economy is
-retuned.
+Add a visitor card and a trial-stay state before full residency. Consider solo
+visitors once the First Light economy is retuned.
 
 ### 15. The Commons Assembly has petitions but no second reading
 
@@ -395,7 +396,7 @@ These are no longer open:
 - **Service retrofit.** An active player service can install one of Sunroom, Atelier or Night Kitchen; the module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
 - **Outer commons isle.** A second buildable shard in the Contest, reached by reserved shuttle gates; player services on it earn cross-island visits. Covered by `commons-isle.mjs`.
 - **Commons Assembly ballot and petition.** A lit Beacon lets residents petition, each chapter nominate and all residents vote; existing and future services inherit the winner's capacity or comfort effect. Covered by `commons-assembly.mjs`.
-- **Day visitors.** 2–3 transient Contest visitors arrive each day, use services, pay visitor fees and leave before the next day unless invited to stay. Covered by `visitors.mjs` and `visitor-stay.mjs`.
+- **Day visitors.** 2–3 transient Contest visitors arrive each day, use services, pay visitor fees and leave before the next day unless invited to stay; charmed visitors can return. Covered by `visitors.mjs`, `visitor-stay.mjs` and `visitor-return.mjs`.
 - **Shared Commons Beacon.** A reserved 2×2 shared civic project can be funded by the player and rivals; when lit it applies a nightly multi-need comfort and becomes a six-seat all-needs service. It is covered by `commons.mjs`.
 - **Contest full-season probe.** `contest-season.mjs` plays all 14 medium days, checks the campaign and Confluence, and records the economy/population trajectory for tuning.
 - **Contest economy, campaign and Confluence preview.** Two rival chapters, shared services/residents, rival housing/economy/closures, recovery and need-pressure builds, Devotion standings, the patronage-flow overlay, a three-day campaign with a festival programme and rival promises, a pledge/vote Confluence finale and a post-vote stewardship epilogue are implemented and covered by `contest.mjs`, `contest-recovery.mjs`, `campaign.mjs` and `confluence-defeat.mjs`.

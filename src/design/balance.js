@@ -12,7 +12,9 @@ export const BALANCE = {
         min: 2,
         max: 3,
         fee: 1,
-        stayAffinity: 0.15
+        stayAffinity: 0.15,
+        returnAffinity: 0.15,
+        maxReturning: 2
     },
     commons: {
         target: 20,

@@ -16,6 +16,15 @@ export class VisitorFactory {
         return rng.nextInt(BALANCE.visitors.min, BALANCE.visitors.max);
     }
 
+    static restore(entries = []) {
+        return entries.map((entry) => {
+            const visitor = Resident.fromJSON(entry);
+            visitor.visitor = true;
+            visitor.active = true;
+            return visitor;
+        });
+    }
+
     static create(seed, day, count = VisitorFactory.countFor(seed, day)) {
         const rng = new SeededRandom(seed + day * 92821 + 4001);
         const names = shuffle([...TIDELANDER_NAMES], rng).slice(0, count);
