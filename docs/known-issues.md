@@ -22,7 +22,7 @@ Severity is about impact on the slice, not effort:
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Home, commons and garden isles are buildable; shared works, purse and capital exist, but no fuller archipelago |
-| 3 | Medium | Floors are stacked blocks and districts are named clusters; no full loadout or shaped neighbourhoods |
+| 3 | Medium | Floors are stacked room plans and districts are named clusters; no full loadout or shaped neighbourhoods |
 | 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
@@ -111,9 +111,9 @@ proof of cross-island transit and shared ownership.
 - The eight buildable programs are fixed compositions. `ServiceBuilding` stores
   `finish`, `policy`, `level`, `retrofitId`, `qualityBonus` and `upkeepBonus`;
   up to two retrofit modules change them, and retrofit sets the grand finish.
-- Extra floors add capacity and upkeep and draw a stacked upper storey above
-  the building, but it is a single service volume rather than a full floor plan
-  with interiors, stairs or separate uses. Connected services form a named
+- Extra floors choose a Dormer, Common Room or Roof Garden and draw a stacked
+  upper storey above the building, but each is a single service volume rather
+  than a full interior with stairs or separate room uses. Connected services form a named
   district with a small quality bonus and a world label, and service atmosphere is player-set, but
   there is no shaped neighbourhood, access policy or full loadout.
 - Footprints are `1×1` except the Garden Dome's `2×2`; entrance validation is a
@@ -407,6 +407,7 @@ These are no longer open:
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
 - **Service districts.** Three connected services form a named district with a shared quality bonus. Covered by `service-district.mjs`.
 - **Neighbouring services.** Each distinct neighbour adds quality, with an extra bonus for mixed chapters. Covered by `service-adjacency.mjs`.
+- **Floor plans.** Extra floors choose Dormer, Common Room or Roof Garden, trading seats against quality and upkeep. Covered by `service-floors.mjs`.
 - **Service floors.** An open, player-built service can add up to two floors for capacity and upkeep; the stacked upper storey is visible and saved. Covered by `service-floors.mjs`.
 - **Building finishes.** A build chooses Humble, Comfortable or Grand; the shell changes cost, capacity, upkeep and the resident standard fit and is saved. Covered by `building-finishes.mjs`.
 - **Service welcome.** Working player services can choose Open door, Chapter first or Visitors first for a small fit trade-off. Covered by `service-access.mjs`.

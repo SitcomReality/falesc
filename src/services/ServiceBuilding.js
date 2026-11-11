@@ -33,6 +33,7 @@ export class ServiceBuilding {
         qualityBonus = 0,
         upkeepBonus = 0,
         floors = 1,
+        floorPlans = [],
         visits = 0,
         hearts = 0,
         closed = false,
@@ -59,6 +60,7 @@ export class ServiceBuilding {
         this.level = Number(level) || 1;
         this.retrofitId = retrofitId || null;
         this.builderChapterId = builderChapterId || null;
+        this.floorPlans = [...floorPlans];
         this.qualityBonus = Number(qualityBonus) || 0;
         this.upkeepBonus = Number(upkeepBonus) || 0;
         this.floors = Math.max(1, Math.min(3, Number(floors) || 1));
@@ -278,6 +280,7 @@ export class ServiceBuilding {
             qualityBonus: this.qualityBonus,
             upkeepBonus: this.upkeepBonus,
             floors: this.floors,
+            floorPlans: [...this.floorPlans],
             fixed: this.fixed,
             finish: this.finish,
             modules: [...this.modules],

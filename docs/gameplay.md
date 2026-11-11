@@ -290,8 +290,13 @@ The finish is saved, shown in the service record, and read by residents'
 standards trait.
 
 An open, player-built service can add up to **two extra floors** for **4 lumen**
-each. Each floor adds **+1 capacity** (**+2** for housing), **+1 upkeep**, and a
-stacked upper storey above the building. The Welcome Post, shared commons works
+each. Each floor opens a **floor-plan** choice:
+
+- **Dormer** — +1 seat, or +2 beds in housing.
+- **Common Room** — +1 seat and +0.04 quality.
+- **Roof Garden** — no new seats, but +0.08 quality.
+
+Every floor adds **+1 upkeep** and a stacked upper storey above the building. The Welcome Post, shared commons works
 and rival services do not grow this way.
 
 Hovering the grid shows a mint diamond and a ghost of the armed service when the

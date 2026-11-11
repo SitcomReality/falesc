@@ -98,6 +98,7 @@ src/
     RetrofitModules.js       Sunroom, Atelier and Night Kitchen retrofit data
     ServicePolicies.js       player-set hours, quality and upkeep modifiers
     BuildingFinishes.js     Humble / Comfortable / Grand shell trade-offs
+    FloorPlans.js           Dormer / Common Room / Roof Garden upper floors
     ServiceAdjacency.js     Neighbour quality and mixed-chapter bonus
     (Charter.refreshDistricts) connected-service district names and bonus
     PlacementPolicy.js       pure footprint/door/home-shard rules

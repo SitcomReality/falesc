@@ -31,33 +31,43 @@ export default async function ({ page, assert, log, screenshot }) {
         const app = window.__falesc.app;
         const service = app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
         app.serviceCard.show(service);
-        return { capacity: service.capacity, floors: service.floors, upkeep: app.charter.services.upkeepFor(service), lumen: app.charter.player.lumen };
+        return { capacity: service.capacity, floors: service.floors, plans: service.floorPlans, upkeep: app.charter.services.upkeepFor(service), lumen: app.charter.player.lumen };
     })()`);
     log(JSON.stringify({ before }));
     await page.click('[data-testid=structure-floor]');
+    await page.waitFor("window.__falesc.app.floorPlan.isOpen === true");
+    await screenshot('service-floor-plan.png');
+    await page.click('[data-testid=floor-plan-dormer]');
+    await page.waitFor("window.__falesc.app.floorPlan.isOpen === false");
     await page.waitFor("window.__falesc.app.serviceCard.isOpen === true");
     const after = await page.evaluate(`(() => {
         const app = window.__falesc.app;
         const service = app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
-        return { capacity: service.capacity, floors: service.floors, upkeep: app.charter.services.upkeepFor(service), lumen: app.charter.player.lumen };
+        return { capacity: service.capacity, floors: service.floors, plans: service.floorPlans, upkeep: app.charter.services.upkeepFor(service), lumen: app.charter.player.lumen };
     })()`);
     log(JSON.stringify({ after }));
     assert.equal(after.floors, 2);
+    assert.deepEqual(after.plans, ['dormer']);
     assert.equal(after.capacity, before.capacity + 1);
     assert.equal(after.upkeep, before.upkeep + 1);
     assert.equal(after.lumen, before.lumen - 4);
     await screenshot('service-floors-two.png');
 
     await page.click('[data-testid=structure-floor]');
+    await page.waitFor("window.__falesc.app.floorPlan.isOpen === true");
+    await page.click('[data-testid=floor-plan-roof_garden]');
+    await page.waitFor("window.__falesc.app.floorPlan.isOpen === false");
     await page.waitFor("window.__falesc.app.serviceCard.isOpen === true");
     const top = await page.evaluate(`(() => {
         const app = window.__falesc.app;
         const service = app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
-        return { floors: service.floors, capacity: service.capacity, button: Boolean(document.querySelector('[data-testid=structure-floor]:not([hidden])')) };
+        return { floors: service.floors, capacity: service.capacity, plans: service.floorPlans, quality: service.qualityBonus, button: Boolean(document.querySelector('[data-testid=structure-floor]:not([hidden])')) };
     })()`);
     log(JSON.stringify({ top }));
     assert.equal(top.floors, 3);
-    assert.equal(top.capacity, before.capacity + 2);
+    assert.equal(top.capacity, before.capacity + 1);
+    assert.deepEqual(top.plans, ['dormer', 'roof_garden']);
+    assert.ok(top.quality > 0.07);
     assert.equal(top.button, false, 'the floor button hides at three floors');
     await screenshot('service-floors-top.png');
     await page.click('[data-testid=structure-cancel]');
@@ -78,8 +88,9 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.waitFor("window.__falesc.snapshot().state === 'MENU'");
     await page.click('[data-testid=menu-continue]');
     await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
-    const restored = await page.evaluate(`(() => { const service = window.__falesc.app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)}); return { floors: service?.floors, capacity: service?.capacity }; })()`);
+    const restored = await page.evaluate(`(() => { const service = window.__falesc.app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)}); return { floors: service?.floors, capacity: service?.capacity, plans: service?.floorPlans }; })()`);
     assert.equal(restored.floors, 3);
-    assert.equal(restored.capacity, before.capacity + 2);
+    assert.equal(restored.capacity, before.capacity + 1);
+    assert.deepEqual(restored.plans, ['dormer', 'roof_garden']);
     await page.pause(400);
 }

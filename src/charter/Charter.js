@@ -7,6 +7,7 @@ import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
 import { SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
 import { SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
 import { SERVICE_ACCESS_BY_ID } from '../services/ServiceAccess.js';
+import { FLOOR_PLAN_BY_ID } from '../services/FloorPlans.js';
 import { finishFor, finishCost } from '../services/BuildingFinishes.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService, removeCommonsPolicyFromService } from '../commons/CommonsPolicies.js';
 import { nominateForRival, petitionFor, resolveCommonsBallot } from '../commons/CommonsBallot.js';
@@ -866,7 +867,7 @@ export class Charter {
         return { ok: true, service, module, cost: module.cost };
     }
 
-    addFloor(service) {
+    addFloor(service, planId = 'dormer') {
         if (!service || (service.chapterId && service.chapterId !== 'player')) {
             return { ok: false, error: "A rival chapter's service cannot grow." };
         }
@@ -875,17 +876,20 @@ export class Charter {
             return { ok: false, error: 'Only an open, working service can add a floor.' };
         }
         if (service.floors >= BALANCE.floors.max) return { ok: false, error: 'This service already has three floors.' };
-        if (this.lumen < BALANCE.floors.cost) {
-            return { ok: false, error: `A floor costs ${BALANCE.floors.cost} lumen.` };
+        const plan = FLOOR_PLAN_BY_ID[planId] || FLOOR_PLAN_BY_ID.dormer;
+        if (this.lumen < plan.cost) {
+            return { ok: false, error: `A floor costs ${plan.cost} lumen.` };
         }
-        this.lumen -= BALANCE.floors.cost;
+        this.lumen -= plan.cost;
         service.floors += 1;
-        service.capacity += service.programId === 'housing' ? BALANCE.floors.housingCapacity : BALANCE.floors.serviceCapacity;
-        service.upkeepBonus = (service.upkeepBonus || 0) + BALANCE.floors.upkeep;
+        service.floorPlans = [...(service.floorPlans || []), plan.id];
+        service.capacity += service.programId === 'housing' ? plan.housingCapacity : plan.serviceCapacity;
+        service.qualityBonus = (service.qualityBonus || 0) + plan.quality;
+        service.upkeepBonus = (service.upkeepBonus || 0) + plan.upkeep;
         service.refreshGraphics();
         this.assignHomes();
         this.refreshDerived();
-        return { ok: true, service, cost: BALANCE.floors.cost };
+        return { ok: true, service, cost: plan.cost, plan };
     }
 
     dismantle(service) {

@@ -218,7 +218,7 @@ after any behavioural change.
   Rest + Sustenance, the 2×2 Amphitheatre for Company + Wonder and the 2×2
   Observatory for Wonder at night. A build chooses a
   Humble, Comfortable or Grand shell finish. An open service can add two
-  floors for capacity and upkeep. Neighbouring services add a small quality
+  floors with Dormer, Common Room or Roof Garden plans. Neighbouring services add a small quality
   bonus, with extra for mixed chapters. Three connected services form a named
   district with a small shared bonus. In Contest, a second
   commons isle is buildable and residents reach it through reserved shuttle gates.

@@ -21,6 +21,7 @@ import { ServiceCardModal } from './ui/ServiceCardModal.js';
 import { RetrofitModal } from './ui/RetrofitModal.js';
 import { SERVICE_HOURS_BY_ID } from './services/ServicePolicies.js';
 import { VisitorCardModal } from './ui/VisitorCardModal.js';
+import { FloorPlanModal } from './ui/FloorPlanModal.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
 import { CommonsModal } from './ui/CommonsModal.js';
@@ -91,9 +92,18 @@ export class FalescGame {
             onReopen: (service) => this.reopenService(service),
             onRetrofit: (service) => this.openRetrofit(service),
             onHours: (service, hoursId) => this.setServiceHours(service, hoursId),
-            onFloor: (service) => this.addFloor(service),
+            onFloor: (service) => this.openFloorPlan(service),
             onVibe: (service, vibeId) => this.setServiceVibe(service, vibeId),
             onAccess: (service, accessId) => this.setServiceAccess(service, accessId),
+            overlays: this.overlays
+        });
+        this.floorPlan = new FloorPlanModal({
+            game: this,
+            onChoose: (service, planId) => this.addFloor(service, planId),
+            onDone: (service) => {
+                this.serviceCard.hide();
+                this.serviceCard.show(service);
+            },
             overlays: this.overlays
         });
         this.visitorCard = new VisitorCardModal({
@@ -261,6 +271,7 @@ export class FalescGame {
         this.campaignModal.hide();
         this.commonsModal.hide();
         this.retrofitModal.hide();
+        this.floorPlan.hide();
         this.visitorCard.hide();
     }
 
@@ -689,14 +700,20 @@ export class FalescGame {
         return true;
     }
 
-    addFloor(service) {
+    openFloorPlan(service) {
+        if (!this.charter || !service) return false;
+        this.floorPlan.show(service);
+        return true;
+    }
+
+    addFloor(service, planId = 'dormer') {
         if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.addFloor(service);
+        const result = this.charter.addFloor(service, planId);
         if (!result.ok) return result;
         this.crowd.sync();
         this.gameScreen.updateHud(true);
         this.saveGame();
-        this.gameScreen.toast(`${service.name} rises to ${service.floors} floors.`, 'mint', 2200);
+        this.gameScreen.toast(`${service.name} rises to ${service.floors} floors · ${result.plan?.name || 'new floor'}.`, 'mint', 2200);
         return result;
     }
 
