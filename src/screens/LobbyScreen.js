@@ -6,7 +6,8 @@ const SIZE_DATA = {
 
 const MODE_DATA = {
     'first-light': { label: 'First Light', note: 'One chapter, one shard, a gentle tutorial.' },
-    contest: { label: 'The Contest', note: 'Share the shard with two rival chapters.' }
+    contest: { label: 'The Contest', note: 'Share the shard with two rival chapters.' },
+    open: { label: 'Open Charter', note: 'One shard, no deadline and no ending. Abandon when you are done.' }
 };
 
 const ISLAND_PATHS = [
@@ -144,8 +145,9 @@ export class LobbyScreen {
             <select class="input" id="lobby-mode-field" data-testid="lobby-mode">
                 <option value="first-light">First Light — solo</option>
                 <option value="contest">The Contest — two rival chapters</option>
+                <option value="open">Open Charter — no deadline</option>
             </select>
-            <span class="field__hint" data-role="mode-hint">One chapter, one shard, a gentle tutorial.</span>
+            <span class="field__hint" data-role="mode-hint">One chapter, one shard, a gentle tutorial. Open Charter removes the deadline and the ending.</span>
         `;
         this.modeSelect = modeField.querySelector('[data-testid=lobby-mode]');
         this.modeHint = modeField.querySelector('[data-role=mode-hint]');

@@ -193,6 +193,8 @@ export class GameScreen {
         this.devotionEl = top.querySelector('[data-role=devotion]');
         this.projectionEl = top.querySelector('[data-role=projection]');
         this.daysLeftEl = objective.querySelector('[data-role=days-left]');
+        this.objectiveKicker = objective.querySelector('.objective-card__head .kicker');
+        this.objectiveName = objective.querySelector('.objective-card__name');
         this.populationFill = objective.querySelector('[data-role=population-fill]');
         this.populationProgress = objective.querySelector('[data-role=population-progress]');
         this.flourishingLabel = objective.querySelector('[data-role=flourishing-label]');
@@ -400,8 +402,11 @@ export class GameScreen {
         const populationGoal = BALANCE.end.firstLightPopulation;
         const flourishingGoal = BALANCE.end.comfortableFlourishing;
 
+        const openCharter = charter.mode === 'open';
         this._setText(this.turnDisplay, 'day', `Day ${String(day).padStart(2, '0')}`);
-        this._setText(this.dayLimitEl, 'dayLimit', `/ ${dayLimit}`);
+        this._setText(this.dayLimitEl, 'dayLimit', openCharter ? '/ open' : `/ ${dayLimit}`);
+        this._setText(this.objectiveKicker, 'objectiveKicker', openCharter ? 'Open Charter' : 'First Light');
+        this._setText(this.objectiveName, 'objectiveName', openCharter ? 'Build without a deadline' : 'House twelve Tidelanders');
         this._setText(this.lumenEl, 'lumen', String(charter.lumen));
         this._setText(this.worksEl, 'works', String(charter.works));
         this._setText(this.populationEl, 'population', String(charter.population));
@@ -409,7 +414,7 @@ export class GameScreen {
         const net = charter.projectedNet;
         const projection = `${net >= 0 ? '+' : '−'}${Math.abs(net)} lumen / day`;
         this._setText(this.projectionEl, 'projection', projection);
-        this._setText(this.daysLeftEl, 'daysLeft', daysLeft === 1 ? 'Last day' : `${daysLeft} days left`);
+        this._setText(this.daysLeftEl, 'daysLeft', openCharter ? 'No deadline' : daysLeft === 1 ? 'Last day' : `${daysLeft} days left`);
 
         const populationPercent = Math.min(100, (charter.housedPopulation / populationGoal) * 100);
         if (force || this._cache.populationPercent !== populationPercent) {
@@ -425,10 +430,12 @@ export class GameScreen {
         }
         this._setText(this.populationProgress, 'populationProgress', `${charter.housedPopulation} / ${populationGoal} residents`);
         this._setText(this.flourishingLabel, 'flourishingLabel', `Flourishing ${Math.round(charter.flourishing)}`);
-        const goalsMet = charter.goalsMet;
-        this._setText(this.goalCopy, 'goalCopy', goalsMet
-            ? 'Both goals are met. Open the day to close the charter.'
-            : `and reach a flourishing of ${flourishingGoal}.`);
+        const goalsMet = openCharter ? false : charter.goalsMet;
+        this._setText(this.goalCopy, 'goalCopy', openCharter
+            ? 'No deadline. Keep building; abandon from the charter menu when you are done.'
+            : goalsMet
+                ? 'Both goals are met. Open the day to close the charter.'
+                : `and reach a flourishing of ${flourishingGoal}.`);
         this.container.classList.toggle('is-goals-met', goalsMet);
 
         for (const program of BUILDABLE_PROGRAMS) {

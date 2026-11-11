@@ -1,7 +1,7 @@
 # Known issues and technical debt
 
 > **Context:** this is the **First Light vertical slice** — one playable home
-> shard, four needs, eight services, planning/playback/report, and a solo
+> shard, four needs, eight services, planning/playback/report, a solo
 > chapter. The refined design is in [design-refinement.md](design-refinement.md)
 > and the build order in [design/roadmap.md](design/roadmap.md). Issues below
 > are current limitations of this build, not of the target design.

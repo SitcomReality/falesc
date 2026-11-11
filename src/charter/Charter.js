@@ -112,7 +112,7 @@ export class Charter {
         this.rivals = [];
         this.lastRivalMoves = [];
         this.day = 1;
-        this.dayLimit = BALANCE.dayLimits[mapSize] || BALANCE.dayLimits.medium;
+        this.dayLimit = mode === 'open' ? 999 : (BALANCE.dayLimits[mapSize] || BALANCE.dayLimits.medium);
         this.flourishing = 0;
         this.devotion = 0;
         this.report = null;
@@ -1201,6 +1201,7 @@ export class Charter {
     }
 
     evaluateEnding(report) {
+        if (this.mode === 'open') return null;
         if (this.ending) return this.ending;
         if (this.population < BALANCE.end.minPopulation) {
             this.ending = {
