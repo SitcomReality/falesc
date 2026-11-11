@@ -23,6 +23,9 @@ export default async function ({ page, assert, screenshot }) {
     const named = await page.evaluate("window.__falesc.snapshot().chapters.find((chapter) => chapter.isPlayer).name");
     assert.equal(named, 'The Long Table');
     assert.equal(await page.evaluate("window.__falesc.app.charter.motto"), 'Every door open.');
+    assert.equal(await page.text('[data-role=objective-motto]'), 'Every door open.');
+    await page.pause(300);
+    await screenshot('charter-motto-hud.png');
     await page.evaluate("window.__falesc.app.saveGame()");
     await page.reload();
     await page.waitFor("window.__falesc.snapshot().state === 'MENU'");
@@ -31,4 +34,5 @@ export default async function ({ page, assert, screenshot }) {
     const restored = await page.evaluate("window.__falesc.snapshot().chapters.find((chapter) => chapter.isPlayer).name");
     assert.equal(restored, 'The Long Table');
     assert.equal(await page.evaluate("window.__falesc.app.charter.motto"), 'Every door open.');
+    assert.equal(await page.text('[data-role=objective-motto]'), 'Every door open.');
 }

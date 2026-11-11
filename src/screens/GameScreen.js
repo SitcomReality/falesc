@@ -104,6 +104,7 @@ export class GameScreen {
                 <span class="objective-card__days" data-role="days-left">14 days left</span>
             </div>
             <p class="objective-card__name">House twelve Tidelanders</p>
+            <p class="objective-card__motto" data-role="objective-motto" hidden></p>
             <div class="objective-card__track" role="progressbar" aria-valuemin="0" aria-valuemax="15" aria-valuenow="6" aria-label="Residents housed">
                 <div class="objective-card__fill" data-role="population-fill"></div>
             </div>
@@ -216,6 +217,7 @@ export class GameScreen {
         this.daysLeftEl = objective.querySelector('[data-role=days-left]');
         this.objectiveKicker = objective.querySelector('.objective-card__head .kicker');
         this.objectiveName = objective.querySelector('.objective-card__name');
+        this.objectiveMotto = objective.querySelector('[data-role=objective-motto]');
         this.populationFill = objective.querySelector('[data-role=population-fill]');
         this.populationProgress = objective.querySelector('[data-role=population-progress]');
         this.flourishingLabel = objective.querySelector('[data-role=flourishing-label]');
@@ -427,6 +429,8 @@ export class GameScreen {
         this._setText(this.dayLimitEl, 'dayLimit', openCharter ? '/ open' : `/ ${dayLimit}`);
         this._setText(this.objectiveKicker, 'objectiveKicker', openCharter ? 'Open Charter' : 'First Light');
         this._setText(this.objectiveName, 'objectiveName', openCharter ? 'Build without a deadline' : 'House twelve Tidelanders');
+        this.objectiveMotto.hidden = !charter.motto;
+        this._setText(this.objectiveMotto, 'objectiveMotto', charter.motto || '');
         this._setText(this.lumenEl, 'lumen', String(charter.lumen));
         this._setText(this.worksEl, 'works', String(charter.works));
         this._setText(this.populationEl, 'population', String(charter.population));

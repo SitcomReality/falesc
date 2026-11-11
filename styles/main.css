@@ -5288,3 +5288,16 @@ body.is-photo-mode .care-watch {
 .charter-archive__best strong {
     color: var(--ink);
 }
+
+.objective-card__motto {
+    margin: 1px 0 5px;
+    font-family: var(--display);
+    font-size: 14px;
+    font-style: italic;
+    line-height: 1.1;
+    color: var(--wine);
+}
+
+.objective-card__motto[hidden] {
+    display: none;
+}
