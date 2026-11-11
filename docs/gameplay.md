@@ -585,6 +585,7 @@ The report is the day's story as a broadsheet:
 - **Word of mouth** — up to three resident quotes, or a quiet fallback.
 - **Complaints** — up to five, with the resident's own words.
 - Any closures caused by the upkeep shortfall.
+- Player services below 60% wear, with a **Repair all** action.
 - A one-line summary of the day's rhythm.
 - If the run ended, the report becomes the charter record and its button reads
   **Read the charter record** before the end screen.
