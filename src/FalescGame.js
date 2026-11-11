@@ -55,6 +55,9 @@ import { BuildingRenderer } from './buildings/BuildingRenderer.js';
 import { installDebugApi } from './debug/DebugApi.js';
 import * as DayPlayback from './app/DayPlayback.js';
 import * as ServiceActions from './app/ServiceActions.js';
+import * as SaveCommands from './app/SaveCommands.js';
+import * as CommonsSession from './app/CommonsSession.js';
+import * as CampaignSession from './app/CampaignSession.js';
 import { defaultProgramId } from './design/programs.js';
 import { BuildCursor } from './controls/BuildCursor.js';
 
@@ -399,9 +402,7 @@ export class FalescGame {
     }
 
     showCommons() {
-        if (!this.charter?.commons) return false;
-        this.commonsModal.show(this.charter);
-        return true;
+        return CommonsSession.showCommons(this);
     }
 
     showVisitor(visitorId) {
@@ -425,106 +426,35 @@ export class FalescGame {
     }
 
     contributeCapital(amount) {
-        if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.contributeCapital(amount);
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.audio.play('mint');
-        this.gameScreen.toast(`${result.gave} lumen into the shared capital budget.`, 'mint', 2200);
-        return result;
+        return CommonsSession.contributeCapital(this, amount);
     }
-
     contributePurse(amount) {
-        if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.contributePurse(amount);
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.audio.play('mint');
-        this.gameScreen.toast(`${result.gave} lumen into the commons purse.`, 'mint', 2200);
-        return result;
+        return CommonsSession.contributePurse(this, amount);
     }
-
     nominateCommonsPolicy(policyId) {
-        if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.nominateCommonsPolicy(policyId);
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.gameScreen.toast(`${result.policy.name} is on the ballot.`, 'mint', 2200);
-        return result;
+        return CommonsSession.nominateCommonsPolicy(this, policyId);
     }
-
     callSecondReading() {
-        if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.callSecondReading();
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.gameScreen.toast('The second reading is open.', 'mint', 2400);
-        return result;
+        return CommonsSession.callSecondReading(this);
     }
-
     resolveCommonsAssembly() {
-        if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.resolveCommonsAssembly();
-        if (!result.ok) return result;
-        this.syncViews();
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.gameScreen.toast(`${result.policy.name} wins the Commons Assembly.`, 'mint', 2600);
-        return result;
+        return CommonsSession.resolveCommonsAssembly(this);
     }
-
     upgradeCommons() {
-        if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.upgradeCommons();
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.gameScreen.toast('The Beacon gains an annex.', 'mint', 2200);
-        return result;
+        return CommonsSession.upgradeCommons(this);
     }
-
     contributeCommons(amount) {
-        if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.contributeCommons(this.charter.player, amount);
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        if (result.activated) {
-            this.gameScreen.toast('The Commons Beacon is lit — every resident rests a little easier.', 'mint', 2600);
-        }
-        return result;
+        return CommonsSession.contributeCommons(this, amount);
     }
 
     showCampaign() {
-        if (!this.charter?.campaign?.active) return false;
-        this.campaignModal.show(this.charter.campaign, this.charter);
-        return true;
+        return CampaignSession.showCampaign(this);
     }
-
     sponsorCampaign(needId) {
-        if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.sponsorCampaign(needId);
-        if (!result.ok) return result;
-        this.gameScreen.updateHud(true);
-        this.saveGame();
-        this.audio.play('build');
-        this.gameScreen.toast('A sponsored bell joins the festival.', 'mint', 2200);
-        return result;
+        return CampaignSession.sponsorCampaign(this, needId);
     }
-
     chooseCampaignPledge(pledgeId) {
-        if (!this.charter) return { ok: false };
-        const result = this.charter.setCampaignPledge(pledgeId);
-        if (!result.ok) return result;
-        this.campaignModal.hide();
-        this.gameScreen.updateHud(true);
-        this.gameScreen.toast(`Campaign promise: ${this.charter.campaign.playerPledgeName}.`, 'mint', 2200);
-        this.saveGame();
-        return result;
+        return CampaignSession.chooseCampaignPledge(this, pledgeId);
     }
 
     /* ------------------------------------------------------------------ */
@@ -808,24 +738,13 @@ export class FalescGame {
     }
 
     showConfluence() {
-        if (!this.charter?.confluenceReady) return false;
-        this.screenStateMachine.setState(GamePhase.CONFLUENCE);
-        return true;
+        return CampaignSession.showConfluence(this);
     }
-
     showStewardship() {
-        if (!this.charter?.ending?.confluence || this.charter.ending.outcome !== 'victory') return false;
-        this.screenStateMachine.setState(GamePhase.STEWARDSHIP);
-        return true;
+        return CampaignSession.showStewardship(this);
     }
-
     chooseStewardship(policyId) {
-        const policy = STEWARDSHIP_BY_ID[policyId];
-        if (!policy || !this.charter?.ending?.confluence || this.charter.ending.outcome !== 'victory') return false;
-        if (!this.charter.applyStewardship(policy)) return false;
-        writeLegacy({ policyId, chapterName: this.charter.player.name, day: this.charter.day });
-        this.finishCharter();
-        return true;
+        return CampaignSession.chooseStewardship(this, policyId);
     }
 
     archiveFinishedCharter() {
@@ -931,46 +850,13 @@ export class FalescGame {
     /* ------------------------------------------------------------------ */
 
     exportSave() {
-        const text = this.saveManager.exportText();
-        if (!text) {
-            this.gameScreen?.toast('There is no charter to export yet.', 'coral');
-            return false;
-        }
-        const blob = new Blob([text], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `falesc-save-day-${this.charter?.day || 1}.json`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(url);
-        this.gameScreen?.toast('Charter exported.', 'mint', 1800);
-        return true;
+        return SaveCommands.exportSave(this);
     }
-
     importSave(text) {
-        const result = this.saveManager.importText(text);
-        if (!result.ok) return result;
-        if (this.screenStateMachine.state !== GamePhase.MENU) this.disposeCharter();
-        const loaded = this.continueCharter();
-        if (!loaded) return { ok: false, error: 'The imported charter could not be loaded.' };
-        return { ok: true };
+        return SaveCommands.importSave(this, text);
     }
-
     saveGame() {
-        if (!this.charter) return false;
-        if (![GamePhase.PLAYING, GamePhase.REPORT].includes(this.screenStateMachine.state)) return false;
-        return this.saveManager.write({
-            phase: this.screenStateMachine.state,
-            settings: { ...this.settings },
-            charter: this.charter.serialize(),
-            camera: {
-                x: this.world.camera.position.x,
-                y: this.world.camera.position.y,
-                zoom: this.world.camera.zoom
-            }
-        });
+        return SaveCommands.saveGame(this);
     }
 
     /* ------------------------------------------------------------------ */
