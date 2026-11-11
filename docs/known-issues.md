@@ -21,7 +21,7 @@ Severity is about impact on the slice, not effort:
 | # | Severity | Issue |
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
-| 2 | Medium | Home shard plus one commons isle are buildable; shared works and a purse exist, but no manual treasury loop or fuller archipelago |
+| 2 | Medium | Home shard plus one commons isle are buildable; shared works, a purse and manual top-ups exist, but no shared capital budget or fuller archipelago |
 | 3 | Medium | No building layers or multi-slot modules; a single hours policy and one retrofit module exist |
 | 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
@@ -83,9 +83,9 @@ when the curve is chosen.
   cross-island route; rivals still build only on the home shard.
 - Other generated islands have scenery and minerals but no buildable grid.
 - Services built on the commons isle are shared works owned by The Commons.
-  A commons purse fed by every chapter pays their upkeep, but there is no
-  manual contribution loop, no shared capital budget and no rival construction
-  there. The Commons Beacon remains a project on the home shard.
+  A commons purse fed by every chapter pays their upkeep, and the player can
+  manually top it up, but there is no shared capital budget and no rival
+  construction there. The Commons Beacon remains a project on the home shard.
   interaction, services, transit or residents.
 
 **Impact**
@@ -98,8 +98,8 @@ the camera has settled on the home shard.
 
 Keep the home shard as the Phase 1 scope, but make the boundary explicit in the
 lobby and HUD. The next step is the Phase 2 shared commons, not quietly enabling
-placement on scenery. Add a manual commons-treasury loop and further islands only with their own
-navigation, ownership and camera affordances. The commons isle is the first
+placement on scenery. Add a shared capital budget and further islands only with their own navigation,
+ownership and camera affordances. The commons isle is the first
 proof of cross-island transit and shared ownership.
 
 ### 3. No building layers or multi-slot modules

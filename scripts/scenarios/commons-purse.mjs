@@ -66,4 +66,15 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.ok(await page.text('[data-testid=report-screen]').then((text) => text.includes('Commons purse')));
     await page.pause(300);
     await screenshot('commons-purse-report.png');
+
+    await page.evaluate("window.__falesc.showCommons()");
+    await page.waitFor("window.__falesc.app.commonsModal.isOpen === true");
+    await page.click('[data-testid=commons-purse-10]');
+    await page.waitFor("window.__falesc.app.charter.commons.purse >= 10");
+    const reopened = await page.evaluate("({ purse: window.__falesc.app.charter.commons.purse, closed: window.__falesc.app.charter.sharedWorkServices().map((service) => service.closed) })");
+    log(JSON.stringify({ reopened }));
+    assert.equal(reopened.purse, 10);
+    assert.ok(reopened.closed.every((closed) => closed === false));
+    await screenshot('commons-purse-gift.png');
+    await page.click('[data-testid=commons-close-x]');
 }

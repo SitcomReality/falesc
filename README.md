@@ -154,7 +154,7 @@ appear in the HUD and report. At the day limit the archipelago convenes a
 **Campaign and Confluence**: the final three days run a three-event festival
 programme where rivals publish promises and the player chooses one; every
 resident then votes and the result becomes the charter record. Still absent: a
-larger multi-round festival, deeper legacy effects, a manual commons-treasury loop, a fuller archipelago,
+larger multi-round festival, deeper legacy effects, a fuller archipelago,
 auctions/systemic stewardship and a deeper rival strategy beyond need-pressure
 builds/recovery, building layers or retrofit, audio, multiplayer, or a keyboard
 build cursor. A patronage-flow overlay traces each resident's last choice from

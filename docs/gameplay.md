@@ -164,7 +164,9 @@ Shared works draw upkeep from the **commons purse**. Whenever shared works
 stand, every chapter with at least **1 lumen** gives **1 lumen** to the purse at
 the start of a day. At the end of the day the purse pays the shared upkeep; if
 it cannot cover it, the shared doors close together until the purse can cover
-them again. The report shows the purse, shared upkeep and any closures.
+them again. The report shows the purse, shared upkeep and any closures. The player can
+also give **5** or **10** lumen to the purse from the Commons modal; a gift can
+reopen shared doors that had closed.
 
 ## Retrofit
 

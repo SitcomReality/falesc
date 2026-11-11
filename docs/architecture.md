@@ -285,7 +285,7 @@ to the commons chapter and is excluded from dismantle, retrofit and hours
 commands. `Charter.collectCommonsLevy()` takes 1 lumen per chapter into
 `commons.purse` when shared works stand; `settleCommonsPurse()` pays their upkeep
 or closes them together, and `sharedUpkeepTotal()` reopens them when the purse
-can cover the full bill. `DaySimulator` credits a small affinity share to the
+can cover the full bill; `contributePurse()` is the player's manual top-up. `DaySimulator` credits a small affinity share to the
 builder on each visit. `PlacementPolicy` accepts that sector as well as
 the home shard. `Charter.setupTransit()` reserves a free gate cell on each
 shard; `DaySimulator.routeTo()` composes a home path, the cross-void shuttle

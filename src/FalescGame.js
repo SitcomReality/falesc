@@ -112,6 +112,7 @@ export class FalescGame {
         });
         this.commonsModal = new CommonsModal({
             onContribute: (amount) => this.contributeCommons(amount),
+            onPurse: (amount) => this.contributePurse(amount),
             onNominate: (policyId) => this.nominateCommonsPolicy(policyId),
             onVote: () => this.resolveCommonsAssembly(),
             overlays: this.overlays
@@ -293,6 +294,16 @@ export class FalescGame {
         this.reportScreen.show();
         this.saveGame();
         this.gameScreen.toast(`${result.trial.name} begins a trial stay.`, 'mint', 2400);
+        return result;
+    }
+
+    contributePurse(amount) {
+        if (!this.charter) return { ok: false, reason: 'No charter.' };
+        const result = this.charter.contributePurse(amount);
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast(`${result.gave} lumen into the commons purse.`, 'mint', 2200);
         return result;
     }
 

@@ -7,8 +7,9 @@ import { COMMONS_POLICIES, COMMONS_POLICY_BY_ID } from '../commons/CommonsPolici
  * every resident, not a private service.
  */
 export class CommonsModal {
-    constructor({ onContribute, onNominate, onVote, overlays }) {
+    constructor({ onContribute, onPurse, onNominate, onVote, overlays }) {
         this.onContribute = onContribute;
+        this.onPurse = onPurse;
         this.onNominate = onNominate;
         this.onVote = onVote;
         this.overlays = overlays;
@@ -53,6 +54,7 @@ export class CommonsModal {
     render() {
         const commons = this.charter.commons;
         if (!commons) return;
+        const player = this.charter.player;
         const sharedWorks = (this.charter.commonsManager?.services || [])
             .filter((service) => service.chapterId === 'commons' && service.id !== commons.serviceId && service.state === 'ACTIVE').length;
         const purse = commons.purse || 0;
@@ -114,6 +116,8 @@ export class CommonsModal {
                 <h4 class="campaign-modal__label">Given so far</h4>
                 <ul class="commons-contributors">${contributors || '<li><span>The commons</span><strong>—</strong></li>'}</ul>
                 <div class="modal__actions">
+                    <button type="button" class="btn btn--paper" data-testid="commons-purse-5" ${player.lumen >= 5 ? '' : 'disabled'}>Give 5 to the purse</button>
+                    <button type="button" class="btn btn--paper" data-testid="commons-purse-10" ${player.lumen >= 10 ? '' : 'disabled'}>Give 10 to the purse</button>
                     <button type="button" class="btn btn--primary" data-testid="commons-close">Close</button>
                 </div>
             `;
@@ -139,18 +143,30 @@ export class CommonsModal {
                 <ul class="commons-contributors">${contributors || '<li><span>Nobody yet</span><strong>0</strong></li>'}</ul>
                 <p class="modal__note">The whole archipelago shares the Beacon. Rivals give a little each day when they can.</p>
                 <div class="modal__actions">
-                    <button type="button" class="btn btn--paper" data-testid="commons-give-5" ${canGive5 ? '' : 'disabled'}>Give 5</button>
-                    <button type="button" class="btn btn--primary" data-testid="commons-give-10" ${canGive10 ? '' : 'disabled'}>Give 10</button>
+                    <button type="button" class="btn btn--paper" data-testid="commons-give-5" ${canGive5 ? '' : 'disabled'}>Give 5 to the Beacon</button>
+                    <button type="button" class="btn btn--primary" data-testid="commons-give-10" ${canGive10 ? '' : 'disabled'}>Give 10 to the Beacon</button>
+                </div>
+                <div class="modal__actions">
+                    <button type="button" class="btn btn--paper" data-testid="commons-purse-5" ${canGive5 ? '' : 'disabled'}>Give 5 to the purse</button>
+                    <button type="button" class="btn btn--paper" data-testid="commons-purse-10" ${canGive10 ? '' : 'disabled'}>Give 10 to the purse</button>
                 </div>
             `;
         }
         this.panel.querySelectorAll('[data-testid^=commons-close]').forEach((button) => button.addEventListener('click', () => this.hide()));
         this.panel.querySelector('[data-testid=commons-give-5]')?.addEventListener('click', () => this.give(5));
         this.panel.querySelector('[data-testid=commons-give-10]')?.addEventListener('click', () => this.give(10));
+        this.panel.querySelector('[data-testid=commons-purse-5]')?.addEventListener('click', () => this.givePurse(5));
+        this.panel.querySelector('[data-testid=commons-purse-10]')?.addEventListener('click', () => this.givePurse(10));
         this.panel.querySelectorAll('[data-testid^=commons-policy-]').forEach((button) => {
             button.addEventListener('click', () => this.nominate(button.dataset.policy));
         });
         this.panel.querySelector('[data-testid=commons-call-vote]')?.addEventListener('click', () => this.vote());
+    }
+
+    givePurse(amount) {
+        const result = this.onPurse(amount);
+        if (!result?.ok) return;
+        this.render();
     }
 
     give(amount) {

@@ -196,8 +196,8 @@ after any behavioural change.
   choose As built, Round the clock, Daylight or Evening hours. The five buildable
   services include the 2×2 Bathhouse for Rest + Company. In Contest, a second
   commons isle is buildable and residents reach it through reserved shuttle gates.
-  This is a first pass; a manual commons-treasury contribution loop, a fuller archipelago,
-  a larger multi-round festival, auctions and deeper legacy effects are still
+  This is a first pass; a fuller archipelago, a larger multi-round festival,
+  auctions, shared capital budgeting and deeper legacy effects are still
   missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
   not remove the survey chart without adjusting `canvasSelectors` and the smoke

@@ -395,6 +395,18 @@ export class Charter {
         return { ok: true, activated, fund: this.commons.fund, active: this.commons.active };
     }
 
+    contributePurse(amount) {
+        const value = Math.max(0, Math.min(Math.trunc(amount), this.player.lumen));
+        if (!value) return { ok: false, reason: 'No lumen to give.' };
+        this.player.lumen -= value;
+        this.commons.purse += value;
+        if (this.commons.purse >= this.sharedUpkeepTotal(true)) {
+            for (const service of this.sharedWorkServices()) service.closed = false;
+        }
+        this.refreshDerived();
+        return { ok: true, purse: this.commons.purse, gave: value };
+    }
+
     nominateCommonsPolicy(policyId) {
         if (!this.commons.active) return { ok: false, reason: 'Light the Beacon before calling an assembly.' };
         if (this.commons.policy) return { ok: false, reason: 'The assembly has already chosen.' };

@@ -64,7 +64,7 @@ services. A fuller commons archipelago, long-term rival plan, multi-round
 festival events, auctions and deeper legacy effects remain.
 
 **Not started:** the rest of Phase 2, Phase 3 (layers, multi-slot modules,
-finishes, access policy), a manual commons-treasury loop, deeper Phase 4
+finishes, access policy), shared capital budgeting, deeper Phase 4
 scenarios, and Phase 5
 (multiplayer, audio, accessibility polish).
 
