@@ -60,6 +60,15 @@ export class ServiceInteriorModal {
         this.overlays.close(this);
     }
 
+    moveHouse(residentId) {
+        const target = this.otherHomes?.[0];
+        if (!target) return;
+        const result = this.game?.charter?.moveResidentHome?.(residentId, target.id);
+        if (!result?.ok) return;
+        this.game.saveGame?.();
+        this.render();
+    }
+
     moveResident(residentId, floor) {
         if (!this.housing || !this.game?.charter) return;
         const resident = this.game.charter.activeResidents.find((entry) => entry.id === residentId);
@@ -99,6 +108,10 @@ export class ServiceInteriorModal {
         });
         this.floors = floors;
         this.housing = housing;
+        const roster = this.game?.charter?.roster || [];
+        this.otherHomes = housing
+            ? (this.game?.charter?.services?.housingServices || []).filter((home) => home.id !== service.id && roster.filter((resident) => resident.active && resident.homeServiceId === home.id).length < home.capacity)
+            : [];
         const people = here.length
             ? here.slice(0, 8).map((resident) => `<li><strong>${escapeHtml(resident.name)}</strong><span>${escapeHtml(resident.lastChoice || 'a familiar face')}</span></li>`).join('')
             : '<li class="service-interior__empty">No one is inside just now.</li>';
@@ -117,7 +130,7 @@ export class ServiceInteriorModal {
                         <span class="kicker">${floor.label}</span>
                         <strong>${escapeHtml(floor.plan?.name || program?.name || 'Service')}</strong>
                         <span>${floor.seats} ${housing ? 'beds' : 'seats'}${floor.plan ? ` · +${(floor.plan.quality || 0).toFixed(2)} quality` : ''}</span>
-                        ${floor.occupants.length ? `<span class="interior-room__people">${floor.occupants.map((resident) => `${escapeHtml(resident.name)}${housing ? ` <button type="button" class="interior-room__move" data-move-resident="${escapeHtml(resident.id)}" data-move-floor="${floor.index + 1}" data-move-direction="up" aria-label="Move ${escapeHtml(resident.name)} up" ${floor.index + 1 >= floors.length || (floors[floor.index + 1]?.occupants.length || 0) >= (floors[floor.index + 1]?.seats || 0) ? 'disabled' : ''}>↑</button><button type="button" class="interior-room__move" data-move-resident="${escapeHtml(resident.id)}" data-move-floor="${floor.index - 1}" data-move-direction="down" aria-label="Move ${escapeHtml(resident.name)} down" ${floor.index === 0 || (floors[floor.index - 1]?.occupants.length || 0) >= (floors[floor.index - 1]?.seats || 0) ? 'disabled' : ''}>↓</button>` : ''}`).join(', ')}</span>` : ''}
+                        ${floor.occupants.length ? `<span class="interior-room__people">${floor.occupants.map((resident) => `${escapeHtml(resident.name)}${housing ? ` <button type="button" class="interior-room__move" data-move-resident="${escapeHtml(resident.id)}" data-move-floor="${floor.index + 1}" data-move-direction="up" aria-label="Move ${escapeHtml(resident.name)} up" ${floor.index + 1 >= floors.length || (floors[floor.index + 1]?.occupants.length || 0) >= (floors[floor.index + 1]?.seats || 0) ? 'disabled' : ''}>↑</button><button type="button" class="interior-room__move" data-move-resident="${escapeHtml(resident.id)}" data-move-floor="${floor.index - 1}" data-move-direction="down" aria-label="Move ${escapeHtml(resident.name)} down" ${floor.index === 0 || (floors[floor.index - 1]?.occupants.length || 0) >= (floors[floor.index - 1]?.seats || 0) ? 'disabled' : ''}>↓</button>${this.otherHomes.length ? `<button type="button" class="interior-room__move" data-move-house="${escapeHtml(resident.id)}" aria-label="Move ${escapeHtml(resident.name)} to another house">→</button>` : ''}` : ''}`).join(', ')}</span>` : ''}
                     </article>
                 `).join('')}
             </div>
@@ -127,6 +140,10 @@ export class ServiceInteriorModal {
                 <button type="button" class="btn btn--paper" data-testid="service-interior-done">Back to the record</button>
             </div>
         `;
+        this.panel.querySelectorAll('[data-move-house]').forEach((button) => button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            this.moveHouse(button.dataset.moveHouse);
+        }));
         this.panel.querySelectorAll('[data-move-resident]').forEach((button) => button.addEventListener('click', (event) => {
             event.stopPropagation();
             this.moveResident(button.dataset.moveResident, Number(button.dataset.moveFloor));

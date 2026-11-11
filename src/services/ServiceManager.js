@@ -165,7 +165,7 @@ export class ServiceManager {
             const used = usedByService.get(service.id) || 0;
             if (used < service.capacity) {
                 resident.homeServiceId = service.id;
-                resident.homeFloor = floorFor(service, used);
+                resident.homeFloor = homeFloorFor(service, used);
                 return service;
             }
         }
@@ -272,7 +272,7 @@ export class ServiceManager {
     }
 }
 
-function floorFor(service, used) {
+export function homeFloorFor(service, used) {
     const upper = (service.floorPlans || []).reduce((sum, id) => sum + (FLOOR_PLAN_BY_ID[id]?.housingCapacity || 0), 0);
     const seats = [Math.max(0, service.capacity - upper), ...(service.floorPlans || []).map((id) => FLOOR_PLAN_BY_ID[id]?.housingCapacity || 0)];
     let remaining = used;

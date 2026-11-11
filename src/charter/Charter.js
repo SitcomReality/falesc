@@ -12,7 +12,7 @@ import { FLOOR_PLAN_BY_ID } from '../services/FloorPlans.js';
 import { finishFor, finishCost } from '../services/BuildingFinishes.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService, removeCommonsPolicyFromService } from '../commons/CommonsPolicies.js';
 import { nominateForRival, petitionFor, resolveCommonsBallot } from '../commons/CommonsBallot.js';
-import { ServiceManager } from '../services/ServiceManager.js';
+import { ServiceManager, homeFloorFor } from '../services/ServiceManager.js';
 import { computeAdjacency } from '../services/ServiceAdjacency.js';
 import { cellKey } from '../services/PlacementPolicy.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
@@ -800,6 +800,24 @@ export class Charter {
             }
         }
         return { u: center, v: center };
+    }
+
+    moveResidentHome(residentId, serviceId) {
+        const resident = this.activeResidents.find((entry) => entry.id === residentId);
+        const target = this.services.services.find((service) => service.id === serviceId);
+        if (!resident || !target) return { ok: false, reason: 'That bed is not available.' };
+        if (target.programId !== 'housing' || target.state !== 'ACTIVE' || target.closed) {
+            return { ok: false, reason: 'That house is not open.' };
+        }
+        if (resident.homeServiceId === target.id) return { ok: false, reason: 'They already live here.' };
+        const used = this.roster.filter((entry) => entry.active && entry.homeServiceId === target.id).length;
+        if (used >= target.capacity) return { ok: false, reason: 'That house is full.' };
+        resident.homeServiceId = target.id;
+        resident.homeChapterId = target.chapterId || 'player';
+        resident.homeFloor = homeFloorFor(target, used);
+        this.assignHomes();
+        this.refreshDerived();
+        return { ok: true, service: target };
     }
 
     assignHomes() {
