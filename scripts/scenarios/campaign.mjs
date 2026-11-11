@@ -23,6 +23,7 @@ export default async function ({ page, assert, log, screenshot }) {
     log(JSON.stringify({ opened: { day: opened.day, campaign: opened.campaign } }));
     assert.equal(opened.campaign.startedDay, 12);
     assert.equal(opened.campaign.events.length, 6, 'the campaign should publish two events for each of three days');
+    assert.ok(opened.campaign.events.some((event) => event.need === 'purpose'));
     assert.equal(new Set(opened.campaign.events.map((event) => event.day)).size, 3);
     assert.ok(Object.keys(opened.campaign.rivalPledges).length === 2, 'both rivals should publish a promise');
     const firstNeed = opened.campaign.events[0].need;

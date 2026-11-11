@@ -125,12 +125,16 @@ const EVENT_COPY = {
     wonder: {
         title: 'Lanterns in the Void',
         blurb: 'The sky fills with festival lights. Something strange and green is the whole argument.'
+    },
+    purpose: {
+        title: 'The Empty Bench',
+        blurb: 'The workshops stand quiet while everyone celebrates. Work worth doing is the whole argument.'
     }
 };
 
 function buildEvents(startedDay, dayLimit, seed) {
     const days = Math.max(1, dayLimit - startedDay + 1);
-    const order = new SeededRandom((seed || 1) + 9173).shuffle(['sustenance', 'rest', 'company', 'wonder']);
+    const order = new SeededRandom((seed || 1) + 9173).shuffle(['sustenance', 'rest', 'company', 'wonder', 'purpose']);
     const events = [];
     for (let index = 0; index < Math.min(3, days); index++) {
         const first = order[(index * 2) % order.length];
