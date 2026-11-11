@@ -170,25 +170,30 @@ export class ServiceCardModal {
             : service.closed
                 ? `Closed after an upkeep shortfall. Reopening costs ${this.game?.charter?.services.reopenCost(service) || 1} lumen.`
                 : 'The door is open. The day report will tell you who came through it.';
+        const housing = service.programId === 'housing';
+        const floorPlans = (service.floorPlans || []).map((id) => FLOOR_PLAN_BY_ID[id]).filter(Boolean);
+        const upperSeats = floorPlans.reduce((sum, plan) => sum + (housing ? (plan.housingCapacity || 0) : (plan.serviceCapacity || 0)), 0);
         const floorRows = [
-            { label: 'Ground', name: program?.name || 'Service', detail: `${program?.capacity || service.capacity} seats` },
+            { label: 'Ground', name: program?.name || 'Service', detail: `${Math.max(0, service.capacity - upperSeats)} ${housing ? 'beds' : 'seats'}` },
             ...(service.floorPlans || []).map((id, index) => {
                 const plan = FLOOR_PLAN_BY_ID[id];
-                const seats = service.programId === 'housing' ? (plan?.housingCapacity || 0) : (plan?.serviceCapacity || 0);
+                const seats = housing ? (plan?.housingCapacity || 0) : (plan?.serviceCapacity || 0);
                 return {
                     label: index === 0 ? 'First floor' : 'Second floor',
                     name: plan?.name || id,
-                    detail: seats ? `+${seats} ${service.programId === 'housing' ? 'beds' : 'seats'} · +${(plan?.quality || 0).toFixed(2)} quality` : `no new seats · +${(plan?.quality || 0).toFixed(2)} quality`
+                    detail: seats ? `+${seats} ${housing ? 'beds' : 'seats'} · +${(plan?.quality || 0).toFixed(2)} quality` : `no new seats · +${(plan?.quality || 0).toFixed(2)} quality`
                 };
             })
         ];
         this.interiorEl.innerHTML = `<span class="kicker">The interior</span>${floorRows.map((row) => `<div class="service-interior__floor"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.detail)}</small></div>`).join('')}`;
         const regulars = (this.game?.charter?.activeResidents || [])
-            .filter((resident) => resident.memory?.lastChoice?.serviceId === service.id)
+            .filter((resident) => housing
+                ? resident.homeServiceId === service.id
+                : resident.memory?.lastChoice?.serviceId === service.id)
             .slice(0, 4);
         this.regularsEl.hidden = regulars.length === 0;
         this.regularsEl.innerHTML = regulars.length
-            ? `<span class="kicker">Last seen here</span>${regulars.map((resident) => `<button type="button" class="service-regulars__person" data-resident-id="${escapeHtml(resident.id)}">${escapeHtml(resident.name)}</button>`).join('')}`
+            ? `<span class="kicker">${housing ? 'Residents here' : 'Last seen here'}</span>${regulars.map((resident) => `<button type="button" class="service-regulars__person" data-resident-id="${escapeHtml(resident.id)}">${escapeHtml(resident.name)}</button>`).join('')}`
             : '';
         this.regularsEl.querySelectorAll('[data-resident-id]').forEach((button) => {
             button.addEventListener('click', () => this.onOpenResident?.(button.dataset.residentId));
