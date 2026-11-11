@@ -26,6 +26,8 @@ export default async function ({ page, assert, screenshot }) {
     assert.equal(staff.work, setup.id);
     const upkeep = await page.evaluate(`window.__falesc.app.charter.services.upkeepFor(window.__falesc.app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(setup.id)}))`);
     assert.equal(upkeep, 1);
+    const capacity = await page.evaluate(`window.__falesc.app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(setup.id)}).totalCapacity`);
+    assert.equal(capacity, 5);
     const saved = await page.evaluate(`window.__falesc.app.saveManager.read().charter.services.find((entry) => entry.id === ${JSON.stringify(setup.id)}).staffId`);
     assert.equal(saved, setup.resident);
     await page.pause(300);

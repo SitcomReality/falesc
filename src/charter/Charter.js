@@ -728,7 +728,7 @@ export class Charter {
                 average: residents.length ? total / residents.length : 0,
                 urgent,
                 services: services.length,
-                capacity: services.reduce((sum, service) => sum + service.capacity, 0)
+                capacity: services.reduce((sum, service) => sum + service.totalCapacity, 0)
             };
         });
     }

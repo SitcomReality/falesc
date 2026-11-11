@@ -144,7 +144,7 @@ export class DaySimulator {
 
             for (const entry of scored) {
                 const load = loads.get(`${entry.service.id}:${phase.id}`) || 0;
-                if (load >= entry.service.capacity + BALANCE.services.maxQueue) {
+                if (load >= entry.service.totalCapacity + BALANCE.services.maxQueue) {
                     blockedByQueue = blockedByQueue || { ...entry, need };
                     continue;
                 }
@@ -204,7 +204,7 @@ export class DaySimulator {
         const proximity = Math.max(0.55, 1.15 - distance * 0.035);
         const loadKey = `${service.id}:${phase.id}`;
         const load = this.phaseLoad.get(loadKey) || 0;
-        const availability = load < service.capacity ? 1 : BALANCE.services.queuePenalty;
+        const availability = load < service.totalCapacity ? 1 : BALANCE.services.queuePenalty;
         const familiarity = 1 + Math.min(this.residentVisits(resident, service.id), 4) * 0.012;
         const chapterBond = 1 + Math.min(resident.getAffinity(service.chapterId), 5) * 0.02;
         const campaignAppeal = this.charter.campaign?.appealFor?.(service.chapterId, this.charter.day) || 1;
@@ -278,7 +278,7 @@ export class DaySimulator {
         let useDuration = Math.max(0.9, service.program.duration || 1);
         // People enter in capacity-sized batches. The first batch walks straight
         // in; later arrivals visibly wait outside until a place turns over.
-        const capacity = Math.max(1, service.capacity);
+        const capacity = Math.max(1, service.totalCapacity);
         const batch = Math.floor(queueIndex / capacity);
         const withinBatch = queueIndex % capacity;
         let queueWait = batch * Math.max(1, useDuration * 0.9) + withinBatch * 0.08;
@@ -392,7 +392,7 @@ export class DaySimulator {
         if (temperament === 'cosy' && service.program.vibe === 'cosy') fragments.push('it is cosy');
         else if (temperament === 'social' && service.program.vibe === 'efficient') fragments.push('it is busy in a good way');
         else if (temperament === 'curious' && service.program.vibe === 'curious') fragments.push('it is strange and green');
-        const waiting = queueIndex >= (service.capacity || 1) ? queueIndex - (service.capacity || 1) + 1 : 0;
+        const waiting = queueIndex >= (service.totalCapacity || 1) ? queueIndex - (service.totalCapacity || 1) + 1 : 0;
         if (waiting === 0) fragments.push('there was no queue');
         else if (waiting === 1) fragments.push('the queue was short');
         else fragments.push('I did not mind the wait');

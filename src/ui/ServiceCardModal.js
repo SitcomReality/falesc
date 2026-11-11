@@ -168,7 +168,7 @@ export class ServiceCardModal {
         this.statsEl.innerHTML = `
             <span><strong>${working ? 'Working' : service.closed ? 'Closed' : 'Under construction'}</strong></span>
             <span>${escapeHtml(service.chapterName || 'Home Chapter')}</span>
-            <span>${service.capacity} capacity</span>
+            <span>${service.totalCapacity} capacity</span>
             <span>${shared ? 'shared · purse-funded' : service.chapterId !== 'player' ? 'rival budget' : `${upkeep} upkeep / day`}</span>
         `;
         this.blurbEl.textContent = program?.blurb || '';
@@ -202,7 +202,7 @@ export class ServiceCardModal {
         const floorPlans = (service.floorPlans || []).map((id) => FLOOR_PLAN_BY_ID[id]).filter(Boolean);
         const upperSeats = floorPlans.reduce((sum, plan) => sum + (housing ? (plan.housingCapacity || 0) : (plan.serviceCapacity || 0)), 0);
         const floorRows = [
-            { label: 'Ground', name: program?.name || 'Service', detail: `${Math.max(0, service.capacity - upperSeats)} ${housing ? 'beds' : 'seats'}` },
+            { label: 'Ground', name: program?.name || 'Service', detail: `${Math.max(0, service.totalCapacity - upperSeats)} ${housing ? 'beds' : 'seats'}` },
             ...(service.floorPlans || []).map((id, index) => {
                 const plan = FLOOR_PLAN_BY_ID[id];
                 const seats = housing ? (plan?.housingCapacity || 0) : (plan?.serviceCapacity || 0);

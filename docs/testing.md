@@ -212,7 +212,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `housing-bed-move.mjs` | Adds a Dormer, opens the interior, moves a resident up and back down. |
 | `housing-floor-save.mjs` | Saves and reloads a charter and checks bedroom floor assignments survive. |
 | `housing-interior.mjs` | Opens the Welcome Post interior and checks six residents are assigned to its ground-floor beds. |
-| `service-staff.mjs` | Staffs a Canteen, checks the saved staff link and that the worker's Purpose falls after a day. |
+| `service-staff.mjs` | Staffs a Canteen, checks its extra seat, saved staff link, lower upkeep and the worker's Purpose after a day. |
 | `service-interior.mjs` | Builds a Canteen, opens its record, steps inside and checks the room and return path. |
 | `service-roster-all.mjs` | Starts a Contest, checks one player row, switches to All chapters and sees all six services including rivals and the Beacon. |
 | `service-roster.mjs` | Wears the Welcome Post, opens the roster, repairs it from its row and opens the Canteen record. |

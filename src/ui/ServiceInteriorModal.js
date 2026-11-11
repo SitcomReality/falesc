@@ -58,6 +58,7 @@ export class ServiceInteriorModal {
         this.container.style.display = 'none';
         this.container.setAttribute('aria-hidden', 'true');
         this.overlays.close(this);
+        this.game?.serviceCard?.show?.(this.service);
     }
 
     moveHouse(residentId) {
@@ -87,7 +88,7 @@ export class ServiceInteriorModal {
         const program = service.program;
         const housing = program?.need === 'rest' && program?.id === 'housing';
         const floors = [
-            { label: 'Ground', plan: null, seats: Math.max(0, service.capacity - (service.floorPlans || []).reduce((sum, id) => sum + (housing ? (FLOOR_PLAN_BY_ID[id]?.housingCapacity || 0) : (FLOOR_PLAN_BY_ID[id]?.serviceCapacity || 0)), 0)) },
+            { label: 'Ground', plan: null, seats: Math.max(0, service.totalCapacity - (service.floorPlans || []).reduce((sum, id) => sum + (housing ? (FLOOR_PLAN_BY_ID[id]?.housingCapacity || 0) : (FLOOR_PLAN_BY_ID[id]?.serviceCapacity || 0)), 0)) },
             ...(service.floorPlans || []).map((id, index) => {
                 const plan = FLOOR_PLAN_BY_ID[id];
                 return {

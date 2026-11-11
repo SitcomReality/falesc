@@ -108,6 +108,10 @@ export class ServiceBuilding {
         return programNeed(this.program);
     }
 
+    get totalCapacity() {
+        return this.capacity + (this.staffId ? 1 : 0);
+    }
+
     get capacityUsed() {
         return this.occupants.length;
     }
