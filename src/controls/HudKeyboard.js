@@ -10,6 +10,13 @@ export function installHudKeyboard(game, screen) {
         if (event.defaultPrevented) return;
         if (event.ctrlKey || event.metaKey || event.altKey) return;
         if (game.screenStateMachine.state !== 'PLAYING') return;
+        if (game.photoMode) {
+            if (event.key === 'Escape' || event.key === 'v' || event.key === 'V') {
+                event.preventDefault();
+                game.togglePhotoMode();
+            }
+            return;
+        }
         if (game.hasBlockingModal?.()) return;
         if (screen.pausePanel && !screen.pausePanel.hidden && event.key !== 'Escape') return;
         if (game.keyboardCursorActive) {

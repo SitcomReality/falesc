@@ -13,6 +13,12 @@ budget, two works per day, and a cast of people with needs. The First Light
 charter is won by reaching **12 housed residents and a flourishing of 62** by the day
 limit.
 
+## Photo mode
+
+The pause menu's **Photo mode** hides the HUD and planning chrome so the islands
+can be viewed cleanly. **Exit photo** or **Esc** returns to planning; it does not
+pause or alter the day.
+
 ## Display preferences
 
 The charter menu has **Motion: full / reduced**. Reduced motion is saved in
@@ -321,6 +327,12 @@ The pause menu's **Residents** opens a scannable roster: name, temperament,
 highest current need, wellbeing and a red crisis row. Clicking a row opens the
 full resident card. Trial guests are listed separately and do not yet count as
 active residents.
+
+## Photo mode
+
+The pause menu's **Photo mode** hides the HUD and planning chrome so the islands
+can be viewed cleanly. **Exit photo** or **Esc** returns to planning; it does not
+pause or alter the day.
 
 ## Display preferences
 

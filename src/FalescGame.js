@@ -852,6 +852,15 @@ export class FalescGame {
         return true;
     }
 
+    togglePhotoMode() {
+        if (this.screenStateMachine.state !== GamePhase.PLAYING || this.hasBlockingModal()) return false;
+        this.photoMode = !this.photoMode;
+        document.body.classList.toggle('is-photo-mode', this.photoMode);
+        this.gameScreen?.setPhotoMode?.(this.photoMode);
+        if (this.photoMode) this.gameScreen?._setPauseOpen?.(false);
+        return this.photoMode;
+    }
+
     togglePlaybackPause() {
         if (this.screenStateMachine.state !== GamePhase.DAY || !this.playback) return false;
         this.playbackPaused = !this.playbackPaused;
@@ -1007,6 +1016,11 @@ export class FalescGame {
 
     onPhaseChanged(phase, previous) {
         if (phase === GamePhase.MENU) this.setWorldVisible(false);
+        if (phase !== GamePhase.PLAYING && this.photoMode) {
+            this.photoMode = false;
+            document.body.classList.remove('is-photo-mode');
+            this.gameScreen?.setPhotoMode?.(false);
+        }
         if (previous === GamePhase.DAY && phase !== GamePhase.DAY) {
             this.crowd.resetToPlanningPositions();
         }

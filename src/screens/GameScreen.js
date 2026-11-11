@@ -84,6 +84,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="sound-toggle" aria-pressed="false">Sound: off</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="motion-toggle" aria-pressed="false">Motion: full</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="contrast-toggle" aria-pressed="false">Contrast: normal</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="photo-mode">Photo mode</button>
                 <button type="button" class="btn btn--small btn--ghost charter-menu__abandon" data-testid="end-game">Abandon charter</button>
                 <div class="charter-menu__confirm" data-role="abandon-confirm" hidden>
                     <p>Abandon this charter? The save will be cleared.</p>
@@ -306,6 +307,7 @@ export class GameScreen {
         this.motionButton.addEventListener('click', () => this.game.toggleMotion());
         this.contrastButton = this.pausePanel.querySelector('[data-testid=contrast-toggle]');
         this.contrastButton.addEventListener('click', () => this.game.toggleContrast());
+        this.pausePanel.querySelector('[data-testid=photo-mode]').addEventListener('click', () => this.game.togglePhotoMode());
         this.abandonBtn = this.pausePanel.querySelector('[data-testid=end-game]');
         this.abandonConfirm = this.pausePanel.querySelector('[data-role=abandon-confirm]');
         this.abandonBtn.addEventListener('click', () => {
@@ -324,6 +326,19 @@ export class GameScreen {
         });
 
         this._onKey = installHudKeyboard(this.game, this);
+    }
+
+    setPhotoMode(on) {
+        if (!this.photoExit) {
+            this.photoExit = document.createElement('button');
+            this.photoExit.type = 'button';
+            this.photoExit.className = 'photo-exit';
+            this.photoExit.dataset.testid = 'photo-exit';
+            this.photoExit.textContent = 'Exit photo · Esc';
+            this.photoExit.addEventListener('click', () => this.game.togglePhotoMode());
+            document.body.appendChild(this.photoExit);
+        }
+        this.photoExit.hidden = !on;
     }
 
     announceCursor(text) {

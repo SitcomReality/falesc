@@ -5072,3 +5072,34 @@ html.is-high-contrast :focus-visible {
     color: var(--ink-soft);
     font-size: 8px;
 }
+
+/* Photo mode -------------------------------------------------------------- */
+.photo-exit {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    z-index: 60;
+    transform: translateX(-50%);
+    min-height: 44px;
+    padding: 8px 16px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+body.is-photo-mode .hud__top,
+body.is-photo-mode .objective-card,
+body.is-photo-mode .chart,
+body.is-photo-mode .hud__bottom,
+body.is-photo-mode .hud__hint,
+body.is-photo-mode .standings-card,
+body.is-photo-mode .care-watch {
+    display: none !important;
+}
