@@ -2,6 +2,7 @@ import { programIcon } from './icons.js';
 import { NEED_BY_ID } from '../design/needs.js';
 import { RETROFIT_BY_ID, RETROFIT_MIN_COST } from '../services/RetrofitModules.js';
 import { SERVICE_HOURS, SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
+import { SERVICE_VIBES, SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
 import { finishCost } from '../services/BuildingFinishes.js';
 
 /**
@@ -10,12 +11,13 @@ import { finishCost } from '../services/BuildingFinishes.js';
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, overlays, game }) {
+    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, overlays, game }) {
         this.onDemolish = onDemolish;
         this.onReopen = onReopen;
         this.onRetrofit = onRetrofit;
         this.onHours = onHours;
         this.onFloor = onFloor;
+        this.onVibe = onVibe;
         this.overlays = overlays;
         this.game = game;
         this.isOpen = false;
@@ -52,6 +54,9 @@ export class ServiceCardModal {
             <label class="service-hours" data-role="hours-wrap" hidden>Hours
                 <select data-testid="service-hours">${SERVICE_HOURS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
             </label>
+            <label class="service-hours" data-role="vibe-wrap" hidden>Atmosphere
+                <select data-testid="service-vibe">${SERVICE_VIBES.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
+            </label>
             <p class="modal__note" data-role="note"></p>
             <p class="modal__error" data-role="error" aria-live="polite"></p>
             <div class="modal__actions">
@@ -71,6 +76,8 @@ export class ServiceCardModal {
         this.factsEl = this.panel.querySelector('[data-role=facts]');
         this.hoursWrap = this.panel.querySelector('[data-role=hours-wrap]');
         this.hoursSelect = this.panel.querySelector('[data-testid=service-hours]');
+        this.vibeWrap = this.panel.querySelector('[data-role=vibe-wrap]');
+        this.vibeSelect = this.panel.querySelector('[data-testid=service-vibe]');
         this.noteEl = this.panel.querySelector('[data-role=note]');
         this.errorEl = this.panel.querySelector('[data-role=error]');
         this.demolishBtn = this.panel.querySelector('[data-testid=structure-demolish]');
@@ -93,6 +100,7 @@ export class ServiceCardModal {
         this.upgradeBtn.addEventListener('click', () => this.requestRetrofit());
         this.floorBtn.addEventListener('click', () => this.addFloor());
         this.hoursSelect.addEventListener('change', () => this.changeHours(this.hoursSelect.value));
+        this.vibeSelect.addEventListener('change', () => this.changeVibe(this.vibeSelect.value));
         this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
     }
 
@@ -165,6 +173,10 @@ export class ServiceCardModal {
         const canSetHours = !rivalService && !service.fixed && service.programId !== 'housing' && working;
         this.hoursWrap.hidden = !canSetHours;
         this.hoursSelect.value = SERVICE_HOURS_BY_ID[service.policy?.hours] ? service.policy.hours : 'as_built';
+        const canSetVibe = !rivalService && !service.fixed && working;
+        this.vibeWrap.hidden = !canSetVibe;
+        this.vibeSelect.value = SERVICE_VIBE_BY_ID[service.policy?.vibe] ? service.policy.vibe : (program?.vibe || 'cosy');
+        this.vibeSelect.disabled = !canSetVibe;
         this.reopenBtn.hidden = !service.closed;
         this.reopenBtn.disabled = rivalService;
         this.reopenBtn.textContent = service.closed
@@ -198,6 +210,18 @@ export class ServiceCardModal {
         const result = this.onHours(service, hoursId);
         if (result?.ok === false) {
             this.errorEl.textContent = result.error || 'Those hours cannot be set.';
+            return;
+        }
+        this.hide();
+        this.show(service);
+    }
+
+    changeVibe(vibeId) {
+        if (!this.isOpen || !this.service) return;
+        const service = this.service;
+        const result = this.onVibe(service, vibeId);
+        if (result?.ok === false) {
+            this.errorEl.textContent = result.error || 'That atmosphere cannot be set.';
             return;
         }
         this.hide();

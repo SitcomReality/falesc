@@ -64,6 +64,7 @@ webgame_smoke --scenario scripts/scenarios/retrofit.mjs
 webgame_smoke --scenario scripts/scenarios/service-district.mjs
 webgame_smoke --scenario scripts/scenarios/service-adjacency.mjs
 webgame_smoke --scenario scripts/scenarios/service-floors.mjs
+webgame_smoke --scenario scripts/scenarios/service-vibe.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
 webgame_smoke --scenario scripts/scenarios/observatory.mjs
 webgame_smoke --scenario scripts/scenarios/amphitheatre.mjs
@@ -208,7 +209,8 @@ after any behavioural change.
   `CommonsBallot.js`). One second reading can amend it after a full day. An open player service can hold up to two retrofit
   modules (6–7 lumen each) from Sunroom, Atelier and Night Kitchen. The
   service record owns the action and the module is saved. Open services can also
-  choose As built, Round the clock, Daylight or Evening hours. The eight buildable
+  choose As built, Round the clock, Daylight or Evening hours, plus a free
+  Cosy/Lively/Curious/Efficient atmosphere. The eight buildable
   services include the 2×2 Bathhouse for Rest + Company, the 2×2 Clinic for
   Rest + Sustenance, the 2×2 Amphitheatre for Company + Wonder and the 2×2
   Observatory for Wonder at night. A build chooses a

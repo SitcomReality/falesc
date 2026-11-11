@@ -22,7 +22,7 @@ Severity is about impact on the slice, not effort:
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Home, commons and garden isles are buildable; shared works, purse and capital exist, but no fuller archipelago |
-| 3 | Medium | Floors are stacked blocks, not full floor plans; districts are named clusters, not shaped neighbourhoods |
+| 3 | Medium | Floors are stacked blocks, districts are named clusters; no access policy or full loadout |
 | 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
@@ -114,8 +114,8 @@ proof of cross-island transit and shared ownership.
 - Extra floors add capacity and upkeep and draw a stacked upper storey above
   the building, but it is a single service volume rather than a full floor plan
   with interiors, stairs or separate uses. Connected services form a named
-  district with a small quality bonus, but there is no shaped neighbourhood,
-  adjacency resonance or access policy or full loadout.
+  district with a small quality bonus, and service atmosphere is player-set, but
+  there is no shaped neighbourhood, access policy or full loadout.
 - Footprints are `1×1` except the Garden Dome's `2×2`; entrance validation is a
   single free door cell, not multi-cell entrance/queue design.
 - The service record can dismantle, reopen and hold two retrofit modules, but
@@ -408,6 +408,7 @@ These are no longer open:
 - **Neighbouring services.** Each distinct neighbour adds quality, with an extra bonus for mixed chapters. Covered by `service-adjacency.mjs`.
 - **Service floors.** An open, player-built service can add up to two floors for capacity and upkeep; the stacked upper storey is visible and saved. Covered by `service-floors.mjs`.
 - **Building finishes.** A build chooses Humble, Comfortable or Grand; the shell changes cost, capacity, upkeep and the resident standard fit and is saved. Covered by `building-finishes.mjs`.
+- **Service atmosphere.** Working player services can choose Cosy, Lively, Curious or Efficient for free, changing temperament fit without cost. Covered by `service-vibe.mjs`.
 - **Service hours.** Open services can choose As built, Round the clock, Daylight or Evening; the choice changes open phases, quality and upkeep and is saved.
 - **Service retrofit.** An active player service can install up to two of Sunroom, Atelier and Night Kitchen; each module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
 - **Garden isle.** A third buildable Contest shard with player-owned services, reached through the home shuttle pad. Covered by `garden-isle.mjs`.

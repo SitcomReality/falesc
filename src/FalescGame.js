@@ -90,6 +90,7 @@ export class FalescGame {
             onRetrofit: (service) => this.openRetrofit(service),
             onHours: (service, hoursId) => this.setServiceHours(service, hoursId),
             onFloor: (service) => this.addFloor(service),
+            onVibe: (service, vibeId) => this.setServiceVibe(service, vibeId),
             overlays: this.overlays
         });
         this.visitorCard = new VisitorCardModal({
@@ -689,6 +690,16 @@ export class FalescGame {
         this.gameScreen.updateHud(true);
         this.saveGame();
         this.gameScreen.toast(`${service.name} rises to ${service.floors} floors.`, 'mint', 2200);
+        return result;
+    }
+
+    setServiceVibe(service, vibeId) {
+        if (!this.charter) return { ok: false, error: 'No charter.' };
+        const result = this.charter.setServiceVibe(service, vibeId);
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast(`${service.name} feels more ${vibeId}.`, 'mint', 1800);
         return result;
     }
 

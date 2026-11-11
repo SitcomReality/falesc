@@ -149,6 +149,12 @@ its service record:
 Changing hours is immediate, saved with the service, and changes both the visit
 window and the ledger. Fixed housing and rival services keep their own hours.
 
+Open player services also choose an **Atmosphere** — **Cosy**, **Lively**,
+**Curious** or **Efficient**. It costs nothing and changes how well each
+resident temperament fits the room: cosy residents prefer cosy, social residents
+prefer lively, curious residents prefer curious, and an efficient room suits a
+rushed day. The atmosphere is saved with the service.
+
 ## The outer commons isle
 
 In the Contest, one second, smaller island is marked as the **outer commons

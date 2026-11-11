@@ -5,6 +5,7 @@ import { ResidentFactory } from '../residents/ResidentFactory.js';
 import { VisitorFactory } from '../residents/VisitorFactory.js';
 import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
 import { SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
+import { SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
 import { finishFor, finishCost } from '../services/BuildingFinishes.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService, removeCommonsPolicyFromService } from '../commons/CommonsPolicies.js';
 import { nominateForRival, petitionFor, resolveCommonsBallot } from '../commons/CommonsBallot.js';
@@ -772,6 +773,21 @@ export class Charter {
         this.assignHomes();
         this.refreshDerived();
         return { ...result, cost, funded };
+    }
+
+    setServiceVibe(service, vibeId) {
+        if (!service || (service.chapterId && service.chapterId !== 'player')) {
+            return { ok: false, error: "A rival chapter's atmosphere cannot be changed." };
+        }
+        if (service.fixed) return { ok: false, error: 'The Welcome Post keeps its own atmosphere.' };
+        if (service.state !== 'ACTIVE' || service.closed) {
+            return { ok: false, error: 'Only an open service can change atmosphere.' };
+        }
+        if (!SERVICE_VIBE_BY_ID[vibeId]) return { ok: false, error: 'Unknown service atmosphere.' };
+        service.policy = { ...(service.policy || {}), vibe: vibeId };
+        service.refreshGraphics();
+        this.refreshDerived();
+        return { ok: true, service, vibe: vibeId };
     }
 
     setServiceHours(service, hoursId) {
