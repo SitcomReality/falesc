@@ -47,7 +47,8 @@ so any static file server works, but ES modules require `http://`, not `file://`
   **The Contest** (two AI rivals on the same shard). First Light gives you six
   Tidelanders, a fixed six-bed Welcome Post, 10 lumen and two works. The Contest
   gives each of the three chapters three residents, a four-bed Welcome House,
-  15 lumen and two works (rivals get one build work per day). The Canteen is
+  15 lumen and two works (rivals get one build work per day). Contest chapters
+  also receive a civic dividend of 1 lumen per resident per day. The Canteen is
   armed in both.
 - Read the morning bulletin. Arm a service with `1`–`4` (or click a dock card),
   then click a free plot on the home shard and name the place.
@@ -96,6 +97,7 @@ webgame_smoke --scenario scripts/scenarios/contest.mjs
 webgame_smoke --scenario scripts/scenarios/contest-recovery.mjs
 webgame_smoke --scenario scripts/scenarios/confluence-defeat.mjs
 webgame_smoke --scenario scripts/scenarios/campaign.mjs
+webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```
 

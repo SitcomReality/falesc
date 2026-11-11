@@ -48,6 +48,9 @@ Severity is about impact on the slice, not effort:
 - Early victory now closes the charter as soon as the goals are met, so the
   surplus does not accumulate across fourteen days — but the first four days
   still do not force a sacrifice.
+- The full 14-day `contest-season.mjs` probe reaches the Confluence with the
+  player on 11 services and an 11–4–0 vote split; the player can still coast on
+  the early lead while the Host sits on a large unspent lumen reserve.
 - `BALANCE` centralises the numbers, but there is no tuning pass against a
   target difficulty curve, and some values (`devotion.decayTowardNeutral`,
   `devotion.maxAffinity`/`minAffinity`) are declared without being read.
@@ -335,6 +338,7 @@ These are no longer open:
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
+- **Contest full-season probe.** `contest-season.mjs` plays all 14 medium days, checks the campaign and Confluence, and records the economy/population trajectory for tuning.
 - **Contest economy, campaign and Confluence preview.** Two rival chapters, shared services/residents, rival housing/economy/closures, recovery and need-pressure builds, Devotion standings, the patronage-flow overlay, a three-day campaign with a festival programme and rival promises, a pledge/vote Confluence finale and a post-vote stewardship epilogue are implemented and covered by `contest.mjs`, `contest-recovery.mjs`, `campaign.mjs` and `confluence-defeat.mjs`.
 - **Safer destructive actions.** Abandoning a charter is a two-step confirmation
   and the save is cleared only after the confirmation.

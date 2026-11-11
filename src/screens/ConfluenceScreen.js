@@ -29,12 +29,12 @@ export class ConfluenceScreen {
         const lockedPledge = campaign?.playerPledge ? PLEDGE_BY_ID[campaign.playerPledge] : null;
         const selectedPledgeId = lockedPledge?.id || PLEDGES[0].id;
         const festivalEvents = campaign
-            ? (campaign.events || []).map((event) => `<li><span class="confluence-standing__dot" style="background:var(--sun)"></span><span>Day ${event.day}</span><strong>${escapeHtml(event.title)}</strong></li>`).join('')
+            ? (campaign.events || []).map((event) => `<li class="confluence-standing"><span class="confluence-standing__dot" style="background:var(--sun)"></span><span>Day ${event.day}</span><strong>${escapeHtml(event.title)}</strong></li>`).join('')
             : '';
         const rivalPromises = campaign
             ? charter.rivals.map((rival) => {
                 const pledge = campaign.pledgeFor(rival.id);
-                return `<li><span class="confluence-standing__dot" style="background:${rival.colour}"></span><span>${escapeHtml(rival.name)}</span><strong>${escapeHtml(pledge?.name || 'No promise')}</strong></li>`;
+                return `<li class="confluence-standing"><span class="confluence-standing__dot" style="background:${rival.colour}"></span><span>${escapeHtml(rival.name)}</span><strong>${escapeHtml(pledge?.name || 'No promise')}</strong></li>`;
             }).join('')
             : '';
         const rows = standings.map((chapter) => `

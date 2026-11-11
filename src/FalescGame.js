@@ -758,6 +758,7 @@ export class FalescGame {
                         heartsGained: report.heartsGained,
                         heartsLost: report.heartsLost,
                         contributions: report.contributions,
+                        dividend: report.dividend || 0,
                         upkeep: report.upkeep,
                         net: report.net,
                         lumenAfter: report.lumenAfter,

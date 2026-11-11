@@ -46,6 +46,7 @@ webgame_smoke --scenario scripts/scenarios/contest.mjs
 webgame_smoke --scenario scripts/scenarios/contest-recovery.mjs
 webgame_smoke --scenario scripts/scenarios/confluence-defeat.mjs
 webgame_smoke --scenario scripts/scenarios/campaign.mjs
+webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 ```
 
 The CLI equivalents and the full scenario list are in
@@ -139,7 +140,8 @@ after any behavioural change.
 - First Light starts with **6 of 15 residents**, **10 lumen**, **2 works/day**,
   and a fixed six-bed **Welcome Post**. The Contest starts with **9 residents**
   (three per chapter), **15 lumen** per chapter, and a four-bed Welcome House per
-  chapter. Services cost 4–6 lumen and one work, and take one day to open
+  chapter. Contest chapters also receive a **1 lumen per resident per day civic
+  dividend**. Services cost 4–6 lumen and one work, and take one day to open
   (`PENDING → ACTIVE`). Only `ACTIVE`, open services accept visits and pay
   upkeep.
 - Lumen comes from resident wellbeing, not harvest tiles. Upkeep is paid at the
@@ -152,7 +154,11 @@ after any behavioural change.
   Change the version and document the reset when the schema changes; never
   half-load an old save.
 - Placement occupancy is shared across player and rival chapters. Do not give a
-  chapter its own private occupancy map or services will overlap.
+  chapter its own private occupancy map or services will overlap. Contest
+  arrivals go to the least-crowded chapter with room before Devotion breaks a
+  tie; do not make arrivals pile onto the leader.
+- The Contest home grid is deliberately larger (7×7 small, 8×8 medium, 9×9
+  large) so three chapters can build for a full season.
 - Rival chapters pay construction costs and upkeep, receive contributions from
   their own residents, own fixed Welcome Houses, reopen services lost to
   shortfalls, and choose builds by need pressure plus doctrine. The last three

@@ -470,15 +470,17 @@ export class Charter {
         if (waiting.length === 0) return [];
         const devotion = this.devotionByChapter;
         const candidates = this.chapters
-            .map((chapter) => ({
-                chapter,
-                spare: chapter.services.spareHousing(
-                    this.activeResidents.filter((resident) => resident.homeChapterId === chapter.id)
-                ),
-                devotion: devotion[chapter.id] || 0
-            }))
+            .map((chapter) => {
+                const residents = this.activeResidents.filter((resident) => resident.homeChapterId === chapter.id);
+                return {
+                    chapter,
+                    residents: residents.length,
+                    spare: chapter.services.spareHousing(residents),
+                    devotion: devotion[chapter.id] || 0
+                };
+            })
             .filter((entry) => entry.spare > 0)
-            .sort((a, b) => b.devotion - a.devotion || b.spare - a.spare);
+            .sort((a, b) => a.residents - b.residents || b.devotion - a.devotion || b.spare - a.spare);
         if (candidates.length === 0) return [];
         const capacity = candidates.reduce((sum, entry) => sum + entry.spare, 0);
         const count = Math.min(BALANCE.arrivals.perDay, capacity, waiting.length);
@@ -492,6 +494,7 @@ export class Charter {
             resident.homeChapterId = target.chapter.id;
             target.chapter.services.assignHome(resident, this.roster);
             target.spare -= 1;
+            target.residents += 1;
             arrivals.push({
                 id: resident.id,
                 name: resident.name,

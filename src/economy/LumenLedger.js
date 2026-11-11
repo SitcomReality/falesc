@@ -18,12 +18,18 @@ export class LumenLedger {
         return charter.activeResidents.filter((resident) => resident.homeChapterId === chapter.id);
     }
 
-    static projectedContributionsFor(chapter, residents) {
-        return residents.reduce((sum, resident) => sum + LumenLedger.contributionFor(resident), 0);
+    static dividendFor(residents, perResident = 0) {
+        return residents.length * perResident;
+    }
+
+    static projectedContributionsFor(chapter, residents, dividendPerResident = 0) {
+        return residents.reduce((sum, resident) => sum + LumenLedger.contributionFor(resident), 0)
+            + LumenLedger.dividendFor(residents, dividendPerResident);
     }
 
     static projectedContributions(charter) {
-        return LumenLedger.projectedContributionsFor(charter.player, charter.playerResidents);
+        const dividend = charter.contest ? BALANCE.contest.civicDividend : 0;
+        return LumenLedger.projectedContributionsFor(charter.player, charter.playerResidents, dividend);
     }
 
     static projectedUpkeepFor(chapter) {
@@ -34,21 +40,23 @@ export class LumenLedger {
         return LumenLedger.projectedUpkeepFor(charter.player);
     }
 
-    static projectedNetFor(chapter, residents) {
-        return LumenLedger.projectedContributionsFor(chapter, residents) - LumenLedger.projectedUpkeepFor(chapter);
+    static projectedNetFor(chapter, residents, dividendPerResident = 0) {
+        return LumenLedger.projectedContributionsFor(chapter, residents, dividendPerResident) - LumenLedger.projectedUpkeepFor(chapter);
     }
 
     static projectedNet(charter) {
-        return LumenLedger.projectedNetFor(charter.player, charter.playerResidents);
+        const dividend = charter.contest ? BALANCE.contest.civicDividend : 0;
+        return LumenLedger.projectedNetFor(charter.player, charter.playerResidents, dividend);
     }
 
     /**
      * Resolve one chapter's day. Mutates its lumen and service closures. The
      * player gets the same rules as a rival, including housing protection.
      */
-    static resolveChapter(chapter, residents) {
+    static resolveChapter(chapter, residents, dividendPerResident = 0) {
         const services = chapter.services;
-        const contributions = LumenLedger.projectedContributionsFor(chapter, residents);
+        const dividend = LumenLedger.dividendFor(residents, dividendPerResident);
+        const contributions = LumenLedger.projectedContributionsFor(chapter, residents, dividendPerResident);
         const upkeepBefore = LumenLedger.projectedUpkeepFor(chapter);
         let lumen = chapter.lumen + contributions - upkeepBefore;
         const closures = [];
@@ -83,6 +91,7 @@ export class LumenLedger {
             chapterName: chapter.name,
             isPlayer: Boolean(chapter.isPlayer),
             residents: residents.length,
+            dividend,
             contributions,
             upkeep: upkeepAfter,
             upkeepBefore,
@@ -93,13 +102,15 @@ export class LumenLedger {
     }
 
     static resolveDay(charter, report) {
+        const dividend = charter.contest ? BALANCE.contest.civicDividend : 0;
         const summaries = charter.chapters.map((chapter) => {
             const residents = LumenLedger.residentsFor(chapter, charter);
-            return LumenLedger.resolveChapter(chapter, residents);
+            return LumenLedger.resolveChapter(chapter, residents, dividend);
         });
         const player = summaries.find((entry) => entry.isPlayer) || summaries[0];
 
         report.contributions = player.contributions;
+        report.dividend = player.dividend || 0;
         report.upkeep = player.upkeep;
         report.upkeepBefore = player.upkeepBefore;
         report.net = player.net;
@@ -115,7 +126,7 @@ export class LumenLedger {
         }))).map((entry) => {
             const economy = summaries.find((summary) => summary.chapterId === entry.id);
             return economy
-                ? { ...entry, contributions: economy.contributions, upkeep: economy.upkeep, net: economy.net, lumen: economy.lumen, residents: economy.residents, closures: economy.closures }
+                ? { ...entry, contributions: economy.contributions, dividend: economy.dividend, upkeep: economy.upkeep, net: economy.net, lumen: economy.lumen, residents: economy.residents, closures: economy.closures }
                 : entry;
         });
         return { summaries, player };

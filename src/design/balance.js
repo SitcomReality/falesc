@@ -10,6 +10,7 @@ export const BALANCE = {
     },
     contest: {
         startingLumen: 15,
+        civicDividend: 1,
         rivalWorksPerDay: 1,
         startingResidentsPerChapter: 3
     },

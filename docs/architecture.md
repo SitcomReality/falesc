@@ -280,8 +280,9 @@ map, so their footprints and doors cannot overlap.
 Contest starts with nine active residents, three per chapter. Each has a
 `homeChapterId`; housing is a chapter service with four beds. `Charter.assignHomes()`
 tries the resident's chapter first and then any chapter with a spare bed.
-`Charter.addArrivals()` prefers the most-beloved chapter with room, so a rival
-that builds housing can grow its own population. In the last three days
+`Charter.addArrivals()` gives new residents to the least-crowded chapter with
+room, breaking ties by Devotion, so a rival that builds housing can grow its own
+population without arrivals piling onto the leader. In the last three days
 `Charter.startCampaign()` creates a `Campaign`: it shuffles a three-day festival
 programme from the four needs, then each rival publishes a doctrine/need-pressure
 promise (also weighted by the programme), and `CampaignModal` lets the player
@@ -505,6 +506,7 @@ contributionFor(resident) = 2 if wellbeing ≥ 65
                             1 if wellbeing ≥ 35
                             0 otherwise
 projectedContributions = sum(active residents in the chapter)
+                        + civic dividend (Contest: 1 per resident/day)
 projectedUpkeep        = sum(active, open services' program upkeep)
 projectedNet           = contributions − upkeep
 ```
@@ -594,9 +596,9 @@ minerals from a seeded RNG.
 
 | Size | Sector grids | Minerals |
 | --- | --- | --- |
-| `small` | 1 × `5×5` + 3 × `2×2` | 46 |
-| `medium` | 1 × `5×5` + 2 × `3×3` + 3 × `2×2` | 64 |
-| `large` | 1 × `6×6` + 2 × `3×3` + 4 × `2×2` | 82 |
+| `small` | 1 × `7×7` + 3 × `2×2` | 46 |
+| `medium` | 1 × `8×8` + 2 × `3×3` + 3 × `2×2` | 64 |
+| `large` | 1 × `9×9` + 2 × `3×3` + 4 × `2×2` | 82 |
 
 Minerals spawn outside the build grid on random islands. Their rocks/crystals
 use per-item seeded variation. The home shard is the only buildable sector.

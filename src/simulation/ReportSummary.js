@@ -18,6 +18,7 @@ export function summarizeReport(report) {
         population: report.population,
         housingCapacity: report.housingCapacity,
         contributions: report.contributions,
+        dividend: report.dividend || 0,
         upkeep: report.upkeep,
         net: report.net,
         lumenAfter: report.lumenAfter,
