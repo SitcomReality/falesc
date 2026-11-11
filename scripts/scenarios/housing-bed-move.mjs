@@ -23,6 +23,8 @@ export default async function ({ page, assert, screenshot }) {
     await page.click('[data-move-resident]');
     const moved = await page.evaluate("window.__falesc.app.charter.activeResidents.filter((resident) => resident.homeFloor === 1).length");
     assert.equal(moved, 1);
+    const saved = await page.evaluate("window.__falesc.app.saveManager.read().charter.residents.filter((resident) => resident.homeFloor === 1).length");
+    assert.equal(saved, 1);
     const upper = await page.evaluate("document.querySelectorAll('.interior-room')[1].querySelectorAll('.interior-room__move').length");
     assert.equal(upper, 2);
     await page.click('[data-move-direction=down]:not([disabled])');

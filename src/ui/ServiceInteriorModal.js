@@ -69,6 +69,7 @@ export class ServiceInteriorModal {
         if (target.occupants.length >= target.seats) return;
         resident.homeFloor = floor;
         this.render();
+        this.game.saveGame?.();
     }
 
     render() {
