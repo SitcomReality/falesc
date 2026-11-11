@@ -20,7 +20,7 @@ export const RIVAL_DEFINITIONS = [
         colour: '#FF4F9A',
         doctrine: 'company',
         blurb: 'Builds tables, lamps and noise. Runs short of garden.',
-        programs: ['tea_house', 'canteen', 'garden_dome', 'housing'],
+        programs: ['tea_house', 'canteen', 'garden_dome', 'workshop', 'housing'],
         works: 1
     }
 ];
@@ -101,6 +101,7 @@ export function planRivalDay(rival, charter) {
 
     choosePlan(rival, charter);
     const planned = rival.plan ? PROGRAM_BY_ID[rival.plan.programId] : null;
+    if (planned && !findFreePlot(rival, planned.id)) rival.plan = null;
     if (planned && rival.lumen < planned.cost) return null;
     if (planned && countProgram(rival, rival.plan.programId) >= programLimit(rival.plan.programId)) rival.plan = null;
     const pressure = needPressure(charter);
@@ -167,7 +168,8 @@ function choosePlan(rival, charter) {
             return { programId, program, score: (pressure[program.need] || 0) + doctrineBias + housingBias, index };
         })
         .filter(Boolean)
-        .sort((a, b) => b.score - a.score || a.index - b.index);
+        .sort((a, b) => b.score - a.score || a.index - b.index)
+        .filter((candidate) => Boolean(findFreePlot(rival, candidate.programId)));
     const next = candidates[0];
     if (!next) {
         rival.plan = null;
