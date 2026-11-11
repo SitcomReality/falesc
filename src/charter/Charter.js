@@ -5,6 +5,7 @@ import { ResidentFactory } from '../residents/ResidentFactory.js';
 import { VisitorFactory } from '../residents/VisitorFactory.js';
 import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
 import { SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
+import { finishFor, finishCost } from '../services/BuildingFinishes.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService, removeCommonsPolicyFromService } from '../commons/CommonsPolicies.js';
 import { nominateForRival, petitionFor, resolveCommonsBallot } from '../commons/CommonsBallot.js';
 import { ServiceManager } from '../services/ServiceManager.js';
@@ -638,20 +639,23 @@ export class Charter {
         this.devotion = this.playerDevotion;
     }
 
-    canBuild(programId) {
+    canBuild(programId, finish = 'comfortable') {
         const program = PROGRAM_BY_ID[programId];
         if (!program || !program.buildable) return { ok: false, reason: 'That program is not available in this charter.' };
         if (this.works <= 0) return { ok: false, reason: 'No works left today. Open the day to reset them.' };
-        if (this.lumen < program.cost) {
-            return { ok: false, reason: `Need ${program.cost - this.lumen} more lumen.` };
+        const cost = finishCost(program, finish);
+        if (this.lumen < cost) {
+            return { ok: false, reason: `Need ${cost - this.lumen} more lumen.` };
         }
         return { ok: true };
     }
 
-    build({ programId, sectorId, u, v, name }) {
-        const affordable = this.canBuild(programId);
+    build({ programId, sectorId, u, v, name, finish = 'comfortable' }) {
+        const affordable = this.canBuild(programId, finish);
         if (!affordable.ok) return affordable;
         const program = PROGRAM_BY_ID[programId];
+        const finishOption = finishFor(finish);
+        const cost = finishCost(program, finish);
         const resolvedName = !name || name === programId ? program.name : name;
         const sector = this.map.sectors.find((entry) => entry.id === sectorId);
         const shared = Boolean(sector?.commons && this.commonsManager);
@@ -662,19 +666,22 @@ export class Charter {
             u,
             v,
             name: resolvedName,
-            state: 'PENDING'
+            state: 'PENDING',
+            finish: finishOption.id
         });
         if (!result.ok) return result;
         if (shared) result.service.builderChapterId = 'player';
+        result.service.capacity = Math.max(1, result.service.capacity + finishOption.capacityDelta);
+        result.service.upkeepBonus = (result.service.upkeepBonus || 0) + finishOption.upkeepDelta;
         if (!shared && this.legacyBonus?.programs.includes(programId)) {
             result.service.capacity += this.legacyBonus.amount;
         }
-        this.lumen -= program.cost;
+        this.lumen -= cost;
         this.works -= 1;
         applyCommonsPolicyToService(result.service, this.commons?.policy);
         this.assignHomes();
         this.refreshDerived();
-        return { ...result, cost: program.cost };
+        return { ...result, cost };
     }
 
     setServiceHours(service, hoursId) {
@@ -727,7 +734,7 @@ export class Charter {
             return { ok: false, reason: "A rival chapter's service cannot be dismantled." };
         }
         if (service.fixed) return { ok: false, reason: 'The Welcome Post cannot be dismantled.' };
-        const cost = service.program?.cost || 0;
+        const cost = finishCost(service.program, service.finish);
         const refund = Math.max(1, Math.floor(cost / 2));
         const removed = this.services.remove(service);
         if (!removed) return { ok: false, reason: 'That service could not be dismantled.' };

@@ -24,7 +24,7 @@ recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
 a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
 a fundable shared Commons Beacon that becomes a six-seat all-needs civic service,
 transient day visitors who pay for service visits, and a one-step service retrofit. The full multi-round festival, auctions, deeper legacy effects, deeper rival
-strategy, layers and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
+strategy, floors and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
 ## Start here
@@ -58,6 +58,7 @@ webgame_smoke --scenario scripts/scenarios/commons-purse.mjs
 webgame_smoke --scenario scripts/scenarios/retrofit.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
 webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
+webgame_smoke --scenario scripts/scenarios/building-finishes.mjs
 webgame_smoke --scenario scripts/scenarios/commons-isle.mjs
 ```
 
@@ -195,7 +196,8 @@ after any behavioural change.
   lumen; Sunroom, Atelier or Night Kitchen trade seats, quality and upkeep. The
   service record owns the action and the module is saved. Open services can also
   choose As built, Round the clock, Daylight or Evening hours. The five buildable
-  services include the 2×2 Bathhouse for Rest + Company. In Contest, a second
+  services include the 2×2 Bathhouse for Rest + Company. A build chooses a
+  Humble, Comfortable or Grand shell finish. In Contest, a second
   commons isle is buildable and residents reach it through reserved shuttle gates.
   This is a first pass; a fuller archipelago, a larger multi-round festival,
   auctions, shared capital budgeting and deeper legacy effects are still

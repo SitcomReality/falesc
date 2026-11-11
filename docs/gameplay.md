@@ -241,6 +241,15 @@ checks the footprint, occupancy,
 and that a free door cell exists on the service edge. The door cell is reserved:
 you cannot build on it, and clicking it opens the service record.
 
+The build dialog chooses a **finish** before breaking ground:
+
+- **Humble** — 1 lumen cheaper, one seat fewer, 0.9 quality.
+- **Comfortable** — the program as drawn.
+- **Grand** — 2 lumen dearer, one seat more, +1 upkeep, 1.1 quality.
+
+The finish is saved, shown in the service record, and read by residents'
+standards trait.
+
 Hovering the grid shows a mint diamond and a ghost of the armed service when the
 plot is legal, coral when it is not. Clicking a legal plot opens the build
 dialog, where you can name the place and **Break ground**. The dialog traps

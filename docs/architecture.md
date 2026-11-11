@@ -97,6 +97,7 @@ src/
     ServiceManager.js        placement, occupancy, housing, promotion, visits
     RetrofitModules.js       Sunroom, Atelier and Night Kitchen retrofit data
     ServicePolicies.js       player-set hours, quality and upkeep modifiers
+    BuildingFinishes.js     Humble / Comfortable / Grand shell trade-offs
     PlacementPolicy.js       pure footprint/door/home-shard rules
   simulation/
     DaySimulator.js          deterministic day: drift, choice, queues, report

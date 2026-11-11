@@ -2,6 +2,7 @@ import { programIcon } from './icons.js';
 import { NEED_BY_ID } from '../design/needs.js';
 import { RETROFIT_BY_ID, RETROFIT_MIN_COST } from '../services/RetrofitModules.js';
 import { SERVICE_HOURS, SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
+import { finishCost } from '../services/BuildingFinishes.js';
 
 /**
  * Service record: the same card is used for inspection, reopening a closed
@@ -118,6 +119,7 @@ export class ServiceCardModal {
             <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}${secondary ? ` · ${secondary.glyph} ${secondary.name}` : ''}</dd></div>
             <div><dt>Visits</dt><dd>${service.visits}</dd></div>
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
+            <div><dt>Finish</dt><dd>${escapeHtml(service.finish || 'comfortable')}</dd></div>
             <div><dt>Condition</dt><dd>${service.level >= 2 ? `Retrofitted · ${escapeHtml(RETROFIT_BY_ID[service.retrofitId]?.name || 'custom finish')}` : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
             <div><dt>Hours</dt><dd>${escapeHtml(SERVICE_HOURS_BY_ID[service.policy?.hours]?.name || 'As built')}</dd></div>
             <div><dt>Door</dt><dd>${service.entrance ? `cell ${service.entrance.u}, ${service.entrance.v}` : '—'}</dd></div>
@@ -133,7 +135,7 @@ export class ServiceCardModal {
                 : 'The door is open. The day report will tell you who came through it.';
         this.errorEl.textContent = '';
         const rivalService = service.chapterId && service.chapterId !== 'player';
-        const refund = Math.max(1, Math.floor((program?.cost || 0) / 2));
+        const refund = Math.max(1, Math.floor(finishCost(program, service.finish) / 2));
         this.demolishBtn.textContent = shared
             ? 'Shared service'
             : rivalService

@@ -76,7 +76,7 @@ export class FalescGame {
         this.overlays = new OverlayManager({ inputManager: this.world.input });
 
         this.buildModal = new BuildModal({
-            onBuild: (name) => this.finalizeBuild(name),
+            onBuild: (name, finish) => this.finalizeBuild(name, finish),
             onCancel: () => { this.pendingBuildLocation = null; },
             overlays: this.overlays
         });
@@ -627,7 +627,7 @@ export class FalescGame {
         this.buildModal.show(program, { lumen: this.charter.lumen, works: this.charter.works });
     }
 
-    finalizeBuild(name) {
+    finalizeBuild(name, finish = 'comfortable') {
         const charter = this.charter;
         if (!charter || !this.pendingBuildLocation) return { ok: false, error: 'Choose a free plot first.' };
         if (this.screenStateMachine.state !== GamePhase.PLAYING) return { ok: false, error: 'The day has already begun.' };
@@ -636,7 +636,8 @@ export class FalescGame {
             sectorId: this.pendingBuildLocation.sectorId,
             u: this.pendingBuildLocation.u,
             v: this.pendingBuildLocation.v,
-            name
+            name,
+            finish
         });
         if (!result.ok) return result;
         this.pendingBuildLocation = null;

@@ -117,6 +117,7 @@ webgame_smoke --scenario scripts/scenarios/commons-purse.mjs
 webgame_smoke --scenario scripts/scenarios/retrofit.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
 webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
+webgame_smoke --scenario scripts/scenarios/building-finishes.mjs
 webgame_smoke --scenario scripts/scenarios/commons-isle.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```

@@ -3922,3 +3922,49 @@ body.has-modal > canvas {
 .commons-purse strong {
     color: var(--ink);
 }
+
+/* Building finishes ------------------------------------------------------ */
+
+.finish-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin: 4px 0 12px;
+}
+
+.finish-option {
+    display: grid;
+    gap: 2px;
+    padding: 8px;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--paper-deep);
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+}
+
+.finish-option strong {
+    font-family: var(--display);
+    font-size: 15px;
+}
+
+.finish-option span {
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.finish-option.is-selected {
+    background: var(--mint);
+    box-shadow: var(--shadow-sm);
+    transform: translate(-1px, -1px);
+}
+
+@media (max-width: 560px) {
+    .finish-options {
+        grid-template-columns: 1fr;
+    }
+}
