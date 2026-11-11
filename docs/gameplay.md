@@ -755,3 +755,6 @@ half-loaded.
 
 Each service card carries a small count of how many of that program the
 player has already built.
+
+
+The charter archive also summarises the best population and flourishing across recorded runs.

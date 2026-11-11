@@ -352,7 +352,7 @@ body > canvas {
 }
 
 .btn:focus-visible {
-    outline: 3px solid var(--mint);
+    outline: 3px solid var(--wine);
     outline-offset: 3px;
 }
 
@@ -664,7 +664,7 @@ body > canvas {
 }
 
 .input:focus-visible {
-    outline: 3px solid var(--mint);
+    outline: 3px solid var(--wine);
     outline-offset: 2px;
 }
 
@@ -747,7 +747,7 @@ body > canvas {
 }
 
 .size-card:has(input:focus-visible) {
-    outline: 3px solid var(--mint);
+    outline: 3px solid var(--wine);
     outline-offset: 2px;
 }
 
@@ -1071,7 +1071,7 @@ body > canvas {
 }
 
 .hud__menu:focus-visible {
-    outline: 3px solid var(--mint);
+    outline: 3px solid var(--wine);
     outline-offset: 3px;
 }
 
@@ -1288,7 +1288,7 @@ body > canvas {
 }
 
 .blueprint:focus-visible {
-    outline: 3px solid var(--mint);
+    outline: 3px solid var(--wine);
     outline-offset: 2px;
 }
 
@@ -1512,7 +1512,7 @@ body > canvas {
 }
 
 .modal__close:focus-visible {
-    outline: 3px solid var(--mint);
+    outline: 3px solid var(--wine);
     outline-offset: 2px;
 }
 
@@ -1590,7 +1590,7 @@ body > canvas {
 }
 
 .modal__input:focus-visible {
-    outline: 3px solid var(--mint);
+    outline: 3px solid var(--wine);
     outline-offset: 2px;
 }
 
@@ -2721,7 +2721,7 @@ body.has-modal > canvas {
 }
 
 #minimap:focus-visible {
-    outline: 3px solid var(--mint);
+    outline: 3px solid var(--wine);
     outline-offset: 3px;
 }
 
@@ -4487,8 +4487,8 @@ html.is-reduced-motion *::after {
 .standings-row[data-chapter-id]:hover,
 .standings-row[data-chapter-id]:focus-visible {
     background: rgba(255, 211, 110, 0.2);
-    outline: 1.5px solid rgba(33, 18, 37, 0.35);
-    outline-offset: -1.5px;
+    outline: 3px solid var(--wine);
+    outline-offset: 2px;
 }
 
 /* Care watch -------------------------------------------------------------- */
@@ -5275,4 +5275,16 @@ body.is-photo-mode .care-watch {
     font-family: var(--display);
     font-size: 13px;
     color: var(--wine);
+}
+
+.charter-archive__best {
+    margin: 0 0 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--wine);
+    letter-spacing: 0.02em;
+}
+
+.charter-archive__best strong {
+    color: var(--ink);
 }
