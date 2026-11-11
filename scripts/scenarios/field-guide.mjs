@@ -12,7 +12,8 @@ export default async function ({ page, assert, screenshot }) {
     assert.ok(menuText.includes('How a charter works'));
     assert.ok(menuText.includes('Observatory'));
     assert.ok(menuText.includes('Visitors first'));
-    assert.ok(menuText.includes('1–8'));
+    assert.ok(menuText.includes('1–9'));
+    assert.ok(menuText.includes('Care and repair'));
     await page.pause(300);
     await screenshot('field-guide-menu.png');
     await page.click('[data-testid=field-guide-done]');

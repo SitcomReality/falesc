@@ -81,12 +81,20 @@ export class FieldGuideModal {
                     <p>In the Contest, the shared <strong>Commons Beacon</strong> costs 20 lumen from every chapter. Once lit it seats six for every need. The Commons Assembly can pass one policy after a petition, nominations and a ballot; one second reading can amend it after a full day.</p>
                 </section>
                 <section>
+                    <h4>Care and repair</h4>
+                    <p>One resident asks for one need each planning day; meeting it earns affinity. The objective card flags residents in crisis. Working services wear with visits; a repair costs 3 lumen. Charmed visitors may return or recommend a friend.</p>
+                </section>
+                <section>
+                    <h4>Display</h4>
+                    <p>The pause menu offers <strong>Motion</strong> and <strong>Contrast</strong>; both persist and follow your operating-system preference on a first visit.</p>
+                </section>
+                <section>
                     <h4>The Contest</h4>
                     <p>Three chapters share one roster. Residents choose doors by fit, distance and queue. The last three days are a <strong>festival</strong> with two bells per day; the player can sponsor one extra bell for 5 lumen. At the day limit the Confluence votes on the promises and care record. Visitors arrive each day, pay for visits and may return or be invited to a trial stay.</p>
                 </section>
                 <section>
                     <h4>Controls</h4>
-                    <p><strong>WASD / arrows</strong> pan · <strong>wheel</strong> zoom · <strong>1–8</strong> select a service · <strong>R</strong> rotate · <strong>Enter</strong> place · <strong>Esc</strong> cancel · <strong>Space</strong> open the day.</p>
+                    <p><strong>WASD / arrows</strong> pan · <strong>wheel</strong> zoom · <strong>1–9</strong> select a service · <strong>C</strong> build cursor · <strong>arrows</strong> move it · <strong>G</strong> switch isle · <strong>Enter</strong> open the build dialog · <strong>E</strong> open the day · <strong>B</strong> bulletin · <strong>R</strong> residents · <strong>P</strong> patronage · <strong>Esc</strong> pause.</p>
                 </section>
             </div>
             <div class="modal__actions">
