@@ -87,6 +87,14 @@ export const ICONS = {
         <path d="M30 47v-9M36 47v-7" stroke="#59E3C2" stroke-width="2"/>
         <rect x="27" y="41" width="10" height="7" fill="#FFD36E" stroke="${INK}" stroke-width="1.5"/>
     `),
+    bathhouse: svg(`
+        <path d="M6 49h52" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M12 47V30c0-9 9-16 20-16s20 7 20 16v17" fill="#FFF2D8" stroke="${INK}" stroke-width="2.5"/>
+        <path d="M9 30c3-13 11-20 23-20s20 7 23 20" fill="#C9B6FF" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M17 47c0-7 7-11 15-11s15 4 15 11Z" fill="#A8F5DC" stroke="${INK}" stroke-width="2"/>
+        <path d="M24 30c-3-6 2-10 0-16M32 30c-3-6 2-10 0-16M40 30c-3-6 2-10 0-16" stroke="#59E3C2" stroke-width="2" stroke-linecap="round" opacity=".75"/>
+        <rect x="29" y="36" width="6" height="11" fill="#211225"/>
+    `),
     commons_beacon: svg(`
         <path d="M8 50h48" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
         <path d="M23 49 27 22h10l4 27Z" fill="#C9B6FF" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>

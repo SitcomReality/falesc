@@ -53,6 +53,7 @@ webgame_smoke --scenario scripts/scenarios/visitors.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 webgame_smoke --scenario scripts/scenarios/retrofit.mjs
+webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
 ```
 
 The CLI equivalents and the full scenario list are in
@@ -74,7 +75,7 @@ after any behavioural change.
 | `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |
 | `src/confluence/` | Campaign, pledges, stewardship and the deterministic Confluence vote |
 | `src/commons/` | Commons Assembly policies and shared service modifiers |
-| `src/design/` | Needs, traits, service programs, balance table, names |
+| `src/design/` | Needs, traits, five service programs, balance table, names |
 | `src/services/` | `ServiceBuilding`, `ServiceManager`, `PlacementPolicy` |
 | `src/simulation/DaySimulator.js` | Deterministic day: needs, choices, queues, visits, report |
 | `src/economy/LumenLedger.js` | Contributions from wellbeing, upkeep, closures |
@@ -183,7 +184,8 @@ after any behavioural change.
   residents vote; the winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
   `CommonsBallot.js`). An open player service can be retrofitted once for 6
   lumen; Sunroom, Atelier or Night Kitchen trade seats, quality and upkeep. The
-  service record owns the action and the module is saved.
+  service record owns the action and the module is saved. The five buildable
+  services include the 2×2 Bathhouse for Rest + Company.
   This is a first pass; a separate shared-commons island,
   a larger multi-round festival, auctions and systemic stewardship effects are
   still missing.

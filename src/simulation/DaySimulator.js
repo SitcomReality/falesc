@@ -422,7 +422,7 @@ export class DaySimulator {
             lastChoice: visitor.memory.lastChoice?.serviceName || null
         }));
         const visitorFees = Object.values(this.visitorFees).reduce((sum, value) => sum + value, 0);
-        const commons = this.charter.commons ? {
+        const commons = this.charter.contest && this.charter.commons ? {
             active: Boolean(this.charter.commons.active),
             fund: this.charter.commons.fund,
             target: this.charter.commons.target,

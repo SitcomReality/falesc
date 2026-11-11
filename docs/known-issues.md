@@ -1,7 +1,7 @@
 # Known issues and technical debt
 
 > **Context:** this is the **First Light vertical slice** — one playable home
-> shard, four needs, four services, planning/playback/report, and a solo
+> shard, four needs, five services, planning/playback/report, and a solo
 > chapter. The refined design is in [design-refinement.md](design-refinement.md)
 > and the build order in [design/roadmap.md](design/roadmap.md). Issues below
 > are current limitations of this build, not of the target design.
@@ -101,7 +101,7 @@ navigation, ownership and camera affordances.
 
 **Evidence**
 
-- The four buildable programs are fixed compositions. `ServiceBuilding` stores
+- The five buildable programs are fixed compositions. `ServiceBuilding` stores
   `finish`, `policy`, `level`, `retrofitId`, `qualityBonus` and `upkeepBonus`;
   one retrofit module changes them, and only to `grand`/level 2.
 - There are no shells, floors, multi-slot modules, adjacency resonance, district
@@ -375,7 +375,7 @@ These are no longer open:
   enter/exit playback and a one-line "why". `NPCController` and the steering
   crowd were replaced by `ResidentAgent`/`ResidentCrowd` and
   `IslandNavigator` A*.
-- **Services have doors and rules.** Four buildable programs, footprints,
+- **Services have doors and rules.** Five buildable programs, footprints,
   capacity, opening hours, upkeep, visits/hearts, construction, closure,
   reopening and a real placement policy. `PlacementPolicy` returns `{ ok, reason }`
   for UI and tests.

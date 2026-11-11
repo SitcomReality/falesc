@@ -202,7 +202,7 @@ line from a resident. From there:
 
 ## Services
 
-All four buildable services cost one work and finish overnight. The Commons
+All five buildable services cost one work and finish overnight. The Commons
 Beacon is endgame art and data, not a buildable program.
 
 | Program | Serves | Cost | Upkeep/day | Capacity | Hours | Footprint |

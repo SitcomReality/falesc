@@ -1259,7 +1259,7 @@ body > canvas {
 
 .blueprints {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 7px;
 }
 
@@ -1418,7 +1418,17 @@ body > canvas {
     .objective-card__name { font-size: 15px; margin: 3px 0 5px; }
     .objective-card__foot { display: none; }
     .hud__bottom { left: 10px; right: 10px; bottom: 10px; }
-    .blueprints { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .blueprints {
+        display: flex;
+        gap: 7px;
+        overflow-x: auto;
+        padding-bottom: 3px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .blueprint {
+        flex: 0 0 46%;
+    }
     .blueprint { min-height: 82px; }
     .hud__hint { top: 160px; bottom: auto; font-size: 12px; }
     .screen--menu { padding: 22px; align-items: flex-end; }

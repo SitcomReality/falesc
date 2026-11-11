@@ -65,6 +65,15 @@ const PROGRAMS = {
             { x: 172, y: 10 }
         ]
     },
+    bathhouse: {
+        hw: 158,
+        hh: 66,
+        guide: [
+            { x: -122, y: 8 },
+            { x: 0, y: -104 },
+            { x: 122, y: 8 }
+        ]
+    },
     commons_beacon: {
         hw: 158,
         hh: 66,
@@ -95,6 +104,9 @@ export class BuildingRenderer {
                 break;
             case 'garden_dome':
                 BuildingRenderer.drawGardenDome(graphics, state);
+                break;
+            case 'bathhouse':
+                BuildingRenderer.drawBathhouse(graphics, state);
                 break;
             case 'commons_beacon':
                 BuildingRenderer.drawCommonsBeacon(graphics, state);
@@ -1024,6 +1036,33 @@ export class BuildingRenderer {
     /* ------------------------------------------------------------------ */
     /* Garden Dome — pressurised geodesic glasshouse                       */
     /* ------------------------------------------------------------------ */
+    static drawBathhouse(graphics, state) {
+        BuildingRenderer.drawTeaHouse(graphics, state);
+        const trim = BuildingRenderer.tone(CREAM, state);
+        const water = BuildingRenderer.tone(0x9fe8ff, state);
+        const deep = BuildingRenderer.tone(0x4fb8c9, state);
+
+        // A sunken pool in front of the tea-room shell.
+        graphics.beginFill(deep, state.active ? 0.9 : 0.5);
+        graphics.lineStyle(4, INK, 1);
+        graphics.drawEllipse(0, 24, 80, 24);
+        graphics.endFill();
+        graphics.beginFill(water, state.active ? 0.75 : 0.35);
+        graphics.lineStyle(0);
+        graphics.drawEllipse(0, 22, 62, 16);
+        graphics.endFill();
+        graphics.lineStyle(2, trim, state.active ? 0.8 : 0.3);
+        graphics.drawEllipse(0, 22, 44, 10);
+
+        // Steam curls.
+        graphics.lineStyle(3, trim, state.active ? 0.7 : 0.25);
+        for (const x of [-46, -18, 22, 50]) {
+            graphics.moveTo(x, 10);
+            graphics.quadraticCurveTo(x - 8, -8, x + 2, -24);
+            graphics.quadraticCurveTo(x + 8, -38, x - 2, -50);
+        }
+    }
+
     static drawGardenDome(graphics, state) {
         const trim = BuildingRenderer.tone(CREAM, state);
         const deck = BuildingRenderer.tone(PAPER_WARM, state);
