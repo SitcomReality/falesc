@@ -202,6 +202,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `housing-residents.mjs` | Opens the Welcome Post record, checks Residents here, a six-bed ground floor and opens a resident. |
 | `service-rename.mjs` | Renames a Canteen to The Long Table, checks the title and confirms the name saves. |
 | `service-roster-repair-all.mjs` | Wears a service, opens the roster and repairs all from its footer. |
+| `service-roster-worn.mjs` | Builds a Canteen, wears the Welcome Post, filters to Worn only and back to all services. |
 | `service-roster-all.mjs` | Starts a Contest, checks one player row, switches to All chapters and sees all six services including rivals and the Beacon. |
 | `service-roster.mjs` | Wears the Welcome Post, opens the roster, repairs it from its row and opens the Canteen record. |
 | `service-regulars.mjs` | Visits a Canteen for a day, opens its record, checks the Last seen here names and opens a resident from the list. |

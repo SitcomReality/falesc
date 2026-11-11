@@ -340,8 +340,9 @@ pause or alter the day.
 The pause menu's **Service roster** lists every player service with state,
 capacity, visits and wear; a row opens the full service record, and worn rows
 offer a direct repair, and **Repair all** fixes every worn player service.
-**All chapters** also lists rival and shared Commons services; only player
-services can be repaired.
+**All chapters** also lists rival and shared Commons services; **Worn only**
+filters the list to services that need repair. Only player services can be
+repaired.
 
 The pause menu offers **Motion: full/reduced** and **Contrast: normal/high**.
 High contrast strengthens ink and paper, doubles key panel borders and keeps the
