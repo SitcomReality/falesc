@@ -22,6 +22,14 @@ export const COMMONS_POLICIES = [
         capacity: 2
     },
     {
+        id: 'care_compact',
+        name: 'Care Compact',
+        kicker: 'Care is infrastructure',
+        detail: 'Clinics and Bathhouses gain 2 seats. Looking after each other is not a private luxury.',
+        programs: ['clinic', 'bathhouse'],
+        capacity: 2
+    },
+    {
         id: 'commons_garden',
         name: 'Commons Garden',
         kicker: 'Beauty is infrastructure',

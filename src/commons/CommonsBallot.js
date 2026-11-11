@@ -66,6 +66,8 @@ function residentPolicyScore(resident, policyId) {
             return needs.sustenance * 0.55 + needs.company * 0.55 + (temperament === 'social' ? 10 : 0);
         case 'open_beds':
             return needs.rest * 0.5 + (resident.isHomeless ? 20 : 0) + (temperament === 'cosy' ? 6 : 0);
+        case 'care_compact':
+            return needs.rest * 0.3 + needs.sustenance * 0.3 + (resident.wellbeing < 40 ? 20 : 0) + (temperament === 'cosy' ? 4 : 0);
         case 'commons_garden':
             return needs.wonder * 0.75 + (temperament === 'curious' ? 10 : 0);
         case 'night_watch':

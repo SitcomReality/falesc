@@ -287,6 +287,8 @@ policy of their own:
 
 - The player picks the Home Chapter's nomination from four policies.
 - The Gardener nominates **Commons Garden**; the Host nominates **Shared Table**.
+- The fifth policy, **Care Compact**, gives Clinics and Bathhouses two more seats;
+  residents can put it on the ballot by petition.
 - The top petition policy joins the finalists even if no chapter nominated it.
 - Every resident then votes among the finalists; the policy with the most votes
   becomes the Assembly policy. The player does not cast a resident vote, only
