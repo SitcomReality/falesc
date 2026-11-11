@@ -560,6 +560,9 @@ The report is the day's story as a broadsheet:
 
 ## Victory and defeat
 
+The charter record now also shows **peak residents**, **peak flourishing** and
+**total visits** across the run, alongside days, final population and stewardship.
+
 - **First Light victory:** at the end of any day, the chapter has at least **12
   housed residents** and a **Flourishing of 62 or more**. The charter closes
   successfully immediately; the day limit is the deadline, not a survival timer.

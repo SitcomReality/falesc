@@ -1658,6 +1658,10 @@ export class Charter {
     }
 
     stats() {
+        const history = this.history || [];
+        const peakPopulation = Math.max(this.population, ...history.map((entry) => entry.population || 0));
+        const peakFlourishing = Math.max(Math.round(this.flourishing), ...history.map((entry) => entry.flourishing || 0));
+        const totalVisits = history.reduce((sum, entry) => sum + (entry.visits || 0), 0);
         return {
             day: this.day,
             dayLimit: this.dayLimit,
@@ -1668,6 +1672,9 @@ export class Charter {
             works: this.works,
             devotion: this.devotion,
             flourishing: this.flourishing,
+            peakPopulation,
+            peakFlourishing,
+            totalVisits,
             services: this.services.services.length,
             activeServices: this.services.activeServices.length,
             mode: this.mode,

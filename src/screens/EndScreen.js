@@ -34,6 +34,9 @@ export class EndScreen {
                 <p class="kicker">The chapter</p>
                 <dl class="end__stats">
                     <div class="end__stat"><dt>Days weathered</dt><dd data-role="days">1</dd></div>
+                    <div class="end__stat"><dt>Peak residents</dt><dd data-role="peak-population">0</dd></div>
+                    <div class="end__stat"><dt>Peak flourishing</dt><dd data-role="peak-flourishing">0</dd></div>
+                    <div class="end__stat"><dt>Total visits</dt><dd data-role="total-visits">0</dd></div>
                     <div class="end__stat"><dt>Residents</dt><dd data-role="population">0</dd></div>
                     <div class="end__stat"><dt>Devotion</dt><dd data-role="devotion">0</dd></div>
                     <div class="end__stat"><dt>Flourishing</dt><dd data-role="flourishing">0</dd></div>
@@ -54,6 +57,9 @@ export class EndScreen {
         this.copyEl = main.querySelector('[data-role=copy]');
         this.quoteEl = main.querySelector('[data-role=quote]');
         this.daysEl = aside.querySelector('[data-role=days]');
+        this.peakPopulationEl = aside.querySelector('[data-role=peak-population]');
+        this.peakFlourishingEl = aside.querySelector('[data-role=peak-flourishing]');
+        this.totalVisitsEl = aside.querySelector('[data-role=total-visits]');
         this.populationEl = aside.querySelector('[data-role=population]');
         this.devotionEl = aside.querySelector('[data-role=devotion]');
         this.flourishingEl = aside.querySelector('[data-role=flourishing]');
@@ -100,6 +106,9 @@ export class EndScreen {
         const quote = charter?.lastReport?.quotes?.[0];
         this.quoteEl.textContent = quote ? `“${quote.text}” — ${quote.resident}` : '“Somebody put the kettle on.” — the square';
         this.daysEl.textContent = String(stats.day || charter?.day || 1);
+        this.peakPopulationEl.textContent = String(stats.peakPopulation ?? stats.population ?? 0);
+        this.peakFlourishingEl.textContent = String(stats.peakFlourishing ?? Math.round(stats.flourishing ?? 0));
+        this.totalVisitsEl.textContent = String(stats.totalVisits ?? 0);
         this.populationEl.textContent = String(stats.population ?? charter?.population ?? 0);
         this.devotionEl.textContent = (stats.devotion ?? charter?.devotion ?? 0).toFixed(1);
         this.flourishingEl.textContent = String(Math.round(stats.flourishing ?? charter?.flourishing ?? 0));

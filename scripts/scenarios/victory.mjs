@@ -78,5 +78,8 @@ export default async function ({ page, assert, screenshot, log }) {
     assert.equal(final.ending?.outcome, 'victory', 'the First Light run should reach twelve residents and flourishing');
     assert.ok(await page.visible('[data-testid=end-screen]'));
     assert.ok((await page.text('[data-testid=end-screen] [data-role=title]')).length > 0);
+    const record = await page.text('[data-testid=end-screen]');
+    assert.ok(record.includes('Peak residents'));
+    assert.ok(record.includes('Total visits'));
     await screenshot('victory.png');
 }
