@@ -62,6 +62,24 @@
       "message": "expected seeded world with 15 characters, minerals, one build action, and the starting economy"
     },
     {
+      "name": "arm Tide Garden with the keyboard",
+      "press": "Digit2"
+    },
+    {
+      "name": "keyboard shorthand arms the blueprint",
+      "assert": "window.__falesc.snapshot().selectedBlueprint === 'tide_garden'",
+      "message": "Digit2 should arm Tide Garden"
+    },
+    {
+      "name": "re-arm Prism Rig with the keyboard",
+      "press": "Digit1"
+    },
+    {
+      "name": "keyboard shorthand restores Prism Rig",
+      "assert": "window.__falesc.snapshot().selectedBlueprint === 'prism_rig'",
+      "message": "Digit1 should arm Prism Rig"
+    },
+    {
       "name": "playing screenshot",
       "screenshot": "playing.png"
     },

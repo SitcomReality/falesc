@@ -108,6 +108,7 @@ export class GameScreen {
             button.dataset.blueprint = blueprint.id;
             button.dataset.testid = blueprint.testid;
             button.setAttribute('aria-pressed', 'false');
+            button.setAttribute('aria-keyshortcuts', String(BLUEPRINTS.indexOf(blueprint) + 1));
             button.title = `${blueprint.name} — ${blueprint.blurb}`;
             button.innerHTML = `
                 <span class="blueprint__icon" aria-hidden="true">${blueprintIcon(blueprint.id)}</span>
@@ -127,6 +128,7 @@ export class GameScreen {
         }
 
         const endTurnBtn = dock.querySelector('[data-testid=end-turn]');
+        endTurnBtn.setAttribute('aria-keyshortcuts', 'E');
         endTurnBtn.addEventListener('click', () => this.gsm.endTurn());
 
         bottom.append(chartSlot, dock);
@@ -177,6 +179,33 @@ export class GameScreen {
         this._toastTimer = null;
         this.actionsNote = dock.querySelector('[data-role=actions-note]');
         this.dock = dock;
+
+        // Number keys arm a blueprint; E ends the tide; Escape opens/closes the
+        // charter menu. These shortcuts are inert while a text dialog is open.
+        this._onShortcut = (event) => {
+            if (event.ctrlKey || event.metaKey || event.altKey) return;
+            if (this.gsm.state !== 'PLAYING' || this.game.buildModal.isOpen) return;
+            if (this.pausePanel && !this.pausePanel.hidden && event.key !== 'Escape') return;
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                this.pausePanel.hidden ? this.menuButton.click() : this._setPauseOpen(false);
+                return;
+            }
+            if (event.key === 'e' || event.key === 'E') {
+                event.preventDefault();
+                this.gsm.endTurn();
+                return;
+            }
+            const slot = Number(event.key);
+            if (Number.isInteger(slot) && slot >= 1 && slot <= BLUEPRINTS.length) {
+                const blueprint = BLUEPRINTS[slot - 1];
+                event.preventDefault();
+                if (this.game.selectBlueprint(blueprint.id)) {
+                    this.toast(`${blueprint.name} armed — click a free plot.`, 'mint', 1600);
+                }
+            }
+        };
+        document.addEventListener('keydown', this._onShortcut);
     }
 
     show() {

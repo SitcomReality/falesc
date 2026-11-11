@@ -231,6 +231,9 @@ chart with a compass rose. Back is a quiet text action.
 - **Build dialog:** cream paper card, blueprint icon and name, cost/yield,
   editable structure name, Reserve / Cancel. Escape cancels, Enter reserves,
   focus is trapped, and the HUD behind is inert.
+- **Placement:** hovering a grid cell shows a mint (valid) or coral (blocked)
+  diamond and a ghost of the armed blueprint. Number keys arm blueprints; `E`
+  ends the tide; Escape opens the charter menu.
 - **Interstitial:** “The tide turns” with day number, income, and construction
   progress over a wave motif. Short, skippable after the first read.
 

@@ -15,6 +15,7 @@ export class BuildModal {
         this.isOpen = false;
         this.lastFocused = null;
         this.blueprint = null;
+        this.inertHud = null;
 
         this.container = document.createElement('div');
         this.container.className = 'modal-scrim';
@@ -113,6 +114,11 @@ export class BuildModal {
         this.container.setAttribute('aria-hidden', 'false');
         document.body.classList.add('has-modal');
 
+        // Keep assistive technology inside the dialog. The scrim blocks the
+        // pointer, but `inert` also removes the HUD from the tab/reading order.
+        this.inertHud = document.querySelector('[data-testid=game-hud]');
+        if (this.inertHud) this.inertHud.setAttribute('inert', '');
+
         if (this.inputManager && typeof this.inputManager.setModalOpen === 'function') {
             this.inputManager.setModalOpen(true);
         }
@@ -175,6 +181,10 @@ export class BuildModal {
         this.container.classList.remove('is-open');
         this.container.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('has-modal');
+        if (this.inertHud) {
+            this.inertHud.removeAttribute('inert');
+            this.inertHud = null;
+        }
 
         if (this.inputManager && typeof this.inputManager.setModalOpen === 'function') {
             this.inputManager.setModalOpen(false);

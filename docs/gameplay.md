@@ -14,10 +14,13 @@ before the last tide.
 | One-finger drag (touch) | Pan |
 | Two-finger pinch (touch) | Zoom and pan |
 | Click a blueprint card | Arm that structure |
+| `1` `2` `3` `4` | Arm Prism Rig / Tide Garden / Lantern House / Aurora Beacon |
+| `E` | End the current tide |
 | Primary click/tap on an empty grid cell | Open the build dialog for the armed blueprint |
 | `Enter` in the build dialog | Reserve the plot |
 | `Escape` in the build dialog | Cancel |
 | `Enter` / `Escape` in the charter menu | Resume / close |
+| `Escape` while playing | Open/close the charter menu |
 | End Turn button | Resolve the tide |
 | Charter menu (☰) → Abandon charter | End the run |
 
