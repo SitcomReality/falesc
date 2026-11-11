@@ -70,5 +70,4 @@ camera clamping, turn cancellation, determinism, and mobile layout. See
 
 Playable prototype with a complete build/turn/economy loop, victory and defeat,
 local autosave, seeded procedural world, and a hand-built HUD. Not yet present:
-audio, demolition/upgrades, multiplayer, and a fully accessible keyboard build
-cursor. See [docs/known-issues.md](docs/known-issues.md).
+audio, upgrades, multiplayer, and a fully accessible keyboard build cursor. See [docs/known-issues.md](docs/known-issues.md).

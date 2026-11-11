@@ -15,7 +15,7 @@ Severity is about impact on the prototype, not effort:
 
 | # | Severity | Issue |
 | --- | --- | --- |
-| 1 | Medium | Building placement policy is still thin, and there is no demolition or upgrade path |
+| 1 | Medium | Building placement policy is still thin, and there is no upgrade path |
 | 2 | Medium | Screens are permanent and the HUD is not fully inert/accessible behind the build dialog |
 | 3 | Medium | Keyboard placement and small-screen interaction are incomplete |
 | 4 | Medium | NPC navigation is steering-only and can stall on awkward shorelines |
@@ -27,7 +27,7 @@ Severity is about impact on the prototype, not effort:
 
 ## Open issues
 
-### 1. Building placement policy and demolition
+### 1. Building placement policy and upgrades
 
 **Evidence**
 
