@@ -4955,3 +4955,22 @@ html.is-reduced-motion *::after {
 .service-card .modal__actions .btn {
     width: 100%;
 }
+
+/* High contrast ----------------------------------------------------------- */
+html.is-high-contrast {
+    --ink: #07030a;
+    --ink-soft: #2a0e2c;
+    --paper: #fffdf2;
+    --paper-warm: #fff8e4;
+    --paper-deep: #f2e3c4;
+    --border: 2px solid var(--ink);
+}
+
+html.is-high-contrast .paper,
+html.is-high-contrast .modal,
+html.is-high-contrast .objective-card,
+html.is-high-contrast .standings-card,
+html.is-high-contrast .charter-menu,
+html.is-high-contrast .build-dock {
+    border-width: 2px;
+}

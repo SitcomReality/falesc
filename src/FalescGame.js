@@ -35,6 +35,7 @@ import { GridSummaryModal } from './ui/GridSummaryModal.js';
 import { recordCharter, recordFromCharter } from './persistence/CharterArchive.js';
 import { recordMilestones } from './persistence/MilestoneArchive.js';
 import { readMotion, writeMotion, applyMotion } from './settings/MotionPreference.js';
+import { readContrast, writeContrast, applyContrast } from './settings/ContrastPreference.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
 import { CommonsModal } from './ui/CommonsModal.js';
@@ -63,6 +64,8 @@ export class FalescGame {
     constructor() {
         this.motion = readMotion();
         applyMotion(this.motion);
+        this.contrast = readContrast();
+        applyContrast(this.contrast);
         this.settings = {
             mapSeed: Math.floor(Math.random() * 1000000),
             mapSize: 'medium',
@@ -814,6 +817,14 @@ export class FalescGame {
     openResidentRoster() {
         this.residentRoster.show();
         return true;
+    }
+
+    toggleContrast() {
+        this.contrast = this.contrast === 'high' ? 'normal' : 'high';
+        writeContrast(this.contrast);
+        this.gameScreen?.updateHud?.(true);
+        this.gameScreen?.toast?.(this.contrast === 'high' ? 'High contrast on.' : 'High contrast off.', 'mint', 1800);
+        return this.contrast;
     }
 
     openMilestones() {

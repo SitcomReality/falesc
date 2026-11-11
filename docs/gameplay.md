@@ -319,6 +319,12 @@ highest current need, wellbeing and a red crisis row. Clicking a row opens the
 full resident card. Trial guests are listed separately and do not yet count as
 active residents.
 
+## Display preferences
+
+The pause menu offers **Motion: full/reduced** and **Contrast: normal/high**.
+High contrast strengthens ink and paper, doubles key panel borders and keeps the
+coral/mint identity; both preferences persist between sessions.
+
 ## Grid summary
 
 The pause menu's **Grid summary** lists every buildable cell for the home,

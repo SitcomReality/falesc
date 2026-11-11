@@ -45,6 +45,7 @@ webgame_smoke --scenario scripts/scenarios/legacy-menu.mjs
 webgame_smoke --scenario scripts/scenarios/departure-archive.mjs
 webgame_smoke --scenario scripts/scenarios/return-menu.mjs
 webgame_smoke --scenario scripts/scenarios/mobile-hud.mjs
+webgame_smoke --scenario scripts/scenarios/high-contrast.mjs
 webgame_smoke --scenario scripts/scenarios/reduced-motion.mjs
 webgame_smoke --scenario scripts/scenarios/onboarding-hints.mjs
 webgame_smoke --scenario scripts/scenarios/grid-summary.mjs
