@@ -334,6 +334,10 @@ export class FalescGame {
         this.visitorCard.hide();
     }
 
+    buildableSectors() {
+        return [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].filter(Boolean);
+    }
+
     syncViews() {
         if (!this.charter) return;
         this.crowd.sync();
@@ -586,7 +590,7 @@ export class FalescGame {
     }
 
     findGridTarget(x, y) {
-        const sectors = [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].filter(Boolean);
+        const sectors = this.buildableSectors();
         for (const sector of sectors) {
             const cell = sector.getGridCell(x, y);
             if (cell.u < 0 || cell.v < 0 || cell.u >= sector.gridSize || cell.v >= sector.gridSize) continue;
@@ -621,7 +625,7 @@ export class FalescGame {
 
     moveKeyboardCursor(dx, dy) {
         if (!this.keyboardCursorActive || !this.keyboardCursor) return false;
-        const sectors = [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].filter(Boolean);
+        const sectors = this.buildableSectors();
         const sector = sectors.find((entry) => entry.id === this.keyboardCursor.sectorId) || sectors[0];
         const program = PROGRAM_BY_ID[this.selectedProgramId];
         const maxU = Math.max(0, sector.gridSize - (program?.footprint?.w || 1));
@@ -634,7 +638,7 @@ export class FalescGame {
 
     switchKeyboardSector() {
         if (!this.keyboardCursorActive || !this.keyboardCursor) return false;
-        const sectors = [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].filter(Boolean);
+        const sectors = this.buildableSectors();
         if (sectors.length < 2) return false;
         const current = this.keyboardCursor.sectorId;
         const next = sectors.find((sector) => sector.id !== current) || sectors[0];
@@ -653,7 +657,7 @@ export class FalescGame {
             this.world.clearHover();
             return;
         }
-        const sector = [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].find((entry) => entry?.id === this.keyboardCursor.sectorId);
+        const sector = this.buildableSectors().find((entry) => entry?.id === this.keyboardCursor.sectorId);
         if (!sector) {
             this.clearKeyboardCursor();
             return;
@@ -671,7 +675,7 @@ export class FalescGame {
 
     confirmKeyboardCursor() {
         if (!this.keyboardCursorActive || !this.keyboardCursor || !this.charter) return false;
-        const sector = [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].find((entry) => entry?.id === this.keyboardCursor.sectorId);
+        const sector = this.buildableSectors().find((entry) => entry?.id === this.keyboardCursor.sectorId);
         if (!sector) return false;
         const u = this.keyboardCursor.u;
         const v = this.keyboardCursor.v;

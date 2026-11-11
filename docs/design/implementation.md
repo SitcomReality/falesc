@@ -91,7 +91,6 @@ save style favour data over class hierarchies.
 | `NPCController` | `ResidentBrain` + `ResidentAgent` |
 | `CrowdManager` | `ResidentManager` (registration, update order, LOD) |
 | `resolveTide()` | `DaySimulator.resolve()` |
-| `GameScreen.updateTurnDisplay()` | HUD with Devotion, Flourishing, population |
 | `StructureModal` | Building card with retrofit and policy |
 | `SaveManager` | v2 schema with chapters/residents/layers |
 | `SectorGraphics` | Void island art + vacuum props; garden art moves to buildings |

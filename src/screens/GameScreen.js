@@ -551,7 +551,4 @@ export class GameScreen {
         this._cache.force = force;
     }
 
-    updateTurnDisplay(force = false) {
-        this.updateHud(force);
-    }
 }
