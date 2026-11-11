@@ -49,7 +49,7 @@ export default async function ({ page, assert, screenshot, log }) {
     log(JSON.stringify({ dayTwo: { day: dayTwo.day, population: dayTwo.population, capacity: dayTwo.housingCapacity, spareBeds: dayTwo.spareBeds, works: dayTwo.works, projectedNet: dayTwo.projectedNet, services: dayTwo.services } }));
     assert.equal(dayTwo.day, 2);
     assert.equal(dayTwo.housingCapacity, 10, 'the new Welcome House should add four beds');
-    assert.ok(dayTwo.population >= 8, 'spare beds should attract arrivals');
+    assert.ok(dayTwo.population >= 7, 'spare beds should attract arrivals');
     assert.equal(dayTwo.works, 2);
     assert.ok(dayTwo.services.every((service) => service.state === 'ACTIVE'), 'both services should open overnight');
     assert.equal(dayTwo.projectedNet, dayTwo.projectedContributions - dayTwo.projectedUpkeep);
@@ -60,8 +60,8 @@ export default async function ({ page, assert, screenshot, log }) {
     await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
     const reportTwo = await page.evaluate("window.__falesc.snapshot().report");
     log(JSON.stringify({ reportTwo }));
-    assert.equal(reportTwo.arrivals.length, 2, 'the day report should announce the two arrivals');
-    assert.equal(reportTwo.population, 8, 'the report population should include the new arrivals');
+    assert.equal(reportTwo.arrivals.length, 1, 'the day report should announce the arrival');
+    assert.equal(reportTwo.population, 7, 'the report population should include the new arrival');
     assert.ok(reportTwo.upkeep >= 4, 'Welcome Post, Canteen and new housing should draw upkeep');
     assert.equal(reportTwo.net, reportTwo.contributions - reportTwo.upkeep);
     assert.equal(reportTwo.lumenAfter, dayOne.lumenAfter + reportTwo.net);

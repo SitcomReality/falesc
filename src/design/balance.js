@@ -91,7 +91,7 @@ export const BALANCE = {
     },
 
     arrivals: {
-        perDay: 2,
+        perDay: 1,
         minFlourishing: 20
     },
 

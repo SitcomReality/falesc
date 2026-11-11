@@ -43,13 +43,14 @@ Severity is about impact on the slice, not effort:
 **Evidence**
 
 - Six residents typically contribute 6 lumen against a 1-lumen Welcome Post
-  upkeep; the current medium victory run closes on day 4 with 24 lumen in hand.
-- Arrivals (up to two per day) and housing are usually affordable, and the
-  opening sequence can build Canteen + housing, then housing, then Garden Dome +
-  Tea House without a hard budget choice.
-- Early victory now closes the charter as soon as the goals are met, so the
-  surplus does not accumulate across fourteen days — but the first four days
-  still do not force a sacrifice.
+  upkeep; after slowing arrivals to **one per day**, the scripted medium victory
+  now closes on **day 8** before the 14-day limit.
+- Arrivals and housing remain affordable, and the opening sequence can build
+  Canteen + housing, then housing, then Garden Dome + Tea House without a hard
+  budget choice.
+- Early victory closes the charter as soon as the goals are met, so the surplus
+  does not accumulate across fourteen days — but the first week still rarely
+  forces a sacrifice.
 - The full 14-day `contest-season.mjs` probe reaches the Confluence with the
   player on 12 services and a 9–4–2 vote split; the player can still coast on
   the early lead while the Host sits on a large unspent lumen reserve. Visitor
