@@ -915,14 +915,20 @@ export class Charter {
         return { ok: true, name: cleaned };
     }
 
+    repairCost() {
+        const policy = COMMONS_POLICY_BY_ID[this.commons?.policy];
+        return Math.max(1, 3 - (policy?.repairDiscount || 0));
+    }
+
     repairAllServices() {
         let count = 0;
         let spent = 0;
         for (const service of this.services.services) {
             if (service.condition >= 100) continue;
-            if (this.lumen < 3) break;
-            this.lumen -= 3;
-            spent += 3;
+            const cost = this.repairCost();
+            if (this.lumen < cost) break;
+            this.lumen -= cost;
+            spent += cost;
             count += 1;
             service.condition = 100;
             service.refreshGraphics();
@@ -936,7 +942,7 @@ export class Charter {
             return { ok: false, error: "A rival chapter's service cannot be repaired." };
         }
         if (service.condition >= 100) return { ok: false, error: 'This service is already in good repair.' };
-        const cost = 3;
+        const cost = this.repairCost();
         if (this.lumen < cost) return { ok: false, error: `A repair costs ${cost} lumen.` };
         this.lumen -= cost;
         service.condition = 100;

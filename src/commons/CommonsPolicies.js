@@ -30,6 +30,13 @@ export const COMMONS_POLICIES = [
         capacity: 2
     },
     {
+        id: 'repair_corps',
+        name: 'Repair Corps',
+        kicker: 'Maintenance is mutual',
+        detail: 'Repairs cost 1 lumen instead of 3. The commons keeps every door working.',
+        repairDiscount: 2
+    },
+    {
         id: 'commons_garden',
         name: 'Commons Garden',
         kicker: 'Beauty is infrastructure',

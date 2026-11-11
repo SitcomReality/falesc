@@ -235,9 +235,11 @@ export class ServiceCardModal {
             : rivalService
                 ? "A rival chapter's service cannot be dismantled."
                 : service.fixed ? 'The Welcome Post is part of the charter.' : '';
+        const repairCost = this.game?.charter?.repairCost?.(service) ?? 3;
+        this.repairBtn.textContent = `Repair · ${repairCost}`;
         const canRepair = !rivalService && working && (service.condition ?? 100) < 100;
         this.repairBtn.hidden = !canRepair;
-        this.repairBtn.disabled = !canRepair || (this.game?.charter?.lumen || 0) < 3;
+        this.repairBtn.disabled = !canRepair || (this.game?.charter?.lumen || 0) < repairCost;
         const canUpgrade = !rivalService && !service.fixed && working && (service.retrofits?.length || 0) < 2;
         this.upgradeBtn.hidden = !canUpgrade;
         this.upgradeBtn.disabled = !canUpgrade || (this.game?.charter?.lumen || 0) < RETROFIT_MIN_COST;

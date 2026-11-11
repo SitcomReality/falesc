@@ -316,6 +316,7 @@ The four policies are:
 - **Commons Garden** — every Garden Dome gains 2 seats.
 - **Night Watch** — the Beacon eases one more point of every need at night, and
   beds restore one more Rest.
+- **Repair Corps** — every repair costs 1 lumen instead of 3.
 
 The winning policy applies to existing services and to every service built
 afterwards by the player or a rival. It is saved with the charter. The first

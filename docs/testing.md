@@ -214,6 +214,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `commons-annex.mjs` | Lights the Beacon, adds a capital-funded annex, checks level/capacity/capital, hides the button at two annexes and reloads. |
 | `commons-capital.mjs` | Gives 10 lumen to the shared capital budget, builds a commons canteen entirely from it, and checks the remaining capital and save/reload. |
 | `commons-purse.mjs` | Builds two shared works, checks the levy and upkeep, verifies the shared doors close together, then tops up the purse manually and reopens them. |
+| `commons-repair.mjs` | Forces the Repair Corps policy, checks the repair price is 1 lumen and that a repair restores the service. |
 | `commons-assembly.mjs` | Lights the Beacon, checks the petition, nominates Open Beds, lets residents vote, verifies the policy applies to existing and new services, then calls a second reading and checks capacity does not stack. |
 | `festival-surge.mjs` | Starts a campaign day and confirms one extra festival visitor is added to the day's arrivals. |
 | `visitor-referral.mjs` | Charms a visitor, checks the one-day referral and confirms one extra visitor arrives before the referral resets. |

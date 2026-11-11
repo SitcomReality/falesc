@@ -80,6 +80,7 @@ webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 webgame_smoke --scenario scripts/scenarios/festival-surge.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-referral.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
+webgame_smoke --scenario scripts/scenarios/commons-repair.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 webgame_smoke --scenario scripts/scenarios/commons-rival-work.mjs
 webgame_smoke --scenario scripts/scenarios/commons-rival-capital.mjs
