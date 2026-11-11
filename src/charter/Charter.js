@@ -6,6 +6,7 @@ import { VisitorFactory } from '../residents/VisitorFactory.js';
 import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
 import { SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
 import { SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
+import { SERVICE_ACCESS_BY_ID } from '../services/ServiceAccess.js';
 import { finishFor, finishCost } from '../services/BuildingFinishes.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService, removeCommonsPolicyFromService } from '../commons/CommonsPolicies.js';
 import { nominateForRival, petitionFor, resolveCommonsBallot } from '../commons/CommonsBallot.js';
@@ -787,6 +788,21 @@ export class Charter {
         this.assignHomes();
         this.refreshDerived();
         return { ...result, cost, funded };
+    }
+
+    setServiceAccess(service, accessId) {
+        if (!service || (service.chapterId && service.chapterId !== 'player')) {
+            return { ok: false, error: "A rival chapter's access cannot be changed." };
+        }
+        if (service.fixed) return { ok: false, error: 'The Welcome Post keeps its own welcome.' };
+        if (service.state !== 'ACTIVE' || service.closed) {
+            return { ok: false, error: 'Only an open service can change access.' };
+        }
+        if (!SERVICE_ACCESS_BY_ID[accessId]) return { ok: false, error: 'Unknown access policy.' };
+        service.policy = { ...(service.policy || {}), access: accessId };
+        service.refreshGraphics();
+        this.refreshDerived();
+        return { ok: true, service, access: accessId };
     }
 
     setServiceVibe(service, vibeId) {

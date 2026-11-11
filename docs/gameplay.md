@@ -158,6 +158,15 @@ resident temperament fits the room: cosy residents prefer cosy, social residents
 prefer lively, curious residents prefer curious, and an efficient room suits a
 rushed day. The atmosphere is saved with the service.
 
+Each service also has a **Welcome** policy:
+
+- **Open door** — everyone gets the same welcome.
+- **Chapter first** — the owning chapter's residents get +4% fit; visitors get
+  −2%.
+- **Visitors first** — day guests get +6% fit; residents get −2%.
+
+Nobody is refused entry; the room simply reads better to one audience.
+
 ## Neighbouring services and districts
 
 Every service checks the four cells along its footprint edge. Each distinct

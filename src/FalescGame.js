@@ -93,6 +93,7 @@ export class FalescGame {
             onHours: (service, hoursId) => this.setServiceHours(service, hoursId),
             onFloor: (service) => this.addFloor(service),
             onVibe: (service, vibeId) => this.setServiceVibe(service, vibeId),
+            onAccess: (service, accessId) => this.setServiceAccess(service, accessId),
             overlays: this.overlays
         });
         this.visitorCard = new VisitorCardModal({
@@ -696,6 +697,16 @@ export class FalescGame {
         this.gameScreen.updateHud(true);
         this.saveGame();
         this.gameScreen.toast(`${service.name} rises to ${service.floors} floors.`, 'mint', 2200);
+        return result;
+    }
+
+    setServiceAccess(service, accessId) {
+        if (!this.charter) return { ok: false, error: 'No charter.' };
+        const result = this.charter.setServiceAccess(service, accessId);
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast(`${service.name} now welcomes ${accessId === 'open' ? 'everyone equally' : accessId === 'chapter' ? 'its chapter first' : 'visitors first'}.`, 'mint', 2000);
         return result;
     }
 

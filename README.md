@@ -123,6 +123,7 @@ webgame_smoke --scenario scripts/scenarios/retrofit.mjs
 webgame_smoke --scenario scripts/scenarios/service-district.mjs
 webgame_smoke --scenario scripts/scenarios/service-adjacency.mjs
 webgame_smoke --scenario scripts/scenarios/service-floors.mjs
+webgame_smoke --scenario scripts/scenarios/service-access.mjs
 webgame_smoke --scenario scripts/scenarios/service-vibe.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
 webgame_smoke --scenario scripts/scenarios/observatory.mjs

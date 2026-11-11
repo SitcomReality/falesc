@@ -2,6 +2,7 @@ import { BALANCE, DAY_PHASES } from '../design/balance.js';
 import { NEEDS, NEED_BY_ID, mostUrgentNeed } from '../design/needs.js';
 import { servesNeed } from '../design/programs.js';
 import { isServiceOpenAt, serviceQualityModifier } from '../services/ServicePolicies.js';
+import { accessFitFor } from '../services/ServiceAccess.js';
 import { rhythmRise, vibeFit, standardFit } from '../design/traits.js';
 import { SeededRandom } from '../map/SeededRandom.js';
 import { IslandNavigator } from '../navigation/IslandNavigator.js';
@@ -186,7 +187,8 @@ export class DaySimulator {
         const isPrimary = program.need === need.id || program.id === 'commons_beacon';
         const match = isPrimary ? 1 : 0.46;
         const quality = ((program.quality || 1) + (service.qualityBonus || 0) + (service.adjacencyBonus || 0) + (service.districtBonus || 0) + serviceQualityModifier(service))
-            * (service.finish === 'grand' ? 1.1 : service.finish === 'humble' ? 0.9 : 1);
+            * (service.finish === 'grand' ? 1.1 : service.finish === 'humble' ? 0.9 : 1)
+            * accessFitFor(service, resident);
         const vibe = vibeFit(resident.traits.temperament, service.policy?.vibe || program.vibe);
         const standards = standardFit(resident.traits.standards, service.finish);
         const distance = this.distanceToService(resident, service);

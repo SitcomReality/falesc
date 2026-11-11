@@ -175,6 +175,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `service-district.mjs` | Builds three connected services, checks the named district/bonus and world label, the service record and save/reload. |
 | `service-adjacency.mjs` | Builds a player canteen beside a rival service, checks the mixed-neighbour quality bonus, the service record and save/reload. |
 | `service-floors.mjs` | Adds two floors to an active canteen, checks capacity/upkeep/lumen, the floor button hiding at three floors, the world plaque and save/reload. |
+| `service-access.mjs` | Switches a working canteen to Visitors first, checks the policy and save/reload without changing capacity. |
 | `service-vibe.mjs` | Switches a working canteen from Efficient to Lively, checks the policy and save/reload without changing capacity or upkeep. |
 | `service-hours.mjs` | Switches an open canteen to Round the clock, checks +2 upkeep and save/reload. |
 | `retrofit.mjs` | Builds a canteen, waits for it to open, opens the retrofit chooser, installs the Atelier, checks +0.22 quality/+1 upkeep (capacity unchanged) and save/reload. |

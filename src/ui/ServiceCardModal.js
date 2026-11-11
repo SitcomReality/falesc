@@ -3,6 +3,7 @@ import { NEED_BY_ID } from '../design/needs.js';
 import { RETROFIT_BY_ID, RETROFIT_MIN_COST } from '../services/RetrofitModules.js';
 import { SERVICE_HOURS, SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
 import { SERVICE_VIBES, SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
+import { SERVICE_ACCESS, SERVICE_ACCESS_BY_ID } from '../services/ServiceAccess.js';
 import { finishCost } from '../services/BuildingFinishes.js';
 
 /**
@@ -11,13 +12,14 @@ import { finishCost } from '../services/BuildingFinishes.js';
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, overlays, game }) {
+    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, overlays, game }) {
         this.onDemolish = onDemolish;
         this.onReopen = onReopen;
         this.onRetrofit = onRetrofit;
         this.onHours = onHours;
         this.onFloor = onFloor;
         this.onVibe = onVibe;
+        this.onAccess = onAccess;
         this.overlays = overlays;
         this.game = game;
         this.isOpen = false;
@@ -57,6 +59,9 @@ export class ServiceCardModal {
             <label class="service-hours" data-role="vibe-wrap" hidden>Atmosphere
                 <select data-testid="service-vibe">${SERVICE_VIBES.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
             </label>
+            <label class="service-hours" data-role="access-wrap" hidden>Welcome
+                <select data-testid="service-access">${SERVICE_ACCESS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
+            </label>
             <p class="modal__note" data-role="note"></p>
             <p class="modal__error" data-role="error" aria-live="polite"></p>
             <div class="modal__actions">
@@ -78,6 +83,8 @@ export class ServiceCardModal {
         this.hoursSelect = this.panel.querySelector('[data-testid=service-hours]');
         this.vibeWrap = this.panel.querySelector('[data-role=vibe-wrap]');
         this.vibeSelect = this.panel.querySelector('[data-testid=service-vibe]');
+        this.accessWrap = this.panel.querySelector('[data-role=access-wrap]');
+        this.accessSelect = this.panel.querySelector('[data-testid=service-access]');
         this.noteEl = this.panel.querySelector('[data-role=note]');
         this.errorEl = this.panel.querySelector('[data-role=error]');
         this.demolishBtn = this.panel.querySelector('[data-testid=structure-demolish]');
@@ -101,6 +108,7 @@ export class ServiceCardModal {
         this.floorBtn.addEventListener('click', () => this.addFloor());
         this.hoursSelect.addEventListener('change', () => this.changeHours(this.hoursSelect.value));
         this.vibeSelect.addEventListener('change', () => this.changeVibe(this.vibeSelect.value));
+        this.accessSelect.addEventListener('change', () => this.changeAccess(this.accessSelect.value));
         this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
     }
 
@@ -177,6 +185,10 @@ export class ServiceCardModal {
         this.vibeWrap.hidden = !canSetVibe;
         this.vibeSelect.value = SERVICE_VIBE_BY_ID[service.policy?.vibe] ? service.policy.vibe : (program?.vibe || 'cosy');
         this.vibeSelect.disabled = !canSetVibe;
+        const canSetAccess = !rivalService && !service.fixed && working;
+        this.accessWrap.hidden = !canSetAccess;
+        this.accessSelect.value = SERVICE_ACCESS_BY_ID[service.policy?.access] ? service.policy.access : 'open';
+        this.accessSelect.disabled = !canSetAccess;
         this.reopenBtn.hidden = !service.closed;
         this.reopenBtn.disabled = rivalService;
         this.reopenBtn.textContent = service.closed
@@ -210,6 +222,18 @@ export class ServiceCardModal {
         const result = this.onHours(service, hoursId);
         if (result?.ok === false) {
             this.errorEl.textContent = result.error || 'Those hours cannot be set.';
+            return;
+        }
+        this.hide();
+        this.show(service);
+    }
+
+    changeAccess(accessId) {
+        if (!this.isOpen || !this.service) return;
+        const service = this.service;
+        const result = this.onAccess(service, accessId);
+        if (result?.ok === false) {
+            this.errorEl.textContent = result.error || 'That access policy cannot be set.';
             return;
         }
         this.hide();

@@ -64,6 +64,7 @@ webgame_smoke --scenario scripts/scenarios/retrofit.mjs
 webgame_smoke --scenario scripts/scenarios/service-district.mjs
 webgame_smoke --scenario scripts/scenarios/service-adjacency.mjs
 webgame_smoke --scenario scripts/scenarios/service-floors.mjs
+webgame_smoke --scenario scripts/scenarios/service-access.mjs
 webgame_smoke --scenario scripts/scenarios/service-vibe.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
 webgame_smoke --scenario scripts/scenarios/observatory.mjs
@@ -211,7 +212,8 @@ after any behavioural change.
   modules (6–7 lumen each) from Sunroom, Atelier and Night Kitchen. The
   service record owns the action and the module is saved. Open services can also
   choose As built, Round the clock, Daylight or Evening hours, plus a free
-  Cosy/Lively/Curious/Efficient atmosphere. The eight buildable
+  Cosy/Lively/Curious/Efficient atmosphere and an Open/Chapter first/Visitors
+  first welcome policy. The eight buildable
   services include the 2×2 Bathhouse for Rest + Company, the 2×2 Clinic for
   Rest + Sustenance, the 2×2 Amphitheatre for Company + Wonder and the 2×2
   Observatory for Wonder at night. A build chooses a
