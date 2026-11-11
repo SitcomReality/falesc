@@ -24,7 +24,7 @@ Severity is about impact on the slice, not effort:
 | 2 | Medium | Home, commons and garden isles are buildable; shared works, purse and capital exist, but no fuller archipelago |
 | 3 | Medium | Floors are stacked room plans and districts are named clusters; no full loadout or shaped neighbourhoods |
 | 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
-| 5 | Low | Keyboard build cursor works, but the canvas has only a live-cell description, not a full screen-reader grid |
+| 5 | Low | Keyboard build cursor and an accessible grid summary exist; the canvas itself is still not a browsable grid |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
 | 7 | Low | Save v1 is discarded and a mid-`DAY` reload loses the day; v2 has JSON export/import |
 | 8 | Low | Residents have an initial portrait, four-visit log and departure archive, but no illustrated portrait or full lifetime log |
@@ -183,8 +183,9 @@ early.
   isle, Enter to open the build dialog, Escape to leave).
 - A live region announces the current isle, cell, and whether the plot is free
   or why it is blocked.
-- The canvas is still not a full screen-reader grid: assistive tech cannot browse
-  cells or read the whole map, only the cursor's current cell.
+- The pause menu's **Grid summary** exposes every buildable cell as an
+  accessible table with coordinates. The canvas itself still is not a
+  browsable grid, so pointerless players work from the table and cursor.
 
 **Impact**
 

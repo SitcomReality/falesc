@@ -116,7 +116,7 @@ src/
     FieldGuideModal.js, FloorPlanModal.js, DepartureArchiveModal.js,
     CharterArchiveModal.js, NeedSurveyModal.js, CharterLedgerModal.js,
     RivalDossierModal.js, CharterJournalModal.js, MilestonesModal.js,
-    ResidentRosterModal.js, icons.js
+    ResidentRosterModal.js, GridSummaryModal.js, icons.js
   world/
     World.js                 Pixi app, layers, camera/input, map and minerals
     PatronageFlow.js         world-space last-choice arcs on the overlay layer

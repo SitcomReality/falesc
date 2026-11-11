@@ -31,6 +31,7 @@ import { RivalDossierModal } from './ui/RivalDossierModal.js';
 import { CharterJournalModal } from './ui/CharterJournalModal.js';
 import { MilestonesModal } from './ui/MilestonesModal.js';
 import { ResidentRosterModal } from './ui/ResidentRosterModal.js';
+import { GridSummaryModal } from './ui/GridSummaryModal.js';
 import { recordCharter, recordFromCharter } from './persistence/CharterArchive.js';
 import { recordMilestones } from './persistence/MilestoneArchive.js';
 import { readMotion, writeMotion, applyMotion } from './settings/MotionPreference.js';
@@ -133,6 +134,7 @@ export class FalescGame {
         this.rivalDossier = new RivalDossierModal({ game: this, overlays: this.overlays });
         this.journal = new CharterJournalModal({ game: this, overlays: this.overlays });
         this.milestones = new MilestonesModal({ game: this, overlays: this.overlays });
+        this.gridSummary = new GridSummaryModal({ game: this, overlays: this.overlays });
         this.residentRoster = new ResidentRosterModal({
             game: this,
             overlays: this.overlays,
@@ -323,6 +325,7 @@ export class FalescGame {
         this.journal.hide();
         this.milestones.hide();
         this.residentRoster.hide();
+        this.gridSummary.hide();
         this.visitorCard.hide();
     }
 
@@ -789,6 +792,11 @@ export class FalescGame {
         const chapter = this.charter?.rivals.find((entry) => entry.id === chapterId);
         if (!chapter) return false;
         this.rivalDossier.show(chapter);
+        return true;
+    }
+
+    openGridSummary() {
+        this.gridSummary.show();
         return true;
     }
 

@@ -314,6 +314,13 @@ highest current need, wellbeing and a red crisis row. Clicking a row opens the
 full resident card. Trial guests are listed separately and do not yet count as
 active residents.
 
+## Grid summary
+
+The pause menu's **Grid summary** lists every buildable cell for the home,
+commons and garden isles in accessible tables: free cells, shuttle gates and
+named services, with column and row coordinates. It is a planning reference for
+keyboard and assistive-tech players; it does not place anything.
+
 ## Daily request
 
 Each planning day one active resident asks for one need. Meeting it during
