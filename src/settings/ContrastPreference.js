@@ -6,10 +6,15 @@ export const CONTRAST_KEY = 'falesc.contrast.v1';
 
 export function readContrast() {
     try {
-        return localStorage.getItem(CONTRAST_KEY) === 'high' ? 'high' : 'normal';
+        const stored = localStorage.getItem(CONTRAST_KEY);
+        if (stored === 'high' || stored === 'normal') return stored;
     } catch {
-        return 'normal';
+        // Fall through to the operating-system preference.
     }
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-contrast: more)')?.matches) {
+        return 'high';
+    }
+    return 'normal';
 }
 
 export function writeContrast(mode) {
