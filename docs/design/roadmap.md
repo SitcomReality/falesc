@@ -54,8 +54,9 @@ moves, shared services/occupancy, shared residents, rival Welcome Houses and
 housing growth, per-chapter lumen/contributions/upkeep/closures, Devotion
 standings, patronage, a patronage-flow overlay and a most-beloved-chapter end at
 the day limit. Rivals also recover from closures and choose builds by need
-pressure, and the day limit now convenes a pledge/vote Confluence. A long-term
-rival plan, the full festival campaign, auctions and stewardship remain.
+pressure, the last three days run a campaign with rival promises, and the day
+limit convenes a pledge/vote Confluence. A long-term rival plan, multi-round
+festival events, auctions and stewardship remain.
 
 **Not started:** the rest of Phase 2, Phase 3 (layers, modules, finishes,
 policy, retrofit), Phase 4 (scenarios, Confluence vote, stewardship), Phase 5

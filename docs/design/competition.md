@@ -11,8 +11,8 @@
 > residents, rival Welcome Houses and housing growth, per-chapter lumen,
 > contributions, upkeep and closures, Devotion standings, a patronage-flow
 > overlay, doctrine/need-pressure builds, reopen recovery and a pledge/vote Confluence
-> finale. A long-term rival plan, the full festival campaign, auctions and
-> stewardship remain target.
+> finale, including a three-day campaign of rival/player promises. A long-term
+> rival plan, a multi-round festival, auctions and stewardship remain target.
 >
 > The competition is for **patronage and love**, not profit. Rivals win residents
 > by being better hosts. There is no price war, no landlord rent, and no cash

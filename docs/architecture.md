@@ -49,7 +49,9 @@ src/
     RivalChapter.js          rival identity, budget, works and services
     RivalAI.js               doctrine/need-pressure builds and recovery
   confluence/
-    ConfluenceVote.js        pledges and the deterministic resident vote
+    Pledges.js               the four shared campaign promises
+    Campaign.js              final-days promises and player choice
+    ConfluenceVote.js        the deterministic resident vote
   charter/
     Charter.js               run model: day, player chapter, rivals, roster, services, ending
   controls/
@@ -97,7 +99,7 @@ src/
   ui/
     BuildModal.js, ServiceCardModal.js, BulletinModal.js,
     OverlayManager.js, StandingsCard.js, ResidentCardModal.js, Minimap.js,
-    ChatterManager.js, icons.js
+    ChatterManager.js, CampaignModal.js, icons.js
   world/
     World.js                 Pixi app, layers, camera/input, map and minerals
     PatronageFlow.js         world-space last-choice arcs on the overlay layer
@@ -276,7 +278,11 @@ Contest starts with nine active residents, three per chapter. Each has a
 `homeChapterId`; housing is a chapter service with four beds. `Charter.assignHomes()`
 tries the resident's chapter first and then any chapter with a spare bed.
 `Charter.addArrivals()` prefers the most-beloved chapter with room, so a rival
-that builds housing can grow its own population. Their `affinity` map gains
+that builds housing can grow its own population. In the last three days
+`Charter.startCampaign()` creates a `Campaign`: each rival publishes a doctrine/
+need-pressure promise, and `CampaignModal` lets the player choose one of the same
+four. The promised need adds a bonus to that chapter's vote with residents whose
+urgent need matches; the player's promise is worth more than a rival's. Their `affinity` map gains
 hearts for whichever chapter owns the service they visit; housing grants
 affinity to the home chapter. `DaySimulator` offers every active service from
 `charter.allServices`, labels rival doors with their chapter name, and writes
@@ -291,8 +297,8 @@ the cost, then chooses the next build from shared need pressure plus doctrine.
 At the day limit the contest does not pick a winner from Devotion directly:
 `Charter.evaluateEnding()` sets `confluenceReady`, and the report hands over to
 the Confluence screen. `ConfluenceVote.tally()` gives each active resident one
-vote based on per-chapter affinity, home loyalty, last choice, a pledge bonus
-and a seeded tie-break. The winner becomes the charter ending; shared
+vote based on per-chapter affinity, home loyalty, last choice, the player's
+campaign promise, rival campaign promises and a seeded tie-break. The winner becomes the charter ending; shared
 Flourishing below the survival line produces a no-winner defeat.
 
 The **patronage-flow overlay** (`src/world/PatronageFlow.js`) is a read-only Pixi
@@ -537,7 +543,9 @@ It stores:
   "charter": {
     "seed": 12345, "mapSize": "medium", "day": 3, "dayLimit": 14,
     "lumen": 12, "works": 2, "flourishing": 63.5, "devotion": 8.3,
-    "mode": "contest", "ending": null, "confluenceReady": true, "pendingArrivals": [], "lastReport": {},
+    "mode": "contest", "ending": null, "confluenceReady": true,
+    "campaign": { "startedDay": 12, "dayLimit": 14, "rivalPledges": {}, "playerPledge": null },
+    "pendingArrivals": [], "lastReport": {},
     "residents": [], "services": [], "rivals": []
   },
   "camera": { "x": 0, "y": 0, "zoom": 0.5 }

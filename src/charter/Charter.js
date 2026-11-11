@@ -7,7 +7,9 @@ import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
 import { summarizeReport } from '../simulation/ReportSummary.js';
 import { RivalChapter } from '../chapters/RivalChapter.js';
-import { createRivalChapters, planRivalDay } from '../chapters/RivalAI.js';
+import { chooseCampaignPledge, createRivalChapters, planRivalDay } from '../chapters/RivalAI.js';
+import { Campaign } from '../confluence/Campaign.js';
+import { PLEDGE_BY_ID } from '../confluence/Pledges.js';
 
 /**
  * A charter is the whole run: day, lumen, works, cast, services and the report
@@ -54,6 +56,7 @@ export class Charter {
         this.lastReport = null;
         this.ending = null;
         this.confluenceReady = false;
+        this.campaign = null;
         this.bulletin = null;
         this.history = [];
         this.commonsCell = null;
@@ -208,6 +211,24 @@ export class Charter {
                 resident.state = 'idle';
             }
         }
+    }
+
+    startCampaign() {
+        if (!this.contest || this.campaign) return this.campaign;
+        const rivalPledges = Object.fromEntries(this.rivals.map((rival) => [rival.id, chooseCampaignPledge(rival, this)]));
+        this.campaign = new Campaign({
+            startedDay: this.day,
+            dayLimit: this.dayLimit,
+            rivalPledges
+        });
+        return this.campaign;
+    }
+
+    setCampaignPledge(pledgeId) {
+        if (!this.campaign?.active) return { ok: false, reason: 'The campaign has not started.' };
+        if (!PLEDGE_BY_ID[pledgeId]) return { ok: false, reason: 'That is not a campaign promise.' };
+        this.campaign.setPlayerPledge(pledgeId);
+        return { ok: true, campaign: this.campaign };
     }
 
     createRivals() {
@@ -427,6 +448,9 @@ export class Charter {
         this.pendingArrivals = arrivals;
         const rivalMoves = this.rivals.map((rival) => planRivalDay(rival, this)).filter(Boolean);
         this.lastRivalMoves = rivalMoves;
+        if (this.contest && !this.campaign && this.day >= this.dayLimit - BALANCE.campaign.days + 1) {
+            this.startCampaign();
+        }
         this.report = null;
         this.bulletin = this.buildBulletin(arrivals, rivalMoves);
         this.refreshDerived();
@@ -585,6 +609,22 @@ export class Charter {
             });
         }
 
+        if (this.campaign?.active) {
+            const rivalPromises = this.rivals
+                .map((rival) => {
+                    const pledge = this.campaign.pledgeFor(rival.id);
+                    return pledge ? `${rival.name}: ${pledge.name}` : null;
+                })
+                .filter(Boolean);
+            items.push({
+                kicker: 'Campaign',
+                title: this.campaign.playerPledgeName ? `Your promise: ${this.campaign.playerPledgeName}` : 'Choose a campaign promise',
+                text: rivalPromises.length
+                    ? `The rivals are promising: ${rivalPromises.join('; ')}.`
+                    : 'The archipelago is listening for a promise.'
+            });
+        }
+
         if (rivalMoves?.length) {
             const first = rivalMoves[0];
             const moveText = rivalMoves.map((move) => move.action === 'reopened'
@@ -624,6 +664,7 @@ export class Charter {
             devotion: this.devotion,
             ending: this.ending,
             confluenceReady: this.confluenceReady,
+            campaign: this.campaign?.toJSON() || null,
             pendingArrivals: this.pendingArrivals,
             lastReport: summarizeReport(this.lastReport),
             residents: this.roster.map((resident) => resident.toJSON()),
@@ -640,6 +681,7 @@ export class Charter {
         this.works = Number.isFinite(saved.works) ? saved.works : BALANCE.worksPerDay;
         this.ending = saved.ending || null;
         this.confluenceReady = Boolean(saved.confluenceReady);
+        this.campaign = Campaign.fromJSON(saved.campaign);
         this.pendingArrivals = Array.isArray(saved.pendingArrivals) ? saved.pendingArrivals : [];
         this.roster = ResidentFactory.fromSave(saved.residents || []);
         if (this.roster.length === 0) this.roster = ResidentFactory.createRoster(this.seed, BALANCE.rosterSize);
@@ -683,6 +725,7 @@ export class Charter {
             activeServices: this.services.activeServices.length,
             mode: this.mode,
             confluenceReady: this.confluenceReady,
+            campaign: this.campaign?.toJSON() || null,
             totalSpareBeds: this.totalSpareBeds,
             rivals: this.rivals.length,
             devotionByChapter: this.devotionByChapter

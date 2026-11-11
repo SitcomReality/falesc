@@ -14,6 +14,7 @@ import { EndScreen } from './screens/EndScreen.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { ServiceCardModal } from './ui/ServiceCardModal.js';
 import { BulletinModal } from './ui/BulletinModal.js';
+import { CampaignModal } from './ui/CampaignModal.js';
 import { ResidentCardModal } from './ui/ResidentCardModal.js';
 import { OverlayManager } from './ui/OverlayManager.js';
 import { Minimap } from './ui/Minimap.js';
@@ -79,6 +80,10 @@ export class FalescGame {
         });
         this.residentCard = new ResidentCardModal({
             game: this,
+            overlays: this.overlays
+        });
+        this.campaignModal = new CampaignModal({
+            onChoose: (pledgeId) => this.chooseCampaignPledge(pledgeId),
             overlays: this.overlays
         });
 
@@ -197,6 +202,7 @@ export class FalescGame {
         this.serviceCard.hide();
         this.bulletinModal.hide();
         this.residentCard.hide();
+        this.campaignModal.hide();
     }
 
     syncViews() {
@@ -219,6 +225,23 @@ export class FalescGame {
             );
         }
         return visible;
+    }
+
+    showCampaign() {
+        if (!this.charter?.campaign?.active) return false;
+        this.campaignModal.show(this.charter.campaign, this.charter);
+        return true;
+    }
+
+    chooseCampaignPledge(pledgeId) {
+        if (!this.charter) return { ok: false };
+        const result = this.charter.setCampaignPledge(pledgeId);
+        if (!result.ok) return result;
+        this.campaignModal.hide();
+        this.gameScreen.updateHud(true);
+        this.gameScreen.toast(`Campaign promise: ${this.charter.campaign.playerPledgeName}.`, 'mint', 2200);
+        this.saveGame();
+        return result;
     }
 
     /* ------------------------------------------------------------------ */
@@ -462,7 +485,11 @@ export class FalescGame {
         this.hintDismissed = false;
         this.syncViews();
         this.screenStateMachine.setState(GamePhase.PLAYING);
-        this.showBulletin();
+        if (this.charter.campaign?.active && !this.charter.campaign.playerPledge) {
+            this.showCampaign();
+        } else {
+            this.showBulletin();
+        }
         if (result.arrivals?.length) {
             this.gameScreen.toast(`${result.arrivals.length} new Tidelander${result.arrivals.length === 1 ? '' : 's'} at the Welcome Post.`, 'mint');
         }
@@ -539,6 +566,7 @@ export class FalescGame {
             this.serviceCard.hide();
             this.bulletinModal.hide();
             this.residentCard.hide();
+            this.campaignModal.hide();
             this.world.clearHover();
         }
         if (phase === GamePhase.CONFLUENCE) {
@@ -727,6 +755,7 @@ export class FalescGame {
                     } : null,
                     ending: charter?.ending || null,
                     confluenceReady: Boolean(charter?.confluenceReady),
+                    campaign: charter?.campaign?.toJSON?.() || null,
                     chapters: charter?.standings?.() || [],
                     devotionByChapter: charter?.devotionByChapter || {},
                     buildModalOpen: game.buildModal.isOpen,
@@ -773,6 +802,9 @@ export class FalescGame {
             },
             showConfluence() {
                 return game.showConfluence();
+            },
+            showCampaign() {
+                return game.showCampaign();
             },
             skipDay() {
                 return game.skipDay();

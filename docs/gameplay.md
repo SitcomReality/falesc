@@ -69,7 +69,7 @@ The lobby offers two modes:
 | Mode | What it is |
 | --- | --- |
 | **First Light** | The solo tutorial slice: one chapter, one shard, the 12-resident / flourishing-62 goal. |
-| **The Contest** | A two-rival preview on the same shard. **The Gardener** and **The Host** each start with three residents, a four-bed Welcome House, 15 lumen and a doctrine. They build, pay upkeep and receive contributions under the same rules as the player. Residents choose between all chapters' doors. At the day limit the **Confluence** convenes: the player makes one pledge, every resident votes, and the most votes wins. |
+| **The Contest** | A two-rival preview on the same shard. **The Gardener** and **The Host** each start with three residents, a four-bed Welcome House, 15 lumen and a doctrine. They build, pay upkeep and receive contributions under the same rules as the player. Residents choose between all chapters' doors. In the last three days the **campaign** opens: rivals publish promises and the player chooses one. At the day limit the **Confluence** convenes and every resident votes. |
 
 In Contest mode the First Light objective card is replaced by a live **Devotion**
 standings card. Each chapter begins with a fixed Welcome House (four beds) and
@@ -84,6 +84,23 @@ it can afford to, and chooses its next build by shared need pressure plus its
 doctrine. The **patronage flow overlay** (Show flows in the standings card, or
 `P`) traces each resident's last choice from their home door to the service
 door, coloured by chapter.
+
+## Campaign
+
+On the **last three days** of a Contest the campaign begins. A promise dialog
+opens (and a **Campaign** card appears above the standings); the morning
+bulletin also carries the campaign item. Each rival publishes one promise from
+the same four options, and the player chooses one:
+
+- **A night kitchen** — sustenance.
+- **A room of one's own** — rest.
+- **The long table** — company.
+- **A garden in the void** — wonder.
+
+The player's promise is locked once chosen. It adds weight to their vote with
+residents whose most urgent need matches. Rival promises add a smaller weight
+to that rival's vote with residents whose need matches. The promise is carried
+into the Confluence screen and cannot be changed there.
 
 ## Planning
 
@@ -253,9 +270,10 @@ The report is the day's story as a broadsheet:
 - **First Light defeat:** the population falls below **4** at the end of a day,
   or the day limit arrives without both goals.
 - **Contest:** at the day limit the report hands over to the **Confluence**.
-  Choose one pledge, then call the vote. Each active resident votes for the
-  chapter they trust most; the player's pledge adds weight when it matches that
-  resident's most urgent need. The most votes wins, with Devotion as the
+  The campaign promise is locked in; call the vote. Each active resident votes
+  for the chapter they trust most. The player's campaign pledge adds weight when
+  it matches that resident's most urgent need; rival pledges do the same for
+  their chapters. The most votes wins, with Devotion as the
   tie-break. If shared flourishing is below the survival line, nobody wins.
   This is a first-pass festival and vote, not the full campaign/auction design.
 - **Abandon:** the charter menu asks for confirmation, then ends the run early as
@@ -346,8 +364,9 @@ yet.
   them.
 - **The Contest is a preview.** Rivals build services and housing, pay upkeep,
   receive contributions, reopen lost services and react to need pressure, but
-  their planning is still one move per day. The Confluence has a pledge and a
-  resident vote, not the full festival campaign, auctions or stewardship.
+  their planning is still one move per day. The campaign is three days of one
+  promise each and a resident vote, not a multi-round festival, auctions or
+  stewardship.
 - **No auctions, stewardship, petitions or multiplayer.** The Multiplayer button
   is a disabled placeholder.
 - **No audio.**

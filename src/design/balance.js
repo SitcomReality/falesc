@@ -5,6 +5,9 @@
 export const BALANCE = {
     startingLumen: 10,
     worksPerDay: 2,
+    campaign: {
+        days: 3
+    },
     contest: {
         startingLumen: 15,
         rivalWorksPerDay: 1,

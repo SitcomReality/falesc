@@ -21,8 +21,8 @@ planning plus playback, care-based competition and the Confluence — is
 substantially implemented for one shared shard, including a **Contest preview**
 with two AI rivals, a shared lumen economy, shared residents, rival housing,
 recovery and need-pressure builds, Devotion standings, a patronage-flow overlay
-and a final Confluence pledge/vote. The full festival campaign, auctions,
-stewardship, deeper rival strategy, layers and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
+and a final campaign, pledge and Confluence vote. The full multi-round festival,
+auctions, stewardship, deeper rival strategy, layers and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
 ## Start here
@@ -44,6 +44,7 @@ webgame_smoke --scenario scripts/scenarios/engine-regression.mjs
 webgame_smoke --scenario scripts/scenarios/contest.mjs
 webgame_smoke --scenario scripts/scenarios/contest-recovery.mjs
 webgame_smoke --scenario scripts/scenarios/confluence-defeat.mjs
+webgame_smoke --scenario scripts/scenarios/campaign.mjs
 ```
 
 The CLI equivalents and the full scenario list are in
@@ -63,7 +64,7 @@ after any behavioural change.
 | `src/world/PatronageFlow.js` | World-space arcs from homes to residents' last choices |
 | `src/charter/Charter.js` | The run model: day, player chapter, rivals, roster, services, reports, ending |
 | `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |
-| `src/confluence/` | Pledges and the deterministic Confluence vote tally |
+| `src/confluence/` | Campaign state, pledges and the deterministic Confluence vote tally |
 | `src/design/` | Needs, traits, service programs, balance table, names |
 | `src/services/` | `ServiceBuilding`, `ServiceManager`, `PlacementPolicy` |
 | `src/simulation/DaySimulator.js` | Deterministic day: needs, choices, queues, visits, report |
@@ -72,7 +73,7 @@ after any behavioural change.
 | `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
 | `src/state/` | `GamePhase` constants and `ScreenStateMachine` |
 | `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, Confluence, end |
-| `src/ui/` | Shared `OverlayManager`, build/service/bulletin/resident modals, standings, survey chart, chatter, icons |
+| `src/ui/` | Shared `OverlayManager`, build/service/bulletin/campaign/resident modals, standings, survey chart, chatter, icons |
 | `src/map/` | Seeded single-pass island generation, packing, grids, sector art, paths |
 | `src/character/`, `src/Character.js` | Procedural chibi rig and animation |
 | `src/minerals/` | Seeded static rock/crystal scenery |
@@ -117,7 +118,7 @@ after any behavioural change.
   `window.__falesc.snapshot()`, `findFreeCell(programId)`,
   `worldToScreen(x, y)`, `saveGame()`, `continueGame()`,
   `selectProgram(id)`, `openDay()`, `skipDay()`, `showResidents()`,
-  `togglePatronage()`, `showConfluence()`. The full game object is
+  `togglePatronage()`, `showCampaign()`, `showConfluence()`. The full game object is
   `window.__falesc.app`.
 - **Do not reintroduce dead sandbox UI.** `src/UI.js` and `lil-gui` were
   removed; the service dock is the real build UI.
@@ -153,9 +154,10 @@ after any behavioural change.
   chapter its own private occupancy map or services will overlap.
 - Rival chapters pay construction costs and upkeep, receive contributions from
   their own residents, own fixed Welcome Houses, reopen services lost to
-  shortfalls, and choose builds by need pressure plus doctrine. The Confluence
-  pledge/vote is a first pass; the full festival campaign, auctions and
-  stewardship are still missing.
+  shortfalls, and choose builds by need pressure plus doctrine. The last three
+  days run a campaign: rivals publish promises, the player chooses one, and the
+  final vote uses both. The campaign is a first pass; multi-round festival
+  events, auctions and stewardship are still missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
   not remove the survey chart without adjusting `canvasSelectors` and the smoke
   test.

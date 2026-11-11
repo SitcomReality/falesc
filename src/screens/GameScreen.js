@@ -172,7 +172,10 @@ export class GameScreen {
         endDayBtn.addEventListener('click', () => this.game.openDay());
         bottom.append(chartSlot, dock);
 
-        this.standings = new StandingsCard({ onToggleFlows: () => this.game.togglePatronage() });
+        this.standings = new StandingsCard({
+            onToggleFlows: () => this.game.togglePatronage(),
+            onOpenCampaign: () => this.game.showCampaign()
+        });
         this.container.append(top, objective, this.standings.element, hint, toast, bottom);
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
@@ -330,7 +333,8 @@ export class GameScreen {
         if (!charter) return;
         const contest = Boolean(charter.contest);
         this.container.classList.toggle('is-contest', contest);
-        this.standings.update(charter.standings(), contest);
+        this.container.classList.toggle('is-campaign', Boolean(charter.campaign?.active));
+        this.standings.update(charter.standings(), contest, charter.campaign);
         const dayLimit = charter.dayLimit || 14;
         const day = charter.day || 1;
         const daysLeft = Math.max(0, dayLimit - day + 1);

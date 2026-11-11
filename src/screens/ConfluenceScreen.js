@@ -1,4 +1,5 @@
 import { ConfluenceVote } from '../confluence/ConfluenceVote.js';
+import { PLEDGES, PLEDGE_BY_ID } from '../confluence/Pledges.js';
 
 /**
  * The final public vote. The player makes one pledge to the archipelago, then
@@ -23,7 +24,16 @@ export class ConfluenceScreen {
         }
         this.result = null;
         const standings = [...charter.standings()].sort((a, b) => b.devotion - a.devotion);
-        const pledges = ConfluenceVote.pledges;
+        const pledges = PLEDGES;
+        const campaign = charter.campaign?.active ? charter.campaign : null;
+        const lockedPledge = campaign?.playerPledge ? PLEDGE_BY_ID[campaign.playerPledge] : null;
+        const selectedPledgeId = lockedPledge?.id || PLEDGES[0].id;
+        const rivalPromises = campaign
+            ? charter.rivals.map((rival) => {
+                const pledge = campaign.pledgeFor(rival.id);
+                return `<li><span class="confluence-standing__dot" style="background:${rival.colour}"></span><span>${escapeHtml(rival.name)}</span><strong>${escapeHtml(pledge?.name || 'No promise')}</strong></li>`;
+            }).join('')
+            : '';
         const rows = standings.map((chapter) => `
             <li class="confluence-standing${chapter.isPlayer ? ' is-player' : ''}">
                 <span class="confluence-standing__dot" style="background:${chapter.colour}"></span>
@@ -32,9 +42,9 @@ export class ConfluenceScreen {
                 <small>${chapter.residents} residents · ${chapter.visits} visits</small>
             </li>
         `).join('');
-        const pledgeCards = pledges.map((pledge, index) => `
-            <label class="pledge-card${index === 0 ? ' is-selected' : ''}">
-                <input type="radio" name="confluence-pledge" value="${pledge.id}" data-testid="pledge-${pledge.id}" ${index === 0 ? 'checked' : ''}>
+        const pledgeCards = pledges.map((pledge) => `
+            <label class="pledge-card${pledge.id === selectedPledgeId ? ' is-selected' : ''}${lockedPledge ? ' is-locked' : ''}">
+                <input type="radio" name="confluence-pledge" value="${pledge.id}" data-testid="pledge-${pledge.id}" ${pledge.id === selectedPledgeId ? 'checked' : ''} ${lockedPledge ? 'disabled' : ''}>
                 <span class="pledge-card__kicker">${escapeHtml(pledge.headline)}</span>
                 <strong>${escapeHtml(pledge.name)}</strong>
                 <span class="pledge-card__copy">${escapeHtml(pledge.copy)}</span>
@@ -60,9 +70,11 @@ export class ConfluenceScreen {
                         <h2>At dusk</h2>
                         <ul class="confluence-standings">${rows}</ul>
                         <p class="confluence__note">Devotion is affection. Votes are trust. A pledge can move the second without erasing the first.</p>
+                        ${rivalPromises ? `<h2>Rival promises</h2><ul class="confluence-standings">${rivalPromises}</ul>` : ''}
                     </section>
                     <section>
-                        <h2>Your pledge</h2>
+                        <h2>${lockedPledge ? 'Your campaign promise' : 'Your pledge'}</h2>
+                        ${lockedPledge ? `<p class="confluence__note">Locked in during the campaign.</p>` : ''}
                         <div class="pledge-grid">${pledgeCards}</div>
                         <button type="button" class="btn btn--primary confluence__vote" data-testid="confluence-vote">
                             Call the vote <span class="btn__arrow" aria-hidden="true">→</span>

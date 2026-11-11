@@ -1,5 +1,6 @@
 import { BALANCE } from '../design/balance.js';
 import { PROGRAM_BY_ID } from '../design/programs.js';
+import { PLEDGES } from '../confluence/Pledges.js';
 import { RivalChapter } from './RivalChapter.js';
 
 export const RIVAL_DEFINITIONS = [
@@ -198,4 +199,23 @@ function findFreePlot(rival, programId) {
         }
     }
     return null;
+}
+
+/**
+ * Rivals promise the need their doctrine and the current archipelago share.
+ * The choice is deterministic: pressure first, doctrine second, pledge order.
+ */
+export function chooseCampaignPledge(rival, charter) {
+    const pressure = needPressure(charter);
+    let best = PLEDGES[0];
+    let bestScore = -Infinity;
+    for (const pledge of PLEDGES) {
+        const doctrineBias = rival.doctrine === pledge.id ? 14 : 0;
+        const score = (pressure[pledge.need] || 0) + doctrineBias;
+        if (score > bestScore) {
+            best = pledge;
+            bestScore = score;
+        }
+    }
+    return best.id;
 }

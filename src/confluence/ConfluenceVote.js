@@ -1,5 +1,6 @@
 import { BALANCE } from '../design/balance.js';
 import { SeededRandom } from '../map/SeededRandom.js';
+import { PLEDGES, PLEDGE_BY_ID } from './Pledges.js';
 
 /**
  * The public vote. Each resident votes for the chapter they trust most, with a
@@ -12,7 +13,8 @@ export class ConfluenceVote {
     }
 
     static tally(charter, pledgeId) {
-        const pledge = PLEDGES.find((entry) => entry.id === pledgeId) || PLEDGES[0];
+        const pledge = PLEDGE_BY_ID[pledgeId] || PLEDGES[0];
+        const campaign = charter.campaign?.active ? charter.campaign : null;
         const counts = charter.chapters.map((chapter) => ({ chapterId: chapter.id, chapterName: chapter.name, votes: 0 }));
         const votes = [];
 
@@ -29,6 +31,8 @@ export class ConfluenceVote {
                 if (resident.homeChapterId === chapter.id) score += 0.6;
                 if (resident.memory.lastChoice?.chapterId === chapter.id) score += 0.35;
                 if (chapter.isPlayer && need?.id === pledge.need) score += 1.45;
+                const rivalPledge = campaign?.rivalPledges?.[chapter.id];
+                if (!chapter.isPlayer && rivalPledge && PLEDGE_BY_ID[rivalPledge]?.need === need?.id) score += 0.75;
                 score += rng.next() * 0.45;
                 return { chapter, score };
             });
@@ -89,37 +93,6 @@ export class ConfluenceVote {
         return { pledge, votes, counts, standings, winner, tied, outcome, ending };
     }
 }
-
-const PLEDGES = [
-    {
-        id: 'sustenance',
-        need: 'sustenance',
-        name: 'A night kitchen',
-        headline: 'Hot food at every hour.',
-        copy: 'No queue, no questions, a plate kept warm through the small hours.'
-    },
-    {
-        id: 'rest',
-        need: 'rest',
-        name: "A room of one's own",
-        headline: 'A quiet bed for everyone who asks.',
-        copy: 'Not a bunk in a hall, but a door that closes and a window that opens.'
-    },
-    {
-        id: 'company',
-        need: 'company',
-        name: 'The long table',
-        headline: 'A seat kept open at every table.',
-        copy: 'A place to linger, argue, listen and be known by name.'
-    },
-    {
-        id: 'wonder',
-        need: 'wonder',
-        name: 'A garden in the void',
-        headline: 'Something strange and green within walking distance.',
-        copy: 'A dome, a path, a bench under leaves that should not grow here.'
-    }
-];
 
 function reasonFor(resident, winner, pledge, need) {
     if (winner.isPlayer && need?.id === pledge.need) {

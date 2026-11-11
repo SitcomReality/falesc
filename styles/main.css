@@ -2863,6 +2863,10 @@ body.has-modal > canvas {
     .screen--hud.is-contest .chart-slot {
         display: none;
     }
+
+    .screen--hud.is-contest.is-campaign .hud__hint {
+        display: none;
+    }
 }
 
 /* Confluence vote -------------------------------------------------------- */
@@ -3132,4 +3136,98 @@ body.has-modal > canvas {
     .confluence__title { font-size: 38px; }
     .pledge-grid { grid-template-columns: 1fr; }
     .confluence-votes { max-height: none; }
+}
+
+/* Campaign --------------------------------------------------------------- */
+
+.standings-card__campaign {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 8px;
+    align-items: center;
+    margin: 0 0 8px;
+    padding: 7px 8px;
+    background: rgba(255, 211, 110, 0.35);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+}
+
+.standings-card__campaign .kicker {
+    grid-column: 1 / 3;
+    color: var(--wine);
+}
+
+.standings-card__campaign strong {
+    font-family: var(--display);
+    font-size: 16px;
+    line-height: 1.05;
+}
+
+.standings-card__campaign button {
+    padding: 3px 7px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.standings-card__campaign button:hover,
+.standings-card__campaign button:focus-visible {
+    background: var(--ink);
+    color: var(--cream);
+}
+
+.campaign-modal {
+    width: min(720px, calc(100vw - 32px));
+}
+
+.campaign-modal__label {
+    margin: 16px 0 7px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.campaign-rivals {
+    display: grid;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.campaign-rivals li {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    border-top: 1px solid rgba(33, 18, 37, 0.2);
+    font-size: 12px;
+}
+
+.campaign-rivals__dot {
+    width: 9px;
+    height: 9px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+}
+
+.campaign-rivals strong {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+@media (max-width: 620px) {
+    .campaign-modal .pledge-grid {
+        grid-template-columns: 1fr;
+    }
 }
