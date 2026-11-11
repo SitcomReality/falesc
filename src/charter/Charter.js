@@ -2,7 +2,7 @@ import { BALANCE } from '../design/balance.js';
 import { NEEDS } from '../design/needs.js';
 import { PROGRAM_BY_ID, servesNeed, isOpenAt } from '../design/programs.js';
 import { ResidentFactory } from '../residents/ResidentFactory.js';
-import { VisitorFactory } from '../residents/VisitorFactory.js';
+import { spawnVisitors, rememberVisitors, clearVisitors, inviteVisitor, resolveTrialStays } from './VisitorLifecycle.js';
 import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
 import { SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
 import { SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
@@ -1102,90 +1102,23 @@ export class Charter {
     }
 
     spawnVisitors() {
-        if (this.mode !== 'contest') {
-            this.visitors = [];
-            return [];
-        }
-        const returning = this.returningVisitors.splice(0, this.returningVisitors.length);
-        for (const visitor of returning) visitor.returned = true;
-        this.lastReferralVisitors = this.referrals;
-        this.lastFestivalVisitors = this.campaign?.active ? 1 : 0;
-        const count = VisitorFactory.countFor(this.seed, this.day) + this.referrals + this.lastFestivalVisitors;
-        this.referrals = 0;
-        this.visitors = [...returning, ...VisitorFactory.create(this.seed, this.day, count)];
-        this.visitorCell = this.commonsCell || null;
-        return this.visitors;
+        return spawnVisitors(this);
     }
 
     rememberVisitors() {
-        const candidates = this.visitors
-            .filter((visitor) => visitor.getAffinity('player') >= BALANCE.visitors.returnAffinity)
-            .sort((a, b) => b.getAffinity('player') - a.getAffinity('player'))
-            .slice(0, BALANCE.visitors.maxReturning);
-        this.returningVisitors = candidates;
-        const charmed = this.visitors.filter((visitor) => visitor.getAffinity('player') >= BALANCE.visitors.referralAffinity).length;
-        if (charmed > 0) {
-            this.referrals = Math.min(1, (this.referrals || 0) + 1);
-            this.log('visitor', `${charmed} charmed visitor${charmed === 1 ? '' : 's'} will recommend the chapter.`);
-        }
+        return rememberVisitors(this);
     }
 
     clearVisitors() {
-        this.visitors = [];
+        return clearVisitors(this);
     }
 
     inviteVisitor(visitorId) {
-        const visitor = this.visitors.find((entry) => entry.id === visitorId);
-        if (!visitor) return { ok: false, reason: 'That visitor has already left.' };
-        if (this.spareBeds <= 0) return { ok: false, reason: 'There is no spare bed.' };
-        if (visitor.getAffinity('player') < BALANCE.visitors.stayAffinity) {
-            return { ok: false, reason: 'They did not spend enough time with your chapter.' };
-        }
-        this.visitors = this.visitors.filter((entry) => entry.id !== visitorId);
-        visitor.visitor = false;
-        visitor.trial = true;
-        visitor.active = false;
-        visitor.state = 'idle';
-        visitor.memory.trialStartDay = this.day;
-        visitor.homeChapterId = 'player';
-        visitor.homeServiceId = null;
-        this.services.assignHome(visitor, this.roster);
-        if (!visitor.homeServiceId) return { ok: false, reason: 'The bed could not be assigned.' };
-        this.trialVisitors.push(visitor);
-        this.refreshDerived();
-        this.log('visitor', `${visitor.name} began a trial stay.`);
-        return { ok: true, trial: visitor };
+        return inviteVisitor(this, visitorId);
     }
 
     resolveTrialStays() {
-        const results = [];
-        const pending = [];
-        for (const visitor of this.trialVisitors) {
-            if ((visitor.memory?.trialStartDay ?? 0) >= this.day) {
-                pending.push(visitor);
-                continue;
-            }
-            if (visitor.wellbeing >= BALANCE.visitors.trialWellbeing) {
-                visitor.trial = false;
-                visitor.active = true;
-                visitor.state = 'idle';
-                this.roster.push(visitor);
-                results.push({ name: visitor.name, outcome: 'stayed', wellbeing: visitor.wellbeing });
-                this.log('visitor', `${visitor.name} passed the trial and stayed.`);
-            } else {
-                visitor.trial = false;
-                visitor.visitor = false;
-                visitor.active = false;
-                visitor.homeServiceId = null;
-                visitor.homeChapterId = 'visitor';
-                results.push({ name: visitor.name, outcome: 'left', wellbeing: visitor.wellbeing });
-                this.log('visitor', `${visitor.name} left after the trial.`);
-            }
-        }
-        this.trialVisitors = pending;
-        this.assignHomes();
-        this.refreshDerived();
-        return results;
+        return resolveTrialStays(this);
     }
 
     openDay() {

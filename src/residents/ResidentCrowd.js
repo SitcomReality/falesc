@@ -47,13 +47,17 @@ export class ResidentCrowd {
             homePoint: { x: 0, y: 0 },
             reducedMotion: this.reducedMotion
         });
+        character.reducedMotion = this.reducedMotion;
         this.agents.set(resident.id, agent);
         return agent;
     }
 
     setReducedMotion(value) {
         this.reducedMotion = Boolean(value);
-        for (const agent of this.agents.values()) agent.reducedMotion = this.reducedMotion;
+        for (const agent of this.agents.values()) {
+            agent.reducedMotion = this.reducedMotion;
+            agent.character.reducedMotion = this.reducedMotion;
+        }
     }
 
     homePointFor(resident, index) {

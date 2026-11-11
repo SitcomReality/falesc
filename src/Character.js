@@ -104,7 +104,7 @@ export class Character {
         // Uses internal this.speed and this.state which are set by AI or App
         // Pass a neutral globalSpeed (1.0) so the animation system uses the character's
         // own this.speed value exactly once (avoids accidental squaring of speed).
-        this.animation.update(deltaTime, 1.0, this.state);
+        if (!this.reducedMotion) this.animation.update(deltaTime, 1.0, this.state);
         
         // Delegate to renderer module for drawing
         this.renderer.draw();

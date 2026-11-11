@@ -117,6 +117,7 @@ after any behavioural change.
 | `src/world/PatronageFlow.js` | World-space arcs from homes to residents' last choices |
 | `src/charter/Charter.js` | The run model: day, player chapter, rivals, roster, services, reports, ending |
 | `src/charter/Bulletin.js` | Morning bulletin copy, rendered from the charter |
+| `src/charter/VisitorLifecycle.js` | Visitor arrivals, referrals, trial stays and departures |
 | `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |
 | `src/confluence/` | Campaign, pledges, stewardship and the deterministic Confluence vote |
 | `src/commons/` | Commons Assembly policies and shared service modifiers |
