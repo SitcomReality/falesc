@@ -5,10 +5,11 @@ import { escapeHtml } from './html.js';
  * Rows open the full service record.
  */
 export class ServiceRosterModal {
-    constructor({ game, overlays, onOpenService }) {
+    constructor({ game, overlays, onOpenService, onRepairService }) {
         this.game = game;
         this.overlays = overlays;
         this.onOpenService = onOpenService;
+        this.onRepairService = onRepairService;
         this.isOpen = false;
         this.container = document.createElement('div');
         this.container.className = 'modal-scrim';
@@ -44,12 +45,13 @@ export class ServiceRosterModal {
     render() {
         const services = this.game?.charter?.services?.services || [];
         const rows = services.map((service) => `
-            <button type="button" class="service-roster__row" data-service-id="${escapeHtml(service.id)}">
+            <div class="service-roster__row" data-service-id="${escapeHtml(service.id)}" role="button" tabindex="0">
                 <span class="service-roster__name">${escapeHtml(service.name)}</span>
                 <span class="service-roster__meta">${escapeHtml(service.program?.name || service.programId)} · ${escapeHtml(service.state.toLowerCase())}${service.closed ? ' · closed' : ''}</span>
                 <span class="service-roster__numbers">${service.capacity} capacity · ${service.visits} visits</span>
                 <span class="service-roster__wear${service.condition < 50 ? ' is-worn' : ''}">${Math.round(service.condition ?? 100)}% wear</span>
-            </button>
+                ${service.condition < 100 ? `<button type="button" class="service-roster__repair" data-repair-id="${escapeHtml(service.id)}">Repair · ${this.game?.charter?.repairCost?.(service) || 3}</button>` : ''}
+            </div>
         `).join('');
         this.panel.innerHTML = `
             <div class="modal__head">
@@ -66,12 +68,31 @@ export class ServiceRosterModal {
             </div>
         `;
         this.panel.querySelectorAll('[data-testid^=service-roster-close], [data-testid=service-roster-done]').forEach((button) => button.addEventListener('click', () => this.hide()));
-        this.panel.querySelectorAll('[data-service-id]').forEach((button) => {
-            button.addEventListener('click', () => {
-                const service = services.find((entry) => entry.id === button.dataset.serviceId);
+        this.panel.querySelectorAll('[data-service-id]').forEach((row) => {
+            const open = () => {
+                const service = services.find((entry) => entry.id === row.dataset.serviceId);
                 if (!service) return;
                 this.hide();
                 this.onOpenService?.(service);
+            };
+            row.addEventListener('click', (event) => {
+                if (event.target.closest('[data-repair-id]')) return;
+                open();
+            });
+            row.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    open();
+                }
+            });
+        });
+        this.panel.querySelectorAll('[data-repair-id]').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const service = services.find((entry) => entry.id === button.dataset.repairId);
+                if (!service) return;
+                const result = this.onRepairService?.(service);
+                if (result?.ok) this.render();
             });
         });
     }

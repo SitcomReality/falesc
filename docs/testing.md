@@ -201,7 +201,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `service-floors.mjs` | Builds a Canteen, opens the interior stack, adds Dormer and Roof Garden floors, checks capacity/upkeep/quality and reload persistence. | Adds a Dormer and a Roof Garden to an active canteen, checks floor plans, capacity/quality/upkeep/lumen, the floor button hiding at three floors, the world stack and save/reload. |
 | `housing-residents.mjs` | Opens the Welcome Post record, checks Residents here, a six-bed ground floor and opens a resident. |
 | `service-rename.mjs` | Renames a Canteen to The Long Table, checks the title and confirms the name saves. |
-| `service-roster.mjs` | Builds a Canteen, opens the roster, checks two rows and opens the Canteen record. |
+| `service-roster.mjs` | Wears the Welcome Post, opens the roster, repairs it from its row and opens the Canteen record. |
 | `service-regulars.mjs` | Visits a Canteen for a day, opens its record, checks the Last seen here names and opens a resident from the list. |
 | `repair-all.mjs` | Wears two services, repairs all from the pause menu and checks both are full and 6 lumen spent. |
 | `report-worn.mjs` | Wears the Welcome Post, opens a day, checks the report warns Worn at 40%, then repairs all from the report. |

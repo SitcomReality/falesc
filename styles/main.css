@@ -5251,3 +5251,20 @@ body.is-photo-mode .care-watch {
 .end__motto[hidden] {
     display: none;
 }
+
+.service-roster__repair {
+    grid-column: 1 / -1;
+    justify-self: start;
+    min-height: 26px;
+    padding: 3px 9px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--mint);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+}

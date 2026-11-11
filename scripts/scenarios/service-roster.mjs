@@ -12,6 +12,8 @@ export default async function ({ page, assert, screenshot }) {
         const cell = window.__falesc.findFreeCell('canteen');
         const result = app.charter.build({ programId: 'canteen', sectorId: cell.sectorId, u: cell.u, v: cell.v, name: 'Roster Canteen' });
         app.syncViews();
+        app.charter.services.services.find((service) => service.fixed).condition = 40;
+        app.gameScreen.updateHud(true);
         return result.ok;
     })()`);
     await page.click('[data-testid=hud-menu]');
@@ -21,8 +23,11 @@ export default async function ({ page, assert, screenshot }) {
     const text = await page.text('[data-testid=service-roster]');
     assert.ok(text.includes('Welcome Post'));
     assert.ok(text.includes('Roster Canteen'));
+    assert.ok(await page.visible('[data-repair-id]'));
     await page.pause(300);
     await screenshot('service-roster.png');
+    await page.click('[data-repair-id]');
+    assert.equal(await page.evaluate("window.__falesc.app.charter.services.services.find((service) => service.fixed).condition"), 100);
     await page.click('.service-roster__row:nth-child(2)');
     await page.waitFor("window.__falesc.app.serviceCard.isOpen === true");
     assert.ok((await page.text('[data-testid=structure-modal]')).includes('Roster Canteen'));
