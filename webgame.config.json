@@ -58,8 +58,8 @@
     },
     {
       "name": "world contents",
-      "assert": "(() => { const s = window.__falesc.snapshot(); return s.seed === 12345 && s.characters === 15 && s.minerals > 0 && s.actionsRemaining === 1; })()",
-      "message": "expected seeded world with 15 characters, minerals, and one build action"
+      "assert": "(() => { const s = window.__falesc.snapshot(); return s.seed === 12345 && s.characters === 15 && s.minerals > 0 && s.actionsRemaining === 1 && s.lumen === 8 && s.dayLimit === 14 && s.selectedBlueprint === 'prism_rig'; })()",
+      "message": "expected seeded world with 15 characters, minerals, one build action, and the starting economy"
     },
     {
       "name": "playing screenshot",
@@ -84,8 +84,8 @@
     },
     {
       "name": "building is pending",
-      "assert": "(() => { const s = window.__falesc.snapshot(); return s.buildings === 1 && s.buildingStates[0] === 'PENDING' && s.actionsRemaining === 0; })()",
-      "message": "expected one PENDING building and no actions left"
+      "assert": "(() => { const s = window.__falesc.snapshot(); return s.buildings === 1 && s.buildingStates[0] === 'PENDING' && s.actionsRemaining === 0 && s.lumen === 5; })()",
+      "message": "expected one PENDING building, no actions left, and the blueprint cost paid"
     },
     {
       "name": "pending screenshot",
@@ -118,12 +118,28 @@
     },
     {
       "name": "turn 3 and active building",
-      "assert": "(() => { const s = window.__falesc.snapshot(); return s.state === 'PLAYING' && s.turn === 3 && s.buildingStates[0] === 'ACTIVE'; })()",
-      "message": "expected turn 3 in PLAYING with an ACTIVE building"
+      "assert": "(() => { const s = window.__falesc.snapshot(); return s.state === 'PLAYING' && s.turn === 3 && s.buildingStates[0] === 'ACTIVE' && s.income === 2; })()",
+      "message": "expected turn 3 in PLAYING with an ACTIVE Prism Rig producing income"
     },
     {
       "name": "active screenshot",
       "screenshot": "building-active.png"
+    },
+    {
+      "name": "open charter menu",
+      "click": "[data-testid=hud-menu]"
+    },
+    {
+      "name": "charter menu is visible",
+      "assertVisible": "[data-testid=charter-menu]"
+    },
+    {
+      "name": "resume from charter menu",
+      "click": "[data-testid=resume-game]"
+    },
+    {
+      "name": "charter menu is closed",
+      "assert": "window.__falesc.app.stateManager.activeScreen.pausePanel.hidden === true"
     },
     {
       "name": "zoom out to map overview",
@@ -151,7 +167,7 @@
     },
     {
       "name": "end game closes modal",
-      "click": "[data-testid=end-game]"
+      "eval": "(() => { window.__falesc.app.stateManager.endGame('abandon'); return window.__falesc.snapshot().state; })()"
     },
     {
       "name": "modal is closed after ending",

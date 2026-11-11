@@ -24,9 +24,11 @@ export const NPC_PARAMS = {
 };
 
 export class NPCController {
-    constructor(character, bounds) {
+    constructor(character, bounds, homeSector = null, game = null) {
         this.character = character;
         this.bounds = bounds;
+        this.homeSector = homeSector;
+        this.game = game;
         
         this.timer = 0;
         this.state = 'IDLE'; 
@@ -41,6 +43,49 @@ export class NPCController {
 
     setBounds(newBounds) {
         this.bounds = newBounds;
+    }
+
+    setHomeSector(sector) {
+        this.homeSector = sector;
+    }
+
+    /**
+     * Land-aware walk test. When a character has a home island, it may only
+     * stand on that island's shape and must route around occupied grid cells.
+     * Legacy characters without a sector keep the old rectangular bounds.
+     */
+    isWalkable(x, y) {
+        if (this.homeSector) {
+            if (!this.homeSector.containsPoint(x, y)) return false;
+        } else {
+            const pad = NPC_PARAMS.boundaryPadding;
+            if (x < pad || y < pad ||
+                x > this.bounds.width - pad || y > this.bounds.height - pad) return false;
+        }
+        if (this.game?.buildingManager?.isWorldBlocked(x, y)) return false;
+        return true;
+    }
+
+    steerTowardLand() {
+        const c = this.character;
+        if (!this.homeSector) {
+            // Old rectangular reflection, used only by legacy callers.
+            const pad = NPC_PARAMS.boundaryPadding;
+            if (c.x < pad) c.x = pad;
+            if (c.x > this.bounds.width - pad) c.x = this.bounds.width - pad;
+            if (c.y < pad) c.y = pad;
+            if (c.y > this.bounds.height - pad) c.y = this.bounds.height - pad;
+            this.targetFacing = Math.random() * Math.PI * 2;
+            return;
+        }
+
+        const dx = this.homeSector.centerX - c.x;
+        const dy = this.homeSector.centerY - c.y;
+        this.targetFacing = Math.atan2(dx, dy) + (Math.random() - 0.5) * 1.1;
+        this.currentTurnRate = 0;
+        c.state = ANIMATION_STATES.WALK;
+        c.speed = NPC_PARAMS.walkSpeed * 0.3;
+        this.timer = Math.max(this.timer, 1.2);
     }
 
     update(dt) {
@@ -142,45 +187,38 @@ export class NPCController {
         // Coordinate alignment: 0 = Front/Down, PI/2 = Right
         const baseSpeed = c.state === ANIMATION_STATES.RUN ? NPC_PARAMS.runSpeed : NPC_PARAMS.walkSpeed; 
         
-        // Use sin for X and cos for Y to align with Renderer's "0 = Front" orientation
-        c.x += Math.sin(c.facing) * baseSpeed * dt;
-        c.y += Math.cos(c.facing) * baseSpeed * dt;
+        // Use sin for X and cos for Y to align with Renderer's "0 = Front" orientation.
+        // Test the actual destination before committing so NPCs never step onto
+        // empty ocean, through a building, or off their home island.
+        const nx = c.x + Math.sin(c.facing) * baseSpeed * dt;
+        const ny = c.y + Math.cos(c.facing) * baseSpeed * dt;
 
-        // Bounds Checking (Bounce)
-        const pad = NPC_PARAMS.boundaryPadding;
-        let bouncedX = false;
-        let bouncedY = false;
-
-        if (c.x < pad) {
-            c.x = pad;
-            bouncedX = true;
-        } else if (c.x > this.bounds.width - pad) {
-            c.x = this.bounds.width - pad;
-            bouncedX = true;
+        if (this.isWalkable(nx, ny)) {
+            c.x = nx;
+            c.y = ny;
+            return;
         }
 
-        if (c.y < pad) {
-            c.y = pad;
-            bouncedY = true;
-        } else if (c.y > this.bounds.height - pad) {
-            c.y = this.bounds.height - pad;
-            bouncedY = true;
+        // Soft separation from other Tidelanders, then steer back toward land.
+        if (this.game?.characters) {
+            for (const other of this.game.characters) {
+                if (other === c) continue;
+                const dx = c.x - other.x;
+                const dy = c.y - other.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 0 && dist < 34) {
+                    const push = (34 - dist) * 0.5;
+                    const sx = c.x + (dx / dist) * push;
+                    const sy = c.y + (dy / dist) * push;
+                    if (this.isWalkable(sx, sy)) {
+                        c.x = sx;
+                        c.y = sy;
+                    }
+                }
+            }
         }
 
-        if (bouncedX) {
-             // Reflect across vertical: angle -> -angle
-             // Must update both current and target to preserve turn intention relative to new path
-             c.facing = -c.facing;
-             this.targetFacing = -this.targetFacing;
-             // Don't flip turnRate; a left turn is still a left turn relative to new heading? 
-             // Actually, geometrically, if reflecting, the chirality might swap. 
-             // But simpler to leave it, they will just spiral the other way relative to world.
-        }
-        if (bouncedY) {
-            // Reflect across horizontal: angle -> PI - angle
-            c.facing = Math.PI - c.facing;
-            this.targetFacing = Math.PI - this.targetFacing;
-        }
+        this.steerTowardLand();
     }
 
     shortestAngleDist(from, to) {

@@ -1,151 +1,190 @@
+import { blueprintIcon } from './icons.js';
+import { effectiveCost } from '../buildings/blueprints.js';
+
+/**
+ * Themed build prompt with a focus trap and a real backdrop.
+ *
+ * `onBuild(name)` returns `{ ok: true }` or `{ ok: false, error }`; the modal
+ * only closes on success.
+ */
 export class BuildModal {
-    constructor(onBuild, onCancel, inputManager) {
+    constructor({ onBuild, onCancel, inputManager }) {
         this.onBuild = onBuild;
         this.onCancel = onCancel;
         this.inputManager = inputManager;
         this.isOpen = false;
-        
+        this.lastFocused = null;
+        this.blueprint = null;
+
         this.container = document.createElement('div');
-        this.container.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #222;
-            border: 2px solid #555;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            font-family: 'Noto Sans', sans-serif;
-            color: #fff;
-            z-index: 2000;
-            min-width: 300px;
-            max-width: calc(100vw - 64px);
-            box-sizing: border-box;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        `;
-        
-        const title = document.createElement('h3');
-        title.id = 'build-modal-title';
-        title.textContent = 'Construct Building';
-        title.style.margin = '0 0 8px 0';
+        this.container.className = 'modal-scrim';
+        this.container.dataset.testid = 'build-modal-scrim';
 
-        this.container.setAttribute('role', 'dialog');
-        this.container.setAttribute('aria-modal', 'true');
-        this.container.setAttribute('aria-labelledby', 'build-modal-title');
+        this.panel = document.createElement('div');
+        this.panel.className = 'modal';
+        this.panel.dataset.testid = 'build-modal';
+        this.panel.setAttribute('role', 'dialog');
+        this.panel.setAttribute('aria-modal', 'true');
+        this.panel.setAttribute('aria-labelledby', 'build-modal-title');
 
-        const label = document.createElement('label');
-        label.textContent = 'Building Name:';
-        label.htmlFor = 'build-name-input';
+        this.panel.innerHTML = `
+            <div class="modal__head">
+                <div>
+                    <p class="kicker" style="color:var(--wine)">Build · one per tide</p>
+                    <h3 class="modal__title" id="build-modal-title">Raise a structure</h3>
+                </div>
+                <button type="button" class="modal__close" data-testid="build-close" aria-label="Close build dialog">×</button>
+            </div>
+            <div class="blueprint-summary">
+                <span class="blueprint-summary__icon" data-role="icon" aria-hidden="true"></span>
+                <span class="blueprint-summary__body">
+                    <span class="blueprint-summary__name" data-role="name">Prism Rig</span>
+                    <span class="blueprint-summary__stats" data-role="stats"></span>
+                </span>
+            </div>
+            <p class="modal__blurb" data-role="blurb"></p>
+            <label class="modal__label" for="build-name-input">Name this structure</label>
+            <input class="modal__input" id="build-name-input" data-testid="build-name" type="text" maxlength="40" autocomplete="off" spellcheck="false">
+            <p class="modal__error" data-role="error" aria-live="polite"></p>
+            <div class="modal__actions">
+                <button type="button" class="btn btn--paper" data-testid="build-cancel">Cancel</button>
+                <button type="button" class="btn btn--primary" data-testid="build-submit">Reserve</button>
+            </div>
+        `;
 
-        this.input = document.createElement('input');
-        this.input.type = 'text';
-        this.input.id = 'build-name-input';
-        this.input.dataset.testid = 'build-name';
-        this.input.placeholder = 'My Structure';
-        this.input.style.cssText = `
-            padding: 8px;
-            background: #333;
-            border: 1px solid #555;
-            color: #fff;
-            font-family: inherit;
-        `;
-        
-        const btnRow = document.createElement('div');
-        btnRow.style.cssText = `
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 8px;
-        `;
-        
-        const cancelBtn = this.createButton('Cancel', () => this.hide());
-        cancelBtn.dataset.testid = 'build-cancel';
-        cancelBtn.style.background = '#444';
-        
-        const buildBtn = this.createButton('Reserve', () => {
-            const name = this.input.value.trim() || 'Untitled';
-            this.onBuild(name);
-            this.hide(false);
-        });
-        buildBtn.dataset.testid = 'build-submit';
-        buildBtn.style.background = '#4ECDC4';
-        buildBtn.style.color = '#000';
-        
-        btnRow.appendChild(cancelBtn);
-        btnRow.appendChild(buildBtn);
-        
-        this.container.dataset.testid = 'build-modal';
-        this.container.appendChild(title);
-        this.container.appendChild(label);
-        this.container.appendChild(this.input);
-        this.container.appendChild(btnRow);
-        
+        this.iconEl = this.panel.querySelector('[data-role=icon]');
+        this.nameEl = this.panel.querySelector('[data-role=name]');
+        this.statsEl = this.panel.querySelector('[data-role=stats]');
+        this.blurbEl = this.panel.querySelector('[data-role=blurb]');
+        this.input = this.panel.querySelector('[data-testid=build-name]');
+        this.errorEl = this.panel.querySelector('[data-role=error]');
+        this.submitBtn = this.panel.querySelector('[data-testid=build-submit]');
+        this.cancelBtn = this.panel.querySelector('[data-testid=build-cancel]');
+        this.closeBtn = this.panel.querySelector('[data-testid=build-close]');
+
+        this.container.appendChild(this.panel);
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
-        
-        // Prevent click propagation to game canvas
-        this.container.addEventListener('pointerdown', e => e.stopPropagation());
 
-        // Allow Enter to submit and Escape to cancel while typing
-        this._onKey = (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                buildBtn.click();
-            } else if (e.key === 'Escape') {
-                e.preventDefault();
-                this.hide();
+        this.container.addEventListener('pointerdown', (event) => event.stopPropagation());
+        this.container.addEventListener('click', (event) => {
+            if (event.target === this.container) this.hide();
+        });
+
+        this.closeBtn.addEventListener('click', () => this.hide());
+        this.cancelBtn.addEventListener('click', () => this.hide());
+        this.submitBtn.addEventListener('click', () => this.submit());
+
+        this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
+        this.input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                this.submit();
             }
-        };
-        this._onDocumentKey = (e) => {
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                this.hide();
-            }
-        };
+        });
     }
-    
-    createButton(text, onClick) {
-        const btn = document.createElement('button');
-        btn.textContent = text;
-        btn.style.cssText = `
-            padding: 8px 16px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            font-family: inherit;
-        `;
-        btn.onclick = onClick;
-        return btn;
-    }
-    
-    show() {
+
+    show(blueprint, lumen, buildings = []) {
         if (this.isOpen) return;
         this.isOpen = true;
+        this.blueprint = blueprint;
+        this.buildings = buildings;
+        this.lumen = lumen;
+        this.lastFocused = document.activeElement;
+
+        const cost = effectiveCost(blueprint, buildings);
+        this.iconEl.innerHTML = blueprintIcon(blueprint.id);
+        this.nameEl.textContent = blueprint.name;
+        this.statsEl.innerHTML = `
+            <span><strong>${cost} lumen</strong></span>
+            ${blueprint.income ? `<span>+${blueprint.income} lumen / tide</span>` : ''}
+            ${blueprint.beaconDiscount ? `<span>Beacon −${blueprint.beaconDiscount}</span>` : ''}
+            ${blueprint.unique ? '<span>Charter structure</span>' : ''}
+        `;
+        this.blurbEl.textContent = blueprint.blurb;
         this.input.value = '';
+        this.input.placeholder = `Name your ${blueprint.name}`;
+        this.errorEl.textContent = '';
+        this.submitBtn.disabled = Number(lumen) < cost;
+        this.submitBtn.textContent = this.submitBtn.disabled ? 'Not enough lumen' : 'Reserve plot';
+
         this.container.style.display = 'flex';
-        // Tell input manager to ignore global key binds while modal open
+        this.container.classList.add('is-open');
+        this.container.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('has-modal');
+
         if (this.inputManager && typeof this.inputManager.setModalOpen === 'function') {
             this.inputManager.setModalOpen(true);
         }
-        // Focus and listen for local key handling
-        this.input.focus();
-        this.input.addEventListener('keydown', this._onKey);
-        document.addEventListener('keydown', this._onDocumentKey);
+
+        // Defer focus until the scrim is painted; helps Safari and avoids a
+        // scroll jump on some mobile browsers.
+        requestAnimationFrame(() => {
+            if (this.isOpen) this.input.focus({ preventScroll: true });
+        });
     }
-    
+
+    updateAffordability(lumen) {
+        if (!this.isOpen || !this.blueprint) return;
+        this.lumen = lumen;
+        const cost = effectiveCost(this.blueprint, this.buildings || []);
+        this.submitBtn.disabled = Number(lumen) < cost;
+        this.submitBtn.textContent = this.submitBtn.disabled ? 'Not enough lumen' : 'Reserve plot';
+    }
+
+    submit() {
+        if (!this.isOpen) return;
+        if (this.submitBtn.disabled) return;
+        const raw = this.input.value.trim();
+        const name = raw || this.blueprint?.name || 'Untitled';
+        const result = this.onBuild(name);
+        if (result && result.ok === false) {
+            this.errorEl.textContent = result.error || 'That plot cannot be built on.';
+            this.input.focus({ preventScroll: true });
+            return;
+        }
+        this.hide(false);
+    }
+
+    onKeyDown(event) {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            this.hide();
+            return;
+        }
+        if (event.key !== 'Tab') return;
+        const focusable = Array.from(
+            this.panel.querySelectorAll('button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])')
+        ).filter((el) => el.offsetParent !== null);
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
+
     hide(cancelled = true) {
         if (!this.isOpen) return;
         this.isOpen = false;
         this.container.style.display = 'none';
-        // Restore input manager behavior
+        this.container.classList.remove('is-open');
+        this.container.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('has-modal');
+
         if (this.inputManager && typeof this.inputManager.setModalOpen === 'function') {
             this.inputManager.setModalOpen(false);
         }
-        this.input.removeEventListener('keydown', this._onKey);
-        document.removeEventListener('keydown', this._onDocumentKey);
+
+        if (this.lastFocused && typeof this.lastFocused.focus === 'function') {
+            this.lastFocused.focus({ preventScroll: true });
+        }
+        this.lastFocused = null;
+
         if (cancelled && this.onCancel) this.onCancel();
     }
 }
-

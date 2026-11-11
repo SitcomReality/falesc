@@ -1,206 +1,258 @@
+const SIZE_DATA = {
+    small: { islands: 4, minerals: 30, days: 12, label: 'A quiet shelf', note: 'Four islets, a short run.' },
+    medium: { islands: 6, minerals: 50, days: 14, label: 'A working archipelago', note: 'Six islets, room to breathe.' },
+    large: { islands: 7, minerals: 70, days: 16, label: 'A wide prism field', note: 'Seven islets, a longer tide.' }
+};
+
+const ISLAND_PATHS = [
+    'M70 92c22-28 63-34 91-14 22 16 21 43-3 55-29 14-70 10-88-11-12-14-9-22 0-30Z',
+    'M224 58c30-18 70-7 80 20 8 22-11 39-38 42-32 4-62-12-60-33 1-11 8-22 18-29Z',
+    'M366 106c28-24 73-16 85 12 11 25-15 49-50 50-32 1-59-15-57-34 1-10 8-20 22-28Z',
+    'M126 190c26-21 68-19 83 6 13 22-9 43-40 44-33 1-62-12-60-29 1-8 7-16 17-21Z',
+    'M286 204c30-26 79-17 91 13 10 25-17 46-51 44-36-2-63-20-58-38 2-7 8-13 18-19Z',
+    'M428 214c18-17 46-12 54 7 7 17-12 33-35 32-22 0-39-10-37-22 1-6 8-12 18-17Z',
+    'M34 212c15-14 38-10 44 6 6 15-10 28-29 27-19 0-33-8-32-18 0-5 7-10 17-15Z'
+];
+
 export class LobbyScreen {
     constructor(gameStateManager) {
         this.gsm = gameStateManager;
         this.fieldCounter = 0;
+
         this.container = document.createElement('div');
-        this.container.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #1a1a1a;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Noto Sans', sans-serif;
-            color: #fff;
-            z-index: 1000;
+        this.container.className = 'screen screen--lobby';
+        this.container.dataset.testid = 'lobby-screen';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'lobby__wrap';
+
+        const sheet = document.createElement('section');
+        sheet.className = 'lobby__sheet paper';
+        sheet.innerHTML = `
+            <p class="eyebrow" style="color:var(--wine)">Charter office · sheet no. 03</p>
+            <h2 class="lobby__title">Choose your tide.</h2>
+            <p class="lobby__lede">Every charter begins with a seed, a shore, and one stubborn lamp. Pick the shape of your archipelago.</p>
         `;
-        
-        const title = document.createElement('h2');
-        title.textContent = 'Game Lobby';
-        title.style.cssText = `
-            font-size: 36px;
-            margin-bottom: 40px;
-        `;
-        
-        // Map Settings Form
-        const settingsContainer = document.createElement('div');
-        settingsContainer.style.cssText = `
-            margin-bottom: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            min-width: 300px;
-        `;
-        
-        // Map Seed Input
-        const seedGroup = this.createInputGroup('Map Seed:', 'number', this.gsm.settings.mapSeed, (value) => {
-            const parsed = Number.parseInt(value, 10);
-            if (Number.isInteger(parsed)) this.gsm.settings.mapSeed = parsed;
-        });
-        seedGroup.input.dataset.testid = 'lobby-seed';
-        
-        // Random Seed Button
-        const randomSeedBtn = this.createButton('Random', () => {
-            const newSeed = Math.floor(Math.random() * 1000000);
-            this.gsm.settings.mapSeed = newSeed;
-            seedGroup.input.value = newSeed;
-        }, true);
-        randomSeedBtn.dataset.testid = 'lobby-random-seed';
-        randomSeedBtn.style.marginLeft = '10px';
-        seedGroup.container.appendChild(randomSeedBtn);
-        
-        // Map Size Select
-        const sizeGroup = this.createSelectGroup('Map Size:', 
-            ['small', 'medium', 'large'], 
-            this.gsm.settings.mapSize,
-            (value) => {
-                this.gsm.settings.mapSize = value;
-            }
-        );
-        sizeGroup.querySelector('select').dataset.testid = 'lobby-size';
-        
-        settingsContainer.appendChild(seedGroup.container);
-        settingsContainer.appendChild(sizeGroup);
-        
-        const buttonContainer = document.createElement('div');
-        buttonContainer.style.cssText = `
-            display: flex;
-            gap: 12px;
-        `;
-        
-        const startBtn = this.createButton('Start Game', () => {
+
+        const form = document.createElement('form');
+        form.className = 'lobby__form';
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
             this.gsm.startGame();
         });
-        startBtn.dataset.testid = 'lobby-start';
-        
-        const backBtn = this.createButton('Back', () => {
-            this.gsm.setState('MENU');
+
+        // Seed -------------------------------------------------------------
+        const seedField = document.createElement('div');
+        seedField.className = 'field';
+
+        const seedLabel = document.createElement('label');
+        seedLabel.className = 'field__label';
+        seedLabel.htmlFor = 'lobby-seed-field';
+        seedLabel.textContent = 'Chart seed';
+
+        const seedRow = document.createElement('div');
+        seedRow.className = 'seed-row';
+
+        this.seedInput = document.createElement('input');
+        this.seedInput.className = 'input';
+        this.seedInput.id = 'lobby-seed-field';
+        this.seedInput.type = 'number';
+        this.seedInput.inputMode = 'numeric';
+        this.seedInput.value = this.gsm.settings.mapSeed;
+        this.seedInput.dataset.testid = 'lobby-seed';
+
+        const randomBtn = document.createElement('button');
+        randomBtn.type = 'button';
+        randomBtn.className = 'btn btn--small btn--paper';
+        randomBtn.dataset.testid = 'lobby-random-seed';
+        randomBtn.textContent = 'Roll';
+        randomBtn.title = 'Roll a new seed';
+
+        seedRow.append(this.seedInput, randomBtn);
+
+        const seedHint = document.createElement('span');
+        seedHint.className = 'field__hint';
+        seedHint.textContent = 'The same seed always raises the same islands.';
+
+        seedField.append(seedLabel, seedRow, seedHint);
+
+        const setSeed = (value, fromInput = false) => {
+            const parsed = Number.parseInt(value, 10);
+            if (!Number.isInteger(parsed)) return;
+            this.gsm.settings.mapSeed = parsed;
+            this.seedInput.value = parsed;
+            this._updateChart();
+        };
+        this.seedInput.addEventListener('change', (event) => setSeed(event.target.value));
+        this.seedInput.addEventListener('input', (event) => {
+            if (!fromInput) setSeed(event.target.value, true);
         });
+        randomBtn.addEventListener('click', () => {
+            const next = Math.floor(Math.random() * 1000000);
+            this.gsm.settings.mapSeed = next;
+            this.seedInput.value = next;
+            this._updateChart();
+            this.seedInput.focus();
+        });
+
+        // Map size ---------------------------------------------------------
+        const sizeField = document.createElement('fieldset');
+        sizeField.className = 'size-picker';
+        const legend = document.createElement('legend');
+        legend.className = 'field__label';
+        legend.textContent = 'Chart size';
+        legend.style.marginBottom = '8px';
+        sizeField.appendChild(legend);
+
+        this.sizeInputs = new Map();
+        for (const [value, data] of Object.entries(SIZE_DATA)) {
+            const card = document.createElement('label');
+            card.className = 'size-card';
+            card.innerHTML = `
+                <input type="radio" name="map-size" value="${value}">
+                <span class="size-card__glyph" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="size-card__name">${value}</span>
+                <span class="size-card__meta">${data.islands} islets</span>
+            `;
+            const input = card.querySelector('input');
+            input.addEventListener('change', () => {
+                if (input.checked) this._setSize(value);
+            });
+            this.sizeInputs.set(value, input);
+            sizeField.appendChild(card);
+        }
+
+        // A native select remains in the DOM for automation and assistive tech
+        // that prefers a plain control. The cards are the visible control.
+        this.sizeSelect = document.createElement('select');
+        this.sizeSelect.className = 'visually-hidden';
+        this.sizeSelect.dataset.testid = 'lobby-size';
+        this.sizeSelect.tabIndex = -1;
+        for (const value of Object.keys(SIZE_DATA)) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            this.sizeSelect.appendChild(option);
+        }
+        this.sizeSelect.addEventListener('change', (event) => this._setSize(event.target.value));
+        sizeField.appendChild(this.sizeSelect);
+
+        // Actions ---------------------------------------------------------
+        const actions = document.createElement('div');
+        actions.className = 'lobby__actions';
+
+        const startBtn = document.createElement('button');
+        startBtn.type = 'submit';
+        startBtn.className = 'btn btn--primary';
+        startBtn.dataset.testid = 'lobby-start';
+        startBtn.innerHTML = 'Sign the charter <span class="btn__arrow" aria-hidden="true">→</span>';
+
+        const backBtn = document.createElement('button');
+        backBtn.type = 'button';
+        backBtn.className = 'btn btn--ghost';
+        backBtn.style.color = 'var(--ink)';
         backBtn.dataset.testid = 'lobby-back';
-        
-        buttonContainer.appendChild(startBtn);
-        buttonContainer.appendChild(backBtn);
-        
-        this.container.dataset.testid = 'lobby-screen';
-        this.container.appendChild(title);
-        this.container.appendChild(settingsContainer);
-        this.container.appendChild(buttonContainer);
-        
+        backBtn.textContent = 'Back to the water';
+
+        actions.append(startBtn, backBtn);
+        backBtn.addEventListener('click', () => this.gsm.setState('MENU'));
+
+        form.append(seedField, sizeField, actions);
+        sheet.appendChild(form);
+
+        // Chart ------------------------------------------------------------
+        const chart = document.createElement('aside');
+        chart.className = 'lobby__chart';
+        chart.setAttribute('aria-hidden', 'true');
+        chart.innerHTML = `
+            <div class="lobby__chart-head">
+                <div>
+                    <p class="kicker">Survey sheet</p>
+                    <p class="kicker" style="color:var(--paper);margin-top:3px">The Glass Sea</p>
+                </div>
+                <span class="chart-badge">FSC / 03</span>
+            </div>
+            <div class="chart-illustration"></div>
+            <dl class="chart-readout">
+                <div><dt>Islets</dt><dd data-chart="islands">6</dd></div>
+                <div><dt>Minerals</dt><dd data-chart="minerals">50</dd></div>
+                <div><dt>Tide limit</dt><dd data-chart="days">14</dd></div>
+                <div><dt>Seed</dt><dd data-chart="seed" style="font-family:var(--mono);font-size:16px">—</dd></div>
+            </dl>
+            <div class="chart-compass" aria-hidden="true">N</div>
+        `;
+        this.chartIllustration = chart.querySelector('.chart-illustration');
+
+        wrap.append(sheet, chart);
+        this.container.append(wrap);
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
+
+        this._setSize(this.gsm.settings.mapSize, false);
     }
 
-    createInputGroup(label, type, defaultValue, onChange) {
-        const container = document.createElement('div');
-        container.style.cssText = `
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        `;
-        
-        const labelEl = document.createElement('label');
-        labelEl.textContent = label;
-        labelEl.style.cssText = `
-            font-size: 16px;
-            margin-right: 12px;
-        `;
-        
-        const input = document.createElement('input');
-        input.type = type;
-        input.id = `lobby-field-${this.fieldCounter++}`;
-        labelEl.htmlFor = input.id;
-        input.value = defaultValue;
-        input.style.cssText = `
-            padding: 8px 12px;
-            font-size: 14px;
-            font-family: 'Noto Sans', sans-serif;
-            background: #2a2a2a;
-            color: #fff;
-            border: 1px solid #444;
-            width: 120px;
-        `;
-        
-        input.addEventListener('change', (e) => onChange(e.target.value));
-        
-        container.appendChild(labelEl);
-        container.appendChild(input);
-        
-        return { container, input };
+    _setSize(value, dispatch = true) {
+        const data = SIZE_DATA[value] || SIZE_DATA.medium;
+        this.gsm.settings.mapSize = value;
+        if (this.sizeInputs) {
+            for (const [key, input] of this.sizeInputs) input.checked = key === value;
+        }
+        if (this.sizeSelect && this.sizeSelect.value !== value) this.sizeSelect.value = value;
+        this._updateChart();
+        if (dispatch) {
+            // Keep the native select's value in sync for automation that reads
+            // it back after choosing a card.
+            this.sizeSelect.value = value;
+        }
+        return data;
     }
 
-    createSelectGroup(label, options, defaultValue, onChange) {
-        const container = document.createElement('div');
-        container.style.cssText = `
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        `;
-        
-        const labelEl = document.createElement('label');
-        labelEl.textContent = label;
-        labelEl.style.cssText = `
-            font-size: 16px;
-            margin-right: 12px;
-        `;
-        
-        const select = document.createElement('select');
-        select.id = `lobby-field-${this.fieldCounter++}`;
-        labelEl.htmlFor = select.id;
-        select.style.cssText = `
-            padding: 8px 12px;
-            font-size: 14px;
-            font-family: 'Noto Sans', sans-serif;
-            background: #2a2a2a;
-            color: #fff;
-            border: 1px solid #444;
-            cursor: pointer;
-        `;
-        
-        options.forEach(opt => {
-            const option = document.createElement('option');
-            option.value = opt;
-            option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
-            option.selected = opt === defaultValue;
-            select.appendChild(option);
-        });
-        
-        select.addEventListener('change', (e) => onChange(e.target.value));
-        
-        container.appendChild(labelEl);
-        container.appendChild(select);
-        
-        return container;
-    }
+    _updateChart() {
+        const data = SIZE_DATA[this.gsm.settings.mapSize] || SIZE_DATA.medium;
+        const seed = this.gsm.settings.mapSeed;
 
-    createButton(text, onClick, small = false) {
-        const btn = document.createElement('button');
-        btn.textContent = text;
-        btn.style.cssText = `
-            padding: ${small ? '8px 16px' : '16px 48px'};
-            font-size: ${small ? '14px' : '18px'};
-            font-family: 'Noto Sans', sans-serif;
-            background: #fff;
-            color: #1a1a1a;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.1s;
+        const count = data.islands;
+        const paths = ISLAND_PATHS.slice(0, count).map((path, index) => {
+            const fill = index % 3 === 0 ? '#59E3C2' : index % 3 === 1 ? '#FFA07A' : '#C9B6FF';
+            return `<path d="${path}" fill="${fill}" fill-opacity=".28" stroke="${fill}" stroke-width="1.5"/>`;
+        }).join('');
+
+        this.chartIllustration.innerHTML = `
+            <svg viewBox="0 0 500 300" fill="none" aria-hidden="true">
+                <defs>
+                    <pattern id="chartGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                        <path d="M30 0H0V30" stroke="#FFF2D8" stroke-opacity=".1" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <rect x="1" y="1" width="498" height="298" fill="url(#chartGrid)" stroke="#FFF2D8" stroke-opacity=".2"/>
+                <circle cx="250" cy="150" r="118" stroke="#FFF2D8" stroke-opacity=".12" stroke-dasharray="3 7"/>
+                <circle cx="250" cy="150" r="74" stroke="#FFF2D8" stroke-opacity=".1"/>
+                <path d="M250 20v260M20 150h460" stroke="#FFF2D8" stroke-opacity=".08"/>
+                ${paths}
+                <path d="M250 150l38-38" stroke="#FF6B5E" stroke-width="1.5" stroke-dasharray="2 4"/>
+                <circle cx="250" cy="150" r="4" fill="#FFD36E"/>
+                <text x="264" y="142" fill="#FFF2D8" fill-opacity=".55" font-family="monospace" font-size="9">HOME TIDE</text>
+                <text x="22" y="280" fill="#FFF2D8" fill-opacity=".4" font-family="monospace" font-size="9">LAT 18.46° S · NODE-05</text>
+                <text x="472" y="34" fill="#FFF2D8" fill-opacity=".4" font-family="monospace" font-size="9" text-anchor="end">SHEET 03</text>
+            </svg>
         `;
-        btn.onmouseenter = () => btn.style.transform = 'scale(1.05)';
-        btn.onmouseleave = () => btn.style.transform = 'scale(1)';
-        btn.onclick = onClick;
-        return btn;
+
+        for (const el of this.container.querySelectorAll('[data-chart]')) {
+            const key = el.dataset.chart;
+            if (key === 'seed') el.textContent = Number.isInteger(seed) ? String(seed) : '—';
+            else if (key === 'islands') el.textContent = String(data.islands);
+            else if (key === 'minerals') el.textContent = String(data.minerals);
+            else if (key === 'days') el.textContent = String(data.days);
+        }
     }
 
     show() {
         this.container.style.display = 'flex';
+        this.seedInput.value = this.gsm.settings.mapSeed;
+        this._setSize(this.gsm.settings.mapSize);
     }
 
     hide() {
         this.container.style.display = 'none';
     }
 }
-

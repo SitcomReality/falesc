@@ -1,6 +1,7 @@
 import { Building } from './Building.js';
 import { projectGridToWorld } from '../map/GridUtils.js';
 import { TILE_WIDTH, TILE_HEIGHT } from '../constants.js';
+import { BLUEPRINT_BY_ID } from './blueprints.js';
 
 export class BuildingManager {
     constructor(app, map, parentContainer) {
@@ -21,7 +22,7 @@ export class BuildingManager {
         return this.buildings.some(b => b.sectorId === sectorId && b.u === iu && b.v === iv);
     }
     
-    createBuilding(sectorId, u, v, name) {
+    createBuilding(sectorId, u, v, name, blueprintId = 'prism_rig') {
         const iu = Math.floor(u);
         const iv = Math.floor(v);
 
@@ -42,7 +43,7 @@ export class BuildingManager {
         }
         
         const id = `b_${Date.now()}_${Math.floor(Math.random()*1000)}`;
-        const building = new Building(id, sectorId, iu, iv, name);
+        const building = new Building(id, sectorId, iu, iv, name, blueprintId);
         
         // Grid centers
         const pos = projectGridToWorld(iu + 0.5, iv + 0.5, sector.centerX, sector.centerY, sector.gridSize, TILE_WIDTH, TILE_HEIGHT);
@@ -54,20 +55,56 @@ export class BuildingManager {
         return building;
     }
     
-    processTurn() {
-        let changed = false;
-        this.buildings.forEach(b => {
-            // Advance one step per interstitial:
-            // PENDING -> RESERVED (ghost) -> ACTIVE (solid)
-            if (b.state === 'PENDING') {
-                b.promote();
-                changed = true;
-            } else if (b.state === 'RESERVED') {
-                b.promote();
-                changed = true;
+    /**
+     * Close one tide: collect income from structures that were already working,
+     * then advance every structure under construction by one phase.
+     *
+     * Income is collected before promotion so a structure that becomes ACTIVE
+     * this tide starts contributing on the next one.
+     */
+    resolveTide() {
+        let income = 0;
+        let activeBefore = 0;
+        const promoted = [];
+
+        for (const building of this.buildings) {
+            if (building.state === 'ACTIVE') {
+                activeBefore += 1;
+                income += BLUEPRINT_BY_ID[building.blueprintId]?.income || 0;
             }
-        });
-        return changed;
+        }
+
+        for (const building of this.buildings) {
+            const before = building.state;
+            if (before === 'PENDING' || before === 'RESERVED') {
+                const after = building.promote();
+                promoted.push({ id: building.id, name: building.name, before, after });
+            }
+        }
+
+        const activeAfter = this.buildings.filter((building) => building.state === 'ACTIVE').length;
+        return { income, active: activeAfter, activeBefore, promoted };
+    }
+
+    /** Backwards-compatible alias for callers that only need phase changes. */
+    processTurn() {
+        this.resolveTide();
+        return true;
+    }
+
+    /**
+     * True when a world point falls inside an occupied grid cell. Used by NPCs
+     * so they do not walk through the town.
+     */
+    isWorldBlocked(x, y) {
+        if (!this.map || this.buildings.length === 0) return false;
+        for (const sector of this.map.sectors) {
+            if (!sector.containsPoint(x, y)) continue;
+            const cell = sector.getGridCell(x, y);
+            if (cell.u < 0 || cell.v < 0 || cell.u >= sector.gridSize || cell.v >= sector.gridSize) continue;
+            if (this.isCellOccupied(sector.id, cell.u, cell.v)) return true;
+        }
+        return false;
     }
 
     update(dt) {

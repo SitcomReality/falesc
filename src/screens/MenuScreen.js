@@ -1,76 +1,82 @@
 export class MenuScreen {
     constructor(gameStateManager) {
         this.gsm = gameStateManager;
+
         this.container = document.createElement('div');
-        this.container.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #1a1a1a;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Noto Sans', sans-serif;
-            color: #fff;
-            z-index: 1000;
-        `;
-        
-        const title = document.createElement('h1');
-        title.textContent = 'FALESC';
-        title.style.cssText = `
-            font-size: 64px;
-            margin-bottom: 60px;
-            letter-spacing: 8px;
-        `;
-        
-        const startBtn = this.createButton('Start Game', () => {
-            this.gsm.setState('LOBBY');
-        });
-        startBtn.dataset.testid = 'menu-start';
-        
-        const joinBtn = this.createButton('Join Multiplayer', () => {
-            alert('Multiplayer not yet implemented');
-        });
-        joinBtn.dataset.testid = 'menu-join';
-        
+        this.container.className = 'screen screen--menu';
         this.container.dataset.testid = 'menu-screen';
-        this.container.appendChild(title);
-        this.container.appendChild(startBtn);
-        this.container.appendChild(joinBtn);
-        
+
+        const inner = document.createElement('div');
+        inner.className = 'menu__inner';
+
+        const eyebrow = document.createElement('p');
+        eyebrow.className = 'eyebrow menu__eyebrow';
+        eyebrow.textContent = 'The Glass Sea · A Prism Tide Chronicle';
+
+        const title = document.createElement('h1');
+        title.className = 'menu__title';
+        title.setAttribute('aria-label', 'FALESC');
+        title.innerHTML = 'FALESC<span class="prism" aria-hidden="true">.</span>';
+
+        const tagline = document.createElement('p');
+        tagline.className = 'menu__tagline';
+        tagline.innerHTML = 'Raise a town at the edge of the <em>Glass Sea</em> before the last light goes out.';
+
+        const actions = document.createElement('div');
+        actions.className = 'menu__actions';
+
+        const startBtn = this.createButton('New charter', 'menu-start', () => {
+            this.gsm.setState('LOBBY');
+        }, 'btn btn--primary');
+        startBtn.insertAdjacentHTML('beforeend', '<span class="btn__arrow" aria-hidden="true">→</span>');
+
+        const joinBtn = this.createButton('Multiplayer', 'menu-join', () => {}, 'btn btn--ghost');
+        joinBtn.disabled = true;
+        joinBtn.title = 'Multiplayer is not implemented yet';
+        joinBtn.insertAdjacentHTML('beforeend', '<span class="kicker" style="margin-left:4px;opacity:.7">soon</span>');
+
+        actions.append(startBtn, joinBtn);
+        inner.append(eyebrow, title, tagline, actions);
+
+        const aside = document.createElement('aside');
+        aside.className = 'menu__aside paper';
+        aside.setAttribute('aria-hidden', 'true');
+        aside.innerHTML = `
+            <span class="menu__aside-stamp">◇</span>
+            <p class="kicker">Field note 001</p>
+            <p>One tide, one build. Listen to the crystals. Keep the lanterns lit.</p>
+        `;
+
+        const meta = document.createElement('div');
+        meta.className = 'menu__meta';
+        meta.innerHTML = `
+            <span>Bundled offline · no signals</span>
+            <span class="menu__version">v0.2 — Prism Tide</span>
+        `;
+
+        this.container.append(inner, aside, meta);
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
     }
 
-    createButton(text, onClick) {
+    createButton(text, testid, onClick, className) {
         const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = className;
         btn.textContent = text;
-        btn.style.cssText = `
-            padding: 16px 48px;
-            margin: 12px;
-            font-size: 18px;
-            font-family: 'Noto Sans', sans-serif;
-            background: #fff;
-            color: #1a1a1a;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.1s;
-        `;
-        btn.onmouseenter = () => btn.style.transform = 'scale(1.05)';
-        btn.onmouseleave = () => btn.style.transform = 'scale(1)';
-        btn.onclick = onClick;
+        btn.dataset.testid = testid;
+        btn.addEventListener('click', onClick);
         return btn;
     }
 
     show() {
         this.container.style.display = 'flex';
+        // Let the scene breathe before the first interaction.
+        const first = this.container.querySelector('[data-testid=menu-start]');
+        if (first) first.focus({ preventScroll: true });
     }
 
     hide() {
         this.container.style.display = 'none';
     }
 }
-

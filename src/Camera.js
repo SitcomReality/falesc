@@ -9,6 +9,8 @@ export class Camera {
         this.zoom = 1;
         this.minZoom = 0.2;
         this.maxZoom = 4.0;
+        this.bounds = null;
+        this.boundsPadding = 620;
 
         // Configuration
         this.panSpeed = 800; // Pixels per second
@@ -111,14 +113,59 @@ export class Camera {
         };
     }
 
+    /**
+     * Constrain the camera to the generated island cluster plus a generous
+     * water margin. Also derive a sensible minimum zoom so the player can
+     * always pull back far enough to see the whole archipelago.
+     */
+    setBounds(bounds) {
+        this.bounds = bounds;
+        if (!bounds) return;
+        const screen = this.app.screen;
+        const fit = Math.min(
+            screen.width / Math.max(1, bounds.width + this.boundsPadding * 2),
+            screen.height / Math.max(1, bounds.height + this.boundsPadding * 2)
+        );
+        this.minZoom = Math.max(0.12, Math.min(0.55, fit * 0.92));
+        this.maxZoom = Math.max(2.5, this.maxZoom);
+        this.clampPosition();
+        this.updateTransform();
+    }
+
+    clampPosition() {
+        if (!this.bounds) return;
+        const screen = this.app.screen;
+        const halfW = screen.width / (2 * this.zoom);
+        const halfH = screen.height / (2 * this.zoom);
+        const pad = this.boundsPadding;
+        const minX = this.bounds.minX - pad;
+        const maxX = this.bounds.maxX + pad;
+        const minY = this.bounds.minY - pad;
+        const maxY = this.bounds.maxY + pad;
+
+        if (maxX - minX <= halfW * 2) {
+            this.position.x = (minX + maxX) / 2;
+        } else {
+            this.position.x = Math.max(minX + halfW, Math.min(maxX - halfW, this.position.x));
+        }
+
+        if (maxY - minY <= halfH * 2) {
+            this.position.y = (minY + maxY) / 2;
+        } else {
+            this.position.y = Math.max(minY + halfH, Math.min(maxY - halfH, this.position.y));
+        }
+    }
+
     updateTransform() {
+        this.clampPosition();
+
         // Apply to container
         this.world.scale.set(this.zoom);
-        
+
         // Center the camera on this.position
         const cx = this.app.screen.width / 2;
         const cy = this.app.screen.height / 2;
-        
+
         this.world.x = cx - this.position.x * this.zoom;
         this.world.y = cy - this.position.y * this.zoom;
     }

@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { Character } from './Character.js';
 import { MineralStructure } from './minerals/MineralStructure.js';
-import { ANIMATION_STATES, MINERAL_TYPES } from './constants.js';
+import { MINERAL_TYPES } from './constants.js';
 import { CrowdManager } from './ai/CrowdManager.js';
 import { Camera } from './Camera.js';
 import { InputManager } from './controls/InputManager.js';
@@ -14,6 +14,7 @@ import { EndScreen } from './screens/EndScreen.js';
 import { MapGenerator } from './map/MapGenerator.js';
 import { SeededRandom } from './map/SeededRandom.js';
 import { BuildingManager } from './buildings/BuildingManager.js';
+import { BLUEPRINT_BY_ID, BEACON_ID, DEFAULT_BLUEPRINT_ID, effectiveCost } from './buildings/blueprints.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { Minimap } from './ui/Minimap.js';
 
@@ -23,11 +24,13 @@ class GameApp {
         this.minerals = [];
         this.map = null;
         this.frameCount = 0;
-        
-        // Setup Pixi
+
+        // Setup Pixi. The canvas is transparent: the illustrated Glass Sea
+        // backdrop lives in the DOM behind it.
         this.app = new PIXI.Application({
             resizeTo: window,
-            backgroundColor: 0x1a1a2e, // Dark Space Blue
+            backgroundColor: 0x1c0d24,
+            backgroundAlpha: 0,
             antialias: true,
             resolution: window.devicePixelRatio || 1,
             autoDensity: true
@@ -42,66 +45,76 @@ class GameApp {
         this.mapLayer = new PIXI.Container();
         this.shadowLayer = new PIXI.Container();
         this.characterLayer = new PIXI.Container();
-        
+
         // Z-Index sorting enabled
         this.characterLayer.sortableChildren = true;
 
-        // Add layers to World instead of Stage
         this.worldContainer.addChild(this.mapLayer);
         this.worldContainer.addChild(this.shadowLayer);
         this.worldContainer.addChild(this.characterLayer);
 
         // AI System
         this.crowdManager = new CrowdManager(this.app);
+        this.crowdManager.setGame(this);
 
         // Input / Controls System
         this.inputManager = new InputManager(window);
-        
+
         // Building System
-        // Initialize AFTER characterLayer is created
         this.buildingManager = new BuildingManager(this.app, null, this.characterLayer);
-        
+
         // UI
         this.pendingBuildLocation = null;
-        this.buildModal = new BuildModal(
-            (name) => this.finalizeBuild(name),
-            () => { this.pendingBuildLocation = null; },
-            this.inputManager
-        );
+        this.buildModal = new BuildModal({
+            onBuild: (name) => this.finalizeBuild(name),
+            onCancel: () => { this.pendingBuildLocation = null; },
+            inputManager: this.inputManager
+        });
 
         // Game State Manager
         this.stateManager = new GameStateManager(this.app);
-        
+
         // Initialize Screens
         this.stateManager.registerScreen(GameState.MENU, new MenuScreen(this.stateManager));
         this.stateManager.registerScreen(GameState.LOBBY, new LobbyScreen(this.stateManager));
-        this.stateManager.registerScreen(GameState.PLAYING, new GameScreen(this.stateManager));
+        this.stateManager.registerScreen(GameState.PLAYING, new GameScreen(this.stateManager, this));
         this.stateManager.registerScreen(GameState.INTERSTITIAL, new InterstitialScreen(this.stateManager));
-        this.stateManager.registerScreen(GameState.END, new EndScreen(this.stateManager));
+        this.stateManager.registerScreen(GameState.END, new EndScreen(this.stateManager, this));
 
         // Leaving active play must close the build prompt; otherwise it can sit
         // on top of the interstitial/end screen and accept a stale build.
         const originalSetState = this.stateManager.setState.bind(this.stateManager);
         this.stateManager.setState = (newState) => {
             if (newState !== GameState.PLAYING) this.buildModal.hide();
+            if (newState === GameState.MENU || newState === GameState.LOBBY || newState === GameState.END) {
+                this.stateManager.cancelPendingTurn();
+            }
             originalSetState(newState);
         };
 
+        // The state manager owns turn timing; App supplies the settlement
+        // simulation step and the victory/defeat check.
+        this.stateManager.onTideResolve = () => this.resolveTide();
+
         // Camera System
         this.camera = new Camera(
-            this.app, 
-            this.worldContainer, 
+            this.app,
+            this.worldContainer,
             (x, y) => this.onWorldTap(x, y),
             this.inputManager
         );
 
         // Minimap (2D canvas overlay)
         this.minimap = new Minimap(this);
-        
-        // Keep the camera centred on the same world point when the window resizes.
-        this.app.renderer.on('resize', () => this.camera.updateTransform());
 
-        // Define world parameters based on minimum zoom (1/0.2 = 5). This is the full map size.
+        // Keep the camera centred on the same world point when the window resizes.
+        this.app.renderer.on('resize', () => {
+            this.camera.updateTransform();
+            this.camera.clampToWorld?.();
+        });
+
+        // Define world parameters based on minimum zoom (1/0.2 = 5). This is the
+        // initial map size; MapGenerator may replace these with tighter bounds.
         this.WORLD_SCALE_FACTOR = 5;
         this.MAP_WIDTH = this.app.screen.width * this.WORLD_SCALE_FACTOR;
         this.MAP_HEIGHT = this.app.screen.height * this.WORLD_SCALE_FACTOR;
@@ -116,19 +129,6 @@ class GameApp {
         this.stateManager.startGame = () => {
             this.initializeWorld();
             originalStartGame();
-        };
-        
-        // Hook into turn processing
-        const originalEndTurn = this.stateManager.endTurn.bind(this.stateManager);
-        this.stateManager.endTurn = () => {
-            if (this.stateManager.state !== GameState.PLAYING) return;
-            originalEndTurn();
-            // Process buildings during turn transition:
-            // PENDING -> RESERVED on first interstitial,
-            // RESERVED -> ACTIVE on second interstitial.
-            setTimeout(() => {
-                this.buildingManager.processTurn();
-            }, 1000);
         };
 
         // Start at menu
@@ -149,20 +149,30 @@ class GameApp {
                 return window.__APP_READY__ === true;
             },
             snapshot() {
+                const buildings = game.buildingManager.buildings;
                 return {
                     ready: window.__APP_READY__ === true,
                     frame: game.frameCount,
                     state: game.stateManager.state,
                     turn: game.stateManager.currentTurn,
+                    day: game.stateManager.currentTurn,
+                    dayLimit: game.stateManager.dayLimit,
                     actionsRemaining: game.stateManager.actionsRemaining,
+                    lumen: game.stateManager.lumen,
+                    income: buildings
+                        .filter((building) => building.state === 'ACTIVE')
+                        .reduce((total, building) => total + (BLUEPRINT_BY_ID[building.blueprintId]?.income || 0), 0),
+                    selectedBlueprint: game.stateManager.selectedBlueprint,
                     seed: game.stateManager.settings.mapSeed,
                     mapSize: game.stateManager.settings.mapSize,
                     characters: game.characters.length,
                     minerals: game.minerals.length,
-                    buildings: game.buildingManager.buildings.length,
-                    buildingStates: game.buildingManager.buildings.map((building) => building.state),
+                    buildings: buildings.length,
+                    buildingStates: buildings.map((building) => building.state),
+                    buildingBlueprints: buildings.map((building) => building.blueprintId),
                     sectors: game.map ? game.map.sectors.length : 0,
-                    buildModalOpen: game.buildModal.container.style.display !== 'none',
+                    buildModalOpen: game.buildModal.isOpen,
+                    endResult: game.stateManager.endResult,
                     camera: {
                         x: game.camera.position.x,
                         y: game.camera.position.y,
@@ -193,54 +203,124 @@ class GameApp {
                     x: cx + (x - game.camera.position.x) * game.camera.zoom,
                     y: cy + (y - game.camera.position.y) * game.camera.zoom
                 };
+            },
+            selectBlueprint(id) {
+                game.selectBlueprint(id);
+                return game.stateManager.selectedBlueprint;
             }
         };
     }
-    
-    finalizeBuild(name) {
-        if (this.pendingBuildLocation &&
-            this.stateManager.state === GameState.PLAYING &&
-            this.stateManager.actionsRemaining > 0) {
-            const { sectorId, u, v } = this.pendingBuildLocation;
-            const building = this.buildingManager.createBuilding(sectorId, u, v, name);
-            if (!building) {
-                this.pendingBuildLocation = null;
-                return;
-            }
-            this.stateManager.actionsRemaining--;
-            if (this.stateManager.activeScreen && this.stateManager.activeScreen.updateTurnDisplay) {
-                this.stateManager.activeScreen.updateTurnDisplay();
-            }
-        }
-        this.pendingBuildLocation = null;
-    }
-    
-    onWorldTap(x, y) {
-        if (this.stateManager.state !== GameState.PLAYING) return;
-        if (this.stateManager.actionsRemaining <= 0) return;
-        if (this.buildModal.isOpen) return;
 
-        // Check against sectors
+    selectBlueprint(id) {
+        if (!BLUEPRINT_BY_ID[id]) return false;
+        const state = this.stateManager;
+        if (state.state !== GameState.PLAYING || state.actionsRemaining <= 0) return false;
+
+        const blueprint = BLUEPRINT_BY_ID[id];
+        const buildings = this.buildingManager.buildings;
+        if (blueprint.unique && buildings.some((building) => building.blueprintId === id)) return false;
+        if (effectiveCost(blueprint, buildings) > state.lumen) return false;
+
+        state.selectedBlueprint = id;
+        this.stateManager.activeScreen?.updateTurnDisplay?.(true);
+        return true;
+    }
+
+    finalizeBuild(name) {
+        const state = this.stateManager;
+        if (!this.pendingBuildLocation) {
+            return { ok: false, error: 'Choose a free plot first.' };
+        }
+        if (state.state !== GameState.PLAYING) {
+            return { ok: false, error: 'The tide has already turned.' };
+        }
+        if (state.actionsRemaining <= 0) {
+            return { ok: false, error: 'No builds left this tide.' };
+        }
+
+        const blueprintId = state.selectedBlueprint || DEFAULT_BLUEPRINT_ID;
+        const blueprint = BLUEPRINT_BY_ID[blueprintId];
+        if (!blueprint) return { ok: false, error: 'Unknown blueprint.' };
+
+        const buildings = this.buildingManager.buildings;
+        if (blueprint.unique && buildings.some((building) => building.blueprintId === blueprintId)) {
+            return { ok: false, error: 'The Beacon is already standing.' };
+        }
+
+        const cost = effectiveCost(blueprint, buildings);
+        if (cost > state.lumen) {
+            return { ok: false, error: `Need ${cost - state.lumen} more lumen.` };
+        }
+
+        const { sectorId, u, v } = this.pendingBuildLocation;
+        const building = this.buildingManager.createBuilding(sectorId, u, v, name, blueprintId);
+        if (!building) {
+            return { ok: false, error: 'That plot cannot be built on.' };
+        }
+
+        state.spendLumen(cost);
+        state.actionsRemaining -= 1;
+        state.hintDismissed = true;
+        this.pendingBuildLocation = null;
+        // Keep the same blueprint armed for the next tide, but refresh the HUD
+        // immediately so the cost, action count and affordability are correct.
+        this.stateManager.activeScreen?.updateTurnDisplay?.(true);
+        return { ok: true };
+    }
+
+    onWorldTap(x, y) {
+        const state = this.stateManager;
+        if (state.state !== GameState.PLAYING) return;
+        if (state.actionsRemaining <= 0) return;
+        if (this.buildModal.isOpen) return;
         if (!this.map) return;
-        
+
+        const blueprintId = state.selectedBlueprint || DEFAULT_BLUEPRINT_ID;
+        const blueprint = BLUEPRINT_BY_ID[blueprintId];
+        const buildings = this.buildingManager.buildings;
+        if (!blueprint) return;
+        if (blueprint.unique && buildings.some((building) => building.blueprintId === blueprintId)) return;
+        if (effectiveCost(blueprint, buildings) > state.lumen) return;
+
         for (const sector of this.map.sectors) {
             const cell = sector.getGridCell(x, y);
-            // Check if within grid bounds (integer check)
             if (cell.u >= 0 && cell.u < sector.gridSize &&
                 cell.v >= 0 && cell.v < sector.gridSize) {
-                
-                // Check if cell is free
+
                 if (!this.buildingManager.isCellOccupied(sector.id, cell.u, cell.v)) {
                     this.pendingBuildLocation = {
                         sectorId: sector.id,
                         u: cell.u,
                         v: cell.v
                     };
-                    this.buildModal.show();
+                    this.buildModal.show(blueprint, state.lumen, buildings);
                     return;
                 }
             }
         }
+    }
+
+    resolveTide() {
+        const summary = this.buildingManager.resolveTide();
+        this.stateManager.addLumen(summary.income);
+
+        const buildings = this.buildingManager.buildings;
+        const beacon = buildings.find((building) => building.blueprintId === BEACON_ID && building.state === 'ACTIVE');
+        const nextDay = this.stateManager.currentTurn + 1;
+        let outcome = null;
+        let message = 'The lamps are lit. The water is moving.';
+
+        if (beacon) {
+            outcome = 'victory';
+            message = 'The Aurora Beacon catches the last light.';
+        } else if (nextDay > this.stateManager.dayLimit) {
+            outcome = 'defeat';
+            message = 'The water reached the lamps.';
+        } else if (summary.promoted.length > 0) {
+            message = `${summary.promoted.map((entry) => entry.name).join(', ')} ${summary.promoted.length === 1 ? 'is' : 'are'} taking shape.`;
+        }
+
+        return { ...summary, outcome, message, nextDay };
     }
 
     initializeWorld() {
@@ -251,42 +331,52 @@ class GameApp {
 
         // Clear existing world
         this.clearWorld();
-        
-        // Update crowd manager bounds before spawning characters
-        this.crowdManager.setWorldBounds(this.MAP_WIDTH, this.MAP_HEIGHT);
 
-        // Generate map
+        // Generate map. The generator owns the final world rectangle, which is
+        // derived from the packed island cluster rather than the viewport.
         this.map = new MapGenerator(
             this.stateManager.settings.mapSeed,
             this.stateManager.settings.mapSize,
             this.MAP_WIDTH,
             this.MAP_HEIGHT
         );
-        
-        this.buildingManager.setMap(this.map);
+        this.MAP_WIDTH = this.map.worldWidth;
+        this.MAP_HEIGHT = this.map.worldHeight;
+        this.crowdManager.setWorldBounds(this.MAP_WIDTH, this.MAP_HEIGHT);
 
-        // Every new game starts centred and at the default zoom, even if the
-        // player panned the hidden world from the menu.
-        this.camera.zoom = 1;
-        this.camera.position.x = this.MAP_WIDTH / 2;
-        this.camera.position.y = this.MAP_HEIGHT / 2;
+        this.buildingManager.setMap(this.map);
+        this.stateManager.selectedBlueprint = DEFAULT_BLUEPRINT_ID;
+        this.stateManager.hintDismissed = false;
+
+        // Open on the home island at a readable scale, not on an empty corner
+        // of a five-viewport map. The clamp keeps the camera inside the cluster.
+        const home = this.map.homeSector || this.map.sectors[0];
+        this.camera.setBounds(this.map.bounds);
+        const view = this.app.screen;
+        const fit = Math.min(
+            view.width / Math.max(1, home.radius * 2.6),
+            view.height / Math.max(1, home.radius * 1.7)
+        );
+        this.camera.zoom = Math.max(0.34, Math.min(0.68, fit * 1.35));
+        this.camera.position.x = home.centerX;
+        this.camera.position.y = home.centerY;
         this.camera.updateTransform();
-        
-        // Add map graphics to layer
-        
-        // Then sectors
+
+        // Add map graphics to layer.
         this.map.sectors.forEach(sector => {
             this.mapLayer.addChild(sector.graphics);
         });
-        
+
         // Create seeded RNG for deterministic entity placement
         const entityRNG = new SeededRandom(this.stateManager.settings.mapSeed + 1);
-        
-        // Add characters on map
+
+        // Add characters on map. Keep a reference to their home island so the
+        // NPC controller can eventually stay on connected land.
         const numCharacters = 15;
         for (let i = 0; i < numCharacters; i++) {
-            const point = this.map.getRandomPointOnMap();
-            this.addCharacter(point.x, point.y);
+            const sector = this.map.getRandomSector();
+            const point = sector.getRandomPoint(entityRNG);
+            this.addCharacter(point.x, point.y, sector);
         }
 
         // Add minerals deterministically on map
@@ -295,43 +385,39 @@ class GameApp {
             medium: 50,
             large: 70
         };
-        
+
         const numMinerals = mineralCounts[this.stateManager.settings.mapSize] || 50;
-        
+
         for (let i = 0; i < numMinerals; i++) {
             const point = this.map.getRandomMineralPoint();
             const type = entityRNG.next() > 0.5 ? MINERAL_TYPES.ROCK : MINERAL_TYPES.CRYSTAL;
-            
-            // Find which palette to use deterministically
-            const paletteIds = type === MINERAL_TYPES.ROCK 
+
+            const paletteIds = type === MINERAL_TYPES.ROCK
                 ? ['ROCK_GREY', 'ROCK_BROWN']
                 : ['CRYSTAL_BLUE', 'CRYSTAL_PURPLE', 'CRYSTAL_GREEN'];
             const paletteId = paletteIds[entityRNG.nextInt(0, paletteIds.length - 1)];
-            
+
             this.addMineral(point.x, point.y, type, paletteId);
         }
+
+        this.stateManager.activeScreen?.updateTurnDisplay?.(true);
     }
 
     clearWorld() {
-        // Clear characters
         this.characters.forEach(char => char.destroy());
         this.characters = [];
         this.crowdManager.clear();
-        
-        // Clear minerals
+
         this.minerals.forEach(min => min.destroy());
         this.minerals = [];
-        
-        // Clear buildings
+
         this.buildingManager.clear();
-        
-        // Clear map
+
         if (this.map) {
             this.map.destroy();
             this.map = null;
         }
-        
-        // Clear layers
+
         this.mapLayer.removeChildren();
         this.characterLayer.removeChildren();
         this.shadowLayer.removeChildren();
@@ -339,74 +425,66 @@ class GameApp {
 
     addMineral(x, y, type, paletteId) {
         const mineral = new MineralStructure(x, y, type, paletteId);
-        
+
         this.minerals.push(mineral);
         this.characterLayer.addChild(mineral.container);
         this.shadowLayer.addChild(mineral.shadowG);
-        
+
         mineral.container.zIndex = mineral.groundY;
     }
 
-    addCharacter(x, y) {
-        // const padding = 50;
-        // const cx = Math.max(padding, Math.min(this.app.screen.width - padding, x));
-        // const cy = Math.max(padding, Math.min(this.app.screen.height - padding, y));
-
+    addCharacter(x, y, sector = null) {
         const char = new Character(x, y);
-        
+        char.homeSector = sector;
+
         this.characters.push(char);
-        this.crowdManager.register(char);
+        this.crowdManager.register(char, sector);
 
         this.characterLayer.addChild(char.graphics);
         this.shadowLayer.addChild(char.shadow);
-        
+
         char.graphics.zIndex = char.groundY ?? char.y;
     }
 
     update(delta) {
         const dtSeconds = delta / 60;
+        const state = this.stateManager.state;
+        const simulating = state === GameState.PLAYING && !document.hidden;
 
-        // Update Camera
+        // Camera is always responsive so the menu/lobby can sit over a living
+        // scene without the world simulation running behind it.
         this.camera.update(dtSeconds);
 
-        // AI Update (always enabled)
-        this.crowdManager.update(dtSeconds);
+        if (simulating) {
+            this.crowdManager.update(dtSeconds);
 
-        // Sort by Y for depth
-        const shouldSort = Math.floor(this.app.ticker.lastTime / (1000 / 60)) % 10 === 0;
+            this.minerals.forEach(min => {
+                min.update(dtSeconds);
+                min.container.zIndex = min.groundY;
+            });
 
-        // Update Minerals
-        this.minerals.forEach(min => {
-            min.update(dtSeconds);
-            min.container.zIndex = min.groundY;
-        });
+            this.characters.forEach(char => {
+                char.update(dtSeconds);
+                char.graphics.zIndex = typeof char.groundY === 'number' ? char.groundY : char.y;
+            });
 
-        // Update Characters
-        this.characters.forEach(char => {
-            char.update(dtSeconds);
-            char.graphics.zIndex = typeof char.groundY === 'number' ? char.groundY : char.y;
-        });
+            this.buildingManager.update(dtSeconds);
 
-        // Update Buildings (for pulsing placeholders, etc.)
-        this.buildingManager.update(dtSeconds);
-
-        if (shouldSort) {
-            this.characterLayer.sortChildren();
+            const shouldSort = Math.floor(this.app.ticker.lastTime / (1000 / 60)) % 10 === 0;
+            if (shouldSort) this.characterLayer.sortChildren();
         }
 
-        // Redraw the minimap with the camera and building state (a few times a
-        // second is plenty; it is an orientation aid, not the game view).
+        // Keep the survey chart painted even before a world exists: it gives
+        // the menu a quiet "no survey" card and ensures the 2D surface the test
+        // harness samples is never a blank canvas on first load.
         if (this.frameCount % 3 === 0) {
             this.minimap.update();
         }
 
-        // Update active game screen if in PLAYING state
-        if (this.stateManager.state === GameState.PLAYING && this.stateManager.activeScreen) {
+        if (state === GameState.PLAYING && this.stateManager.activeScreen?.updateTurnDisplay) {
             this.stateManager.activeScreen.updateTurnDisplay();
         }
 
-        // Signal readiness after the first completed frame. The browser smoke
-        // test waits for this instead of screenshotting during initial paint.
         this.frameCount += 1;
         if (this.frameCount === 1) {
             window.__APP_READY__ = true;

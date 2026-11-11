@@ -9,7 +9,7 @@ import { projectGridToWorld, isPointInIsoGrid, getGridDiamond, worldToGrid } fro
  * It has an irregular, organic shape and can contain buildings/minerals.
  */
 export class Sector {
-    constructor(id, centerX, centerY, gridSize, rng) {
+    constructor(id, centerX, centerY, gridSize, rng, prebuiltShape = null) {
         this.id = id;
         this.centerX = centerX;
         this.centerY = centerY;
@@ -26,8 +26,17 @@ export class Sector {
         // Precompute grid diamond for quick reference (centered at sector center)
         this.gridPoly = getGridDiamond(this.centerX, this.centerY, this.gridSize, TILE_WIDTH, TILE_HEIGHT);
 
-        // Generate organic outline
-        this.shape = generateShape(this.centerX, this.centerY, this.radius, this.rng);
+        // Generate the organic outline once. When the generator supplies a
+        // local silhouette, translate it rather than consuming more RNG and
+        // regenerating a different island.
+        if (prebuiltShape) {
+            this.shape = prebuiltShape.map((point) => ({
+                x: point.x + this.centerX,
+                y: point.y + this.centerY
+            }));
+        } else {
+            this.shape = generateShape(this.centerX, this.centerY, this.radius, this.rng);
+        }
 
         // Graphics
         this.graphics = new PIXI.Graphics();

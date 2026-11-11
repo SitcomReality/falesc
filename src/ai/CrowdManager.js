@@ -3,8 +3,14 @@ import { NPCController } from './NPCController.js';
 export class CrowdManager {
     constructor(app) {
         this.app = app;
+        this.game = null;
         this.controllers = new Map(); // Map<Character, NPCController>
         this.worldBounds = { width: app.screen.width, height: app.screen.height };
+    }
+
+    /** Give controllers access to the current map/building state. */
+    setGame(game) {
+        this.game = game;
     }
 
     setWorldBounds(width, height) {
@@ -15,9 +21,9 @@ export class CrowdManager {
         }
     }
 
-    register(character) {
+    register(character, homeSector = null) {
         if (!this.controllers.has(character)) {
-            const controller = new NPCController(character, this.worldBounds);
+            const controller = new NPCController(character, this.worldBounds, homeSector, this.game);
             this.controllers.set(character, controller);
         }
     }

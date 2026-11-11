@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#1c0d24">
     <title>FALESC</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-    <style>
-        body { margin: 0; padding: 0; overflow: hidden; background-color: #1a1a2e; }
-        canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
-    </style>
+    <link rel="preload" href="./assets/fonts/fraunces-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="./assets/fonts/jost-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="./assets/fonts/space-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="./styles/main.css">
     <script type="importmap">
         {
             "imports": {
@@ -19,7 +20,98 @@
     </script>
 </head>
 <body>
+    <!-- Fixed illustrated backdrop. The Pixi canvas renders above this and is
+         transparent, so the Glass Sea is visible past every island. -->
+    <div class="world-backdrop" id="world-backdrop" aria-hidden="true">
+        <svg class="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="presentation">
+            <defs>
+                <linearGradient id="skyGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#1c0d24"/>
+                    <stop offset="0.22" stop-color="#38143b"/>
+                    <stop offset="0.45" stop-color="#6b1e48"/>
+                    <stop offset="0.6" stop-color="#a92f58"/>
+                    <stop offset="0.72" stop-color="#e95263"/>
+                    <stop offset="0.82" stop-color="#ff8a63"/>
+                    <stop offset="0.9" stop-color="#ffc07a"/>
+                    <stop offset="1" stop-color="#ffe2ac"/>
+                </linearGradient>
+                <linearGradient id="seaGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#ffc58a"/>
+                    <stop offset="0.05" stop-color="#ed856d"/>
+                    <stop offset="0.14" stop-color="#c94c68"/>
+                    <stop offset="0.34" stop-color="#8a2756"/>
+                    <stop offset="0.62" stop-color="#4d1948"/>
+                    <stop offset="0.84" stop-color="#2b0f37"/>
+                    <stop offset="1" stop-color="#1c0d24"/>
+                </linearGradient>
+                <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+                    <stop offset="0" stop-color="#ffe8ad" stop-opacity="0.95"/>
+                    <stop offset="0.42" stop-color="#ffb877" stop-opacity="0.42"/>
+                    <stop offset="1" stop-color="#ff8a63" stop-opacity="0"/>
+                </radialGradient>
+                <linearGradient id="reflectionGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#ffe2ac" stop-opacity="0.8"/>
+                    <stop offset="0.4" stop-color="#ff9e75" stop-opacity="0.34"/>
+                    <stop offset="1" stop-color="#ff6b8a" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="cloudGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#ffb08a" stop-opacity="0"/>
+                    <stop offset="0.4" stop-color="#ffc49a" stop-opacity="0.28"/>
+                    <stop offset="0.65" stop-color="#ffd8a8" stop-opacity="0.34"/>
+                    <stop offset="1" stop-color="#ffb08a" stop-opacity="0"/>
+                </linearGradient>
+                <filter id="softBlur" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="9"/>
+                </filter>
+            </defs>
+
+            <rect width="1600" height="620" fill="url(#skyGradient)"/>
+            <circle cx="1128" cy="500" r="230" fill="url(#sunGlow)"/>
+            <circle class="scene__sun" cx="1128" cy="500" r="92" fill="#ffe8ad"/>
+            <circle cx="1128" cy="500" r="78" fill="#fff4ce" opacity="0.4"/>
+
+            <g class="scene__clouds" opacity="0.85">
+                <path d="M-120 250 C 80 225, 220 260, 420 238 C 560 224, 680 245, 820 232 L 820 258 C 660 272, 540 250, 400 264 C 240 280, 80 270, -120 292 Z" fill="url(#cloudGradient)" filter="url(#softBlur)"/>
+                <path d="M430 150 C 600 132, 760 154, 920 140 C 1060 128, 1200 150, 1330 136 L 1330 158 C 1180 176, 1040 156, 900 168 C 740 182, 580 170, 430 186 Z" fill="url(#cloudGradient)" filter="url(#softBlur)" opacity="0.7"/>
+                <path d="M980 340 C 1130 328, 1260 344, 1420 330 C 1520 322, 1600 334, 1700 326 L 1700 350 C 1580 364, 1480 348, 1380 356 C 1240 368, 1120 354, 980 370 Z" fill="url(#cloudGradient)" filter="url(#softBlur)" opacity="0.55"/>
+            </g>
+
+            <g class="scene__birds" fill="none" stroke="#4b1a43" stroke-width="2.4" stroke-linecap="round" opacity="0.65">
+                <path d="M290 300 q 9 -8 18 0 q 9 -8 18 0"/>
+                <path d="M356 270 q 7 -6 14 0 q 7 -6 14 0"/>
+                <path d="M242 340 q 6 -5 12 0 q 6 -5 12 0"/>
+            </g>
+
+            <!-- distant island silhouettes at the horizon -->
+            <g class="scene__far-islands" fill="#541a45" opacity="0.92">
+                <path d="M0 606 C 60 592, 110 583, 170 590 C 220 596, 265 581, 330 590 C 375 596, 405 610, 430 620 L 0 620 Z"/>
+                <path d="M1210 606 C 1260 590, 1300 581, 1360 590 C 1410 598, 1460 580, 1520 588 C 1570 594, 1600 610, 1600 620 L 1210 620 Z"/>
+            </g>
+            <g class="scene__far-islands" fill="#3e153c" opacity="0.9">
+                <path d="M330 615 C 390 601, 450 604, 510 612 C 560 618, 600 616, 640 620 L 330 620 Z"/>
+                <path d="M820 614 C 880 600, 940 602, 1000 610 C 1060 618, 1110 614, 1160 620 L 820 620 Z"/>
+            </g>
+
+            <rect y="618" width="1600" height="282" fill="url(#seaGradient)"/>
+            <path d="M1128 620 C 1088 670, 1072 728, 1080 900 L 1176 900 C 1184 728, 1168 670, 1128 620 Z" fill="url(#reflectionGradient)" opacity="0.8"/>
+
+            <g class="scene__waves" fill="none" stroke-linecap="round">
+                <path d="M0 650 C 90 644, 180 656, 270 650 C 360 644, 450 656, 540 650 C 630 644, 720 656, 810 650 C 900 644, 990 656, 1080 650 C 1170 644, 1260 656, 1350 650 C 1440 644, 1530 656, 1620 650" stroke="#ffb48a" stroke-opacity="0.28" stroke-width="2"/>
+                <path d="M-40 684 C 70 676, 180 692, 290 684 C 400 676, 510 692, 620 684 C 730 676, 840 692, 950 684 C 1060 676, 1170 692, 1280 684 C 1390 676, 1500 692, 1610 684" stroke="#ff8f83" stroke-opacity="0.2" stroke-width="3"/>
+                <path d="M0 726 C 120 716, 240 736, 360 726 C 480 716, 600 736, 720 726 C 840 716, 960 736, 1080 726 C 1200 716, 1320 736, 1440 726 C 1520 720, 1580 728, 1620 724" stroke="#ffd0a0" stroke-opacity="0.14" stroke-width="2"/>
+                <path d="M-60 782 C 100 768, 260 794, 420 780 C 580 766, 740 792, 900 778 C 1060 764, 1220 790, 1380 776 C 1480 768, 1560 780, 1660 774" stroke="#ff7f8f" stroke-opacity="0.12" stroke-width="4"/>
+            </g>
+
+            <!-- foreground fronds: just enough to frame the scene, kept away from the HUD -->
+            <g class="scene__fronds" fill="#2c1134" opacity="0.85">
+                <path d="M1600 900 C 1530 820, 1490 760, 1495 700 C 1518 742, 1540 750, 1556 742 C 1530 786, 1538 804, 1554 812 C 1528 844, 1530 868, 1552 882 Z"/>
+                <path d="M1600 900 C 1510 860, 1450 838, 1400 840 C 1440 852, 1460 868, 1464 884 C 1490 870, 1514 876, 1524 892 C 1548 884, 1574 890, 1600 900 Z"/>
+            </g>
+        </svg>
+        <div class="world-backdrop__grain"></div>
+        <div class="world-backdrop__vignette"></div>
+    </div>
+
     <script type="module" src="./src/App.js"></script>
 </body>
 </html>
-

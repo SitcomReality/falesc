@@ -2,12 +2,13 @@ import * as PIXI from 'pixi.js';
 import { BuildingRenderer } from './BuildingRenderer.js';
 
 export class Building {
-    constructor(id, sectorId, u, v, name) {
+    constructor(id, sectorId, u, v, name, blueprintId = 'prism_rig') {
         this.id = id;
         this.sectorId = sectorId;
         this.u = u;
         this.v = v;
         this.name = name;
+        this.blueprintId = blueprintId;
         // Three-phase lifecycle:
         // PENDING (ephemeral placeholder) -> RESERVED (ghost) -> ACTIVE (solid)
         this.state = 'PENDING';
@@ -36,6 +37,7 @@ export class Building {
             this.state = 'ACTIVE';
         }
         this.updateGraphics();
+        return this.state;
     }
     
     updateGraphics() {
@@ -46,10 +48,13 @@ export class Building {
         // Ephemeral placeholder pulses; other states are solid alpha
         if (this.state === 'PENDING') {
             this.pulseTime += dt;
-            const base = 0.35;
-            const amp = 0.25;
-            // Pulse between roughly 0.1 and 0.6 alpha
+            const base = 0.62;
+            const amp = 0.12;
+            // Pulse between roughly 0.5 and 0.74 alpha: transparent enough to
+            // read as a plan, solid enough that the silhouette is always visible.
             this.container.alpha = base + Math.sin(this.pulseTime * 4) * amp;
+        } else if (this.state === 'RESERVED') {
+            this.container.alpha = 0.72;
         } else {
             this.container.alpha = 1.0;
         }
