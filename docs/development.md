@@ -281,24 +281,24 @@ scripts/
 vendor/                     pinned Pixi + license/provenance
 src/
   App.js                    pure entrypoint: new FalescGame()
-  FalescGame.js             coordinator, screens, day playback, save, debug API
+  FalescGame.js             coordinator: wiring, input, modal routing, main loop
+  app/                      lifecycle, day playback, service/commons/campaign/save commands
   art/ShapeMetrics.js       shared drawing proportions
   character/                Character, CharacterStyle, animation, renderer
   world/World.js            Pixi app, layers, camera/input, map and minerals
   world/Camera.js           world transform, clamp, pointer/touch input
-  charter/Charter.js        run model: day, lumen, works, roster, services, ending
+  charter/Charter.js        run model; projections, cast, commands in sibling modules
   design/                   needs, traits, programs, balance, names
   services/                 ServiceBuilding, ServiceManager, PlacementPolicy
-  simulation/DaySimulator.js deterministic day and report
+  simulation/               deterministic day and its report
   economy/LumenLedger.js    contributions, upkeep, closures
   residents/                Resident, ResidentFactory, ResidentAgent, ResidentCrowd
   navigation/IslandNavigator.js  per-island A*
   state/                    GamePhase, ScreenStateMachine
-  screens/                  menu, lobby, HUD, day, report, end
-  ui/                       build/service/bulletin/resident modals, chart, chatter, icons
-  map/                      single-pass generation, packing, sectors, grid math, paths
-  buildings/BuildingRenderer.js  illustrated service silhouettes (art only)
-  character/                procedural character rendering/animation
+  screens/                  menu, lobby, HUD (gameScreen/, lobby/), day, report, end
+  ui/                       chrome/, service/, residents/, charter/, contest/ modals
+  map/                      generation, packing, Sector and sector/ art, grid math, paths
+  buildings/                silhouette dispatcher, metrics, palette and art/
   minerals/                 seeded static rock/crystal scenery
   persistence/              versioned localStorage save v2
 styles/main.css             design tokens, void backdrop, all chrome

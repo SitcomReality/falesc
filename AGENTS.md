@@ -140,11 +140,17 @@ after any behavioural change.
 | `styles/main.css` | Design tokens, scene, chrome, all screen/HUD/modal styles |
 | `assets/fonts/` | OFL woff2 fonts + licenses (no runtime CDN) |
 | `src/App.js` | Pure entrypoint: `new FalescGame()` |
-| `src/FalescGame.js` | Coordinator: charter lifecycle, screens/modals, day playback, save, debug API, ticker |
+| `src/FalescGame.js` | Coordinator: wiring, input, modal routing, debug API, ticker |
+| `src/app/` | Run lifecycle, day playback, service/commons/campaign commands, save commands |
 | `src/world/World.js` | Pixi application, layered scene, camera/input, map and mineral generation |
 | `src/world/DistrictOverlay.js` | World labels for named service districts |
 | `src/world/PatronageFlow.js` | World-space arcs from homes to residents' last choices |
-| `src/charter/Charter.js` | The run model: day, player chapter, rivals, roster, services, reports, ending |
+| `src/charter/Charter.js` | The run model: setup, day loop, rival wiring, ending |
+| `src/charter/CharterProjections.js` | Standings, milestones, care watch, need survey and stats |
+| `src/charter/CharterCast.js` | Welcome post, housing, staffing and arrivals |
+| `src/charter/ServiceCommands.js` | Build, repair, policy and floor commands |
+| `src/charter/CommonsAssembly.js` / `CommonsPurse.js` | Commons fund, capital, Assembly and purse settlement |
+| `src/charter/CampaignRoom.js` | Festival kitchen, sponsored bells and the campaign pledge |
 | `src/charter/Bulletin.js` | Morning bulletin copy, rendered from the charter |
 | `src/charter/VisitorLifecycle.js` | Visitor arrivals, referrals, trial stays and departures |
 | `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |
@@ -152,7 +158,7 @@ after any behavioural change.
 | `src/commons/` | Commons Assembly policies and shared service modifiers |
 | `src/design/` | Needs, traits, ten service programs, balance table, names |
 | `src/services/` | `ServiceBuilding`, `ServiceManager`, `PlacementPolicy` |
-| `src/simulation/DaySimulator.js` | Deterministic day: needs, choices, queues, visits, report |
+| `src/simulation/` | `DaySimulator` (needs, choices, queues, visits) and `DayReport` (report + summary) |
 | `src/economy/LumenLedger.js` | Contributions from wellbeing, upkeep, closures |
 | `src/residents/` | `Resident` model, seeded resident/visitor factories, visual agent, crowd |
 | `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
@@ -161,11 +167,11 @@ after any behavioural change.
 | `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, Confluence, stewardship, end |
 | `src/audio/` | Procedural soundscape, persisted mute toggle |
 | `src/settings/` | Persisted motion and contrast preferences, OS defaults |
-| `src/ui/` | Shared `OverlayManager`, build/service/bulletin/campaign/commons/resident/visitor modals, standings, survey chart, chatter, icons |
+| `src/ui/` | `OverlayManager` plus `chrome/`, `service/`, `residents/`, `charter/` and `contest/` modals |
 | `src/map/` | Seeded single-pass island generation, packing, grids, sector art, paths |
-| `src/character/`, `src/Character.js` | Procedural chibi rig and animation |
+| `src/character/` | Procedural chibi rig, palettes, animation and renderer |
 | `src/minerals/` | Seeded static rock/crystal scenery |
-| `src/buildings/BuildingRenderer.js` | Service silhouettes (art only; no building model) |
+| `src/buildings/` | `BuildingRenderer` dispatch, metrics/palette/primitives and per-family `art/` silhouettes |
 | `src/persistence/SaveManager.js` | Versioned `localStorage` save v2 (model data only) |
 | `src/persistence/CharterSerializer.js` | Charter save shape and restore |
 | `src/debug/DebugApi.js` | The browser-console `window.__falesc` surface, extracted from the coordinator |

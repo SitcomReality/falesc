@@ -36,11 +36,22 @@ sit above it.
 ```text
 src/
   App.js                     pure entrypoint
-  FalescGame.js              application coordinator
+  FalescGame.js              coordinator: wiring, input, modal routing, main loop
+  app/
+    CharterLifecycle.js      start, restore, archive and close a run
+    DayPlayback.js           open, replay and finish a precomputed day
+    ServiceActions.js        build placement and service commands
+    CommonsSession.js        Beacon, capital, purse and Assembly commands
+    CampaignSession.js       campaign, Confluence and stewardship commands
+    SaveCommands.js          export, import and write the local save
   art/
     ShapeMetrics.js          shared drawing proportions (rig, ink outline)
   buildings/
-    BuildingRenderer.js      illustrated service silhouettes (art only)
+    BuildingRenderer.js      dispatcher for the service silhouettes
+    BuildingMetrics.js       program footprints and storey heights
+    BuildingPalette.js       shared silhouette palette
+    BuildingPrimitives.js    ink, facet and wall primitives
+    art/                     program silhouettes by need family
   character/
     Character.js             procedural chibi character container
     CharacterStyle.js        chibi palettes and animation states
@@ -58,7 +69,15 @@ src/
     Stewardship.js           post-vote governing promises
     ConfluenceVote.js        the deterministic resident vote
   charter/
-    Charter.js               run model: day, player chapter, rivals, roster, services, ending
+    Charter.js               run model: setup, day loop, rival wiring, ending
+    CharterProjections.js    standings, milestones, care watch, need survey, stats
+    CharterCast.js           welcome post, housing, staffing and arrivals
+    CommonsAssembly.js       fund, capital, purse and Assembly commands
+    CommonsPurse.js          commons levy and upkeep settlement
+    CampaignRoom.js          festival kitchen, sponsored bells and pledge
+    ServiceCommands.js       build, repair, policy and floor commands
+    Bulletin.js              morning bulletin copy
+    VisitorLifecycle.js      arrivals, referrals, trial stays and departures
   controls/
     InputManager.js          key bindings and modal lock
   design/
@@ -74,10 +93,16 @@ src/
     TileMetrics.js           TILE_WIDTH / TILE_HEIGHT
     MapGenerator.js          seeded single-pass shapes, AABB packing, world rect
     Sector.js                one island: shape, grid, graphics
-    SectorGraphics.js        void shadow, keel, top surface, grid, vacuum props
     SeededRandom.js          deterministic RNG
     SettlementPaths.js       curved paths from services to the square
     ShapeGenerator.js        organic island silhouettes
+    sector/
+      SectorGraphics.js      composes one island
+      SectorSilhouette.js    void shadow, underside keel and keel details
+      SectorSurface.js       top surface, regolith, rim light and build grid
+      SectorProps.js         vacuum-safe dressing outside the grid
+      SectorPrimitives.js    shared drawing primitives
+      SectorPalette.js       shared island palette
   minerals/
     MineralCatalog.js        mineral types and seeded palettes
     CrystalRenderer.js, RockRenderer.js, MineralRenderer.js,
@@ -86,9 +111,9 @@ src/
     IslandNavigator.js       per-island A* to doors
   persistence/
     SaveManager.js
+    CharterSerializer.js, CharterArchive.js, MilestoneArchive.js, DriftRank.js
   debug/
     DebugApi.js              window.__falesc console surface
-    CharterArchive.js        versioned localStorage save v2
   residents/
     Resident.js              plain model: traits, needs, affinity, memory
     ResidentFactory.js       seeded 15-name roster, 6 founders
@@ -98,34 +123,44 @@ src/
     MenuScreen.js, LobbyScreen.js, GameScreen.js,
     DayScreen.js, ReportScreen.js, ConfluenceScreen.js,
     StewardshipScreen.js, EndScreen.js
+    gameScreen/
+      HudLayout.js           HUD markup, refs and control wiring
+      HudPresenter.js        refresh the HUD from the charter
+    lobby/
+      LobbyForm.js           charter form fields and validation
+      LobbyChart.js          survey-chart preview
+      LobbyOptions.js        size, mode and island-path data
   services/
     ServiceBuilding.js       service model plus its Pixi container
     ServiceManager.js        placement, occupancy, housing, promotion, visits
     RetrofitModules.js       Sunroom, Atelier and Night Kitchen retrofit data
     ServicePolicies.js       player-set hours, quality and upkeep modifiers
-    BuildingFinishes.js     Humble / Comfortable / Grand shell trade-offs
-    FloorPlans.js           Dormer / Common Room / Roof Garden upper floors
-    ServiceAdjacency.js     Neighbour quality and mixed-chapter bonus
+    BuildingFinishes.js      Humble / Comfortable / Grand shell trade-offs
+    FloorPlans.js            Dormer / Common Room / Roof Garden upper floors
+    ServiceAdjacency.js      Neighbour quality and mixed-chapter bonus
     (Charter.refreshDistricts) connected-service district names and bonus
     PlacementPolicy.js       pure footprint/door/home-shard rules
   simulation/
-    DaySimulator.js          deterministic day: drift, choice, queues, report
+    DaySimulator.js          deterministic day: drift, choice, queues, visits
+    DayReport.js             structured report and one-line summary
   state/
     GamePhase.js             MENU/LOBBY/PLAYING/DAY/REPORT/CONFLUENCE/STEWARDSHIP/END
     ScreenStateMachine.js    screen registry and phase changes
   ui/
-    BuildModal.js, ServiceCardModal.js, BulletinModal.js,
-    OverlayManager.js, StandingsCard.js, ResidentCardModal.js, Minimap.js,
-    ChatterManager.js, CampaignModal.js, CommonsModal.js,
-    FieldGuideModal.js, FloorPlanModal.js, DepartureArchiveModal.js,
-    CharterArchiveModal.js, NeedSurveyModal.js, CharterLedgerModal.js,
-    RivalDossierModal.js, CharterJournalModal.js, MilestonesModal.js,
-    ResidentRosterModal.js, GridSummaryModal.js, icons.js
+    OverlayManager.js        modal stack, focus trap and Escape handling
+    chrome/                  Minimap, StandingsCard, ChatterManager, icons, escapeHtml
+    service/                 build, service card/interior/roster, retrofit, floor plan
+    residents/               resident, visitor and departure-archive cards
+    charter/                 bulletin, journal, ledger, archive, milestones,
+                             need survey, grid summary, field guide, rival dossier
+    contest/                 campaign and commons modals
   world/
     Camera.js                world transform, clamp, pointer/touch input
     World.js                 Pixi app, layers, camera/input, map and minerals
     PatronageFlow.js         world-space last-choice arcs on the overlay layer
     DistrictOverlay.js       read-only names above connected service districts
+    TransitGate.js           reserved shuttle gates to the outer isles
+
 ```
 
 There is no `GameStateManager`, `TurnScheduler`, `BuildingManager`, `Building`,
