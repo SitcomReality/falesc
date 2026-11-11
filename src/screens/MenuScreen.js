@@ -152,7 +152,7 @@ export class MenuScreen {
         if (this.archiveBtn) this.archiveBtn.hidden = readArchive().length === 0;
         const rank = readDriftRank();
         this.driftEl.textContent = rank.charters
-            ? `Drift rank ${rank.rank} · ${rank.label} · ${rank.charters} charter${rank.charters === 1 ? '' : 's'} · +${rank.bonus} starting lumen`
+            ? `Drift rank ${rank.rank} · ${rank.label} · ${rank.charters} charter${rank.charters === 1 ? '' : 's'} · +${rank.bonus} lumen${rank.beds ? ` · +${rank.beds} bed` : ''}${rank.commons ? ` · +${rank.commons} commons` : ''}`
             : 'Drift rank 0 · Unwritten · the first charter sets the tone';
         this.driftEl.hidden = false;
         const legacy = readLegacy();

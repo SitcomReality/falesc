@@ -15,7 +15,7 @@ export default async function ({ page, assert, screenshot }) {
     await page.click('[data-testid=menu-archive]');
     const archive = await page.text('[data-testid=charter-archive]');
     assert.ok(archive.includes('Drift rank 1'));
-    assert.ok(archive.includes('+1 starting lumen'));
+    assert.ok(archive.includes('+1 lumen'));
     await page.pause(300);
     await screenshot('drift-rank-archive.png');
     await page.click('[data-testid=charter-archive-done]');

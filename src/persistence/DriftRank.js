@@ -6,9 +6,9 @@ import { readArchive } from './CharterArchive.js';
  */
 export const DRIFT_RANKS = [
     { rank: 0, at: 0, bonus: 0, label: 'Unwritten' },
-    { rank: 1, at: 3, bonus: 1, label: 'Remembered' },
-    { rank: 2, at: 6, bonus: 2, label: 'Kept' },
-    { rank: 3, at: 8, bonus: 3, label: 'Written in' }
+    { rank: 1, at: 3, bonus: 1, beds: 0, commons: 0, label: 'Remembered' },
+    { rank: 2, at: 6, bonus: 2, beds: 1, commons: 0, label: 'Kept' },
+    { rank: 3, at: 8, bonus: 3, beds: 1, commons: 5, label: 'Written in' }
 ];
 
 export function readDriftRank() {
@@ -21,6 +21,8 @@ export function readDriftRank() {
         rank: current.rank,
         label: current.label,
         bonus: current.bonus,
+        beds: current.beds || 0,
+        commons: current.commons || 0,
         charters,
         victories,
         nextAt: next?.at ?? null,

@@ -249,6 +249,8 @@ export class FalescGame {
         this.charter = new Charter({
             seed,
             startingLumenBonus: drift.bonus,
+            startingBedBonus: drift.beds,
+            startingCommonsBonus: drift.commons,
             mapSize: size,
             mode: this.settings.mode || 'first-light',
             chapterName: this.settings.chapterName || 'Home Chapter',

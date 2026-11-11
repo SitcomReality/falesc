@@ -31,7 +31,7 @@ import { ConfluenceVote } from '../confluence/ConfluenceVote.js';
  * layer listens; it never owns the rules.
  */
 export class Charter {
-    constructor({ seed, mapSize = 'medium', mode = 'first-light', chapterName = null, chapterMotto = null, map = null, parentContainer = null, saved = null, legacy = null, startingLumenBonus = 0 }) {
+    constructor({ seed, mapSize = 'medium', mode = 'first-light', chapterName = null, chapterMotto = null, map = null, parentContainer = null, saved = null, legacy = null, startingLumenBonus = 0, startingBedBonus = 0, startingCommonsBonus = 0 }) {
         this.legacy = legacy || saved?.legacy || null;
         this.legacyNote = null;
         this.legacyBonus = this.legacy?.policyId === 'open_table'
@@ -41,6 +41,7 @@ export class Charter {
                 : this.legacy?.policyId === 'workshop_charter'
                     ? { amount: 1, programs: ['workshop'] }
                 : null;
+        this.startingBedBonus = Math.max(0, Number(startingBedBonus) || 0);
         this.seed = seed;
         this.mapSize = mapSize;
         this.mode = mode;
@@ -95,8 +96,8 @@ export class Charter {
         this.visitorCell = null;
         this.commons = {
             target: BALANCE.commons.target,
-            fund: 0,
-            purse: 0,
+            fund: Math.max(0, Number(startingCommonsBonus) || 0),
+            purse: Math.max(0, Number(startingCommonsBonus) || 0),
             capital: 0,
             capitalContributors: {},
             active: false,
@@ -763,7 +764,7 @@ export class Charter {
             v: anchor.v,
             name: 'Welcome Post',
             state: 'ACTIVE',
-            capacityOverride: this.contest ? 4 : 6,
+            capacityOverride: (this.contest ? 4 : 6) + this.startingBedBonus,
             fixed: true
         });
         this.welcomePost = result.ok ? result.service : null;

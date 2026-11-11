@@ -160,6 +160,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `open-charter.mjs` | Starts Open Charter, checks the HUD objective and day label, plays past the old limit and confirms no ending. |
 | `archive-clear-filter.mjs` | Seeds First Light and Contest records, checks Best sort, confirms the clear, undoes it, clears only Contest and checks First Light survives. |
 | `drift-rank.mjs` | Seeds three closed charters, checks Drift rank 1 on the menu and archive, and 11 starting lumen. |
+| `drift-bonuses.mjs` | Checks rank 2 adds a bed and rank 3 also seeds 5 commons fund. |
 | `charter-archive.mjs` | Abandons a live charter, checks the menu archive and its day/outcome/mode record, clears it and hides the menu button. |
 | `legacy-workshop.mjs` | Seeds the Workshop Charter legacy and checks a new Workshop starts with 4 seats. |
 | `legacy-menu.mjs` | Seeds a stewardship legacy, checks the menu card and effect text, then clears it and verifies storage is empty. |
