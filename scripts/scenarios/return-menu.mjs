@@ -21,6 +21,7 @@ export default async function ({ page, assert, screenshot }) {
     await page.click('[data-testid=save-return-menu]');
     await page.waitFor("window.__falesc.snapshot().state === 'MENU'");
     assert.ok(await page.visible('[data-testid=menu-continue]'));
+    assert.ok((await page.text('[data-testid=menu-continue]')).includes('Day 1'));
     assert.ok(await page.visible('[data-testid=menu-export]'));
     await page.pause(300);
     await screenshot('return-menu.png');

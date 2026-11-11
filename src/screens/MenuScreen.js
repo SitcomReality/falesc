@@ -137,7 +137,11 @@ export class MenuScreen {
     show() {
         this.container.style.display = 'flex';
         const canContinue = Boolean(this.game?.saveManager?.hasSave());
-        if (this.continueBtn) this.continueBtn.hidden = !canContinue;
+        if (this.continueBtn) {
+            this.continueBtn.hidden = !canContinue;
+            const save = canContinue ? this.game?.saveManager?.read() : null;
+            this.continueBtn.textContent = save?.charter ? `Continue · Day ${save.charter.day}` : 'Continue charter';
+        }
         if (this.exportBtn) this.exportBtn.hidden = !canContinue;
         if (this.archiveBtn) this.archiveBtn.hidden = readArchive().length === 0;
         const legacy = readLegacy();
