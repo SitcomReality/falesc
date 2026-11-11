@@ -235,6 +235,7 @@ export class ServiceManager {
                 builderChapterId: entry.builderChapterId,
                 qualityBonus: entry.qualityBonus,
                 upkeepBonus: entry.upkeepBonus,
+                floors: entry.floors,
                 fixed: entry.fixed,
                 finish: entry.finish,
                 modules: entry.modules,

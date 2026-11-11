@@ -730,6 +730,28 @@ export class Charter {
         return { ok: true, service, module, cost: module.cost };
     }
 
+    addFloor(service) {
+        if (!service || (service.chapterId && service.chapterId !== 'player')) {
+            return { ok: false, error: "A rival chapter's service cannot grow." };
+        }
+        if (service.fixed) return { ok: false, error: 'The Welcome Post is already part of the charter.' };
+        if (service.state !== 'ACTIVE' || service.closed) {
+            return { ok: false, error: 'Only an open, working service can add a floor.' };
+        }
+        if (service.floors >= BALANCE.floors.max) return { ok: false, error: 'This service already has three floors.' };
+        if (this.lumen < BALANCE.floors.cost) {
+            return { ok: false, error: `A floor costs ${BALANCE.floors.cost} lumen.` };
+        }
+        this.lumen -= BALANCE.floors.cost;
+        service.floors += 1;
+        service.capacity += service.programId === 'housing' ? BALANCE.floors.housingCapacity : BALANCE.floors.serviceCapacity;
+        service.upkeepBonus = (service.upkeepBonus || 0) + BALANCE.floors.upkeep;
+        service.refreshGraphics();
+        this.assignHomes();
+        this.refreshDerived();
+        return { ok: true, service, cost: BALANCE.floors.cost };
+    }
+
     dismantle(service) {
         if (!service) return { ok: false, reason: 'That service is already gone.' };
         if (service.chapterId && service.chapterId !== 'player') {

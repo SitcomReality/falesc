@@ -8,7 +8,7 @@
 > the build, including a three-day festival campaign, a stewardship promise and legacy and
 > a shared Commons Beacon, a first Commons Assembly petition/ballot, day visitors and a
 > two-module retrofit; the full multi-round festival, a fully shared
-> commons archipelago, deeper legacy effects and floors are still absent. The
+> commons archipelago, deeper legacy effects and true stacked floors are still absent. The
 > sea/island/plant imagery in §7 and the building silhouettes
 > there are prototype-era and superseded by the void world in
 > [design/world.md](design/world.md); the economy and loop in §8 and the

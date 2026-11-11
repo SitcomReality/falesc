@@ -86,6 +86,7 @@ export class FalescGame {
             onReopen: (service) => this.reopenService(service),
             onRetrofit: (service) => this.openRetrofit(service),
             onHours: (service, hoursId) => this.setServiceHours(service, hoursId),
+            onFloor: (service) => this.addFloor(service),
             overlays: this.overlays
         });
         this.visitorCard = new VisitorCardModal({
@@ -652,6 +653,17 @@ export class FalescGame {
         if (!this.charter) return false;
         this.retrofitModal.show(service);
         return true;
+    }
+
+    addFloor(service) {
+        if (!this.charter) return { ok: false, error: 'No charter.' };
+        const result = this.charter.addFloor(service);
+        if (!result.ok) return result;
+        this.crowd.sync();
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast(`${service.name} rises to ${service.floors} floors.`, 'mint', 2200);
+        return result;
     }
 
     setServiceHours(service, hoursId) {

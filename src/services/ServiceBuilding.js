@@ -32,6 +32,7 @@ export class ServiceBuilding {
         builderChapterId = null,
         qualityBonus = 0,
         upkeepBonus = 0,
+        floors = 1,
         visits = 0,
         hearts = 0,
         closed = false,
@@ -60,6 +61,7 @@ export class ServiceBuilding {
         this.builderChapterId = builderChapterId || null;
         this.qualityBonus = Number(qualityBonus) || 0;
         this.upkeepBonus = Number(upkeepBonus) || 0;
+        this.floors = Math.max(1, Math.min(3, Number(floors) || 1));
         this.entrance = entrance;
         this.visits = Number(visits) || 0;
         this.hearts = Number(hearts) || 0;
@@ -73,8 +75,9 @@ export class ServiceBuilding {
 
         this.container = new PIXI.Container();
         this.graphics = new PIXI.Graphics();
+        this.floorG = new PIXI.Graphics();
         this.bannerG = new PIXI.Graphics();
-        this.container.addChild(this.graphics, this.bannerG);
+        this.container.addChild(this.graphics, this.floorG, this.bannerG);
         this.container.sortableChildren = false;
         this.pulseTime = 0;
         this.sector = null;
@@ -135,8 +138,25 @@ export class ServiceBuilding {
 
     refreshGraphics() {
         BuildingRenderer.draw(this.graphics, this);
+        this.drawFloorTabs();
         this.drawChapterBanner();
         this.container.alpha = this.closed ? 0.62 : this.state === 'PENDING' ? 0.72 : 1;
+    }
+
+    drawFloorTabs() {
+        this.floorG.clear();
+        for (let floor = 1; floor < this.floors; floor++) {
+            const y = -104 - (floor - 1) * 13;
+            this.floorG.beginFill(0xFFF8EA, 0.94);
+            this.floorG.lineStyle(2, 0x211225, 0.9);
+            this.floorG.drawRoundedRect(-25, y, 50, 9, 3);
+            this.floorG.endFill();
+            this.floorG.beginFill(0x59E3C2, 0.95);
+            for (let windowIndex = 0; windowIndex < 3; windowIndex++) {
+                this.floorG.drawCircle(-13 + windowIndex * 13, y + 4.5, 2.1);
+            }
+            this.floorG.endFill();
+        }
     }
 
     drawChapterBanner() {
@@ -223,6 +243,7 @@ export class ServiceBuilding {
             builderChapterId: this.builderChapterId,
             qualityBonus: this.qualityBonus,
             upkeepBonus: this.upkeepBonus,
+            floors: this.floors,
             fixed: this.fixed,
             finish: this.finish,
             modules: [...this.modules],

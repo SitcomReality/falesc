@@ -12,7 +12,7 @@
 > pledge/vote Confluence, a stewardship promise and a legacy, a fundable shared Commons
 > Beacon, a first Commons Assembly petition/ballot, transient day visitors and a two-module
 > service retrofit. The full multi-round festival, a fully shared-commons archipelago,
-> auctions, deeper legacy effects, floors and multiplayer are **not**
+> auctions, deeper legacy effects, true stacked floors and multiplayer are **not**
 > implemented. This document and the component docs in `docs/design/`
 > describe the direction; where they conflict with the source, the source wins.
 > The visual identity (palette, typography, paper/ink chrome) remains the

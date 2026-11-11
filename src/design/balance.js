@@ -31,6 +31,13 @@ export const BALANCE = {
         rivalWorksPerDay: 1,
         startingResidentsPerChapter: 3
     },
+    floors: {
+        cost: 4,
+        max: 3,
+        housingCapacity: 2,
+        serviceCapacity: 1,
+        upkeep: 1
+    },
     rosterSize: 15,
     startingResidents: 6,
     dayLimits: { small: 12, medium: 14, large: 16 },

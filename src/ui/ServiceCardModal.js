@@ -10,11 +10,12 @@ import { finishCost } from '../services/BuildingFinishes.js';
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, onRetrofit, onHours, overlays, game }) {
+    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, overlays, game }) {
         this.onDemolish = onDemolish;
         this.onReopen = onReopen;
         this.onRetrofit = onRetrofit;
         this.onHours = onHours;
+        this.onFloor = onFloor;
         this.overlays = overlays;
         this.game = game;
         this.isOpen = false;
@@ -56,6 +57,7 @@ export class ServiceCardModal {
             <div class="modal__actions">
                 <button type="button" class="btn btn--paper" data-testid="structure-cancel">Keep it</button>
                 <button type="button" class="btn btn--mint" data-testid="structure-upgrade" hidden>Retrofit</button>
+                <button type="button" class="btn btn--paper" data-testid="structure-floor" hidden>Add a floor · 4</button>
                 <button type="button" class="btn btn--mint" data-testid="structure-reopen" hidden>Reopen</button>
                 <button type="button" class="btn btn--danger" data-testid="structure-demolish">Dismantle</button>
             </div>
@@ -74,6 +76,7 @@ export class ServiceCardModal {
         this.demolishBtn = this.panel.querySelector('[data-testid=structure-demolish]');
         this.reopenBtn = this.panel.querySelector('[data-testid=structure-reopen]');
         this.upgradeBtn = this.panel.querySelector('[data-testid=structure-upgrade]');
+        this.floorBtn = this.panel.querySelector('[data-testid=structure-floor]');
 
         this.container.appendChild(this.panel);
         document.body.appendChild(this.container);
@@ -88,6 +91,7 @@ export class ServiceCardModal {
         this.demolishBtn.addEventListener('click', () => this.demolish());
         this.reopenBtn.addEventListener('click', () => this.reopen());
         this.upgradeBtn.addEventListener('click', () => this.requestRetrofit());
+        this.floorBtn.addEventListener('click', () => this.addFloor());
         this.hoursSelect.addEventListener('change', () => this.changeHours(this.hoursSelect.value));
         this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
     }
@@ -120,6 +124,7 @@ export class ServiceCardModal {
             <div><dt>Visits</dt><dd>${service.visits}</dd></div>
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
             <div><dt>Finish</dt><dd>${escapeHtml(service.finish || 'comfortable')}</dd></div>
+            <div><dt>Floors</dt><dd>${service.floors || 1} / 3</dd></div>
             <div><dt>Condition</dt><dd>${service.retrofits?.length ? `Retrofitted · ${service.retrofits.map((id) => escapeHtml(RETROFIT_BY_ID[id]?.name || id)).join(' + ')}` : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
             <div><dt>Hours</dt><dd>${escapeHtml(SERVICE_HOURS_BY_ID[service.policy?.hours]?.name || 'As built')}</dd></div>
             <div><dt>Door</dt><dd>${service.entrance ? `cell ${service.entrance.u}, ${service.entrance.v}` : '—'}</dd></div>
@@ -152,6 +157,9 @@ export class ServiceCardModal {
         this.upgradeBtn.disabled = !canUpgrade || (this.game?.charter?.lumen || 0) < RETROFIT_MIN_COST;
         this.upgradeBtn.textContent = (service.retrofits?.length || 0) === 1 ? 'Add a second module →' : 'Add a module →';
         this.upgradeBtn.title = canUpgrade ? 'Add a permanent module: seats, quality or a later kitchen.' : '';
+        const canFloor = !rivalService && !service.fixed && working && (service.floors || 1) < 3;
+        this.floorBtn.hidden = !canFloor;
+        this.floorBtn.disabled = !canFloor || (this.game?.charter?.lumen || 0) < 4;
         const canSetHours = !rivalService && !service.fixed && service.programId !== 'housing' && working;
         this.hoursWrap.hidden = !canSetHours;
         this.hoursSelect.value = SERVICE_HOURS_BY_ID[service.policy?.hours] ? service.policy.hours : 'as_built';
@@ -188,6 +196,18 @@ export class ServiceCardModal {
         const result = this.onHours(service, hoursId);
         if (result?.ok === false) {
             this.errorEl.textContent = result.error || 'Those hours cannot be set.';
+            return;
+        }
+        this.hide();
+        this.show(service);
+    }
+
+    addFloor() {
+        if (!this.isOpen || !this.service) return;
+        const service = this.service;
+        const result = this.onFloor(service);
+        if (result?.ok === false) {
+            this.errorEl.textContent = result.error || 'That floor cannot be added.';
             return;
         }
         this.hide();
