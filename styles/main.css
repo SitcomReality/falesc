@@ -5301,3 +5301,89 @@ body.is-photo-mode .care-watch {
 .objective-card__motto[hidden] {
     display: none;
 }
+
+.service-interior {
+    width: min(660px, calc(100vw - 40px));
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+}
+
+.service-interior__rooms {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 14px 0 18px;
+}
+
+.interior-room {
+    display: grid;
+    gap: 3px;
+    padding: 12px 14px;
+    border: 2px solid var(--ink);
+    border-radius: 3px;
+    background: var(--mint);
+    box-shadow: var(--shadow-hard);
+}
+
+.interior-room strong {
+    font-family: var(--display);
+    font-size: 20px;
+}
+
+.interior-room span:last-child {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--wine);
+}
+
+.service-interior__label {
+    margin: 4px 0 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.service-interior__people {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 14px;
+    padding: 0;
+    list-style: none;
+}
+
+.service-interior__people li {
+    display: grid;
+    gap: 1px;
+    padding: 6px 9px;
+    border: 1.5px solid var(--ink);
+    border-radius: 2px;
+    background: var(--paper);
+}
+
+.service-interior__people li strong {
+    font-size: 13px;
+}
+
+.service-interior__people li span {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--ink-soft);
+}
+
+.service-interior__empty {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-soft);
+    border-style: dashed !important;
+}
+
+.service-interior {
+    background: var(--paper);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    box-shadow: var(--shadow-hard);
+    padding: 24px 28px;
+}

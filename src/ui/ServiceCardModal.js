@@ -15,9 +15,10 @@ import { escapeHtml } from './html.js';
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, onFocus, onRepair, onOpenResident, onRename, overlays, game }) {
+    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, onFocus, onRepair, onInterior, onOpenResident, onRename, overlays, game }) {
         this.onDemolish = onDemolish;
         this.onRepair = onRepair;
+        this.onInterior = onInterior;
         this.onOpenResident = onOpenResident;
         this.onRename = onRename;
         this.onReopen = onReopen;
@@ -87,6 +88,7 @@ export class ServiceCardModal {
             <p class="modal__note" data-role="note"></p>
             <p class="modal__error" data-role="error" aria-live="polite"></p>
             <div class="modal__actions">
+                <button type="button" class="btn btn--paper" data-testid="service-interior-open">Step inside</button>
                 <button type="button" class="btn btn--paper" data-testid="structure-cancel">Keep it</button>
                 <button type="button" class="btn btn--mint" data-testid="structure-upgrade" hidden>Retrofit</button>
                 <button type="button" class="btn btn--paper" data-testid="structure-floor" hidden>Add a floor · 4</button>
@@ -132,6 +134,7 @@ export class ServiceCardModal {
         });
         this.panel.querySelector('[data-testid=structure-close]').addEventListener('click', () => this.hide());
         this.panel.querySelector('[data-testid=structure-cancel]').addEventListener('click', () => this.hide());
+        this.panel.querySelector('[data-testid=service-interior-open]').addEventListener('click', () => this.onInterior?.(this.service));
         this.demolishBtn.addEventListener('click', () => this.demolish());
         this.repairBtn.addEventListener('click', () => this.repair());
         this.reopenBtn.addEventListener('click', () => this.reopen());

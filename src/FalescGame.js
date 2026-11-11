@@ -18,6 +18,7 @@ import { readLegacy, writeLegacy } from './confluence/StewardshipLegacy.js';
 import { EndScreen } from './screens/EndScreen.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { ServiceCardModal } from './ui/ServiceCardModal.js';
+import { ServiceInteriorModal } from './ui/ServiceInteriorModal.js';
 import { RetrofitModal } from './ui/RetrofitModal.js';
 import { SERVICE_HOURS_BY_ID } from './services/ServicePolicies.js';
 import { VisitorCardModal } from './ui/VisitorCardModal.js';
@@ -117,6 +118,7 @@ export class FalescGame {
             onCancel: () => { this.pendingBuildLocation = null; },
             overlays: this.overlays
         });
+        this.serviceInterior = new ServiceInteriorModal({ overlays: this.overlays });
         this.serviceCard = new ServiceCardModal({
             game: this,
             onDemolish: (service) => this.dismantleService(service),
@@ -130,6 +132,7 @@ export class FalescGame {
             onVibe: (service, vibeId) => this.setServiceVibe(service, vibeId),
             onAccess: (service, accessId) => this.setServiceAccess(service, accessId),
             onFocus: (service, focusId) => this.setServiceFocus(service, focusId),
+            onInterior: (service) => this.serviceInterior.show(service, this.charter),
             overlays: this.overlays
         });
         this.floorPlan = new FloorPlanModal({
