@@ -14,6 +14,7 @@ export class Resident {
         active = true,
         homeServiceId = null,
         homeFloor = null,
+        workServiceId = null,
         homeChapterId = 'player',
         affinity = 0.8,
         memory = null,
@@ -31,6 +32,7 @@ export class Resident {
         this.active = active;
         this.homeServiceId = homeServiceId;
         this.homeFloor = Number.isInteger(homeFloor) ? homeFloor : null;
+        this.workServiceId = workServiceId;
         this.homeChapterId = homeChapterId;
         this.affinity = {};
         if (typeof affinity === 'number') {
@@ -173,6 +175,7 @@ export class Resident {
             active: this.active,
             homeServiceId: this.homeServiceId,
             homeFloor: this.homeFloor,
+            workServiceId: this.workServiceId,
             homeChapterId: this.homeChapterId,
             affinity: { ...this.affinity },
             memory: JSON.parse(JSON.stringify(this.memory)),

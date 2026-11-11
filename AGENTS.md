@@ -103,6 +103,7 @@ webgame_smoke --scenario scripts/scenarios/housing-house-move.mjs
 webgame_smoke --scenario scripts/scenarios/housing-bed-move.mjs
 webgame_smoke --scenario scripts/scenarios/housing-floor-save.mjs
 webgame_smoke --scenario scripts/scenarios/housing-interior.mjs
+webgame_smoke --scenario scripts/scenarios/service-staff.mjs
 webgame_smoke --scenario scripts/scenarios/service-interior.mjs
 webgame_smoke --scenario scripts/scenarios/service-roster-all.mjs
 webgame_smoke --scenario scripts/scenarios/service-roster.mjs

@@ -64,6 +64,7 @@ export class DaySimulator {
         }
 
         for (const resident of [...charter.activeResidents, ...(charter.trialVisitors || [])]) {
+            if (resident.workServiceId) resident.needs.purpose = Math.max(0, resident.needs.purpose - 15);
             this.applyNightRest(resident);
             if (resident.trial) continue;
             this.recordDailyUnmet(resident);
@@ -187,7 +188,7 @@ export class DaySimulator {
         const program = service.program;
         const isPrimary = program.need === need.id || program.id === 'commons_beacon';
         const match = isPrimary ? 1 : 0.46;
-        const quality = ((program.quality || 1) + (service.qualityBonus || 0) + (service.adjacencyBonus || 0) + (service.districtBonus || 0) + serviceQualityModifier(service) + (this.charter.campaign?.qualityBonusFor?.(service.chapterId, program.need) || 0))
+        const quality = ((program.quality || 1) + (service.qualityBonus || 0) + (service.adjacencyBonus || 0) + (service.districtBonus || 0) + (service.staffId ? 0.05 : 0) + serviceQualityModifier(service) + (this.charter.campaign?.qualityBonusFor?.(service.chapterId, program.need) || 0))
             * (service.finish === 'grand' ? 1.1 : service.finish === 'humble' ? 0.9 : 1)
             * accessFitFor(service, resident)
             * focusFitFor(service, need.id)
@@ -302,7 +303,7 @@ export class DaySimulator {
         const needValue = resident.needs[need.id];
         const isPrimary = service.program.need === need.id || service.program.id === 'commons_beacon';
         const effect = (isPrimary ? BALANCE.services.primaryEffect : BALANCE.services.secondaryEffect)
-            * ((service.program.quality || 1) + (service.qualityBonus || 0) + (service.adjacencyBonus || 0) + (service.districtBonus || 0) + serviceQualityModifier(service))
+            * ((service.program.quality || 1) + (service.qualityBonus || 0) + (service.adjacencyBonus || 0) + (service.districtBonus || 0) + (service.staffId ? 0.05 : 0) + serviceQualityModifier(service))
             * standardFit(resident.traits.standards, service.finish);
         resident.adjustNeed(need.id, -effect);
         service.recordVisit(BALANCE.services.serviceHeart);

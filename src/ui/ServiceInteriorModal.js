@@ -112,6 +112,8 @@ export class ServiceInteriorModal {
         this.otherHomes = housing
             ? (this.game?.charter?.services?.housingServices || []).filter((home) => home.id !== service.id && roster.filter((resident) => resident.active && resident.homeServiceId === home.id).length < home.capacity)
             : [];
+        const canStaff = !housing && service.chapterId === 'player' && service.state === 'ACTIVE' && !service.closed;
+        const staffOptions = residents.map((resident) => `<option value="${escapeHtml(resident.id)}" ${service.staffId === resident.id ? 'selected' : ''}>${escapeHtml(resident.name)}${resident.workServiceId && resident.workServiceId !== service.id ? ' · elsewhere' : ''}</option>`).join('');
         const people = here.length
             ? here.slice(0, 8).map((resident) => `<li><strong>${escapeHtml(resident.name)}</strong><span>${escapeHtml(resident.lastChoice || 'a familiar face')}</span></li>`).join('')
             : '<li class="service-interior__empty">No one is inside just now.</li>';
@@ -136,10 +138,22 @@ export class ServiceInteriorModal {
             </div>
             <h3 class="service-interior__label">Who is here</h3>
             <ul class="service-interior__people">${people}</ul>
+            ${canStaff ? `<label class="service-interior__staff">Staff
+                <select data-testid="service-staff" data-staff-select>
+                    <option value="">Nobody yet</option>
+                    ${staffOptions}
+                </select>
+            </label>` : ''}
             <div class="modal__actions">
                 <button type="button" class="btn btn--paper" data-testid="service-interior-done">Back to the record</button>
             </div>
         `;
+        this.panel.querySelector('[data-staff-select]')?.addEventListener('change', (event) => {
+            const result = this.game?.charter?.assignStaff?.(service, event.target.value || null);
+            if (!result?.ok) return;
+            this.game.saveGame?.();
+            this.render();
+        });
         this.panel.querySelectorAll('[data-move-house]').forEach((button) => button.addEventListener('click', (event) => {
             event.stopPropagation();
             this.moveHouse(button.dataset.moveHouse);

@@ -245,6 +245,7 @@ export class ServiceManager {
                 level: entry.level,
                 retrofitId: entry.retrofitId,
                 builderChapterId: entry.builderChapterId,
+                staffId: entry.staffId,
                 qualityBonus: entry.qualityBonus,
                 upkeepBonus: entry.upkeepBonus,
                 floors: entry.floors,

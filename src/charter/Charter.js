@@ -802,6 +802,27 @@ export class Charter {
         return { u: center, v: center };
     }
 
+    assignStaff(service, residentId = null) {
+        if (!service || service.chapterId !== 'player' || service.state !== 'ACTIVE' || service.closed) {
+            return { ok: false, reason: 'Open one of your own services first.' };
+        }
+        const previous = this.roster.find((resident) => resident.id === service.staffId);
+        if (previous) previous.workServiceId = null;
+        if (!residentId) {
+            service.staffId = null;
+            return { ok: true, service };
+        }
+        const resident = this.activeResidents.find((entry) => entry.id === residentId);
+        if (!resident) return { ok: false, reason: 'That resident is not here.' };
+        if (resident.workServiceId) {
+            const old = this.allServices.find((entry) => entry.staffId === resident.id);
+            if (old) old.staffId = null;
+        }
+        service.staffId = resident.id;
+        resident.workServiceId = service.id;
+        return { ok: true, service, resident };
+    }
+
     moveResidentHome(residentId, serviceId) {
         const resident = this.activeResidents.find((entry) => entry.id === residentId);
         const target = this.services.services.find((service) => service.id === serviceId);

@@ -30,6 +30,7 @@ export class ServiceBuilding {
         level = 1,
         retrofitId = null,
         builderChapterId = null,
+        staffId = null,
         qualityBonus = 0,
         upkeepBonus = 0,
         floors = 1,
@@ -66,6 +67,7 @@ export class ServiceBuilding {
         this.builderChapterId = builderChapterId || null;
         this.floorPlans = [...floorPlans];
         this.condition = Math.max(0, Math.min(100, Number(condition) || 100));
+        this.staffId = staffId;
         this.qualityBonus = Number(qualityBonus) || 0;
         this.upkeepBonus = Number(upkeepBonus) || 0;
         this.floors = Math.max(1, Math.min(3, Number(floors) || 1));
@@ -288,6 +290,7 @@ export class ServiceBuilding {
             level: this.level,
             retrofitId: this.retrofitId,
             builderChapterId: this.builderChapterId,
+            staffId: this.staffId,
             qualityBonus: this.qualityBonus,
             upkeepBonus: this.upkeepBonus,
             floors: this.floors,

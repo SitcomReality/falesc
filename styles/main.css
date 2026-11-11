@@ -5425,3 +5425,28 @@ body.is-photo-mode .care-watch {
     align-self: center;
     color: var(--ink-soft);
 }
+
+.service-interior__staff {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.service-interior__staff select {
+    min-width: 180px;
+    padding: 6px 8px;
+    border: 2px solid var(--ink);
+    border-radius: 2px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 13px;
+    text-transform: none;
+    letter-spacing: 0;
+}

@@ -343,7 +343,7 @@ pause or alter the day.
 The pause menu's **Service roster** lists every player service with state,
 capacity, visits and wear; a row opens the full service record, **Step inside** opens a room-by-room
 view of its floors, residents assigned to each bed and the regulars using it.
-Housing rows include **↑/↓** bed moves between floors and **→** to move to another open player house with a free bed; every move is saved immediately. and worn rows
+Open player services can name one **Staff** resident in the interior view; that resident's Purpose eases by 15 each day and the service gains +0.05 quality. Housing rows include **↑/↓** bed moves between floors and **→** to move to another open player house with a free bed; every move is saved immediately. and worn rows
 offer a direct repair, and **Repair all** fixes every worn player service.
 **All chapters** also lists rival and shared Commons services; **Worn only**
 filters the list to services that need repair. Only player services can be
