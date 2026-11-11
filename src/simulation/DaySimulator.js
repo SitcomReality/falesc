@@ -64,7 +64,11 @@ export class DaySimulator {
         }
 
         for (const resident of [...charter.activeResidents, ...(charter.trialVisitors || [])]) {
-            if (resident.workServiceId) resident.needs.purpose = Math.max(0, resident.needs.purpose - 15);
+            if (resident.workServiceId) {
+                resident.needs.purpose = Math.max(0, resident.needs.purpose - 15);
+                const work = charter.allServices.find((service) => service.id === resident.workServiceId);
+                if (work) resident.addAffinity(work.chapterId, 0.01);
+            }
             this.applyNightRest(resident);
             if (resident.trial) continue;
             this.recordDailyUnmet(resident);

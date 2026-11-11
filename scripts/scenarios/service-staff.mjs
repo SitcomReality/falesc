@@ -15,7 +15,7 @@ export default async function ({ page, assert, screenshot }) {
         for (const resident of app.charter.activeResidents) resident.needs.purpose = 90;
         app.syncViews();
         app.serviceCard.show(result.service);
-        return { ok: result.ok, id: result.service.id, resident: app.charter.activeResidents[0].id };
+        return { ok: result.ok, id: result.service.id, resident: app.charter.activeResidents[0].id, affinity: app.charter.activeResidents[0].getAffinity('player') };
     })()`);
     assert.equal(setup.ok, true);
     await page.click('[data-testid=service-interior-open]');
@@ -42,6 +42,8 @@ export default async function ({ page, assert, screenshot }) {
     await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
     await page.evaluate("window.__falesc.skipDay()");
     await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
+    const affinity = await page.evaluate(`window.__falesc.app.charter.activeResidents.find((resident) => resident.id === ${JSON.stringify(setup.resident)}).getAffinity('player')`);
+    assert.ok(affinity > setup.affinity);
     const purpose = await page.evaluate(`window.__falesc.app.charter.activeResidents.find((resident) => resident.id === ${JSON.stringify(setup.resident)}).needs.purpose`);
     assert.ok(purpose < 90);
 }
