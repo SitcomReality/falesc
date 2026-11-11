@@ -267,9 +267,10 @@ of **20 lumen**. The player can give 5 or 10 lumen from the **Commons** card
 in the HUD; each rival gives 1 lumen per day when it has at least 6 in hand.
 Every chapter's contribution is recorded. When the fund fills, the Beacon
 becomes active, every resident's needs ease by **3 each night**, and the Beacon
-opens as a six-seat shared service that can answer any need. It is a shared
-institution, not a private service, and it cannot be bought or dismantled by one
-chapter alone. The planned shared-island institution is still future work;
+opens as a six-seat shared service that can answer any need. Up to two
+**annexes** can then be added for **8 capital** each, giving one more seat and
+one more nightly comfort. It is a shared institution, not a private service, and
+it cannot be bought or dismantled by one chapter alone. The planned shared-island institution is still future work;
 this Beacon sits on the home shard.
 
 ## The first Commons Assembly
