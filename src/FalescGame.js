@@ -24,6 +24,8 @@ import { VisitorCardModal } from './ui/VisitorCardModal.js';
 import { FloorPlanModal } from './ui/FloorPlanModal.js';
 import { FieldGuideModal } from './ui/FieldGuideModal.js';
 import { DepartureArchiveModal } from './ui/DepartureArchiveModal.js';
+import { CharterArchiveModal } from './ui/CharterArchiveModal.js';
+import { recordCharter, recordFromCharter } from './persistence/CharterArchive.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
 import { CommonsModal } from './ui/CommonsModal.js';
@@ -110,6 +112,10 @@ export class FalescGame {
         });
         this.fieldGuide = new FieldGuideModal({ overlays: this.overlays });
         this.departureArchive = new DepartureArchiveModal({ game: this, overlays: this.overlays });
+        this.charterArchive = new CharterArchiveModal({
+            overlays: this.overlays,
+            onClear: () => this.menuScreen?.show()
+        });
         this.visitorCard = new VisitorCardModal({
             onInvite: (visitorId) => this.inviteVisitor(visitorId),
             overlays: this.overlays
@@ -150,7 +156,8 @@ export class FalescGame {
         this.reportScreen = new ReportScreen(this);
         this.confluenceScreen = new ConfluenceScreen(this);
         this.stewardshipScreen = new StewardshipScreen(this);
-        this.screenStateMachine.registerScreen(GamePhase.MENU, new MenuScreen(this.screenStateMachine, this));
+        this.menuScreen = new MenuScreen(this.screenStateMachine, this);
+        this.screenStateMachine.registerScreen(GamePhase.MENU, this.menuScreen);
         this.screenStateMachine.registerScreen(GamePhase.LOBBY, new LobbyScreen(this.screenStateMachine, this));
         this.screenStateMachine.registerScreen(GamePhase.PLAYING, this.gameScreen);
         this.screenStateMachine.registerScreen(GamePhase.DAY, this.dayScreen);
@@ -205,6 +212,7 @@ export class FalescGame {
     }
 
     continueCharter() {
+        this._archiveRecorded = false;
         const save = this.saveManager.read();
         if (!save?.charter) return false;
         this.settings.mapSeed = save.charter.seed;
@@ -279,6 +287,7 @@ export class FalescGame {
         this.floorPlan.hide();
         this.fieldGuide.hide();
         this.departureArchive.hide();
+        this.charterArchive.hide();
         this.visitorCard.hide();
     }
 
@@ -718,6 +727,11 @@ export class FalescGame {
         return true;
     }
 
+    openCharterArchive() {
+        this.charterArchive.show();
+        return true;
+    }
+
     openDepartureArchive() {
         this.departureArchive.show();
         return true;
@@ -917,9 +931,16 @@ export class FalescGame {
         return true;
     }
 
+    archiveFinishedCharter() {
+        if (!this.charter || this._archiveRecorded) return;
+        this._archiveRecorded = true;
+        recordCharter(recordFromCharter(this.charter, this.endResult || this.charter.ending));
+    }
+
     finishCharter() {
         if (!this.charter) return;
         this.endResult = this.charter.ending || { outcome: 'abandon' };
+        this.archiveFinishedCharter();
         this.saveManager.clear();
         this.screenStateMachine.setState(GamePhase.END);
     }
@@ -938,6 +959,7 @@ export class FalescGame {
                 : 'The charter closes before the commons finds its feet.'
         };
         this.endResult = this.charter.ending;
+        this.archiveFinishedCharter();
         this.saveManager.clear();
         this.screenStateMachine.setState(GamePhase.END);
     }

@@ -82,7 +82,7 @@ src/
   navigation/
     IslandNavigator.js       per-island A* to doors
   persistence/
-    SaveManager.js           versioned localStorage save v2
+    SaveManager.js, CharterArchive.js           versioned localStorage save v2
   residents/
     Resident.js              plain model: traits, needs, affinity, memory
     ResidentFactory.js       seeded 15-name roster, 6 founders
@@ -111,7 +111,8 @@ src/
     BuildModal.js, ServiceCardModal.js, BulletinModal.js,
     OverlayManager.js, StandingsCard.js, ResidentCardModal.js, Minimap.js,
     ChatterManager.js, CampaignModal.js, CommonsModal.js,
-    FieldGuideModal.js, FloorPlanModal.js, DepartureArchiveModal.js, icons.js
+    FieldGuideModal.js, FloorPlanModal.js, DepartureArchiveModal.js,
+    CharterArchiveModal.js, icons.js
   world/
     World.js                 Pixi app, layers, camera/input, map and minerals
     PatronageFlow.js         world-space last-choice arcs on the overlay layer

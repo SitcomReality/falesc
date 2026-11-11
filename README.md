@@ -97,6 +97,7 @@ With the shared browser harness available in this workspace:
 ```bash
 webgame_smoke
 webgame_smoke --scenario scripts/scenarios/save-transfer.mjs
+webgame_smoke --scenario scripts/scenarios/charter-archive.mjs
 webgame_smoke --scenario scripts/scenarios/legacy-menu.mjs
 webgame_smoke --scenario scripts/scenarios/departure-archive.mjs
 webgame_smoke --scenario scripts/scenarios/field-guide.mjs

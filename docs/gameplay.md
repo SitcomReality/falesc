@@ -529,6 +529,14 @@ the same day.
 The lobby chart's "Shards" readout is the mineral count. The survey chart and
 camera fit the whole generated cluster; the camera starts on the home shard.
 
+## Charter archive
+
+Every closed charter — victory, defeat or abandonment — records its chapter
+name, mode, day, outcome, population, flourishing, stewardship and whether the
+Beacon was lit in `falesc.charters.v1`. The menu's **Charter archive** shows the
+last eight, newest first, and can clear them. The archive survives the save
+being cleared; it is a record, not a resume point.
+
 ## Stewardship legacy
 
 A player victory records the chosen stewardship promise in `falesc.legacy.v1`.

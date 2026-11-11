@@ -1,4 +1,5 @@
 import { readLegacy, describeLegacy, clearLegacy } from '../confluence/StewardshipLegacy.js';
+import { readArchive } from '../persistence/CharterArchive.js';
 
 export class MenuScreen {
     constructor(screenStateMachine, game = null) {
@@ -73,6 +74,12 @@ export class MenuScreen {
             this.game?.openFieldGuide();
         }, 'btn btn--paper');
         actions.append(guideBtn);
+        const archiveBtn = this.createButton('Charter archive', 'menu-archive', () => {
+            this.game?.openCharterArchive();
+        }, 'btn btn--paper');
+        archiveBtn.hidden = true;
+        this.archiveBtn = archiveBtn;
+        actions.append(archiveBtn);
         this.importInput = document.createElement('input');
         this.importInput.type = 'file';
         this.importInput.accept = 'application/json,.json';
@@ -132,6 +139,7 @@ export class MenuScreen {
         const canContinue = Boolean(this.game?.saveManager?.hasSave());
         if (this.continueBtn) this.continueBtn.hidden = !canContinue;
         if (this.exportBtn) this.exportBtn.hidden = !canContinue;
+        if (this.archiveBtn) this.archiveBtn.hidden = readArchive().length === 0;
         const legacy = readLegacy();
         const effect = describeLegacy(legacy);
         this.legacyCard.hidden = !effect;
