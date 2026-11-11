@@ -30,6 +30,7 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.ok(text.includes('Every door open.'));
     assert.ok(text.includes('Best so far:'));
     assert.ok(text.includes('visits'));
+    assert.ok(text.includes('devotion'));
     await page.click('[data-testid=archive-filter-contest]');
     assert.ok((await page.text('[data-testid=charter-archive]')).includes('No charters'));
     await page.click('[data-testid=archive-filter-all]');

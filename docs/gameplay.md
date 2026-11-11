@@ -765,4 +765,4 @@ Each service card carries a small count of how many of that program the
 player has already built.
 
 
-**Clear archive** removes only the visible mode; with All selected it removes every record. The archive can be filtered to All, First Light or Contest charters, and summarises the best population, flourishing and visits across recorded runs.
+**Clear archive** removes only the visible mode; with All selected it removes every record. The archive can be filtered to All, First Light or Contest charters, and summarises the best population, flourishing, visits and devotion across recorded runs.

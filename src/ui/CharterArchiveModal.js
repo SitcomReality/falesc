@@ -53,6 +53,7 @@ export class CharterArchiveModal {
         const bestPopulation = records.length ? Math.max(...records.map((record) => record.population || 0)) : 0;
         const bestFlourishing = records.length ? Math.max(...records.map((record) => record.flourishing || 0)) : 0;
         const bestVisits = records.length ? Math.max(...records.map((record) => record.visits || 0)) : 0;
+        const bestDevotion = records.length ? Math.max(...records.map((record) => record.devotion || 0)) : 0;
         const rows = records.map((record) => `
             <li class="charter-archive__row charter-archive__row--${escapeHtml(record.outcome)}">
                 <div>
@@ -82,7 +83,7 @@ export class CharterArchiveModal {
                 <button type="button" class="btn btn--small ${this.filter === 'first-light' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-filter-first-light">First Light</button>
                 <button type="button" class="btn btn--small ${this.filter === 'contest' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-filter-contest">Contest</button>
             </div>
-            ${records.length ? `<p class="charter-archive__best">Best so far: <strong>${bestPopulation} residents</strong> · <strong>${bestFlourishing} flourishing</strong> · <strong>${bestVisits} visits</strong>.</p>` : ''}
+            ${records.length ? `<p class="charter-archive__best">Best so far: <strong>${bestPopulation} residents</strong> · <strong>${bestFlourishing} flourishing</strong> · <strong>${bestVisits} visits</strong> · <strong>${bestDevotion.toFixed(1)} devotion</strong>.</p>` : ''}
             ${rows ? `<ol class="charter-archive__list">${rows}</ol>` : '<p class="modal__note">No charters have closed yet.</p>'}
             <div class="modal__actions">
                 <button type="button" class="btn btn--paper" data-testid="charter-archive-done">Back to the menu</button>
