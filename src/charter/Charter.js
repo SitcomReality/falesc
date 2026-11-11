@@ -38,6 +38,8 @@ export class Charter {
             ? { amount: 1, programs: ['canteen', 'tea_house'] }
             : this.legacy?.policyId === 'garden_charter'
                 ? { amount: 1, programs: ['garden_dome'] }
+                : this.legacy?.policyId === 'workshop_charter'
+                    ? { amount: 1, programs: ['workshop'] }
                 : null;
         this.seed = seed;
         this.mapSize = mapSize;
@@ -175,6 +177,9 @@ export class Charter {
         } else if (policyId === 'garden_charter') {
             this.legacyBonus = { amount: 1, programs: ['garden_dome'] };
             this.legacyNote = 'The Garden Charter: new garden domes keep one more place.';
+        } else if (policyId === 'workshop_charter') {
+            this.legacyBonus = { amount: 1, programs: ['workshop'] };
+            this.legacyNote = 'The Workshop Charter: new workshops keep one more bench.';
         }
     }
 

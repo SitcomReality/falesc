@@ -18,6 +18,10 @@ export const LEGACY_EFFECTS = {
         title: 'The Commons Assembly',
         blurb: 'The next charter remembers the commons: the Beacon fund and purse begin with 5 lumen.'
     },
+    workshop_charter: {
+        title: 'Workshop Charter',
+        blurb: 'The next charter remembers the bench: its workshops keep one more place.'
+    },
     garden_charter: {
         title: 'The Garden Charter',
         blurb: 'The next charter remembers the garden: its garden domes keep one more place.'

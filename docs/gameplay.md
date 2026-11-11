@@ -626,14 +626,15 @@ choice. The winning chapter chooses one governing promise:
 - **Universal Care** — care by right, not by luck.
 - **The Open Table** — the next arrival is expected.
 - **Commons Assembly** — residents choose the works.
+- **Workshop Charter** — work is infrastructure.
 - **Garden Charter** — beauty is infrastructure.
 
 The stewardship changes the epilogue and the charter record, not the resolved
 day. It is also written to `falesc.legacy.v1`: the next new charter remembers
 the promise in a small way — one more bed for Universal Care, one more seat in
 new canteens and tea houses for The Open Table, 5 lumen in the Beacon fund and
-commons purse for the Commons Assembly, or one more place in new garden domes
-for the Garden Charter. A rival winner takes stewardship without a player choice
+commons purse for the Commons Assembly, one more bench in new workshops for the
+Workshop Charter, or one more place in new garden domes for the Garden Charter. A rival winner takes stewardship without a player choice
 and the run ends on the defeat record.
 
 

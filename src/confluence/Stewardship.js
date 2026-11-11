@@ -25,6 +25,13 @@ export const STEWARDSHIP_POLICIES = [
         epilogue: 'The works are argued over in public now. That is the point.'
     },
     {
+        id: 'workshop_charter',
+        name: 'Workshop Charter',
+        headline: 'Work is infrastructure.',
+        copy: 'A bench, a tool wall and a place to make what the chapter needs are written into the charter.',
+        epilogue: 'The charter keeps a workshop in the void. Making things is scheduled like water.'
+    },
+    {
         id: 'garden_charter',
         name: 'Garden Charter',
         headline: 'Beauty is infrastructure.',

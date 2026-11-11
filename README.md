@@ -101,6 +101,7 @@ webgame_smoke --scenario scripts/scenarios/chart-link.mjs
 webgame_smoke --scenario scripts/scenarios/chapter-name.mjs
 webgame_smoke --scenario scripts/scenarios/open-charter.mjs
 webgame_smoke --scenario scripts/scenarios/charter-archive.mjs
+webgame_smoke --scenario scripts/scenarios/legacy-workshop.mjs
 webgame_smoke --scenario scripts/scenarios/legacy-menu.mjs
 webgame_smoke --scenario scripts/scenarios/departure-archive.mjs
 webgame_smoke --scenario scripts/scenarios/return-menu.mjs
@@ -140,6 +141,7 @@ webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 webgame_smoke --scenario scripts/scenarios/festival-surge.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-referral.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
+webgame_smoke --scenario scripts/scenarios/commons-workshop.mjs
 webgame_smoke --scenario scripts/scenarios/commons-repair.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 webgame_smoke --scenario scripts/scenarios/commons-rival-work.mjs

@@ -153,7 +153,7 @@ carry a real trade-off.
   pressure plus doctrine, and can grow through housing. Rivals now publish a long-term plan, save for it and honour it when they can, but still make at most two build moves
   per day and do not plan a long-term service mix or respond to the player's
   specific moves.
-- A player winner chooses one of four stewardship promises. The promise now
+- A player winner chooses one of five stewardship promises. The promise now
   writes a small legacy that the next new charter remembers (one bed, one seat,
   a seeded commons purse, or a wider garden), but it does not reshape the wider
   rules or stack across many runs. There are no auctions or multi-round public

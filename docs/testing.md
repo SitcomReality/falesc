@@ -159,6 +159,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `chapter-name.mjs` | Signs a charter as The Long Table with the motto Every door open., checks the HUD motto and confirms both survive save/reload. |
 | `open-charter.mjs` | Starts Open Charter, checks the HUD objective and day label, plays past the old limit and confirms no ending. |
 | `charter-archive.mjs` | Abandons a live charter, checks the menu archive and its day/outcome/mode record, clears it and hides the menu button. |
+| `legacy-workshop.mjs` | Seeds the Workshop Charter legacy and checks a new Workshop starts with 4 seats. |
 | `legacy-menu.mjs` | Seeds a stewardship legacy, checks the menu card and effect text, then clears it and verifies storage is empty. |
 | `departure-archive.mjs` | Records a departure, opens the Past residents archive from the pause menu, checks the day/reason/last door and closes it. |
 | `return-menu.mjs` | Builds a Canteen, uses Save & menu, checks Continue/Export and returns to the same pending build and day. |

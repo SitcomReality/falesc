@@ -43,6 +43,7 @@ webgame_smoke --scenario scripts/scenarios/chart-link.mjs
 webgame_smoke --scenario scripts/scenarios/chapter-name.mjs
 webgame_smoke --scenario scripts/scenarios/open-charter.mjs
 webgame_smoke --scenario scripts/scenarios/charter-archive.mjs
+webgame_smoke --scenario scripts/scenarios/legacy-workshop.mjs
 webgame_smoke --scenario scripts/scenarios/legacy-menu.mjs
 webgame_smoke --scenario scripts/scenarios/departure-archive.mjs
 webgame_smoke --scenario scripts/scenarios/return-menu.mjs
@@ -81,6 +82,7 @@ webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 webgame_smoke --scenario scripts/scenarios/festival-surge.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-referral.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
+webgame_smoke --scenario scripts/scenarios/commons-workshop.mjs
 webgame_smoke --scenario scripts/scenarios/commons-repair.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 webgame_smoke --scenario scripts/scenarios/commons-rival-work.mjs
@@ -245,7 +247,7 @@ after any behavioural change.
   Clicking a rival row opens a read-only dossier of its plan, ledger and services. The last three
   days run a campaign: a seeded six-event, two-bell-per-day festival programme
   makes matching promises more magnetic, rivals publish promises, the player chooses one, and
-  the final vote uses both; the player may sponsor one extra bell for 5 lumen. A player victory then chooses one of four stewardship
+  the final vote uses both; the player may sponsor one extra bell for 5 lumen. A player victory then chooses one of five stewardship
   promises for the epilogue; a rival winner skips that choice. A shared Commons
   Beacon can be funded by every chapter; once lit it gives every resident a
   nightly comfort and opens as a six-seat all-needs shared service. Contest days
