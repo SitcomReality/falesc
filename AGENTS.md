@@ -116,6 +116,7 @@ after any behavioural change.
 | `src/world/DistrictOverlay.js` | World labels for named service districts |
 | `src/world/PatronageFlow.js` | World-space arcs from homes to residents' last choices |
 | `src/charter/Charter.js` | The run model: day, player chapter, rivals, roster, services, reports, ending |
+| `src/charter/Bulletin.js` | Morning bulletin copy, rendered from the charter |
 | `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |
 | `src/confluence/` | Campaign, pledges, stewardship and the deterministic Confluence vote |
 | `src/commons/` | Commons Assembly policies and shared service modifiers |
@@ -126,6 +127,7 @@ after any behavioural change.
 | `src/residents/` | `Resident` model, seeded resident/visitor factories, visual agent, crowd |
 | `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
 | `src/state/` | `GamePhase` constants and `ScreenStateMachine` |
+| `src/controls/` | Document-level HUD keyboard shortcuts |
 | `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, Confluence, stewardship, end |
 | `src/audio/` | Procedural soundscape, persisted mute toggle |
 | `src/ui/` | Shared `OverlayManager`, build/service/bulletin/campaign/commons/resident/visitor modals, standings, survey chart, chatter, icons |

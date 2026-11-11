@@ -3,6 +3,7 @@ import { NEED_BY_ID } from '../design/needs.js';
 import { BALANCE } from '../design/balance.js';
 import { programIcon, ICONS } from '../ui/icons.js';
 import { StandingsCard } from '../ui/StandingsCard.js';
+import { installHudKeyboard } from '../controls/HudKeyboard.js';
 
 /**
  * The planning HUD: a civic bulletin strip, First Light progress, the survey
@@ -322,74 +323,7 @@ export class GameScreen {
             this.game.endCharter('abandon');
         });
 
-        this._onKey = (event) => {
-            if (event.defaultPrevented) return;
-            if (event.ctrlKey || event.metaKey || event.altKey) return;
-            if (this.gsm.state !== 'PLAYING') return;
-            if (this.game.hasBlockingModal?.()) return;
-            if (this.pausePanel && !this.pausePanel.hidden && event.key !== 'Escape') return;
-            if (this.game.keyboardCursorActive) {
-                if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-                    event.preventDefault();
-                    const dx = event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowRight' ? 1 : 0;
-                    const dy = event.key === 'ArrowUp' ? -1 : event.key === 'ArrowDown' ? 1 : 0;
-                    this.game.moveKeyboardCursor(dx, dy);
-                    return;
-                }
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    this.game.confirmKeyboardCursor();
-                    return;
-                }
-                if (event.key === 'g' || event.key === 'G') {
-                    event.preventDefault();
-                    this.game.switchKeyboardSector();
-                    return;
-                }
-                if (event.key === 'Escape' || event.key === 'c' || event.key === 'C') {
-                    event.preventDefault();
-                    this.game.clearKeyboardCursor();
-                    return;
-                }
-            }
-            if (event.key === 'c' || event.key === 'C') {
-                event.preventDefault();
-                this.game.toggleKeyboardCursor();
-                return;
-            }
-            if (event.key === 'Escape') {
-                event.preventDefault();
-                this.pausePanel.hidden ? this.menuButton.click() : this._setPauseOpen(false);
-                return;
-            }
-            if (event.key === 'e' || event.key === 'E') {
-                event.preventDefault();
-                this.game.openDay();
-                return;
-            }
-            if (event.key === 'b' || event.key === 'B') {
-                event.preventDefault();
-                this.game.showBulletin();
-                return;
-            }
-            if (event.key === 'r' || event.key === 'R') {
-                event.preventDefault();
-                this.game.openResidentRoster();
-                return;
-            }
-            if (event.key === 'p' || event.key === 'P') {
-                event.preventDefault();
-                this.game.togglePatronage();
-                return;
-            }
-            const slot = Number(event.key);
-            if (Number.isInteger(slot) && slot >= 1 && slot <= BUILDABLE_PROGRAMS.length) {
-                const program = BUILDABLE_PROGRAMS[slot - 1];
-                event.preventDefault();
-                if (this.game.selectProgram(program.id)) this.toast(`${program.name} armed — choose a plot.`, 'mint', 1600);
-            }
-        };
-        document.addEventListener('keydown', this._onKey);
+        this._onKey = installHudKeyboard(this.game, this);
     }
 
     announceCursor(text) {

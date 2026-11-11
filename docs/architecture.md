@@ -185,7 +185,9 @@ service, agent or overlay between runs.
 
 ## 3. State machine and screens
 
-`src/state/GamePhase.js` defines:
+`src/controls/             document-level HUD keyboard controller
+src/charter/Bulletin.js    morning bulletin copy
+src/state/GamePhase.js` defines:
 
 | Phase | Meaning | Screen |
 | --- | --- | --- |
