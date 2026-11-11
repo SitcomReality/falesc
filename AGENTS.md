@@ -241,7 +241,7 @@ after any behavioural change.
   first Commons Assembly lets residents petition, each chapter nominate and
   residents vote; the winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
   `CommonsBallot.js`). One second reading can amend it after a full day. An open player service can hold up to two retrofit
-  modules (6–7 lumen each) from Sunroom, Atelier, Caretaker's Nook and Night Kitchen. The
+  modules (5–7 lumen each) from Sunroom, Atelier, Caretaker's Nook and Night Kitchen. The
   service record owns the action and the module is saved. Open services can also
   choose As built, Round the clock, Daylight or Evening hours, plus a free
   Cosy/Lively/Curious/Efficient atmosphere and an Open/Chapter first/Visitors
