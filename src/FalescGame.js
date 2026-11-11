@@ -1,4 +1,5 @@
 import { World } from './world/World.js';
+import { PatronageFlow } from './world/PatronageFlow.js';
 import { Charter } from './charter/Charter.js';
 import { ResidentCrowd } from './residents/ResidentCrowd.js';
 import { ScreenStateMachine } from './state/ScreenStateMachine.js';
@@ -47,6 +48,7 @@ export class FalescGame {
             objectLayer: this.world.objectLayer,
             shadowLayer: this.world.shadowLayer
         });
+        this.patronageFlow = new PatronageFlow({ layer: this.world.overlayLayer });
         this.saveManager = new SaveManager();
         this.screenStateMachine = new ScreenStateMachine();
 
@@ -116,6 +118,8 @@ export class FalescGame {
             parentContainer: this.world.objectLayer
         });
         this.crowd.setCharter(this.charter);
+        this.patronageFlow.setCharter(this.charter);
+        this.gameScreen?.setPatronageState?.(false);
         this.crowd.sync();
         this.syncViews();
         this.selectedProgramId = defaultProgramId();
@@ -141,6 +145,8 @@ export class FalescGame {
             parentContainer: this.world.objectLayer
         });
         this.crowd.setCharter(this.charter);
+        this.patronageFlow.setCharter(this.charter);
+        this.gameScreen?.setPatronageState?.(false);
         this.crowd.sync();
         this.syncViews();
         this.selectedProgramId = defaultProgramId();
@@ -180,6 +186,9 @@ export class FalescGame {
             this.charter.rivals.forEach((rival) => rival.services.clear());
             this.charter = null;
         }
+        this.patronageFlow.hide();
+        this.patronageFlow.setCharter(null);
+        this.gameScreen?.setPatronageState?.(false);
         this.chatter?.clear();
         this.buildModal.hide(false);
         this.serviceCard.hide();
@@ -191,7 +200,22 @@ export class FalescGame {
         if (!this.charter) return;
         this.crowd.sync();
         this.world.rebuildPaths(this.charter.allServices);
+        this.patronageFlow.refresh();
         this.gameScreen.updateHud(true);
+    }
+
+    togglePatronage() {
+        if (!this.charter) return false;
+        const visible = this.patronageFlow.toggle();
+        this.gameScreen?.setPatronageState?.(visible);
+        if (this.gameScreen?.toast) {
+            this.gameScreen.toast(
+                visible ? 'Patronage flows on — each arc is a last choice.' : 'Patronage flows off.',
+                'mint',
+                1800
+            );
+        }
+        return visible;
     }
 
     /* ------------------------------------------------------------------ */
@@ -374,6 +398,8 @@ export class FalescGame {
         this.world.clearHover();
         this.buildModal.hide(false);
         this.pendingBuildLocation = null;
+        this.patronageFlow.hide();
+        this.gameScreen.setPatronageState(false);
         this.chatter.clear();
         const simulation = this.charter.openDay();
         // Anyone who left at dusk no longer has an agent on the shard.
@@ -647,6 +673,8 @@ export class FalescGame {
                     })),
                     buildings: services.length,
                     allServices: game.charter?.allServices?.length || services.length,
+                    patronageVisible: Boolean(game.patronageFlow?.visible),
+                    patronageLines: game.patronageFlow?.lineCount || 0,
                     buildingStates: services.map((service) => service.state),
                     buildingBlueprints: services.map((service) => service.programId),
                     residents: residents.map((resident) => ({
@@ -738,6 +766,9 @@ export class FalescGame {
             showBulletin() {
                 game.showBulletin();
                 return game.bulletinModal.isOpen;
+            },
+            togglePatronage() {
+                return game.togglePatronage();
             },
             showResidents() {
                 game.showResidentRoster();

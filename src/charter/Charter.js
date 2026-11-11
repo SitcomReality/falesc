@@ -603,12 +603,15 @@ export class Charter {
             });
         }
 
-        const rivalMove = rivalMoves?.[0];
-        if (rivalMove) {
+        if (rivalMoves?.length) {
+            const first = rivalMoves[0];
+            const moveText = rivalMoves.map((move) => move.action === 'reopened'
+                ? `${move.chapterName} reopened ${move.programName}.`
+                : `${move.chapterName} put up a ${move.programName}.`).join(' ');
             items.push({
                 kicker: 'Rival move',
-                title: `${rivalMove.chapterName} ${rivalMove.action}`,
-                text: `${rivalMove.chapterName} put up a ${rivalMove.programName}. The room to be loved just got a little more crowded.`
+                title: rivalMoves.length === 1 ? `${first.chapterName} ${first.action}` : 'Rivals make their moves',
+                text: `${moveText} The room to be loved just got a little more crowded.`
             });
         }
 

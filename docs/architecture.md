@@ -98,6 +98,7 @@ src/
     ChatterManager.js, icons.js
   world/
     World.js                 Pixi app, layers, camera/input, map and minerals
+    PatronageFlow.js         world-space last-choice arcs on the overlay layer
 ```
 
 There is no `GameStateManager`, `TurnScheduler`, `BuildingManager`, `Building`,
@@ -279,12 +280,19 @@ affinity to the home chapter. `DaySimulator` offers every active service from
 `devotionByChapter`, `patronageByChapter` and a chapter summary into the report.
 The HUD's `StandingsCard` and the report use those numbers.
 
-`LumenLedger.resolveDay()` now resolves every chapter. Each chapter pays upkeep
-from its own residents' contributions, and a shortfall closes its non-housing
+`LumenLedger.resolveDay()` resolves every chapter. Each chapter pays upkeep from
+its own residents' contributions, and a shortfall closes its non-housing
 services in the usual order. Rivals therefore have a real budget, can fall short
-and can grow through housing. Their AI still does not reopen closed services or
-plan beyond its doctrine queue. The end at the day limit compares Devotion;
-shared Flourishing below the survival line produces a no-winner defeat.
+and can grow through housing. Their AI reopens a lost service when it can afford
+the cost, then chooses the next build from shared need pressure plus doctrine.
+The end at the day limit compares Devotion; shared Flourishing below the
+survival line produces a no-winner defeat.
+
+The **patronage-flow overlay** (`src/world/PatronageFlow.js`) is a read-only Pixi
+layer over the world. When toggled from the standings card or with `P`, it draws
+one chapter-coloured arc from each resident's home door to the door of their
+last chosen service. It is cleared on day playback and refreshed after planning
+changes; it never feeds the simulation.
 
 ## 5. Day simulation and playback
 

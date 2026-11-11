@@ -9,9 +9,9 @@
 >
 > **Status:** a two-rival Contest preview now exists in code: shared services and
 > residents, rival Welcome Houses and housing growth, per-chapter lumen,
-> contributions, upkeep and closures, Devotion standings, patronage and doctrine
-> build moves. Rival reopen/reactive strategy and the Confluence vote remain
-> target.
+> contributions, upkeep and closures, Devotion standings, a patronage-flow
+> overlay, doctrine/need-pressure builds and reopen recovery. A long-term rival
+> plan, the full survey view and the Confluence vote remain target.
 >
 > The competition is for **patronage and love**, not profit. Rivals win residents
 > by being better hosts. There is no price war, no landlord rent, and no cash

@@ -52,8 +52,9 @@ no sea, beach or open-air planting. `npm run check` and the smoke test pass.
 **Phase 2 preview is now in the build:** two AI rival chapters, doctrine build
 moves, shared services/occupancy, shared residents, rival Welcome Houses and
 housing growth, per-chapter lumen/contributions/upkeep/closures, Devotion
-standings, patronage and a most-beloved-chapter end at the day limit. Rival
-reopen/recovery, reactive strategy, the survey patronage overlay and the
+standings, patronage, a patronage-flow overlay and a most-beloved-chapter end at
+the day limit. Rivals also recover from closures and choose builds by need
+pressure. A long-term rival plan, the full survey/comparison view and the
 Confluence vote remain.
 
 **Not started:** the rest of Phase 2, Phase 3 (layers, modules, finishes,

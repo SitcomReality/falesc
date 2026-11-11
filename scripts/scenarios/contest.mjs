@@ -61,6 +61,14 @@ export default async function ({ page, assert, screenshot, log }) {
     await page.evaluate("window.__falesc.beginNextDay()");
     await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
     await page.evaluate("window.__falesc.app.bulletinModal.hide()");
+    await page.click('[data-testid=patronage-toggle]');
+    await page.pause(300);
+    const flows = await page.evaluate("window.__falesc.snapshot()");
+    log(JSON.stringify({ flows: { visible: flows.patronageVisible, lines: flows.patronageLines } }));
+    assert.ok(flows.patronageVisible, 'the patronage flow overlay should toggle on');
+    assert.ok(flows.patronageLines > 0, 'the overlay should draw at least one last-choice arc');
+    await screenshot('contest-flows.png');
+    await page.click('[data-testid=patronage-toggle]');
 
     const built = await page.evaluate(`(() => {
         const app = window.__falesc.app;
@@ -111,6 +119,12 @@ export default async function ({ page, assert, screenshot, log }) {
     assert.ok(restored.allServices >= 5, 'rival services should restore');
     assert.equal(restored.chapters.length, 3);
     assert.ok(restored.chapters.find((chapter) => chapter.id === 'host').residents > 3, 'a growing rival should win residents into its housing');
+    await page.click('[data-testid=patronage-toggle]');
+    await page.pause(200);
+    const restoredFlows = await page.evaluate("window.__falesc.snapshot()");
+    assert.ok(restoredFlows.patronageVisible, 'the patronage overlay should survive a reload');
+    assert.ok(restoredFlows.patronageLines > 0, 'restored residents should still have last-choice arcs');
+    await page.click('[data-testid=patronage-toggle]');
 
     await page.evaluate("window.__falesc.app.charter.day = window.__falesc.app.charter.dayLimit");
     await page.evaluate("window.__falesc.openDay()");

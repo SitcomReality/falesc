@@ -22,7 +22,8 @@ the game makes no network requests at runtime.
 > tuned; only the home shard is playable. A two-rival Contest preview is
 > available, with rival upkeep, contributions, housing and Devotion standings;
 > the Confluence vote, deeper rival strategy, building layers, auctions and
-> multiplayer are not implemented. See [docs/known-issues.md](docs/known-issues.md).
+> multiplayer are not implemented. A patronage flow overlay is available in
+> the Contest standings card (or `P`). See [docs/known-issues.md](docs/known-issues.md).
 
 ## Run it locally
 
@@ -48,6 +49,8 @@ so any static file server works, but ES modules require `http://`, not `file://`
   armed in both.
 - Read the morning bulletin. Arm a service with `1`–`4` (or click a dock card),
   then click a free plot on the home shard and name the place.
+- Press `P` (or **Show flows** in the Contest standings) to trace each
+  resident's last choice from their home door to the service that earned it.
 - A service costs lumen and one work. It is `PENDING` for a day and opens at the
   start of the next day. You get **two works per day**.
 - Click **Open the day** (or press `E`) to run the day. Playback moves through
@@ -85,6 +88,7 @@ webgame_smoke --scenario scripts/scenarios/departure.mjs
 webgame_smoke --scenario scripts/scenarios/overlay-stack.mjs
 webgame_smoke --scenario scripts/scenarios/report-save.mjs
 webgame_smoke --scenario scripts/scenarios/contest.mjs
+webgame_smoke --scenario scripts/scenarios/contest-recovery.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```
 
@@ -119,7 +123,8 @@ The **Contest preview** is present: two rival chapters build services and
 housing, pay upkeep from their own residents' contributions, share the same
 residents and occupancy, and compete for Devotion; standings and patronage
 appear in the HUD and report, and the day limit crowns the most-beloved chapter.
-Still absent: the full shared commons, Confluence vote, deeper rival strategy
-and reopen logic, building layers or retrofit, auctions, audio, multiplayer, or a
-keyboard build cursor. The Commons Beacon silhouette exists as endgame art but
+Still absent: the full shared commons, Confluence vote and a deeper rival
+strategy beyond need-pressure builds/recovery, building layers or retrofit,
+auctions, audio, multiplayer, or a keyboard build cursor. A patronage-flow
+overlay now traces each resident's last choice from home to door. The Commons Beacon silhouette exists as endgame art but
 is not buildable. See [docs/known-issues.md](docs/known-issues.md).

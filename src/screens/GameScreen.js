@@ -172,7 +172,7 @@ export class GameScreen {
         endDayBtn.addEventListener('click', () => this.game.openDay());
         bottom.append(chartSlot, dock);
 
-        this.standings = new StandingsCard();
+        this.standings = new StandingsCard({ onToggleFlows: () => this.game.togglePatronage() });
         this.container.append(top, objective, this.standings.element, hint, toast, bottom);
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
@@ -271,6 +271,11 @@ export class GameScreen {
                 this.game.showResidentRoster();
                 return;
             }
+            if (event.key === 'p' || event.key === 'P') {
+                event.preventDefault();
+                this.game.togglePatronage();
+                return;
+            }
             const slot = Number(event.key);
             if (Number.isInteger(slot) && slot >= 1 && slot <= BUILDABLE_PROGRAMS.length) {
                 const program = BUILDABLE_PROGRAMS[slot - 1];
@@ -314,6 +319,10 @@ export class GameScreen {
         if (this._cache[key] === value) return;
         this._cache[key] = value;
         element.textContent = value;
+    }
+
+    setPatronageState(visible) {
+        this.standings.setFlows(visible);
     }
 
     updateHud(force = false) {

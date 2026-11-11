@@ -2,7 +2,8 @@
  * Live Devotion standings for the Contest preview. Hidden in First Light.
  */
 export class StandingsCard {
-    constructor() {
+    constructor({ onToggleFlows = null } = {}) {
+        this.onToggleFlows = onToggleFlows;
         this.signature = null;
         this.element = document.createElement('aside');
         this.element.className = 'standings-card';
@@ -14,9 +15,20 @@ export class StandingsCard {
                 <span class="standings-card__goal">most love by the last day</span>
             </div>
             <h3 class="standings-card__title">The Contest</h3>
+            <button class="standings-card__flows" type="button" data-testid="patronage-toggle" aria-pressed="false">Show flows</button>
             <ol class="standings-list" data-role="list"></ol>
         `;
         this.listEl = this.element.querySelector('[data-role=list]');
+        this.flowButton = this.element.querySelector('[data-testid=patronage-toggle]');
+        this.flowButton.addEventListener('click', () => {
+            if (this.onToggleFlows) this.onToggleFlows();
+        });
+    }
+
+    setFlows(visible) {
+        this.flowButton.textContent = visible ? 'Hide flows' : 'Show flows';
+        this.flowButton.setAttribute('aria-pressed', String(Boolean(visible)));
+        this.flowButton.classList.toggle('is-on', Boolean(visible));
     }
 
     update(chapters = [], visible = false) {

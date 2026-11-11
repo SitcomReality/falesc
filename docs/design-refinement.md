@@ -7,8 +7,9 @@
 > planning, deterministic day playback, the evening report, wellbeing-driven
 > lumen, Devotion/Flourishing, resident cards with a "why", and save v2. A
 > **Contest preview** adds two AI rivals, shared residents/services, rival
-> housing and a per-chapter economy, Devotion standings, patronage and a
-> most-beloved-chapter end at the day limit. The full shared commons, Confluence
+> housing and a per-chapter economy, recovery/need-pressure builds, Devotion
+> standings, a patronage-flow overlay and a most-beloved-chapter end at the day
+> limit. The full shared commons, Confluence
 > vote, building layers and multiplayer are **not** implemented. This document and the component docs in `docs/design/`
 > describe the direction; where they conflict with the source, the source wins.
 > The visual identity (palette, typography, paper/ink chrome) remains the

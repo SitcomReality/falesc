@@ -30,6 +30,7 @@ limit.
 | `E` | Open the day (end planning) |
 | `B` | Open the morning bulletin |
 | `R` | Open the resident roster |
+| `P` | Toggle the patronage flow overlay (homes → last choices) |
 | `Escape` while planning | Open/close the charter menu |
 | `Enter` in the build dialog | Break ground |
 | `←` `→` in the resident card | Previous / next resident |
@@ -78,8 +79,11 @@ and cannot be dismantled by the player. Rivals build one service or house per
 day from their doctrine, pay upkeep and can go short; their residents contribute
 lumen exactly like the player's. Residents are assigned to the chapter with a
 spare bed, and arrivals prefer the most-beloved chapter with room. A rival can
-win residents into its own housing, but the AI does not yet reopen a closed
-service or run a more sophisticated strategy.
+win residents into its own housing, reopens a service lost to a shortfall when
+it can afford to, and chooses its next build by shared need pressure plus its
+doctrine. The **patronage flow overlay** (Show flows in the standings card, or
+`P`) traces each resident's last choice from their home door to the service
+door, coloured by chapter.
 
 ## Planning
 
@@ -337,9 +341,10 @@ yet.
 - **No building layers, modules, finishes, policies or retrofit.** The model
   carries default finish/policy values for future use; the player cannot choose
   them.
-- **The Contest is a preview.** Rivals build services and housing, pay upkeep
-  and receive contributions, but their AI does not reopen closed services or
-  plan beyond its doctrine queue. The full Confluence vote is not implemented.
+- **The Contest is a preview.** Rivals build services and housing, pay upkeep,
+  receive contributions, reopen lost services and react to need pressure, but
+  their planning is still one move per day and the full Confluence
+  festival/vote is not implemented.
 - **No auctions, stewardship, petitions or multiplayer.** The Multiplayer button
   is a disabled placeholder.
 - **No audio.**

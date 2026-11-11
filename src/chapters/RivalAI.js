@@ -1,3 +1,4 @@
+import { BALANCE } from '../design/balance.js';
 import { PROGRAM_BY_ID } from '../design/programs.js';
 import { RivalChapter } from './RivalChapter.js';
 
@@ -9,7 +10,6 @@ export const RIVAL_DEFINITIONS = [
         doctrine: 'wonder',
         blurb: 'Builds gardens and quiet rooms. Forgets the night kitchen.',
         programs: ['garden_dome', 'tea_house', 'canteen', 'housing'],
-        lumen: 20,
         works: 1
     },
     {
@@ -19,7 +19,6 @@ export const RIVAL_DEFINITIONS = [
         doctrine: 'company',
         blurb: 'Builds tables, lamps and noise. Runs short of garden.',
         programs: ['tea_house', 'canteen', 'garden_dome', 'housing'],
-        lumen: 20,
         works: 1
     }
 ];
@@ -28,6 +27,8 @@ export function createRivalChapters({ map, parentContainer, occupancy }) {
     return RIVAL_DEFINITIONS.map((definition) => {
         const rival = new RivalChapter({
             ...definition,
+            lumen: BALANCE.contest.startingLumen,
+            works: BALANCE.contest.rivalWorksPerDay,
             map,
             parentContainer,
             occupancy
@@ -83,34 +84,52 @@ function seedOpeningService(rival, programId) {
 }
 
 /**
- * One deterministic build attempt per rival per day. Rivals pay construction
- * costs and use one work; their day-to-day upkeep is a later Phase 2 pass.
+ * One deterministic move per rival per day. A rival first reopens a service it
+ * lost to a shortfall if it can afford to, then chooses the next build by
+ * shared need pressure plus its doctrine bias. It still uses one work and pays
+ * construction costs from its own lumen.
  */
 export function planRivalDay(rival, charter) {
+    const reopened = tryReopen(rival, charter);
+    if (reopened) return reopened;
     if (rival.works <= 0) return null;
-    for (const programId of rival.doctrinePrograms || rival.programs || []) {
-        const program = PROGRAM_BY_ID[programId];
-        if (!program || !program.buildable) continue;
-        if (countProgram(rival, programId) >= programLimit(programId)) continue;
-        if (rival.lumen < program.cost) continue;
-        const plot = findFreePlot(rival, programId);
+
+    const pressure = needPressure(charter);
+    const candidates = (rival.programs || [])
+        .map((programId, index) => {
+            const program = PROGRAM_BY_ID[programId];
+            if (!program || !program.buildable) return null;
+            if (countProgram(rival, programId) >= programLimit(programId)) return null;
+            if (rival.lumen < program.cost) return null;
+            const residents = charter.activeResidents.filter((resident) => resident.homeChapterId === rival.id);
+            const spare = rival.services.spareHousing(residents);
+            const doctrineBias = Math.max(0, 12 - index * 3);
+            const housingBias = programId === 'housing' && spare <= 0 ? 8 : 0;
+            const score = (pressure[program.need] || 0) + doctrineBias + housingBias;
+            return { programId, program, index, score };
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.score - a.score || a.index - b.index);
+
+    for (const candidate of candidates) {
+        const plot = findFreePlot(rival, candidate.programId);
         if (!plot) continue;
-        const built = countProgram(rival, programId);
+        const built = countProgram(rival, candidate.programId);
         const result = rival.services.place({
-            programId,
+            programId: candidate.programId,
             sectorId: plot.sectorId,
             u: plot.u,
             v: plot.v,
-            name: built > 0 ? `${program.name} ${built + 1}` : program.name,
+            name: built > 0 ? `${candidate.program.name} ${built + 1}` : candidate.program.name,
             state: 'PENDING'
         });
         if (!result.ok) continue;
-        rival.lumen -= program.cost;
+        rival.lumen -= candidate.program.cost;
         rival.works -= 1;
         rival.lastMove = {
             chapterId: rival.id,
             chapterName: rival.name,
-            programId,
+            programId: candidate.programId,
             programName: result.service.name,
             day: charter.day,
             action: 'broke ground'
@@ -118,6 +137,44 @@ export function planRivalDay(rival, charter) {
         return rival.lastMove;
     }
     return null;
+}
+
+function tryReopen(rival, charter) {
+    const doctrine = rival.programs || [];
+    const closed = rival.services.services
+        .filter((service) => service.closed && !service.fixed)
+        .sort((a, b) => doctrine.indexOf(a.programId) - doctrine.indexOf(b.programId));
+    for (const service of closed) {
+        const cost = rival.services.reopenCost(service);
+        if (rival.lumen < cost) continue;
+        rival.lumen -= cost;
+        service.reopen();
+        rival.lastMove = {
+            chapterId: rival.id,
+            chapterName: rival.name,
+            programId: service.programId,
+            programName: service.name,
+            day: charter.day,
+            action: 'reopened'
+        };
+        return rival.lastMove;
+    }
+    return null;
+}
+
+function needPressure(charter) {
+    const residents = charter.activeResidents;
+    if (residents.length === 0) return { sustenance: 0, rest: 0, company: 0, wonder: 0 };
+    const pressure = { sustenance: 0, rest: 0, company: 0, wonder: 0 };
+    for (const resident of residents) {
+        for (const needId of Object.keys(pressure)) {
+            pressure[needId] += resident.needs[needId] || 0;
+        }
+    }
+    for (const needId of Object.keys(pressure)) {
+        pressure[needId] = Math.round((pressure[needId] / residents.length) * 10) / 10;
+    }
+    return pressure;
 }
 
 function countProgram(rival, programId) {

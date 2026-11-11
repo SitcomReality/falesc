@@ -19,9 +19,10 @@ that document is prototype-era; the current world is the void described in
 **Design direction.** The refined design — resident needs, service buildings,
 planning plus playback, care-based competition and the Confluence — is
 substantially implemented for one shared shard, including a **Contest preview**
-with two AI rivals, a shared lumen economy, shared residents, rival housing and
-Devotion standings. The full Confluence vote, deeper rival strategy, layers,
-auctions and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
+with two AI rivals, a shared lumen economy, shared residents, rival housing,
+recovery and need-pressure builds, Devotion standings and a patronage-flow
+overlay. The full Confluence vote, deeper rival strategy, layers, auctions and
+multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
 ## Start here
@@ -41,6 +42,7 @@ webgame_smoke --scenario scripts/scenarios/persistence.mjs
 webgame_smoke --scenario scripts/scenarios/determinism.mjs
 webgame_smoke --scenario scripts/scenarios/engine-regression.mjs
 webgame_smoke --scenario scripts/scenarios/contest.mjs
+webgame_smoke --scenario scripts/scenarios/contest-recovery.mjs
 ```
 
 The CLI equivalents and the full scenario list are in
@@ -57,6 +59,7 @@ after any behavioural change.
 | `src/App.js` | Pure entrypoint: `new FalescGame()` |
 | `src/FalescGame.js` | Coordinator: charter lifecycle, screens/modals, day playback, save, debug API, ticker |
 | `src/world/World.js` | Pixi application, layered scene, camera/input, map and mineral generation |
+| `src/world/PatronageFlow.js` | World-space arcs from homes to residents' last choices |
 | `src/charter/Charter.js` | The run model: day, player chapter, rivals, roster, services, reports, ending |
 | `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |
 | `src/design/` | Needs, traits, service programs, balance table, names |
@@ -146,9 +149,10 @@ after any behavioural change.
 - Placement occupancy is shared across player and rival chapters. Do not give a
   chapter its own private occupancy map or services will overlap.
 - Rival chapters pay construction costs and upkeep, receive contributions from
-  their own residents, and own fixed Welcome Houses. Their AI does not reopen
-  closed services yet, and the Confluence vote is still missing; do not describe
-  the preview as the full competition design.
+  their own residents, own fixed Welcome Houses, reopen services lost to
+  shortfalls, and choose builds by need pressure plus doctrine. The Confluence
+  vote is still missing; do not describe the preview as the full competition
+  design.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
   not remove the survey chart without adjusting `canvasSelectors` and the smoke
   test.
