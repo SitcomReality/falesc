@@ -99,6 +99,7 @@ src/
     ServicePolicies.js       player-set hours, quality and upkeep modifiers
     BuildingFinishes.js     Humble / Comfortable / Grand shell trade-offs
     ServiceAdjacency.js     Neighbour quality and mixed-chapter bonus
+    (Charter.refreshDistricts) connected-service district names and bonus
     PlacementPolicy.js       pure footprint/door/home-shard rules
   simulation/
     DaySimulator.js          deterministic day: drift, choice, queues, report

@@ -65,6 +65,10 @@ export class ServiceBuilding {
         this.adjacencyBonus = 0;
         this.adjacencyNeighbours = 0;
         this.adjacencyChapters = [];
+        this.districtId = null;
+        this.districtName = null;
+        this.districtBonus = 0;
+        this.districtSize = 0;
         this.entrance = entrance;
         this.visits = Number(visits) || 0;
         this.hearts = Number(hearts) || 0;

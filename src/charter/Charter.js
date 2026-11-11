@@ -9,6 +9,7 @@ import { finishFor, finishCost } from '../services/BuildingFinishes.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService, removeCommonsPolicyFromService } from '../commons/CommonsPolicies.js';
 import { nominateForRival, petitionFor, resolveCommonsBallot } from '../commons/CommonsBallot.js';
 import { ServiceManager } from '../services/ServiceManager.js';
+import { computeAdjacency } from '../services/ServiceAdjacency.js';
 import { cellKey } from '../services/PlacementPolicy.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
@@ -639,6 +640,68 @@ export class Charter {
         this.services.refreshAdjacency();
         for (const rival of this.rivals || []) rival.services.refreshAdjacency();
         this.commonsManager?.refreshAdjacency();
+        this.refreshDistricts();
+    }
+
+    refreshDistricts() {
+        const services = this.allServices;
+        for (const service of services) {
+            service.districtId = null;
+            service.districtName = null;
+            service.districtBonus = 0;
+            service.districtSize = 0;
+        }
+        const byId = new Map(services.map((service) => [service.id, service]));
+        const graph = new Map();
+        for (const service of services) {
+            graph.set(service.id, computeAdjacency(service, this.occupancy).neighbourIds.filter((id) => byId.has(id)));
+        }
+        const visited = new Set();
+        const names = new Map();
+        for (const service of services) {
+            if (visited.has(service.id)) continue;
+            const component = [];
+            const queue = [service.id];
+            visited.add(service.id);
+            while (queue.length) {
+                const id = queue.shift();
+                const member = byId.get(id);
+                if (!member) continue;
+                component.push(member);
+                for (const next of graph.get(id) || []) {
+                    if (visited.has(next)) continue;
+                    visited.add(next);
+                    queue.push(next);
+                }
+            }
+            if (component.length < 3) continue;
+            const base = this.districtBaseName(component);
+            const count = (names.get(base) || 0) + 1;
+            names.set(base, count);
+            const suffix = count === 1 ? '' : ` ${['I', 'II', 'III', 'IV', 'V', 'VI'][count - 1] || count}`;
+            const id = `district-${service.id}-${component.length}`;
+            const mixed = new Set(component.map((member) => member.chapterId)).size > 1;
+            const bonus = Math.min(0.05, 0.02 + Math.max(0, component.length - 3) * 0.01 + (mixed ? 0.01 : 0));
+            for (const member of component) {
+                member.districtId = id;
+                member.districtName = `${base}${suffix}`;
+                member.districtBonus = Math.round(bonus * 100) / 100;
+                member.districtSize = component.length;
+            }
+        }
+    }
+
+    districtBaseName(component) {
+        const chapters = new Set(component.map((service) => service.chapterId));
+        if (chapters.size > 1) return 'The Commons';
+        const counts = {};
+        for (const service of component) counts[service.programId] = (counts[service.programId] || 0) + 1;
+        const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
+        if (top === 'housing') return 'Hearth Lane';
+        if (top === 'canteen' || top === 'tea_house') return 'Long Table';
+        if (top === 'garden_dome') return 'Lantern Row';
+        if (top === 'bathhouse') return 'Steam Walk';
+        return 'The Cluster';
     }
 
     refreshDerived() {

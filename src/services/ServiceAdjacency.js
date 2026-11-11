@@ -24,5 +24,5 @@ export function computeAdjacency(service, occupancy) {
     const neighbours = seen.size;
     const bonus = Math.min(ADJACENCY.max,
         neighbours * ADJACENCY.perNeighbour + chapters.size * ADJACENCY.differentChapter);
-    return { bonus: Math.round(bonus * 100) / 100, neighbours, chapters: [...chapters] };
+    return { bonus: Math.round(bonus * 100) / 100, neighbours, chapters: [...chapters], neighbourIds: [...seen] };
 }

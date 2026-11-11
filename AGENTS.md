@@ -57,6 +57,7 @@ webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 webgame_smoke --scenario scripts/scenarios/commons-purse.mjs
 webgame_smoke --scenario scripts/scenarios/retrofit.mjs
+webgame_smoke --scenario scripts/scenarios/service-district.mjs
 webgame_smoke --scenario scripts/scenarios/service-adjacency.mjs
 webgame_smoke --scenario scripts/scenarios/service-floors.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
@@ -203,7 +204,8 @@ after any behavioural change.
   services include the 2×2 Bathhouse for Rest + Company. A build chooses a
   Humble, Comfortable or Grand shell finish. An open service can add two
   floors for capacity and upkeep. Neighbouring services add a small quality
-  bonus, with extra for mixed chapters. In Contest, a second
+  bonus, with extra for mixed chapters. Three connected services form a named
+  district with a small shared bonus. In Contest, a second
   commons isle is buildable and residents reach it through reserved shuttle gates.
   This is a first pass; a fuller archipelago, a larger multi-round festival,
   auctions, shared capital budgeting and deeper legacy effects are still
