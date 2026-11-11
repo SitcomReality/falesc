@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { TILE_WIDTH, TILE_HEIGHT } from './TileMetrics.js';
 import { generateShape } from './ShapeGenerator.js';
-import { drawSectorGraphics } from './SectorGraphics.js';
+import { drawSectorGraphics } from './sector/SectorGraphics.js';
 import { projectGridToWorld, isPointInIsoGrid, worldToGrid } from './IsometricProjection.js';
 
 /**
