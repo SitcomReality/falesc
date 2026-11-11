@@ -732,7 +732,7 @@ half-loaded.
   policy and one service record per building are implemented.
 - **The Contest is a preview.** Rivals build services and housing, pay upkeep,
   receive contributions, reopen lost services and react to need pressure, but
-  their planning is still one move per day. The campaign has three festival
+  their planning is at most two build moves per day. The campaign has three festival
   events, one promise each and a resident vote, not a larger multi-round
   festival or auctions.
 - **No auctions or multiplayer.** The Multiplayer button is a disabled placeholder.

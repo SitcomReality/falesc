@@ -1267,7 +1267,15 @@ export class Charter {
         this.request = this.buildDailyRequest();
         const arrivals = this.addArrivals();
         this.pendingArrivals = arrivals;
-        const rivalMoves = this.rivals.map((rival) => planRivalDay(rival, this)).filter(Boolean);
+        const rivalMoves = this.rivals.flatMap((rival) => {
+            const moves = [];
+            for (let index = 0; index < rival.works; index++) {
+                const move = planRivalDay(rival, this);
+                if (!move) break;
+                moves.push(move);
+            }
+            return moves;
+        });
         this.lastRivalMoves = rivalMoves;
         if (this.contest && this.commons && !this.commons.active) {
             for (const rival of this.rivals) {
