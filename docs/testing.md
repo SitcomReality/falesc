@@ -1,304 +1,419 @@
-# AGENTS.md
+# Testing guide
 
-FALESC is a zero-build, single-page isometric city-builder: vanilla ES modules,
-Pixi.js 7 (WebGL), DOM overlays for menus, and no backend. The entry point is
-`index.html` → `src/App.js` (a three-line entrypoint) → `src/FalescGame.js` (the
-application coordinator). Dependencies are vendored under `vendor/` and resolved
-through the import map, so the game runs offline with no install or bundling
-step.
+FALESC has four layers of checks:
 
-The current build is the **First Light vertical slice** of **FALESC: The
-Confluence** — floating shards in a warm nebula void, coral/mint/cream UI, local
-Fraunces/Jost/Space Mono fonts, and a lumen economy made from residents'
-wellbeing. Read [docs/design-vision.md](docs/design-vision.md) before making
-visual changes; the palette, typography and paper/ink chrome are the guardrail
-against generic dark-dashboard styling. The sea/beach/open-air-plant imagery in
-that document is prototype-era; the current world is the void described in
-[docs/design/world.md](docs/design/world.md).
+1. **Static checks** — fast, no browser, catch syntax and broken imports.
+2. **Browser smoke test** — real headless Firefox, full user flow, screenshots.
+3. **Scenario regressions** — resident loop, economy, saves, determinism, map
+   packing, engine behaviour, demolition, a full victory and mobile layout.
+4. **Manual playtest** — camera, touch, visual and narrative checks the harness
+   cannot judge.
 
-**Design direction.** The refined design — resident needs, service buildings,
-planning plus playback, care-based competition and the Confluence — is
-substantially implemented across a home shard, a Contest commons isle and a Contest garden isle, including a **Contest preview**
-with two AI rivals, a shared lumen economy, shared residents, rival housing,
-recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
-a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
-a fundable shared Commons Beacon that becomes a six-seat all-needs civic service,
-transient day visitors who pay for service visits, and a two-module service retrofit. The full multi-round festival, auctions, deeper legacy effects, deeper rival
-strategy, full interior floors and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
-and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
+The browser harness is a shared workspace tool, not a dependency of this
+repository. From the repository root it is at `../webgame-tools/`.
 
-## Start here
+## 1. Quick commands
 
 ```bash
-npm run dev          # static dev server, default http://127.0.0.1:5173/
-npm run check        # syntax, local import resolution, import-map targets
-```
+# Project-local, dependency-free
+npm run check
 
-Browser verification from this workspace (shared harness):
-
-```bash
+# Main smoke: menu → lobby → planning → build → day → report → resident → end
 webgame_smoke
-webgame_smoke --scenario scripts/scenarios/save-transfer.mjs
-webgame_smoke --scenario scripts/scenarios/chart-link.mjs
-webgame_smoke --scenario scripts/scenarios/chapter-name.mjs
-webgame_smoke --scenario scripts/scenarios/open-charter.mjs
-webgame_smoke --scenario scripts/scenarios/charter-archive.mjs
-webgame_smoke --scenario scripts/scenarios/legacy-menu.mjs
-webgame_smoke --scenario scripts/scenarios/departure-archive.mjs
-webgame_smoke --scenario scripts/scenarios/return-menu.mjs
-webgame_smoke --scenario scripts/scenarios/mobile-hud.mjs
-webgame_smoke --scenario scripts/scenarios/high-contrast.mjs
-webgame_smoke --scenario scripts/scenarios/reduced-motion.mjs
-webgame_smoke --scenario scripts/scenarios/onboarding-hints.mjs
-webgame_smoke --scenario scripts/scenarios/grid-summary.mjs
-webgame_smoke --scenario scripts/scenarios/daily-request.mjs
-webgame_smoke --scenario scripts/scenarios/resident-roster.mjs
-webgame_smoke --scenario scripts/scenarios/milestones.mjs
-webgame_smoke --scenario scripts/scenarios/charter-journal.mjs
-webgame_smoke --scenario scripts/scenarios/care-watch.mjs
-webgame_smoke --scenario scripts/scenarios/charter-ledger.mjs
-webgame_smoke --scenario scripts/scenarios/need-survey.mjs
-webgame_smoke --scenario scripts/scenarios/field-guide.mjs
-webgame_smoke --scenario scripts/scenarios/sound-toggle.mjs
-webgame_smoke --scenario scripts/scenarios/keyboard-cursor.mjs
-webgame_smoke --scenario scripts/scenarios/photo-mode.mjs
-webgame_smoke --scenario scripts/scenarios/dock-counts.mjs
-webgame_smoke --scenario scripts/scenarios/playback-pause.mjs
+
+# Scenario regressions
 webgame_smoke --scenario scripts/scenarios/resident-day.mjs
 webgame_smoke --scenario scripts/scenarios/economy.mjs
 webgame_smoke --scenario scripts/scenarios/persistence.mjs
 webgame_smoke --scenario scripts/scenarios/determinism.mjs
 webgame_smoke --scenario scripts/scenarios/engine-regression.mjs
-webgame_smoke --scenario scripts/scenarios/contest.mjs
-webgame_smoke --scenario scripts/scenarios/contest-recovery.mjs
-webgame_smoke --scenario scripts/scenarios/confluence-defeat.mjs
-webgame_smoke --scenario scripts/scenarios/festival-kitchen.mjs
-webgame_smoke --scenario scripts/scenarios/campaign.mjs
-webgame_smoke --scenario scripts/scenarios/contest-season.mjs
-webgame_smoke --scenario scripts/scenarios/commons.mjs
-webgame_smoke --scenario scripts/scenarios/visitors.mjs
-webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
-webgame_smoke --scenario scripts/scenarios/festival-surge.mjs
-webgame_smoke --scenario scripts/scenarios/visitor-referral.mjs
-webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
-webgame_smoke --scenario scripts/scenarios/commons-repair.mjs
-webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
-webgame_smoke --scenario scripts/scenarios/commons-rival-work.mjs
-webgame_smoke --scenario scripts/scenarios/commons-rival-capital.mjs
-webgame_smoke --scenario scripts/scenarios/commons-annex.mjs
-webgame_smoke --scenario scripts/scenarios/commons-capital.mjs
-webgame_smoke --scenario scripts/scenarios/commons-purse.mjs
-webgame_smoke --scenario scripts/scenarios/retrofit.mjs
-webgame_smoke --scenario scripts/scenarios/service-district.mjs
-webgame_smoke --scenario scripts/scenarios/service-adjacency.mjs
-webgame_smoke --scenario scripts/scenarios/service-floors.mjs
-webgame_smoke --scenario scripts/scenarios/housing-residents.mjs
-webgame_smoke --scenario scripts/scenarios/service-rename.mjs
-webgame_smoke --scenario scripts/scenarios/service-roster-repair-all.mjs
-webgame_smoke --scenario scripts/scenarios/service-roster-worn.mjs
-webgame_smoke --scenario scripts/scenarios/service-roster-all.mjs
-webgame_smoke --scenario scripts/scenarios/service-roster.mjs
-webgame_smoke --scenario scripts/scenarios/service-regulars.mjs
-webgame_smoke --scenario scripts/scenarios/repair-all.mjs
-webgame_smoke --scenario scripts/scenarios/report-worn.mjs
-webgame_smoke --scenario scripts/scenarios/service-condition.mjs
-webgame_smoke --scenario scripts/scenarios/service-focus.mjs
-webgame_smoke --scenario scripts/scenarios/service-access.mjs
-webgame_smoke --scenario scripts/scenarios/service-vibe.mjs
-webgame_smoke --scenario scripts/scenarios/service-hours.mjs
-webgame_smoke --scenario scripts/scenarios/creche.mjs
-webgame_smoke --scenario scripts/scenarios/observatory.mjs
-webgame_smoke --scenario scripts/scenarios/amphitheatre.mjs
-webgame_smoke --scenario scripts/scenarios/clinic.mjs
-webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
-webgame_smoke --scenario scripts/scenarios/building-finishes.mjs
-webgame_smoke --scenario scripts/scenarios/garden-isle.mjs
-webgame_smoke --scenario scripts/scenarios/commons-isle.mjs
+webgame_smoke --scenario scripts/scenarios/map-regression.mjs
+webgame_smoke --scenario scripts/scenarios/demolition.mjs
+webgame_smoke --scenario scripts/scenarios/showcase.mjs
+webgame_smoke --scenario scripts/scenarios/victory.mjs
+webgame_smoke --scenario scripts/scenarios/mobile.mjs --width 390 --height 844
+
+# CLI equivalents (run from the repo root)
+node ../webgame-tools/bin/webgame-harness.mjs doctor
+node ../webgame-tools/bin/webgame-harness.mjs check
+node ../webgame-tools/bin/webgame-harness.mjs smoke
+node ../webgame-tools/bin/webgame-harness.mjs runs
 ```
 
-The CLI equivalents and the full scenario list are in
-[docs/testing.md](docs/testing.md). Run `npm run check` and the main smoke test
-after any behavioural change.
+The DSH tools `webgame_check`, `webgame_smoke`, `webgame_shot` and
+`webgame_runs` expose the same harness when available. In this workspace prefer
+`webgame_smoke` with a `scenario` argument over the CLI; the tool path applies
+the headless WebGL setup reliably. `webgame_doctor` reports the browser engine,
+the config and artifact locations without launching a browser.
 
-## What lives where
+## 2. Static checks
 
-| Path | Responsibility |
+### `npm run check`
+
+`scripts/check.mjs` walks the first-party source (excluding `vendor/`,
+`node_modules/`, `.git/`, `.artifacts/`) and checks:
+
+- each `.js`/`.mjs` file parses as an ES module;
+- relative imports (static and string-literal dynamic imports) resolve on disk;
+- the `index.html` import map points at local files that exist;
+- first-party source has no remote runtime URLs (warnings only).
+
+It is intentionally not a bundler, type checker or linter.
+
+### Harness `check`
+
+`webgame_check`/`webgame-harness check` adds asset-reference and readiness
+checks and writes `.artifacts/webgame/check.json`. It reads
+`webgame.config.json` for its `check` settings, resolves local fonts, CSS and the
+inline SVG backdrop, and confirms there are no external requests.
+
+Run both before committing; they catch different classes of mistake.
+
+## 3. Browser smoke test
+
+`webgame.config.json` describes a real Firefox run:
+
+- the server is `node scripts/dev-server.mjs --port {port} --strict-port`, so
+  the test also proves that `npm run dev` serves the game correctly;
+- readiness is `window.__APP_READY__ === true`;
+- viewport is 1280×720 at DPR 1;
+- external requests must be zero (all dependencies are local);
+- page errors are failures; console errors are warnings;
+- the harness samples `#minimap` for the canvas-content check.
+
+A green run reports **71 checks**: 66 scripted steps plus automatic readiness,
+page-error, console, external-request and canvas checks. (The exact total moves
+when steps are added; read `report.json` rather than the number.)
+
+### What the steps cover
+
+| Area | Coverage |
 | --- | --- |
-| `index.html` | Import map, local font preloads, warm nebula void backdrop |
-| `styles/main.css` | Design tokens, scene, chrome, all screen/HUD/modal styles |
-| `assets/fonts/` | OFL woff2 fonts + licenses (no runtime CDN) |
-| `src/App.js` | Pure entrypoint: `new FalescGame()` |
-| `src/FalescGame.js` | Coordinator: charter lifecycle, screens/modals, day playback, save, debug API, ticker |
-| `src/world/World.js` | Pixi application, layered scene, camera/input, map and mineral generation |
-| `src/world/DistrictOverlay.js` | World labels for named service districts |
-| `src/world/PatronageFlow.js` | World-space arcs from homes to residents' last choices |
-| `src/charter/Charter.js` | The run model: day, player chapter, rivals, roster, services, reports, ending |
-| `src/charter/Bulletin.js` | Morning bulletin copy, rendered from the charter |
-| `src/charter/VisitorLifecycle.js` | Visitor arrivals, referrals, trial stays and departures |
-| `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |
-| `src/confluence/` | Campaign, pledges, stewardship and the deterministic Confluence vote |
-| `src/commons/` | Commons Assembly policies and shared service modifiers |
-| `src/design/` | Needs, traits, ten service programs, balance table, names |
-| `src/services/` | `ServiceBuilding`, `ServiceManager`, `PlacementPolicy` |
-| `src/simulation/DaySimulator.js` | Deterministic day: needs, choices, queues, visits, report |
-| `src/economy/LumenLedger.js` | Contributions from wellbeing, upkeep, closures |
-| `src/residents/` | `Resident` model, seeded resident/visitor factories, visual agent, crowd |
-| `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
-| `src/state/` | `GamePhase` constants and `ScreenStateMachine` |
-| `src/controls/` | HUD keyboard shortcuts and the build cursor / placement preview |
-| `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, Confluence, stewardship, end |
-| `src/audio/` | Procedural soundscape, persisted mute toggle |
-| `src/settings/` | Persisted motion and contrast preferences, OS defaults |
-| `src/ui/` | Shared `OverlayManager`, build/service/bulletin/campaign/commons/resident/visitor modals, standings, survey chart, chatter, icons |
-| `src/map/` | Seeded single-pass island generation, packing, grids, sector art, paths |
-| `src/character/`, `src/Character.js` | Procedural chibi rig and animation |
-| `src/minerals/` | Seeded static rock/crystal scenery |
-| `src/buildings/BuildingRenderer.js` | Service silhouettes (art only; no building model) |
-| `src/persistence/SaveManager.js` | Versioned `localStorage` save v2 (model data only) |
-| `src/persistence/CharterSerializer.js` | Charter save shape and restore |
-| `src/debug/DebugApi.js` | The browser-console `window.__falesc` surface, extracted from the coordinator |
-| `scripts/scenarios/` | Browser regressions for the resident/visitor loop, economy, saves, maps, determinism, victory, mobile |
-| `vendor/` | Pinned Pixi.js build and license (committed; no fetch at runtime) |
-| `webgame.config.json` | Main browser smoke configuration and steps |
+| Boot | page ready, title, first rendered frame, no lost WebGL context |
+| Navigation | menu → lobby → playing, charter menu, end screen |
+| Lobby | deterministic seed `12345`, start-charter transition |
+| Founding state | 6 residents, 1 Welcome Post, 10 lumen, 2 works, housing capacity 6, Canteen armed |
+| Bulletin | morning bulletin visible, dismiss to planning |
+| Keyboard | `1`–`4` arm services through the real validation path |
+| Hover | pointer move shows a validated highlight and ghost; pointer leave clears both |
+| Build flow | free cell, build dialog, typed name, break ground, `PENDING`, cost paid, work spent |
+| Day flow | day playback screen, 4× speed, Skip, report with contributions and upkeep |
+| Overnight | Canteen becomes `ACTIVE`, works reset to 2 |
+| Residents | roster opens, card shows Devotion, Home and Last choice; a resident visits the Canteen, enters, leaves a why line |
+| Camera | fit-zoom overview screenshot, restore |
+| Modals | build modal closes when the charter ends; no building in `END` |
+| Rendering | screenshots of playing, pending, playback, report, resident card, resident report, overview, end |
 
-## Ground rules
+### Artifacts
 
-- **Keep the zero-build architecture.** Do not add a bundler, framework, or
-  runtime CDN imports without an explicit request. Native ES modules and the
-  import map are the deployment model. There is no npm dependency at runtime.
-- **Pixi is v7.** `new PIXI.Application(...)` and `app.view` are synchronous. A
-  v8 upgrade requires changes in `World.js`/`Camera.js`; do not bump it casually.
-- **Canvas is transparent.** The warm nebula void is a DOM/SVG backdrop behind
-  the Pixi canvas. Do not set an opaque renderer background without redesigning
-  the scene.
-- **Respect the model/view split.** The charter, day simulation, economy and
-  resident model are plain JavaScript; DOM screens read the charter and never
-  own the rules. `ServiceBuilding` owns its Pixi container, and `World` owns the
-  scene. The Pixi ticker drives updates; only `PLAYING` runs ambient planning
-  behaviour and only `DAY` runs playback, and updates freeze while the tab is
-  hidden (`dt = 0`).
-- **The day is precomputed, not real-time.** `FalescGame.openDay()` runs
-  `DaySimulator` once; playback at 1×/2×/4× is a view over the finished events
-  and report. Do not add wall-clock simulation or move rules into the render
-  loop.
-- **No gameplay timers.** Day timing is ticker-driven. The only `setTimeout` is
-  the HUD toast; focus moves use `requestAnimationFrame`. Do not add
-  `setTimeout`/`setInterval` for simulation.
-- **Home, commons and garden isles.** Contest placement accepts the home shard,
-  the marked commons sector (`map.commonsEnabled`) and the marked garden sector
-  (`map.gardenEnabled`); every other island remains scenery. The garden isle is
-  player-owned and uses the home shuttle pad.
-- **Keep generated output out of git.** `.artifacts/`, `node_modules/`, logs and
-  local env files are ignored. Scenarios are source; screenshots are not.
-- **Test after changes.** `npm run check` catches broken imports and syntax; the
-  smoke test catches the main flow. Scenario files cover the engine and design
-  regressions.
-- **Use the debug surface.** From the browser console:
-  `window.__falesc.snapshot()`, `findFreeCell(programId)`,
-  `worldToScreen(x, y)`, `saveGame()`, `continueGame()`,
-  `selectProgram(id)`, `openDay()`, `skipDay()`, `showResidents()`,
-  `togglePatronage()`, `showCampaign()`, `showCommons()`, `showConfluence()`,
-  `showStewardship()`. The full game object is
-  `window.__falesc.app`.
-- **Do not reintroduce dead sandbox UI.** `src/UI.js` and `lil-gui` were
-  removed; the service dock is the real build UI.
+Every run writes a timestamped directory under `.artifacts/webgame/`:
 
-## Key conventions
+```text
+.artifacts/webgame/<timestamp>-falesc/
+  report.json          checks, steps, warnings, console/page errors, network
+  summary.txt          short human summary
+  browser.log          Firefox/WebDriver log
+  console.log          captured page console
+  playing.png
+  building-pending.png
+  day-playback.png
+  day-report.png
+  resident-card.png
+  resident-report.png
+  map-overview.png
+  end.png
+  final.png
+```
 
-- ES modules with explicit `.js` extensions in relative imports.
-- Four-space indentation and semicolons, matching the existing source.
-- DOM screens own their structure; shared visual language lives in
-  `styles/main.css` with classes, not inline CSS. Tests rely on `data-testid`.
-- World distances are in pixels; grid cells are `TILE_WIDTH × TILE_HEIGHT`
-  (512 × 256); camera zoom is clamped to the generated world.
-- Tuning lives in `src/design/balance.js`; service data in
-  `src/design/programs.js`; needs in `src/design/needs.js`; traits in
-  `src/design/traits.js`. Do not scatter balance literals through the
-  simulation.
-- First Light starts with **6 of 15 residents**, **10 lumen**, **2 works/day**,
-  and a fixed six-bed **Welcome Post**. The Contest starts with **9 residents**
-  (three per chapter), **15 lumen** per chapter, and a four-bed Welcome House per
-  chapter. Contest chapters also receive a **1 lumen per resident per day civic
-  dividend**. Services cost 4–6 lumen and one work, and take one day to open
-  (`PENDING → ACTIVE`). Only `ACTIVE`, open services accept visits and pay
-  upkeep.
-- Lumen comes from resident wellbeing, not harvest tiles. Upkeep is paid at the
-  end of the day; a shortfall closes services in the order wonder → company →
-  sustenance (housing is exempt). Closed services can be reopened for lumen.
-- Do not change the economy or the First Light goals (12 residents, flourishing
-  62, day limits 12/14/16) without updating `victory.mjs`, `economy.mjs`,
-  `resident-day.mjs` and [docs/gameplay.md](docs/gameplay.md).
-- Save schema is v2 under `falesc.save.v2` (including `mode` and `rivals`).
-  Change the version and document the reset when the schema changes; never
-  half-load an old save.
-- Placement occupancy is shared across player and rival chapters. Do not give a
-  chapter its own private occupancy map or services will overlap. Contest
-  arrivals go to the least-crowded chapter with room before Devotion breaks a
-  tie; do not make arrivals pile onto the leader.
-- The Contest home grid is deliberately larger (7×7 small, 8×8 medium, 9×9
-  large) so three chapters can build for a full season.
-- Rival chapters pay construction costs and upkeep, receive contributions from
-  their own residents, own fixed Welcome Houses, reopen services lost to
-  shortfalls, publish a visible long-term plan and choose builds by need pressure
-  plus doctrine. A planned build that is out of reach makes the rival save for it.
-  Clicking a rival row opens a read-only dossier of its plan, ledger and services. The last three
-  days run a campaign: a seeded six-event, two-bell-per-day festival programme
-  makes matching promises more magnetic, rivals publish promises, the player chooses one, and
-  the final vote uses both; the player may sponsor one extra bell for 5 lumen. A player victory then chooses one of four stewardship
-  promises for the epilogue; a rival winner skips that choice. A shared Commons
-  Beacon can be funded by every chapter; once lit it gives every resident a
-  nightly comfort and opens as a six-seat all-needs shared service. Contest days
-  also bring 2–3 transient visitors who use services, pay 1 lumen per visit and
-  leave before the next day. A charmed visitor with a spare bed can be invited
-  from the report into a one-day trial stay; a trial guest holds a bed but does
-  not contribute or vote until they pass. Charmed visitors who are not invited
-  may return on later days (up to two). Clicking a visitor's name opens
-  their card with traits, needs, affinity and last door. Once the Beacon is lit, the
-  first Commons Assembly lets residents petition, each chapter nominate and
-  residents vote; the winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
-  `CommonsBallot.js`). One second reading can amend it after a full day. An open player service can hold up to two retrofit
-  modules (5–7 lumen each) from Sunroom, Atelier, Caretaker's Nook and Night Kitchen. The
-  service record owns the action and the module is saved. Open services can also
-  choose As built, Round the clock, Daylight or Evening hours, plus a free
-  Cosy/Lively/Curious/Efficient atmosphere and an Open/Chapter first/Visitors
-  first welcome policy, including Care first for residents in crisis. Dual-need services
-  can also choose a Focus toward either need. The ten buildable
-  services include the 2×2 Bathhouse for Rest + Company, the 2×2 Clinic for
-  Rest + Sustenance, the 2×2 Creche for Company + Rest, the 2×2 Workshop for Purpose, the 2×2
-  Amphitheatre for Company + Wonder and the 2×2 Observatory for Wonder at night. A build chooses a
-  Humble, Comfortable or Grand shell finish. An open service can add two
-  floors with Dormer, Common Room or Roof Garden plans. Neighbouring services add a small quality
-  bonus, with extra for mixed chapters. Three connected services form a named
-  district with a small shared bonus. In Contest, a second commons isle and a
-  third garden isle are buildable and residents reach both through reserved
-  shuttle gates.
-  Open Charter uses the same three isles without rivals or a campaign. This is a
-  first pass; a fuller archipelago, a larger multi-round festival, auctions and
-  deeper legacy effects are still missing.
-- The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
-  not remove the survey chart without adjusting `canvasSelectors` and the smoke
-  test.
-- Fonts are local and licensed. Add new fonts under `assets/fonts/` with their
-  OFL license and an `@font-face` rule; never add a font CDN.
+Open `report.json` when a step fails; the failing step's `detail` usually names
+the selector or assertion. Look in `browser.log` for WebGL or module-loading
+problems.
 
-## Where to read more
+Useful commands:
 
-- [docs/design-refinement.md](docs/design-refinement.md) — refined design overview, pillars, decisions, scope
-- [docs/design/](docs/design/) — component docs: residents, buildings, economy, competition, world, implementation, roadmap, decisions
-- [docs/design-vision.md](docs/design-vision.md) — identity, palette, typography, UX guardrails
-- [docs/architecture.md](docs/architecture.md) — detailed runtime and system design
-- [docs/development.md](docs/development.md) — local setup, vendoring, common tasks
-- [docs/testing.md](docs/testing.md) — checks, smoke test, scenarios, manual checklist
-- [docs/gameplay.md](docs/gameplay.md) — controls, needs, services, day loop, economy, victory
-- [docs/known-issues.md](docs/known-issues.md) — remaining limitations and risks
+```bash
+# Visible Firefox window for debugging
+node ../webgame-tools/bin/webgame-harness.mjs smoke --headed
 
-## Practical notes
+# Keep the browser profile
+node ../webgame-tools/bin/webgame-harness.mjs smoke --keep-profile
 
-- Node 18+ is required for `scripts/dev-server.mjs` and `scripts/check.mjs`.
-- The dev server refuses to serve dotfiles (including `.git`) and never writes
-  to the project.
-- If `git add .gitignore` reports that the file is ignored, use
-  `git add -f .gitignore`; a global gitignore may exclude the filename.
-- Keep commit messages focused; this repo's history uses short imperative
-  subjects. New tooling/docs commits use conventional prefixes (`chore:`,
-  `feat:`, `fix:`, `docs:`).
+# Recent-run dashboard (writes .artifacts/webgame/index.html)
+node ../webgame-tools/bin/webgame-harness.mjs runs
+
+# One screenshot with the config's readiness hook
+node ../webgame-tools/bin/webgame-harness.mjs shot --out .artifacts/shot.png
+```
+
+Do not commit `.artifacts/`; it is ignored.
+
+## 4. Scenario regressions
+
+Scenarios live in `scripts/scenarios/` and are loaded with
+`webgame_smoke --scenario <path>` (or the CLI `smoke --scenario`).
+
+| Scenario | What it proves |
+| --- | --- |
+| `save-transfer.mjs` | Exports the current charter as JSON, rejects an invalid file, imports it back and restores the report phase. |
+| `chart-link.mjs` | Opens a chart URL into the lobby and checks the copied link carries seed, size, mode, chapter name and motto. |
+| `chapter-name.mjs` | Signs a charter as The Long Table with the motto Every door open., checks the HUD motto and confirms both survive save/reload. |
+| `open-charter.mjs` | Starts Open Charter, checks the HUD objective and day label, plays past the old limit and confirms no ending. |
+| `charter-archive.mjs` | Abandons a live charter, checks the menu archive and its day/outcome/mode record, clears it and hides the menu button. |
+| `legacy-menu.mjs` | Seeds a stewardship legacy, checks the menu card and effect text, then clears it and verifies storage is empty. |
+| `departure-archive.mjs` | Records a departure, opens the Past residents archive from the pause menu, checks the day/reason/last door and closes it. |
+| `return-menu.mjs` | Builds a Canteen, uses Save & menu, checks Continue/Export and returns to the same pending build and day. |
+| `mobile-hud.mjs` | Runs the HUD at 390×844, checks no horizontal overflow, opens the charter menu and need survey, and captures the phone layout. |
+| `high-contrast.mjs` | Toggles high contrast from the pause menu, checks the root class and storage, then confirms it survives reload and can be turned off. |
+| `reduced-motion.mjs` | Toggles reduced motion from the pause menu, checks the document class and storage, reloads and toggles it back. |
+| `onboarding-hints.mjs` | Checks the Canteen hint, the pending Canteen hint and the next Tea House hint after activation. |
+| `grid-summary.mjs` | Opens the grid summary in Contest mode, checks three isle tables, occupied cells and cell labels, then closes it. |
+| `daily-request.mjs` | Checks the daily request line and resident link, forces a Wonder request, plays the day and confirms the unmet result in the report. |
+| `resident-roster.mjs` | Pushes a resident into crisis, opens the roster, checks six rows and the red row, then opens that resident’s card. |
+| `milestones.mjs` | Seeds an all-time milestone, builds a Canteen, checks current/lifetime states and the earned marker, then closes the checklist. |
+| `charter-journal.mjs` | Builds a Canteen, checks the journal entry, opens the journal from the pause menu and confirms it survives save/reload. |
+| `care-watch.mjs` | Pushes a resident into crisis, checks the Care watch count, opens the need survey, clicks the at-risk resident and opens their card. |
+| `charter-ledger.mjs` | Plays two days, checks the daily rows and sparkline, then reloads and confirms the history persists. |
+| `need-survey.mjs` | Opens the need survey after a day, checks all five rows, urgency/capacity text and closes it. |
+| `field-guide.mjs` | Opens the almanac from the menu and the pause menu, checks the service/policy/control sections, and closes it. |
+| `sound-toggle.mjs` | Opens the charter menu, turns the procedural soundscape on and off, checks persistence and the audio context. |
+| `keyboard-cursor.mjs` | Toggles the keyboard build cursor, moves it with arrows, opens the build dialog with Enter, and confirms a pending build. |
+| `photo-mode.mjs` | Enters Photo mode, checks the HUD is hidden and the exit control appears, then exits by button and Escape. |
+| `dock-counts.mjs` | Builds two Canteens and checks the dock badges show 2 Canteens and 1 Welcome House. |
+| `playback-pause.mjs` | Opens a day, pauses and confirms the clock is frozen, resumes, then skips to the report. |
+| `resident-day.mjs` | A Tidelander is scheduled into the Canteen, walks and enters during playback, emerges with a lower need, remembers the visit, and the card quotes the why line. |
+| `economy.mjs` | Founding state is 10 lumen / 2 works / 6 residents; two builds cost 8 lumen and both works; the report satisfies `lumenAfter = prior + contributions − upkeep`; a new house adds beds and arrivals; both services open overnight. |
+| `persistence.mjs` | Save v2 holds day 3, lumen, works, services, residents, needs and last choice; reload + **Continue charter** restores them, the Canteen comes back `ACTIVE`, a resident card renders without NaN, and a new build gets a non-colliding service id. |
+| `determinism.mjs` | The same seed, actions and day produce byte-identical reports, resident needs, service visits/hearts and quote lines across two full runs. |
+| `engine-regression.mjs` | During playback, visible residents stay on the home shard; clicking the survey chart moves the camera; the camera clamps at both extremes; leaving during `DAY` lands in `MENU` with no late transition. |
+| `map-regression.mjs` | 72 maps (24 seeds × 3 sizes) have the expected sector counts, non-overlapping island AABBs, all shapes inside the world rectangle, and deterministic layouts. |
+| `demolition.mjs` | Clicking an occupied plot opens the service record; dismantling a 4-lumen Canteen refunds 2, removes it, and frees the plot. |
+| `contest.mjs` | Lobby Contest mode creates two rival chapters with Welcome Houses and opening services; each chapter starts with three residents; residents visit rival doors; standings/patronage/Devotion appear; rival upkeep is charged; a rival grows by housing new arrivals; the player Canteen earns visits; rival moves occur; the patronage-flow overlay draws one arc per last choice; the contest restores after reload, then the day limit convenes the Confluence; the player makes a pledge, every resident votes, and a player victory proceeds to a stewardship choice before the charter ending. |
+| `garden-isle.mjs` | Builds a player service on the third garden isle, verifies garden placement, the garden shuttle gate, cross-island visits and save/reload. |
+| `commons-isle.mjs` | Builds a shared Bathhouse on the second commons isle, verifies reserved shuttle gates, commons ownership, cross-island visits, the shared service card and save/reload. |
+| `building-finishes.mjs` | Builds a Grand canteen and a Humble tea house, checks cost/capacity/upkeep, the finish in the service record, and save/reload. |
+| `creche.mjs` | Builds the ninth service, the 2×2 Creche for Company + Rest, checks the dock shortcut, capacity/cost, visits and save/reload. |
+| `workshop.mjs` | Builds the tenth service, sets Purpose high and confirms Workshop visits lower it. |
+| `observatory.mjs` | Builds the eighth service, the 2×2 night Observatory, checks the dock shortcut, capacity/cost, visits and save/reload. |
+| `amphitheatre.mjs` | Builds the seventh service, the 2×2 Amphitheatre, checks the dock shortcut, capacity/cost, visits and save/reload. |
+| `clinic.mjs` | Builds the sixth service, the 2×2 Clinic, checks the dock shortcut, capacity/cost, cross-day visits and save/reload. |
+| `bathhouse.mjs` | Builds the fifth service, checks its 2×2 footprint, capacity 5, late opening, visits and saved state. |
+| `service-district.mjs` | Builds three connected services, checks the named district/bonus and world label, the service record and save/reload. |
+| `service-adjacency.mjs` | Builds a player canteen beside a rival service, checks the mixed-neighbour quality bonus, the service record and save/reload. |
+| `service-floors.mjs` | Builds a Canteen, opens the interior stack, adds Dormer and Roof Garden floors, checks capacity/upkeep/quality and reload persistence. | Adds a Dormer and a Roof Garden to an active canteen, checks floor plans, capacity/quality/upkeep/lumen, the floor button hiding at three floors, the world stack and save/reload. |
+| `housing-residents.mjs` | Opens the Welcome Post record, checks Residents here, a six-bed ground floor and opens a resident. |
+| `service-rename.mjs` | Renames a Canteen to The Long Table, checks the title and confirms the name saves. |
+| `service-roster-repair-all.mjs` | Wears a service, opens the roster and repairs all from its footer. |
+| `service-roster-worn.mjs` | Builds a Canteen, wears the Welcome Post, filters to Worn only and back to all services. |
+| `service-roster-all.mjs` | Starts a Contest, checks one player row, switches to All chapters and sees all six services including rivals and the Beacon. |
+| `service-roster.mjs` | Wears the Welcome Post, opens the roster, repairs it from its row and opens the Canteen record. |
+| `service-regulars.mjs` | Visits a Canteen for a day, opens its record, checks the Last seen here names and opens a resident from the list. |
+| `repair-all.mjs` | Wears two services, repairs all from the pause menu and checks both are full and 6 lumen spent. |
+| `report-worn.mjs` | Wears the Welcome Post, opens a day, checks the report warns Worn at 40%, then repairs all from the report. |
+| `service-condition.mjs` | Wears a Canteen to 42%, checks the wear row and repair button, repairs it for 3 lumen and confirms the condition saves. |
+| `service-focus.mjs` | Builds a Clinic, sets Focus to Rest first, checks the policy and confirms it saves. |
+| `service-access.mjs` | Switches a canteen through Visitors first and Care first, checks the policies and save/reload without changing capacity. |
+| `service-vibe.mjs` | Switches a working canteen from Efficient to Lively, checks the policy and save/reload without changing capacity or upkeep. |
+| `service-hours.mjs` | Switches an open canteen to Round the clock, checks +2 upkeep and save/reload. |
+| `retrofit.mjs` | Builds a canteen, waits for it to open, opens the retrofit chooser, installs the Atelier, checks +0.22 quality/+1 upkeep (capacity unchanged) and save/reload. |
+| `commons-rival-work.mjs` | Funds the capital, advances a day, and checks a rival breaks ground on the commons with its builder name and save/reload. |
+| `commons-rival-capital.mjs` | Advances a day, checks both rivals put 1 lumen into the shared capital budget, and checks the contributors survive reload. |
+| `commons-annex.mjs` | Lights the Beacon, adds a capital-funded annex, checks level/capacity/capital, hides the button at two annexes and reloads. |
+| `commons-capital.mjs` | Gives 10 lumen to the shared capital budget, builds a commons canteen entirely from it, and checks the remaining capital and save/reload. |
+| `commons-purse.mjs` | Builds two shared works, checks the levy and upkeep, verifies the shared doors close together, then tops up the purse manually and reopens them. |
+| `commons-repair.mjs` | Forces the Repair Corps policy, checks the repair price is 1 lumen and that a repair restores the service. |
+| `commons-assembly.mjs` | Lights the Beacon, checks the petition, nominates Open Beds, lets residents vote, verifies the policy applies to existing and new services, then calls a second reading and checks capacity does not stack. |
+| `festival-surge.mjs` | Starts a campaign day and confirms one extra festival visitor is added to the day's arrivals. |
+| `visitor-referral.mjs` | Charms a visitor, checks the one-day referral and confirms one extra visitor arrives before the referral resets. |
+| `visitor-return.mjs` | Charmed but unhoused visitors are remembered up to two, return on a later day with the same name/affinity, and are marked returning in the report. |
+| `visitor-stay.mjs` | Builds a player canteen and spare bed, opens the visitor card, starts a one-day trial stay, checks the bed is held, the trial survives reload, and the guest resolves into a resident after the trial day. |
+| `visitors.mjs` | Verifies 2–3 day visitors arrive with the Contest day, get crowd agents, remain outside the resident population, use services, pay visitor fees into chapter ledgers, appear in the report, and leave when the next day starts unless invited to stay. |
+| `commons.mjs` | Verifies the reserved Beacon site, HUD fund card, contribution modal, player gifts, activation, nightly comfort report, and save/reload of the active shared project. |
+| `contest-season.mjs` | Plays all 14 medium Contest days with a deterministic player build plan, records the daily economy/population trajectory, crosses the campaign, votes in the Confluence and chooses stewardship. This is the full-season balance/regression probe. |
+| `festival-kitchen.mjs` | Starts a campaign, checks the free 5-seat Festival Kitchen and removes it after the festival. |
+| `campaign.mjs` | Crosses into the campaign through the real report flow, verifies the three-day festival programme and both rival promises, chooses and locks a promise matching the first event, checks the HUD and bulletin, plays the event day and verifies it in the report, reloads, then convenes the Confluence with that promise selected, votes, and chooses a stewardship promise before the ending. |
+| `confluence-defeat.mjs` | Forces a Host-majority electorate, convenes the Confluence, verifies the rival wins the vote, skips player stewardship and ends on the defeat composition. |
+| `contest-recovery.mjs` | A rival Garden Dome is closed and affordable; the next day the rival reopens it, then resumes a need-pressure build (housing) the following day. |
+| `overlay-stack.mjs` | Nested bulletin + resident modals keep the body lock and HUD `inert` until the stack is empty; focus moves into the top modal. |
+| `report-save.mjs` | The report is saved in `REPORT`; reload + Continue reopens the same report and Begin Day advances from it without replaying the day. |
+| `departure.mjs` | Removing all beds leaves six residents homeless; one night is a warning, the second removes every resident and agent, empties the population, and records a defeat. |
+| `corrupt-save.mjs` | A parseable v2 payload with the wrong service shape is discarded; Continue stays hidden and the key is removed. |
+| `abandon-confirm.mjs` | The first Abandon click asks for confirmation and keeps the run alive; cancel returns to play; the second confirm reaches the end screen. |
+| `victory.mjs` | A full, real-UI medium charter plans services until it reaches 12 housed residents + flourishing 62, closes the charter, and reports `victory`. |
+| `showcase.mjs` | Visual tool: places one of each service, marks them open, and captures the illustrated shard and a day for design review. Not a pass/fail regression. |
+| `mobile.mjs` | Captures menu, lobby, HUD and build dialog at a narrow viewport; the build dialog must be visible. Run with `--width 390 --height 844`. |
+
+`mobile.mjs` does not set the viewport itself; pass the dimensions. The old
+`affinity.mjs` is deleted with the crystal-affinity economy. `victory.mjs` no
+longer raises an Aurora Beacon; it earns the First Light goals.
+`engine-regression.mjs` no longer drives 3,600 steering updates or a turn
+scheduler; it verifies precomputed resident playback, camera clamp and clean
+phase exit. `persistence.mjs` and `determinism.mjs` were rewritten for save v2
+and the day report. `demolition.mjs`, `showcase.mjs` and `mobile.mjs` were
+adapted to services and the new screens.
+
+Scenario APIs: the harness `page` object exposes `goto`, `reload`, `evaluate`,
+`text`, `count`, `visible`, `click`, `press`, `keyDown`, `keyUp`, `type`,
+`pause`, `title`, `canvasStats`, `viewport` and `screenshot`. Use `assert.ok`,
+`assert.equal` and `log` from the scenario arguments. Return nothing; a thrown
+error fails the run.
+
+## 5. Why `canvasSelectors` is `#minimap`
+
+The Pixi canvas is WebGL. The harness's generic canvas scanner calls
+`canvas.getContext('2d')`, which returns `null` for a WebGL canvas, so it cannot
+measure painted pixels on the game view. Without an override, every smoke run
+would fail the automatic "canvas has content" check with `no 2d context`.
+
+The survey chart is a real Canvas2D UI element painted even before a world
+exists, so `webgame.config.json` sets:
+
+```json
+"canvasSelectors": ["#minimap"]
+```
+
+This is a deliberate, documented override. The actual game view is verified by
+screenshots and the frame/renderer assertions. If the chart is removed, update
+`canvasSelectors` and add another Canvas2D surface or disable the relevant check
+knowingly.
+
+## 6. Manual playtest checklist
+
+Run `npm run dev`, open the printed URL, and check:
+
+- [ ] Menu: warm void backdrop, local display/UI fonts, New charter and (after a
+      save) Continue charter. No layout overflow at 1280×720.
+- [ ] Lobby: seed, Roll, size cards (small/medium/large), survey readout, Sign
+      the charter, Back to the drift.
+- [ ] Start: 6 residents visible on the home shard, Welcome Post, 10 lumen,
+      2 works, Canteen armed, First Light progress 6/12 and flourishing.
+- [ ] Morning bulletin appears with an unmet need, a chapter/arrival/complaint
+      item and a quote; Begin planning closes it.
+- [ ] WASD/arrow keys pan; the camera stops cleanly at the cluster edge.
+- [ ] Wheel zooms toward the cursor; zoom respects the camera min/max.
+- [ ] Middle-drag pans; releasing outside the window does not leave it stuck.
+- [ ] `1`–`4` arm each service; a free plot shows a mint highlight and ghost,
+      an occupied/other-island plot shows coral or a toast.
+- [ ] Build dialog: name focused, Tab stays inside, Escape cancels, Enter breaks
+      ground, whitespace falls back to the program name.
+- [ ] A built service is `PENDING`, ghosted and scaffolded; lumen and works
+      update; the dock disables what you cannot afford.
+- [ ] Clicking the service opens its record; the Welcome Post cannot be
+      dismantled; dismantling another refunds half cost and frees the plot.
+- [ ] Open the day: the strip shows morning/afternoon/evening/night, `1×`/`2×`/
+      `4×` work, and Skip lands on the evening report.
+- [ ] Report: visits, hearts, contributions, upkeep, lumen, flourishing, needs,
+      doors/visits, quotes, complaints and any closures. Begin Day N returns to
+      planning.
+- [ ] Completed construction is `ACTIVE` on the next planning day; works are
+      back to 2; spare beds and flourishing can produce arrivals.
+- [ ] `B` opens the bulletin, `R` opens the resident roster, the card shows
+      needs, traits, home, Devotion, wellbeing, last choice and the why line,
+      and Previous/Next cycle residents.
+- [ ] Clicking a visible resident opens the same card; clicking a service door
+      opens the service record.
+- [ ] Escape / ☰ opens the charter menu; Return to planning and Abandon charter
+      both behave, and the end screen shows the run's people and numbers.
+- [ ] Reload during planning and use Continue charter: day, lumen, works,
+      services, needs and last choice survive. Reload during playback/report
+      returns to the last planning save (expected).
+- [ ] Resize the window and check the camera and HUD; use a narrow viewport
+      (390×844) and check the menu, lobby, HUD and build dialog.
+- [ ] No console errors during any of the above.
+
+Known expected warning in headless Firefox: a Pixi/WebGL "context was lost"
+message may appear in `browser.log`; the screenshots and checks still pass. See
+[known-issues.md](known-issues.md).
+
+## 7. Extending the smoke test
+
+Steps live in `webgame.config.json` under `steps`. Each step has a `name` (for
+reporting) and exactly one action/assertion. Common forms:
+
+```json
+{ "name": "open lobby", "click": "[data-testid=menu-start]" },
+{ "name": "wait for planning", "waitFor": "window.__falesc.snapshot().state === 'PLAYING'" },
+{ "name": "first frame", "assert": "window.__falesc.snapshot().frame > 1" },
+{ "name": "screenshot", "screenshot": "playing.png" },
+{ "name": "type name", "type": "Test Canteen", "selector": "[data-testid=build-name]" }
+```
+
+Useful selectors are exposed as `data-testid` attributes:
+
+| Selector | Element |
+| --- | --- |
+| `[data-testid=menu-screen]`, `menu-start`, `menu-continue`, `menu-join` | menu |
+| `[data-testid=lobby-screen]`, `lobby-seed`, `lobby-size`, `lobby-start`, `lobby-back`, `lobby-random-seed` | lobby |
+| `[data-testid=game-hud]`, `hud-menu`, `charter-menu`, `resume-game`, `end-game`, `end-turn`, `turn-display`, `open-bulletin`, `open-residents` | planning HUD and charter menu |
+| `[data-testid=program-housing]`, `program-canteen`, `program-tea-house`, `program-garden-dome` | service dock cards |
+| `[data-testid=build-modal]`, `build-name`, `build-submit`, `build-cancel`, `build-close` | build dialog |
+| `[data-testid=structure-modal]`, `structure-demolish`, `structure-reopen`, `structure-cancel`, `structure-close` | service record |
+| `[data-testid=day-screen]`, `day-speed-1`, `day-speed-2`, `day-speed-4`, `day-skip` | day playback |
+| `[data-testid=bulletin-modal]`, `bulletin-continue` | morning bulletin |
+| `[data-testid=resident-modal]`, `resident-prev`, `resident-next`, `resident-close` | resident card |
+| `[data-testid=report-screen]`, `report-continue` | evening report |
+| `[data-testid=end-screen]`, `end-menu`, `end-retry` | end screen |
+| `[data-testid=minimap]` | survey chart canvas |
+
+Keep assertions tied to `window.__falesc.snapshot()` or visible DOM, not to exact
+pixels, resident positions or animation timing. Those are procedural.
+
+For a new user-visible feature, add one happy-path step and one edge-case step
+where practical. Avoid sleeping when `waitFor` can express the condition.
+
+### When to use a scenario file
+
+JSON steps cover the main flow. If you need loops, computed coordinates,
+reloads, dynamic imports or custom polling, write an `.mjs` scenario and run it
+with `--scenario` (or `webgame_smoke`'s `scenario` parameter). See the existing
+files for the page API contract.
+
+## 8. Visual regression
+
+Pixel regression is **not enabled**, and no baseline is committed. The map and
+cast are seeded, but character animation phase, chatter and ambient timing still
+depend on elapsed frame time, so a full-viewport baseline would be flaky. The
+survey chart and static HUD are the most stable candidates for a future pass.
+
+To enable it later:
+
+1. Pause or fix the ambient clock (or capture the survey chart only) so the frame
+   is repeatable.
+2. Add a `visual` block with a stable selector (`#minimap` or `.build-dock`).
+3. Capture a baseline with `webgame_visual --update` and commit it under a
+   documented baselines directory.
+4. Set `visual.createBaseline: false` in CI.
+5. Do not raise the pixel threshold until the check is meaningless.
+
+The harness's `webgame_visual` seeds `Math.random`, freezes clocks and settles
+frames, but it cannot make the game's animation phase deterministic by itself.
+
+## 9. CI
+
+The repository does not commit a CI workflow. To add one, the harness must be
+available in the checkout (for example, vendored at `tools/webgame-tools/` or
+provided as a submodule), then:
+
+```bash
+node tools/webgame-tools/bin/webgame-harness.mjs check
+node tools/webgame-tools/bin/webgame-harness.mjs smoke
+node tools/webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/victory.mjs
+```
+
+CI should use the Playwright engine if Firefox is unreliable on the runner; the
+config, scenarios and steps are engine agnostic. Keep screenshots and reports as
+artifacts, not committed files.
+
+## 10. Troubleshooting the test run
+
+| Symptom | Check |
+| --- | --- |
+| Timeout waiting for readiness | `window.__APP_READY__` is only set after the first completed ticker frame. Look for module/WebGL errors first. |
+| `canvas #minimap` not found | The survey chart is created in `FalescGame`; verify `src/ui/Minimap.js` is imported and the mount exists. |
+| `no 2d context` | `canvasSelectors` is pointing at the WebGL canvas. Point it at `#minimap`. |
+| External request failure | A runtime import, font or CSS asset still points at a CDN. Move it under `assets/` or `vendor/`. |
+| Port conflict | The config uses `--strict-port`; another process may be on the harness's chosen port. Stop the other server. |
+| Day screen never appears | Check that `window.__falesc.openDay()` returned true: a blocking modal or a non-`PLAYING` phase refuses it. |
+| Report shows the previous day | The report reads `charter.lastReport`; a reload during `DAY`/`REPORT` restores the last planning save. |
+| Continue button missing | A v2 save only exists while a run is in `PLAYING`; v1 is removed on read. Check `localStorage` for `falesc.save.v2`. |
+| Screenshots look stale | Add a short `pause` or a `waitFor` after changing camera/state; screenshots are captured from the next presented frame. |
+| WebGL "Unable to auto-detect a suitable renderer" | Environment-level WebGL exhaustion; retry the run. The browser smoke normally gets a software context. |
