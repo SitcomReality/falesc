@@ -96,6 +96,9 @@ export function planRivalDay(rival, charter) {
     if (reopened) return reopened;
     if (rival.works <= 0) return null;
 
+    const civic = tryCommonsBuild(rival, charter);
+    if (civic) return civic;
+
     const pressure = needPressure(charter);
     const candidates = (rival.programs || [])
         .map((programId, index) => {
@@ -161,6 +164,47 @@ function tryReopen(rival, charter) {
             action: 'reopened'
         };
         return rival.lastMove;
+    }
+    return null;
+}
+
+function tryCommonsBuild(rival, charter) {
+    if (!charter.commonsSector || !charter.commonsManager) return null;
+    if (charter.sharedWorkServices().length >= 2) return null;
+    const capital = charter.commons.capital || 0;
+    if (capital < 5) return null;
+    const candidates = (rival.programs || [])
+        .map((programId, index) => ({ programId, program: PROGRAM_BY_ID[programId], index }))
+        .filter((entry) => entry.program?.buildable && entry.program.cost <= capital)
+        .sort((a, b) => a.index - b.index);
+    for (const candidate of candidates) {
+        for (let v = 0; v < charter.commonsSector.gridSize; v++) {
+            for (let u = 0; u < charter.commonsSector.gridSize; u++) {
+                if (!charter.commonsManager.canPlace(candidate.programId, charter.commonsSector.id, u, v).ok) continue;
+                const result = charter.commonsManager.place({
+                    programId: candidate.programId,
+                    sectorId: charter.commonsSector.id,
+                    u,
+                    v,
+                    name: `${rival.name}'s ${candidate.program.name}`,
+                    state: 'PENDING'
+                });
+                if (!result.ok) continue;
+                result.service.builderChapterId = rival.id;
+                charter.commons.capital -= candidate.program.cost;
+                applyCommonsPolicyToService(result.service, charter.commons?.policy);
+                rival.works -= 1;
+                rival.lastMove = {
+                    chapterId: rival.id,
+                    chapterName: rival.name,
+                    programId: candidate.programId,
+                    programName: result.service.name,
+                    day: charter.day,
+                    action: 'funded a shared work on the commons'
+                };
+                return rival.lastMove;
+            }
+        }
     }
     return null;
 }

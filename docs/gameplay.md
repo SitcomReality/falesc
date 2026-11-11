@@ -176,7 +176,9 @@ reopen shared doors that had closed. Gifts to the **capital budget** pay for the
 next shared works before the builder's own lumen: a 10-lumen capital gift builds
 a 4-lumen commons canteen and leaves 6 in the budget. Each rival also puts 1
 lumen into the capital budget each day while it has at least 6 in hand, up to a
-30-lumen reserve.
+30-lumen reserve. When that budget can cover one of its programs and the isle
+has fewer than two shared works, a rival may break ground there itself; the work
+is still owned by The Commons and carries its builder's name.
 
 ## Retrofit
 
