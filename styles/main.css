@@ -5419,3 +5419,9 @@ body.is-photo-mode .care-watch {
     gap: 6px;
     margin: 0 0 10px;
 }
+
+.charter-archive__sort-label {
+    margin-left: 10px;
+    align-self: center;
+    color: var(--ink-soft);
+}

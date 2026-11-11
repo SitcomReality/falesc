@@ -10,6 +10,7 @@ export class CharterArchiveModal {
         this.onClear = onClear;
         this.isOpen = false;
         this.filter = 'all';
+        this.sort = 'newest';
         this.container = document.createElement('div');
         this.container.className = 'modal-scrim';
         this.container.dataset.testid = 'charter-archive-scrim';
@@ -29,9 +30,16 @@ export class CharterArchiveModal {
         this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
         this.panel.addEventListener('click', (event) => {
             const filter = event.target.closest('[data-testid^=archive-filter-]');
-            if (!filter) return;
-            this.filter = filter.dataset.testid.replace('archive-filter-', '');
-            this.render();
+            if (filter) {
+                this.filter = filter.dataset.testid.replace('archive-filter-', '');
+                this.render();
+                return;
+            }
+            const sort = event.target.closest('[data-testid^=archive-sort-]');
+            if (sort) {
+                this.sort = sort.dataset.testid.replace('archive-sort-', '');
+                this.render();
+            }
         });
     }
 
@@ -49,7 +57,8 @@ export class CharterArchiveModal {
 
     render() {
         const allRecords = readArchive();
-        const records = this.filter === 'all' ? allRecords : allRecords.filter((record) => (record.mode || 'first-light') === this.filter);
+        const filtered = this.filter === 'all' ? allRecords : allRecords.filter((record) => (record.mode || 'first-light') === this.filter);
+        const records = [...filtered].sort((a, b) => this.sort === 'best' ? score(b) - score(a) : 0);
         const bestPopulation = records.length ? Math.max(...records.map((record) => record.population || 0)) : 0;
         const bestFlourishing = records.length ? Math.max(...records.map((record) => record.flourishing || 0)) : 0;
         const bestVisits = records.length ? Math.max(...records.map((record) => record.visits || 0)) : 0;
@@ -77,11 +86,14 @@ export class CharterArchiveModal {
                 </div>
                 <button type="button" class="modal__close" data-testid="charter-archive-close" aria-label="Close charter archive">×</button>
             </div>
-            <p class="modal__blurb">The last ${records.length || 0} charter${records.length === 1 ? '' : 's'}, newest first. A victory records its stewardship; a defeat records what the chapter reached.</p>
+            <p class="modal__blurb">The last ${records.length || 0} charter${records.length === 1 ? '' : 's'}, ${this.sort === 'best' ? 'best first' : 'newest first'}. A victory records its stewardship; a defeat records what the chapter reached.</p>
             <div class="charter-archive__filters" role="group" aria-label="Filter charters">
                 <button type="button" class="btn btn--small ${this.filter === 'all' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-filter-all">All</button>
                 <button type="button" class="btn btn--small ${this.filter === 'first-light' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-filter-first-light">First Light</button>
                 <button type="button" class="btn btn--small ${this.filter === 'contest' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-filter-contest">Contest</button>
+                <span class="charter-archive__sort-label kicker">Sort</span>
+                <button type="button" class="btn btn--small ${this.sort === 'newest' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-sort-newest">Newest</button>
+                <button type="button" class="btn btn--small ${this.sort === 'best' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-sort-best">Best</button>
             </div>
             ${records.length ? `<p class="charter-archive__best">Best so far: <strong>${bestPopulation} residents</strong> · <strong>${bestFlourishing} flourishing</strong> · <strong>${bestVisits} visits</strong> · <strong>${bestDevotion.toFixed(1)} devotion</strong>.</p>` : ''}
             ${rows ? `<ol class="charter-archive__list">${rows}</ol>` : '<p class="modal__note">No charters have closed yet.</p>'}
@@ -113,6 +125,7 @@ export class CharterArchiveModal {
         if (!this.isOpen) return;
         this.isOpen = false;
         this.filter = 'all';
+        this.sort = 'newest';
         this.container.style.display = 'none';
         this.container.classList.remove('is-open');
         this.container.setAttribute('aria-hidden', 'true');
@@ -126,3 +139,7 @@ function labelFor(record) {
     return `${mode} · ${outcome}${record.commons === 'lit' ? ' · Beacon lit' : ''}`;
 }
 
+
+function score(record) {
+    return (record.population || 0) * 2 + (record.flourishing || 0) + (record.visits || 0) / 5 + (record.devotion || 0) * 2;
+}
