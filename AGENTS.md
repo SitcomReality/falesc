@@ -38,6 +38,7 @@ Browser verification from this workspace (shared harness):
 
 ```bash
 webgame_smoke
+webgame_smoke --scenario scripts/scenarios/sound-toggle.mjs
 webgame_smoke --scenario scripts/scenarios/keyboard-cursor.mjs
 webgame_smoke --scenario scripts/scenarios/resident-day.mjs
 webgame_smoke --scenario scripts/scenarios/economy.mjs
@@ -91,6 +92,7 @@ after any behavioural change.
 | `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
 | `src/state/` | `GamePhase` constants and `ScreenStateMachine` |
 | `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, Confluence, stewardship, end |
+| `src/audio/` | Procedural soundscape, persisted mute toggle |
 | `src/ui/` | Shared `OverlayManager`, build/service/bulletin/campaign/commons/resident/visitor modals, standings, survey chart, chatter, icons |
 | `src/map/` | Seeded single-pass island generation, packing, grids, sector art, paths |
 | `src/character/`, `src/Character.js` | Procedural chibi rig and animation |

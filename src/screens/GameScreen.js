@@ -71,6 +71,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="resume-game">Return to planning</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-bulletin">Morning bulletin</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-residents">Residents</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="sound-toggle" aria-pressed="false">Sound: off</button>
                 <button type="button" class="btn btn--small btn--ghost charter-menu__abandon" data-testid="end-game">Abandon charter</button>
                 <div class="charter-menu__confirm" data-role="abandon-confirm" hidden>
                     <p>Abandon this charter? The save will be cleared.</p>
@@ -232,6 +233,8 @@ export class GameScreen {
             this._setPauseOpen(false);
             this.game.showResidentRoster();
         });
+        this.soundButton = this.pausePanel.querySelector('[data-testid=sound-toggle]');
+        this.soundButton.addEventListener('click', () => this.game.toggleAudio());
         this.abandonBtn = this.pausePanel.querySelector('[data-testid=end-game]');
         this.abandonConfirm = this.pausePanel.querySelector('[data-role=abandon-confirm]');
         this.abandonBtn.addEventListener('click', () => {
@@ -321,7 +324,14 @@ export class GameScreen {
 
     show() {
         this.container.style.display = 'block';
+        this.setSound(Boolean(this.game.audio?.enabled));
         this.updateHud(true);
+    }
+
+    setSound(enabled) {
+        if (!this.soundButton) return;
+        this.soundButton.textContent = enabled ? 'Sound: on' : 'Sound: off';
+        this.soundButton.setAttribute('aria-pressed', String(Boolean(enabled)));
     }
 
     hide() {

@@ -29,7 +29,7 @@ Severity is about impact on the slice, not effort:
 | 7 | Low | Save v1 is discarded, a mid-`DAY` reload loses the day, and there is no export/import |
 | 8 | Low | The resident card stops at the last choice; no portrait or visit history |
 | 9 | Low | Crowd movement has no local avoidance |
-| 10 | Low | No audio, and the multiplayer button remains a disabled placeholder |
+| 10 | Low | Procedural audio exists, but the multiplayer button remains a disabled placeholder |
 | 11 | Low | WebGL context loss is not handled |
 | 12 | Low | Visual regression is not enabled and no baseline is committed |
 | 13 | Low | Minor teardown and cleanup gaps remain |
@@ -284,9 +284,10 @@ Keep model queues authoritative. If visual crowding becomes a problem, add
 simple local avoidance or queue-slot positions in `ResidentAgent`; do not add a
 second physical simulation that disagrees with the report.
 
-### 10. No audio; multiplayer is a placeholder
+### 10. Procedural audio only; multiplayer is a placeholder
 
-- There is no audio subsystem, music or SFX.
+- A procedural Web Audio pad and short cues exist behind the charter-menu Sound
+toggle; there is no recorded music, voice or mixer.
 - The menu keeps a disabled **Multiplayer — later** button. There is no
   transport, lobby or authority model; D1 deliberately keeps human multiplayer
   later.

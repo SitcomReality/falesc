@@ -27,6 +27,7 @@ limit.
 | Primary click/tap a free plot | Open the build dialog for the armed service |
 | Primary click/tap a service | Open its service record |
 | `C` | Toggle the keyboard build cursor |
+| Charter menu → Sound | Toggle the procedural pad and click cues |
 | Arrow keys while the cursor is active | Move the footprint |
 | `G` while the cursor is active | Switch between the home shard and the commons isle |
 | `Enter` while the cursor is active | Open the service record or build dialog at the cursor |

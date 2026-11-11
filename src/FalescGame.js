@@ -28,6 +28,7 @@ import { OverlayManager } from './ui/OverlayManager.js';
 import { Minimap } from './ui/Minimap.js';
 import { ChatterManager } from './ui/ChatterManager.js';
 import { SaveManager } from './persistence/SaveManager.js';
+import { Soundscape } from './audio/Soundscape.js';
 import { BUILDABLE_PROGRAMS, PROGRAM_BY_ID } from './design/programs.js';
 import { DAY_PHASES, BALANCE } from './design/balance.js';
 import { BuildingRenderer } from './buildings/BuildingRenderer.js';
@@ -61,6 +62,8 @@ export class FalescGame {
         this.patronageFlow = new PatronageFlow({ layer: this.world.overlayLayer });
         this.transitGate = new TransitGate({ layer: this.world.overlayLayer });
         this.saveManager = new SaveManager();
+        this.audio = new Soundscape();
+        document.addEventListener('pointerdown', () => this.audio.unlock(), { once: true });
         this.screenStateMachine = new ScreenStateMachine();
 
         this.selectedProgramId = defaultProgramId();
@@ -262,6 +265,13 @@ export class FalescGame {
         this.gameScreen.updateHud(true);
     }
 
+    toggleAudio() {
+        const enabled = this.audio.toggle();
+        this.gameScreen?.setSound(enabled);
+        this.gameScreen?.toast(enabled ? 'Sound on. The void hums.' : 'Sound off.', enabled ? 'mint' : 'coral', 1600);
+        return enabled;
+    }
+
     togglePatronage() {
         if (!this.charter) return false;
         const visible = this.patronageFlow.toggle();
@@ -308,6 +318,7 @@ export class FalescGame {
         if (!result.ok) return result;
         this.gameScreen.updateHud(true);
         this.saveGame();
+        this.audio.play('mint');
         this.gameScreen.toast(`${result.gave} lumen into the commons purse.`, 'mint', 2200);
         return result;
     }
@@ -644,6 +655,7 @@ export class FalescGame {
         this.pendingBuildLocation = null;
         this.hintDismissed = true;
         this.syncViews();
+        this.audio.play('build');
         this.gameScreen.toast(`${result.service.name} breaks ground — opens tomorrow.`, 'mint');
         this.saveGame();
         return { ok: true };
@@ -714,6 +726,7 @@ export class FalescGame {
     openDay() {
         if (!this.charter || this.screenStateMachine.state !== GamePhase.PLAYING) return false;
         this.clearKeyboardCursor();
+        this.audio.play('day');
         if (this.hasBlockingModal()) return false;
         this.world.clearHover();
         this.buildModal.hide(false);
@@ -1161,6 +1174,9 @@ export class FalescGame {
             showBulletin() {
                 game.showBulletin();
                 return game.bulletinModal.isOpen;
+            },
+            toggleAudio() {
+                return game.toggleAudio();
             },
             togglePatronage() {
                 return game.togglePatronage();
