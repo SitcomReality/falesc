@@ -414,10 +414,10 @@ export class GameScreen {
         const dayLimit = charter.dayLimit || 14;
         const day = charter.day || 1;
         const daysLeft = Math.max(0, dayLimit - day + 1);
-        const populationGoal = BALANCE.end.firstLightPopulation;
+        const openCharter = charter.mode === 'open';
+        const populationGoal = openCharter ? BALANCE.rosterSize : BALANCE.end.firstLightPopulation;
         const flourishingGoal = BALANCE.end.comfortableFlourishing;
 
-        const openCharter = charter.mode === 'open';
         this._setText(this.turnDisplay, 'day', `Day ${String(day).padStart(2, '0')}`);
         this._setText(this.dayLimitEl, 'dayLimit', openCharter ? '/ open' : `/ ${dayLimit}`);
         this._setText(this.objectiveKicker, 'objectiveKicker', openCharter ? 'Open Charter' : 'First Light');
@@ -455,7 +455,9 @@ export class GameScreen {
             ? `Daily request · ${request.residentName}: ${request.needName}${request.status === 'met' ? ' · met' : request.status === 'missed' ? ' · missed' : ''}`
             : '';
         this._setText(this.goalCopy, 'goalCopy', openCharter
-            ? 'No deadline. Keep building; abandon from the charter menu when you are done.'
+            ? (charter.housedPopulation >= BALANCE.rosterSize
+                ? 'The whole roster is housed. Keep building; the charter is yours.'
+                : `A full house is ${BALANCE.rosterSize} residents. No deadline; keep building.`)
             : goalsMet
                 ? 'Both goals are met. Open the day to close the charter.'
                 : `and reach a flourishing of ${flourishingGoal}.`);
@@ -482,12 +484,15 @@ export class GameScreen {
         const spare = charter.contest ? charter.totalSpareBeds : charter.spareBeds;
         this._setText(this.worksNote, 'worksNote', `${charter.works} ${charter.works === 1 ? 'work' : 'works'} left · ${spare} spare ${spare === 1 ? 'bed' : 'beds'}`);
         for (const [programId, button] of this.programButtons) {
-            const count = charter.services.services.filter((service) => service.programId === programId).length;
+            const built = charter.services.services.filter((service) => service.programId === programId);
+            const count = built.length;
+            const worn = built.filter((service) => service.condition < 50).length;
             const badge = button.querySelector('[data-role=count]');
             if (!badge) continue;
             badge.hidden = count === 0;
             badge.textContent = count ? String(count) : '';
-            badge.title = count ? `${count} built` : '';
+            badge.classList.toggle('is-worn', worn > 0);
+            badge.title = count ? `${count} built${worn ? ` · ${worn} worn` : ''}` : '';
         }
         this._setText(this.dockNote, 'dockNote', charter.works > 0
             ? `${selectedName} armed${this.game.selectedProgramId ? ' · choose a plot' : ''}`

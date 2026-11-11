@@ -16,11 +16,13 @@ export default async function ({ page, assert, log, screenshot }) {
         const service = app.charter.services.services.find((entry) => entry.id === result.service.id);
         service.state = 'ACTIVE';
         service.condition = 42;
+        app.gameScreen.updateHud(true);
         app.serviceCard.show(service);
         return { id: service.id, condition: service.condition, lumen: app.charter.lumen };
     })()`);
     log(JSON.stringify({ setup }));
     assert.equal(setup.condition, 42);
+    assert.ok(await page.evaluate("document.querySelector('[data-testid=program-canteen] [data-role=count]').classList.contains('is-worn')"));
     const text = await page.text('[data-testid=structure-modal]');
     assert.ok(text.includes('Wear'));
     assert.ok(text.includes('42%'));

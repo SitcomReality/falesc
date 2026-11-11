@@ -5156,3 +5156,8 @@ body.is-photo-mode .care-watch {
 .service-rename[hidden] {
     display: none;
 }
+
+.blueprint__count.is-worn {
+    background: var(--coral);
+    color: var(--paper);
+}
