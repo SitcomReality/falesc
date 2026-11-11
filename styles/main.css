@@ -3968,3 +3968,39 @@ body.has-modal > canvas {
         grid-template-columns: 1fr;
     }
 }
+
+/* The paper almanac ------------------------------------------------------- */
+.field-guide {
+    width: min(760px, calc(100vw - 32px));
+    max-height: calc(100vh - 36px);
+}
+
+.field-guide__body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 24px;
+    margin: 18px 0;
+}
+
+.field-guide__body section {
+    padding-top: 10px;
+    border-top: 1.5px solid rgba(33, 18, 37, 0.25);
+}
+
+.field-guide__body h4 {
+    margin: 0 0 6px;
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--wine);
+}
+
+.field-guide__body p {
+    margin: 0 0 5px;
+    font-size: 12.5px;
+    line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+    .field-guide__body { grid-template-columns: 1fr; }
+}

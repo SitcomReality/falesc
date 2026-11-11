@@ -71,6 +71,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="resume-game">Return to planning</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-bulletin">Morning bulletin</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-residents">Residents</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="open-field-guide">Field guide</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="sound-toggle" aria-pressed="false">Sound: off</button>
                 <button type="button" class="btn btn--small btn--ghost charter-menu__abandon" data-testid="end-game">Abandon charter</button>
                 <div class="charter-menu__confirm" data-role="abandon-confirm" hidden>
@@ -232,6 +233,10 @@ export class GameScreen {
         this.pausePanel.querySelector('[data-testid=open-residents]').addEventListener('click', () => {
             this._setPauseOpen(false);
             this.game.showResidentRoster();
+        });
+        this.pausePanel.querySelector('[data-testid=open-field-guide]').addEventListener('click', () => {
+            this._setPauseOpen(false);
+            this.game.openFieldGuide();
         });
         this.soundButton = this.pausePanel.querySelector('[data-testid=sound-toggle]');
         this.soundButton.addEventListener('click', () => this.game.toggleAudio());

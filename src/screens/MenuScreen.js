@@ -47,6 +47,11 @@ export class MenuScreen {
             this.importInput.click();
         }, 'btn btn--paper');
         this.importBtn = importBtn;
+
+        const guideBtn = this.createButton('How to play', 'menu-guide', () => {
+            this.game?.openFieldGuide();
+        }, 'btn btn--paper');
+        actions.append(guideBtn);
         this.importInput = document.createElement('input');
         this.importInput.type = 'file';
         this.importInput.accept = 'application/json,.json';

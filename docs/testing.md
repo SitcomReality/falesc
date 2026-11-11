@@ -155,6 +155,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | Scenario | What it proves |
 | --- | --- |
 | `save-transfer.mjs` | Exports the current charter as JSON, rejects an invalid file, imports it back and restores the report phase. |
+| `field-guide.mjs` | Opens the almanac from the menu and the pause menu, checks the service/policy/control sections, and closes it. |
 | `sound-toggle.mjs` | Opens the charter menu, turns the procedural soundscape on and off, checks persistence and the audio context. |
 | `keyboard-cursor.mjs` | Toggles the keyboard build cursor, moves it with arrows, opens the build dialog with Enter, and confirms a pending build. |
 | `resident-day.mjs` | A Tidelander is scheduled into the Canteen, walks and enters during playback, emerges with a lower need, remembers the visit, and the card quotes the why line. |

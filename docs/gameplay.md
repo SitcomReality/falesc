@@ -15,6 +15,11 @@ limit.
 
 ## Controls
 
+The menu's **How to play** button and the pause menu's **Field guide** open a
+paper almanac of the four needs, the day loop, every service, hours, atmosphere,
+welcome, floor plans, the commons and the Contest. It is built from the same
+data as the game and never changes a rule.
+
 | Input | Action |
 | --- | --- |
 | `W` `A` `S` `D` or arrow keys | Pan the camera |
