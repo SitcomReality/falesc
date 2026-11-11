@@ -13,6 +13,7 @@ export class Resident {
         needs,
         active = true,
         homeServiceId = null,
+        homeChapterId = 'player',
         affinity = 0.8,
         memory = null,
         paletteSeed = 1
@@ -26,11 +27,16 @@ export class Resident {
         }
         this.active = active;
         this.homeServiceId = homeServiceId;
-        const affinityValue = typeof affinity === 'number'
-            ? affinity
-            : Number(affinity?.player ?? 0.8);
-        const safeAffinity = Number.isFinite(affinityValue) ? affinityValue : 0.8;
-        this.affinity = { player: Math.max(0, Math.min(5, safeAffinity)) };
+        this.homeChapterId = homeChapterId;
+        this.affinity = {};
+        if (typeof affinity === 'number') {
+            this.affinity.player = clampAffinity(affinity);
+        } else if (affinity && typeof affinity === 'object') {
+            for (const [chapterId, value] of Object.entries(affinity)) {
+                this.affinity[chapterId] = clampAffinity(value);
+            }
+        }
+        if (!('player' in this.affinity)) this.affinity.player = 0.8;
         this.memory = {
             lastChoice: null,
             recentVisits: [],
@@ -59,6 +65,22 @@ export class Resident {
 
     get isHomeless() {
         return !this.homeServiceId;
+    }
+
+    get favouriteChapterId() {
+        let best = 'player';
+        let bestValue = -1;
+        for (const [chapterId, value] of Object.entries(this.affinity)) {
+            if (value > bestValue) {
+                best = chapterId;
+                bestValue = value;
+            }
+        }
+        return best;
+    }
+
+    getAffinity(chapterId = 'player') {
+        return this.affinity[chapterId] || 0;
     }
 
     adjustNeed(needId, amount) {
@@ -101,6 +123,7 @@ export class Resident {
     depart(reason, day) {
         this.active = false;
         this.homeServiceId = null;
+        this.homeChapterId = null;
         this.state = 'departed';
         this.memory.departure = { day, reason };
     }
@@ -129,10 +152,10 @@ export class Resident {
         if (this.memory.unmetDays) this.memory.unmetDays[needId] = 0;
     }
 
-    addAffinity(amount) {
-        const next = Math.max(0, Math.min(5, (this.affinity.player || 0) + amount));
-        this.affinity.player = Math.round(next * 100) / 100;
-        return this.affinity.player;
+    addAffinity(amount, chapterId = 'player') {
+        const next = clampAffinity((this.affinity[chapterId] || 0) + amount);
+        this.affinity[chapterId] = Math.round(next * 100) / 100;
+        return this.affinity[chapterId];
     }
 
     toJSON() {
@@ -143,6 +166,7 @@ export class Resident {
             needs: { ...this.needs },
             active: this.active,
             homeServiceId: this.homeServiceId,
+            homeChapterId: this.homeChapterId,
             affinity: { ...this.affinity },
             memory: JSON.parse(JSON.stringify(this.memory)),
             paletteSeed: this.paletteSeed
@@ -152,4 +176,10 @@ export class Resident {
     static fromJSON(data) {
         return new Resident(data);
     }
+}
+
+function clampAffinity(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return 0;
+    return Math.max(0, Math.min(5, number));
 }

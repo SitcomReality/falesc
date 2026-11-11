@@ -93,11 +93,13 @@ export class ServiceCardModal {
         this.programEl.textContent = program?.name || 'Service';
         this.statsEl.innerHTML = `
             <span><strong>${working ? 'Working' : service.closed ? 'Closed' : 'Under construction'}</strong></span>
+            <span>${escapeHtml(service.chapterName || 'Home Chapter')}</span>
             <span>${service.capacity} capacity</span>
-            <span>${upkeep} upkeep / day</span>
+            <span>${service.chapterId !== 'player' ? 'rival budget' : `${upkeep} upkeep / day`}</span>
         `;
         this.blurbEl.textContent = program?.blurb || '';
         this.factsEl.innerHTML = `
+            <div><dt>Chapter</dt><dd>${escapeHtml(service.chapterName || 'Home Chapter')}</dd></div>
             <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}${secondary ? ` · ${secondary.glyph} ${secondary.name}` : ''}</dd></div>
             <div><dt>Visits</dt><dd>${service.visits}</dd></div>
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
@@ -113,10 +115,15 @@ export class ServiceCardModal {
                 ? `Closed after an upkeep shortfall. Reopening costs ${this.game?.charter?.services.reopenCost(service) || 1} lumen.`
                 : 'The door is open. The day report will tell you who came through it.';
         this.errorEl.textContent = '';
+        const rivalService = service.chapterId && service.chapterId !== 'player';
         const refund = Math.max(1, Math.floor((program?.cost || 0) / 2));
-        this.demolishBtn.textContent = `Dismantle · +${refund} lumen`;
-        this.demolishBtn.disabled = Boolean(service.fixed);
-        this.demolishBtn.title = service.fixed ? 'The Welcome Post is part of the charter.' : '';
+        this.demolishBtn.textContent = rivalService
+            ? 'Rival service'
+            : `Dismantle · +${refund} lumen`;
+        this.demolishBtn.disabled = Boolean(service.fixed) || rivalService;
+        this.demolishBtn.title = service.fixed
+            ? 'The Welcome Post is part of the charter.'
+            : rivalService ? "A rival chapter's service cannot be dismantled." : '';
         this.reopenBtn.hidden = !service.closed;
         this.reopenBtn.textContent = service.closed
             ? `Reopen · ${this.game?.charter?.services.reopenCost(service) || 1} lumen`
@@ -171,4 +178,12 @@ export class ServiceCardModal {
         this.container.setAttribute('aria-hidden', 'true');
         this.overlays.close(this);
     }
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
 }

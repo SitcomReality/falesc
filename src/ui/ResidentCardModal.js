@@ -116,11 +116,15 @@ export class ResidentCardModal {
                 </div>
             `;
         }).join('');
-        const home = charter.services.housingFor(resident);
+        const home = charter.homeFor(resident);
         const homeName = home ? home.name : 'No bed — homeless';
+        const favourite = charter.chapterById(resident.favouriteChapterId) || charter.playerChapter;
+        const heartLine = charter.chapters.map((chapter) => `${chapter.name} ${resident.getAffinity(chapter.id).toFixed(1)}`).join(' · ');
         this.metaEl.innerHTML = `
             <p><span class="kicker">Home</span><strong>${escapeHtml(homeName)}</strong></p>
-            <p><span class="kicker">Devotion</span><strong>${resident.affinity.player.toFixed(1)} ♥</strong></p>
+            <p><span class="kicker">Favourite</span><strong>${escapeHtml(favourite.name)}</strong></p>
+            <p><span class="kicker">Devotion</span><strong>${resident.getAffinity('player').toFixed(1)} ♥</strong></p>
+            <p><span class="kicker">All hearts</span><strong>${escapeHtml(heartLine)}</strong></p>
             <p><span class="kicker">Wellbeing</span><strong>${Math.round(resident.wellbeing)}</strong></p>
             <p class="resident-card__blurb">${escapeHtml(temperament?.blurb || '')} ${escapeHtml(standard?.blurb || '')} ${escapeHtml(rhythm?.blurb || '')}</p>
         `;

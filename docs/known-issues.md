@@ -23,7 +23,7 @@ Severity is about impact on the slice, not effort:
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Only the home shard is playable; there is no archipelago layer |
 | 3 | Medium | No building layers, retrofit, modules, finishes or player-set policy |
-| 4 | Medium | No rivals, standings, patronage flow or Confluence vote |
+| 4 | Medium | Contest preview rivals lack upkeep, housing competition and the Confluence vote |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
 | 7 | Low | Save v1 is discarded, a mid-`DAY` reload loses the day, and there is no export/import |
@@ -115,30 +115,33 @@ no new geometry), then modules, then shells/retrofit. Keep the "no spreadsheet"
 test: every option must show up in a resident's choice or the report. Extend
 `ServiceCardModal` and the placement preview before adding more programs.
 
-### 4. No rivals, standings, patronage flow or Confluence vote
+### 4. Contest preview rivals lack upkeep, housing competition and the vote
 
 **Evidence**
 
-- The bulletin has three items and never a rival move; there is no rival
-  chapter model, AI, standings card or survey overlay for patronage.
-- The Commons Beacon program (`buildable: false`) and its art exist as endgame
-  data, but the shared commons and vote do not.
-- The menu's Multiplayer button is disabled; no networking or authority model
-  exists.
-- D1/D3/D4 in [design/decisions.md](design/decisions.md) deliberately defer
-  these to Phase 2/4.
+- The Contest preview has two AI chapters, doctrine build orders, shared
+  services/occupancy, shared residents, a rival bulletin move, Devotion
+  standings, patronage and a most-beloved-chapter end at the day limit.
+- Rivals pay construction costs from a finite budget but do not pay daily
+  upkeep, receive resident contributions, own housing or assign homes. Shared
+  residents all live at the player's Welcome Post.
+- There is no patronage-flow survey overlay, Confluence festival or public vote;
+  the Commons Beacon remains non-buildable endgame data.
+- D3/D4 in [design/decisions.md](design/decisions.md) deliberately defer
+  auctions, stewardship and the full vote.
 
 **Impact**
 
-The game is a solo care sandbox. There is no competition for residents and no
-final social judgment; the word "Confluence" currently lives in the subtitle and
-copy, not in mechanics.
+Competition is visible and testable, but it is a preview rather than the full
+care economy: rivals cannot go bankrupt, cannot win a resident's bed, and the
+final judgment is a simple Devotion comparison.
 
 **Suggested direction**
 
-Follow [design/roadmap.md](design/roadmap.md): one shared central island with two
-AI chapters, shared residents, a standings card and one rival bulletin item
-before any vote. Do not add auctions or human multiplayer early.
+Give rivals upkeep, contributions and housing, then add the patronage survey
+overlay. Follow [design/roadmap.md](design/roadmap.md) into the Confluence
+festival/vote only after the rival economy is stable. Do not add auctions or
+human multiplayer early.
 
 ### 5. No keyboard build cursor
 
@@ -322,6 +325,7 @@ These are no longer open:
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
+- **Contest preview.** Two rival chapters, doctrine build moves, shared services and residents, Devotion standings, patronage and a day-limit winner are implemented and covered by `contest.mjs`.
 - **Safer destructive actions.** Abandoning a charter is a two-step confirmation
   and the save is cleared only after the confirmation.
 - **Truthful choice feedback.** "I come here often" is per resident, "open late"

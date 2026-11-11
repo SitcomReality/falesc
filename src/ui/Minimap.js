@@ -165,11 +165,11 @@ export class Minimap {
         }
 
         // Services.
-        const services = this.game.charter?.services.services || [];
+        const services = this.game.charter?.allServices || [];
         for (const service of services) {
             const position = project(service.container.x, service.container.y);
             if (service.state === 'ACTIVE' && !service.closed) {
-                ctx.fillStyle = service.programId === 'housing' ? '#ffa07a' : '#ffd36e';
+                ctx.fillStyle = service.chapter?.isPlayer ? '#ffd36e' : (service.chapterColour || '#ff9ed6');
                 ctx.fillRect(position.x - 2, position.y - 2, 4, 4);
                 ctx.strokeStyle = 'rgba(33, 18, 37, 0.85)';
                 ctx.lineWidth = 0.7;
@@ -183,9 +183,10 @@ export class Minimap {
 
         // Residents as tiny warm dots.
         if (this.game.crowd) {
-            ctx.fillStyle = 'rgba(255, 79, 154, 0.85)';
             for (const agent of this.game.crowd.agents.values()) {
                 if (agent.hidden) continue;
+                const chapter = this.game.charter?.chapterById?.(agent.resident.favouriteChapterId);
+                ctx.fillStyle = chapter?.colour || 'rgba(255, 79, 154, 0.85)';
                 const position = project(agent.character.x, agent.character.y);
                 ctx.fillRect(position.x - 1, position.y - 1, 2, 2);
             }

@@ -6,6 +6,8 @@ import { ServiceManager } from '../services/ServiceManager.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
 import { summarizeReport } from '../simulation/ReportSummary.js';
+import { RivalChapter } from '../chapters/RivalChapter.js';
+import { createRivalChapters, planRivalDay } from '../chapters/RivalAI.js';
 
 /**
  * A charter is the whole run: day, lumen, works, cast, services and the report
@@ -13,13 +15,25 @@ import { summarizeReport } from '../simulation/ReportSummary.js';
  * layer listens; it never owns the rules.
  */
 export class Charter {
-    constructor({ seed, mapSize = 'medium', map = null, parentContainer = null, saved = null }) {
+    constructor({ seed, mapSize = 'medium', mode = 'first-light', map = null, parentContainer = null, saved = null }) {
         this.seed = seed;
         this.mapSize = mapSize;
+        this.mode = mode;
         this.map = map;
         this.homeSector = map?.homeSector || null;
         this.name = 'Home Chapter';
-        this.services = new ServiceManager({ map, parentContainer });
+        this.occupancy = new Map();
+        this.playerChapter = { id: 'player', name: this.name, colour: '#FF6B5E', isPlayer: true };
+        this.services = new ServiceManager({
+            map,
+            parentContainer,
+            chapter: this.playerChapter,
+            occupancy: this.occupancy,
+            idPrefix: 'player'
+        });
+        this.playerChapter.services = this.services;
+        this.rivals = [];
+        this.lastRivalMoves = [];
         this.day = 1;
         this.dayLimit = BALANCE.dayLimits[mapSize] || BALANCE.dayLimits.medium;
         this.lumen = BALANCE.startingLumen;
@@ -41,6 +55,10 @@ export class Charter {
 
         this.roster = ResidentFactory.createRoster(seed, BALANCE.rosterSize);
         this.foundWelcomePost();
+        if (this.mode === 'contest') {
+            this.createRivals();
+            this.lastRivalMoves = this.rivals.map((rival) => rival.lastMove).filter(Boolean);
+        }
         this.assignHomes();
         this.refreshDerived();
         this.bulletin = this.buildBulletin([]);
@@ -50,6 +68,7 @@ export class Charter {
         return new Charter({
             seed: saved.seed,
             mapSize: saved.mapSize,
+            mode: saved.mode || 'first-light',
             map,
             parentContainer,
             saved
@@ -60,12 +79,45 @@ export class Charter {
         return this.roster.filter((resident) => resident.active);
     }
 
+    get playerResidents() {
+        return this.activeResidents.filter((resident) => resident.homeChapterId === 'player');
+    }
+
+    get allServices() {
+        return [
+            ...this.services.services,
+            ...this.rivals.flatMap((rival) => rival.services.services)
+        ];
+    }
+
+    get chapters() {
+        return [this.playerChapter, ...this.rivals];
+    }
+
+    get contest() {
+        return this.mode === 'contest';
+    }
+
+    get devotionByChapter() {
+        const totals = Object.fromEntries(this.chapters.map((chapter) => [chapter.id, 0]));
+        for (const resident of this.activeResidents) {
+            for (const [chapterId, value] of Object.entries(resident.affinity)) {
+                totals[chapterId] = (totals[chapterId] || 0) + value;
+            }
+        }
+        return Object.fromEntries(Object.entries(totals).map(([id, value]) => [id, Math.round(value * 10) / 10]));
+    }
+
+    get playerDevotion() {
+        return this.devotionByChapter.player || 0;
+    }
+
     get population() {
         return this.activeResidents.length;
     }
 
     get housedResidents() {
-        return this.activeResidents.filter((resident) => resident.homeServiceId && this.services.housingFor(resident));
+        return this.playerResidents.filter((resident) => resident.homeServiceId && this.services.housingFor(resident));
     }
 
     get housedPopulation() {
@@ -77,7 +129,7 @@ export class Charter {
     }
 
     get spareBeds() {
-        return this.services.spareHousing(this.roster);
+        return this.services.spareHousing(this.playerResidents);
     }
 
     get wellbeing() {
@@ -110,6 +162,50 @@ export class Charter {
     get goalsMet() {
         return this.housedPopulation >= BALANCE.end.firstLightPopulation
             && this.flourishing >= BALANCE.end.comfortableFlourishing;
+    }
+
+    createRivals() {
+        this.rivals = createRivalChapters({
+            map: this.map,
+            parentContainer: this.services.parentContainer,
+            occupancy: this.occupancy
+        });
+    }
+
+    chapterById(id) {
+        return this.chapters.find((chapter) => chapter.id === id) || null;
+    }
+
+    serviceAt(sectorId, u, v) {
+        return this.services.serviceAt(sectorId, u, v);
+    }
+
+    homeFor(resident) {
+        if (!resident.homeServiceId) return null;
+        for (const chapter of this.chapters) {
+            const service = chapter.services?.findById?.(resident.homeServiceId);
+            if (service && service.state === 'ACTIVE' && !service.closed) return service;
+        }
+        return null;
+    }
+
+    serviceLabel(service) {
+        return service.chapter?.isPlayer || !service.chapter
+            ? service.name
+            : `${service.chapter.name}'s ${service.name}`;
+    }
+
+    standings() {
+        const devotion = this.devotionByChapter;
+        const patronage = this.lastReport?.patronageByChapter || {};
+        return this.chapters.map((chapter) => ({
+            id: chapter.id,
+            name: chapter.name,
+            colour: chapter.colour,
+            isPlayer: Boolean(chapter.isPlayer),
+            devotion: devotion[chapter.id] || 0,
+            visits: patronage[chapter.id] || 0
+        }));
     }
 
     foundWelcomePost() {
@@ -165,15 +261,16 @@ export class Charter {
 
     assignHomes() {
         for (const resident of this.activeResidents) {
-            const home = this.services.housingFor(resident);
+            const home = this.homeFor(resident);
             if (home) continue;
+            resident.homeChapterId = 'player';
             this.services.assignHome(resident, this.roster);
         }
     }
 
     refreshDerived() {
         this.flourishing = this.wellbeing;
-        this.devotion = Math.round(this.activeResidents.reduce((sum, resident) => sum + (resident.affinity.player || 0), 0) * 10) / 10;
+        this.devotion = this.playerDevotion;
     }
 
     canBuild(programId) {
@@ -209,6 +306,9 @@ export class Charter {
 
     dismantle(service) {
         if (!service) return { ok: false, reason: 'That service is already gone.' };
+        if (service.chapterId && service.chapterId !== 'player') {
+            return { ok: false, reason: "A rival chapter's service cannot be dismantled." };
+        }
         if (service.fixed) return { ok: false, reason: 'The Welcome Post cannot be dismantled.' };
         const cost = service.program?.cost || 0;
         const refund = Math.max(1, Math.floor(cost / 2));
@@ -225,6 +325,9 @@ export class Charter {
 
     reopen(service) {
         if (!service || !service.closed) return { ok: false, reason: 'That service is already open.' };
+        if (service.chapterId && service.chapterId !== 'player') {
+            return { ok: false, reason: "A rival chapter's service is not yours to reopen." };
+        }
         const cost = this.services.reopenCost(service);
         if (this.lumen < cost) return { ok: false, reason: `Need ${cost - this.lumen} more lumen to reopen.` };
         this.lumen -= cost;
@@ -249,18 +352,25 @@ export class Charter {
         this.works = BALANCE.worksPerDay;
         const promoted = this.services.promoteUnderConstruction();
         for (const service of this.services.services) service.resetDaily();
+        for (const rival of this.rivals) {
+            rival.works = 1;
+            rival.services.promoteUnderConstruction();
+            for (const service of rival.services.services) service.resetDaily();
+        }
         this.assignHomes();
         const arrivals = this.addArrivals();
         this.pendingArrivals = arrivals;
+        const rivalMoves = this.rivals.map((rival) => planRivalDay(rival, this)).filter(Boolean);
+        this.lastRivalMoves = rivalMoves;
         this.report = null;
-        this.bulletin = this.buildBulletin(arrivals);
+        this.bulletin = this.buildBulletin(arrivals, rivalMoves);
         this.refreshDerived();
-        return { day: this.day, promoted, arrivals, bulletin: this.bulletin };
+        return { day: this.day, promoted, arrivals, rivalMoves, bulletin: this.bulletin };
     }
 
     addArrivals() {
         if (this.flourishing < BALANCE.arrivals.minFlourishing) return [];
-        const spare = this.services.spareHousing(this.roster);
+        const spare = this.services.spareHousing(this.playerResidents);
         if (spare <= 0) return [];
         const waiting = this.roster.filter((resident) => !resident.active && !resident.memory.departure);
         const count = Math.min(BALANCE.arrivals.perDay, spare, waiting.length);
@@ -269,6 +379,7 @@ export class Charter {
             const resident = waiting[index];
             resident.active = true;
             resident.state = 'idle';
+            resident.homeChapterId = 'player';
             this.services.assignHome(resident, this.roster);
             arrivals.push({ id: resident.id, name: resident.name, homeServiceId: resident.homeServiceId });
         }
@@ -288,6 +399,33 @@ export class Charter {
                 title: 'The chapter empties.',
                 message: 'Too few Tidelanders remain to keep the commons. The doors close one by one.'
             };
+        } else if (this.contest) {
+            if (this.day >= this.dayLimit) {
+                const standings = this.standings().sort((a, b) => b.devotion - a.devotion);
+                const winner = standings[0];
+                if (this.flourishing < BALANCE.end.sharedSurvival) {
+                    this.ending = {
+                        outcome: 'defeat',
+                        day: this.day,
+                        title: 'No one wins the Confluence.',
+                        message: `The archipelago emptied before the vote. A flourishing of ${this.flourishing} is below the survival line; the evacuation ships take everyone.`
+                    };
+                } else if (winner?.isPlayer) {
+                    this.ending = {
+                        outcome: 'victory',
+                        day: this.day,
+                        title: 'The Confluence chooses you.',
+                        message: `Your chapter is the most beloved, with ${winner.devotion.toFixed(1)} Devotion. The commons holds, for now.`
+                    };
+                } else {
+                    this.ending = {
+                        outcome: 'defeat',
+                        day: this.day,
+                        title: `${winner?.name || 'Another chapter'} wins the Confluence.`,
+                        message: `Your chapter gathered ${this.devotion.toFixed(1)} Devotion against ${winner?.devotion?.toFixed(1) || '0'} for the winner. There is another charter in the drift.`
+                    };
+                }
+            }
         } else if (this.housedPopulation >= BALANCE.end.firstLightPopulation && this.flourishing >= BALANCE.end.comfortableFlourishing) {
             // First Light is a goal, not a survival timer: meeting both targets
             // closes the charter successfully, and the day limit is the deadline.
@@ -313,7 +451,7 @@ export class Charter {
         return this.ending;
     }
 
-    buildBulletin(arrivals = []) {
+    buildBulletin(arrivals = [], rivalMoves = this.lastRivalMoves || []) {
         const items = [];
         const residents = this.activeResidents;
         const averages = {};
@@ -324,7 +462,7 @@ export class Charter {
         }
         const topNeed = NEEDS.reduce((best, need) => (!best || averages[need.id] > averages[best.id] ? need : best), null);
         const urgentCount = topNeed ? residents.filter((resident) => resident.needs[topNeed.id] >= BALANCE.needs.bulletinThreshold).length : 0;
-        const matching = topNeed ? this.services.services.filter((service) => servesNeed(service.program, topNeed.id)) : [];
+        const matching = topNeed ? this.allServices.filter((service) => servesNeed(service.program, topNeed.id)) : [];
         const openNow = matching.filter((service) => service.state === 'ACTIVE' && !service.closed && !service.program?.passive && isOpenAt(service.program, 'morning'));
         const later = matching.filter((service) => service.state === 'ACTIVE' && !service.closed && !service.program?.passive && !isOpenAt(service.program, 'morning'));
         const passive = matching.filter((service) => service.state === 'ACTIVE' && !service.closed && service.program?.passive);
@@ -332,10 +470,10 @@ export class Charter {
         const closed = matching.filter((service) => service.closed);
         let serviceHint = `Nobody serves ${topNeed?.short?.toLowerCase()} yet.`;
         if (topNeed?.id === 'rest' && passive.length > 0) serviceHint = 'Residents recover Rest in their own beds overnight.';
-        else if (openNow.length > 0) serviceHint = `${openNow[0].name} is open now.`;
-        else if (pending.length > 0) serviceHint = `${pending[0].name} opens tomorrow.`;
-        else if (closed.length > 0) serviceHint = `${closed[0].name} is closed after an upkeep shortfall.`;
-        else if (later.length > 0) serviceHint = `${later[0].name} opens later today.`;
+        else if (openNow.length > 0) serviceHint = `${this.serviceLabel(openNow[0])} is open now.`;
+        else if (pending.length > 0) serviceHint = `${this.serviceLabel(pending[0])} opens tomorrow.`;
+        else if (closed.length > 0) serviceHint = `${this.serviceLabel(closed[0])} is closed after an upkeep shortfall.`;
+        else if (later.length > 0) serviceHint = `${this.serviceLabel(later[0])} opens later today.`;
 
         items.push({
             kicker: 'Unmet need',
@@ -381,6 +519,15 @@ export class Charter {
             });
         }
 
+        const rivalMove = rivalMoves?.[0];
+        if (rivalMove) {
+            items.push({
+                kicker: 'Rival move',
+                title: `${rivalMove.chapterName} ${rivalMove.action}`,
+                text: `${rivalMove.chapterName} put up a ${rivalMove.programName}. The room to be loved just got a little more crowded.`
+            });
+        }
+
         const quote = this.lastReport?.quotes?.[0] || this.activeResidents.find((resident) => resident.memory.lastChoice)?.memory?.lastChoice;
         items.push({
             kicker: 'Word of mouth',
@@ -399,6 +546,7 @@ export class Charter {
         return {
             seed: this.seed,
             mapSize: this.mapSize,
+            mode: this.mode,
             day: this.day,
             dayLimit: this.dayLimit,
             lumen: this.lumen,
@@ -409,11 +557,13 @@ export class Charter {
             pendingArrivals: this.pendingArrivals,
             lastReport: summarizeReport(this.lastReport),
             residents: this.roster.map((resident) => resident.toJSON()),
-            services: this.services.serialize()
+            services: this.services.serialize(),
+            rivals: this.rivals.map((rival) => rival.toJSON())
         };
     }
 
     restore(saved) {
+        this.mode = saved.mode || 'first-light';
         this.day = saved.day || 1;
         this.dayLimit = saved.dayLimit || BALANCE.dayLimits[this.mapSize] || 14;
         this.lumen = Number.isFinite(saved.lumen) ? saved.lumen : BALANCE.startingLumen;
@@ -423,13 +573,28 @@ export class Charter {
         this.roster = ResidentFactory.fromSave(saved.residents || []);
         if (this.roster.length === 0) this.roster = ResidentFactory.createRoster(this.seed, BALANCE.rosterSize);
         this.services.restore(saved.services || []);
+        if (Array.isArray(saved.rivals)) {
+            this.rivals = saved.rivals.map((entry) => {
+                const rival = new RivalChapter({
+                    ...entry,
+                    map: this.map,
+                    parentContainer: this.services.parentContainer,
+                    occupancy: this.occupancy
+                });
+                rival.services.restore(entry.services || []);
+                return rival;
+            });
+        } else if (this.mode === 'contest') {
+            this.createRivals();
+        }
+        this.lastRivalMoves = this.rivals.map((rival) => rival.lastMove).filter(Boolean);
         this.commonsCell = this.findCommonsCell(this.homeSector);
         this.assignHomes();
         this.refreshDerived();
         this.report = null;
         this.lastReport = saved.lastReport || null;
         this.history = [];
-        this.bulletin = this.buildBulletin(this.pendingArrivals);
+        this.bulletin = this.buildBulletin(this.pendingArrivals, this.lastRivalMoves);
     }
 
     stats() {
@@ -444,7 +609,10 @@ export class Charter {
             devotion: this.devotion,
             flourishing: this.flourishing,
             services: this.services.services.length,
-            activeServices: this.services.activeServices.length
+            activeServices: this.services.activeServices.length,
+            mode: this.mode,
+            rivals: this.rivals.length,
+            devotionByChapter: this.devotionByChapter
         };
     }
 }

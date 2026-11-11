@@ -2,6 +2,7 @@ import { BUILDABLE_PROGRAMS, PROGRAM_BY_ID } from '../design/programs.js';
 import { NEED_BY_ID } from '../design/needs.js';
 import { BALANCE } from '../design/balance.js';
 import { programIcon, ICONS } from '../ui/icons.js';
+import { StandingsCard } from '../ui/StandingsCard.js';
 
 /**
  * The planning HUD: a civic bulletin strip, First Light progress, the survey
@@ -171,7 +172,8 @@ export class GameScreen {
         endDayBtn.addEventListener('click', () => this.game.openDay());
         bottom.append(chartSlot, dock);
 
-        this.container.append(top, objective, hint, toast, bottom);
+        this.standings = new StandingsCard();
+        this.container.append(top, objective, this.standings.element, hint, toast, bottom);
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
 
@@ -317,6 +319,9 @@ export class GameScreen {
     updateHud(force = false) {
         const charter = this.game?.charter;
         if (!charter) return;
+        const contest = Boolean(charter.contest);
+        this.container.classList.toggle('is-contest', contest);
+        this.standings.update(charter.standings(), contest);
         const dayLimit = charter.dayLimit || 14;
         const day = charter.day || 1;
         const daysLeft = Math.max(0, dayLimit - day + 1);

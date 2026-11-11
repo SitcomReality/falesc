@@ -35,7 +35,8 @@ export class FalescGame {
     constructor() {
         this.settings = {
             mapSeed: Math.floor(Math.random() * 1000000),
-            mapSize: 'medium'
+            mapSize: 'medium',
+            mode: 'first-light'
         };
         this.charter = null;
         this.world = new World({
@@ -110,6 +111,7 @@ export class FalescGame {
         this.charter = new Charter({
             seed,
             mapSize: size,
+            mode: this.settings.mode || 'first-light',
             map: this.world.map,
             parentContainer: this.world.objectLayer
         });
@@ -131,6 +133,7 @@ export class FalescGame {
         if (!save?.charter) return false;
         this.settings.mapSeed = save.charter.seed;
         this.settings.mapSize = save.charter.mapSize;
+        this.settings.mode = save.charter.mode || 'first-light';
         this.initializeWorld(save.charter.seed, save.charter.mapSize);
         this.charter = Charter.fromSave({
             saved: save.charter,
@@ -174,6 +177,7 @@ export class FalescGame {
         this.crowd.clear();
         if (this.charter) {
             this.charter.services.clear();
+            this.charter.rivals.forEach((rival) => rival.services.clear());
             this.charter = null;
         }
         this.chatter?.clear();
@@ -186,7 +190,7 @@ export class FalescGame {
     syncViews() {
         if (!this.charter) return;
         this.crowd.sync();
-        this.world.rebuildPaths(this.charter.services.services);
+        this.world.rebuildPaths(this.charter.allServices);
         this.gameScreen.updateHud(true);
     }
 
@@ -623,6 +627,8 @@ export class FalescGame {
                     selectedBlueprint: game.selectedProgramId,
                     seed: game.settings.mapSeed,
                     mapSize: game.settings.mapSize,
+                    mode: game.charter?.mode || game.settings.mode,
+                    rivalCount: game.charter?.rivals?.length || 0,
                     characters: game.crowd.agents.size,
                     sectors: game.world.map?.sectors.length || 0,
                     services: services.map((service) => ({
@@ -640,6 +646,7 @@ export class FalescGame {
                         entrance: service.entrance
                     })),
                     buildings: services.length,
+                    allServices: game.charter?.allServices?.length || services.length,
                     buildingStates: services.map((service) => service.state),
                     buildingBlueprints: services.map((service) => service.programId),
                     residents: residents.map((resident) => ({
@@ -666,11 +673,16 @@ export class FalescGame {
                         complaints: report.complaints?.length || 0,
                         arrivals: report.arrivals || [],
                         departures: report.departures || [],
+                        patronageByChapter: report.patronageByChapter || {},
+                        devotionByChapter: report.devotionByChapter || {},
+                        chapters: report.chapters || [],
                         population: report.population,
                         quotes: report.quotes,
                         outcome: report.outcome || null
                     } : null,
                     ending: charter?.ending || null,
+                    chapters: charter?.standings?.() || [],
+                    devotionByChapter: charter?.devotionByChapter || {},
                     buildModalOpen: game.buildModal.isOpen,
                     bulletinOpen: game.bulletinModal.isOpen,
                     residentCardOpen: game.residentCard.isOpen,
@@ -750,9 +762,10 @@ export class FalescGame {
             serviceAt(sectorId, u, v) {
                 return game.charter?.services.serviceAt(sectorId, u, v) || null;
             },
-            startCharter(seed, size = 'medium') {
+            startCharter(seed, size = 'medium', mode = null) {
                 if (Number.isInteger(seed)) game.settings.mapSeed = seed;
                 if (size) game.settings.mapSize = size;
+                if (mode) game.settings.mode = mode;
                 return game.startCharter();
             }
         };

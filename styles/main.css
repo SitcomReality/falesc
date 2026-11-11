@@ -597,7 +597,7 @@ body > canvas {
 }
 
 .lobby__sheet {
-    padding: clamp(22px, 3.2vw, 42px);
+    padding: clamp(20px, 2.4vw, 34px);
     overflow: auto;
 }
 
@@ -613,7 +613,7 @@ body > canvas {
 
 .lobby__lede {
     max-width: 38ch;
-    margin: 0 0 26px;
+    margin: 0 0 16px;
     color: var(--ink-soft);
     font-size: 15px;
     line-height: 1.5;
@@ -622,7 +622,7 @@ body > canvas {
 .lobby__form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 14px;
 }
 
 .field {
@@ -2710,4 +2710,122 @@ body.has-modal > canvas {
 #minimap:focus-visible {
     outline: 3px solid var(--mint);
     outline-offset: 3px;
+}
+
+/* Contest standings ------------------------------------------------------ */
+
+.screen--hud.is-contest .objective-card {
+    display: none;
+}
+
+.standings-card {
+    position: absolute;
+    top: 100px;
+    left: 18px;
+    width: min(360px, calc(100vw - 36px));
+    padding: 12px 14px 10px;
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hard);
+    z-index: 3;
+    pointer-events: auto;
+    transform: rotate(-0.35deg);
+}
+
+.standings-card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.standings-card__head .kicker {
+    color: var(--wine);
+}
+
+.standings-card__goal {
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.standings-card__title {
+    margin: 4px 0 8px;
+    font-family: var(--display);
+    font-variation-settings: 'SOFT' 60, 'WONK' 1, 'opsz' 40;
+    font-size: 21px;
+    line-height: 1;
+}
+
+.standings-list {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.standings-row {
+    display: grid;
+    grid-template-columns: 16px 10px 1fr auto;
+    grid-template-areas:
+        'rank dot name hearts'
+        '. . visits visits';
+    align-items: center;
+    gap: 2px 7px;
+    padding: 5px 6px;
+    border-top: 1px solid rgba(33, 18, 37, 0.2);
+    font-size: 12px;
+}
+
+.standings-row__rank {
+    grid-area: rank;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 9px;
+}
+
+.standings-row__dot {
+    grid-area: dot;
+    width: 9px;
+    height: 9px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+}
+
+.standings-row__name {
+    grid-area: name;
+    font-weight: 600;
+}
+
+.standings-row__hearts {
+    grid-area: hearts;
+    font-family: var(--display);
+    font-size: 15px;
+}
+
+.standings-row__visits {
+    grid-area: visits;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.standings-row.is-player {
+    background: var(--mint-soft);
+    border-left: 3px solid var(--wine);
+}
+
+@media (max-width: 620px) {
+    .standings-card {
+        top: 124px;
+        left: 10px;
+        padding: 9px 11px;
+    }
+    .standings-card__title { font-size: 18px; }
 }

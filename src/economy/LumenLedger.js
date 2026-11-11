@@ -14,7 +14,7 @@ export class LumenLedger {
     }
 
     static projectedContributions(charter) {
-        return charter.activeResidents.reduce((sum, resident) => sum + LumenLedger.contributionFor(resident), 0);
+        return charter.playerResidents.reduce((sum, resident) => sum + LumenLedger.contributionFor(resident), 0);
     }
 
     static projectedUpkeep(charter) {

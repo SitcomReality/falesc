@@ -4,6 +4,11 @@ const SIZE_DATA = {
     large: { islands: 7, shards: 82, days: 16, label: 'A wide drift', note: 'Seven islets, a longer light.' }
 };
 
+const MODE_DATA = {
+    'first-light': { label: 'First Light', note: 'One chapter, one shard, a gentle tutorial.' },
+    contest: { label: 'The Contest', note: 'Share the shard with two rival chapters.' }
+};
+
 const ISLAND_PATHS = [
     'M70 92c22-28 63-34 91-14 22 16 21 43-3 55-29 14-70 10-88-11-12-14-9-22 0-30Z',
     'M224 58c30-18 70-7 80 20 8 22-11 39-38 42-32 4-62-12-60-33 1-11 8-22 18-29Z',
@@ -131,6 +136,21 @@ export class LobbyScreen {
         this.sizeSelect.addEventListener('change', (event) => this._setSize(event.target.value));
         sizeField.appendChild(this.sizeSelect);
 
+        // Mode ------------------------------------------------------------
+        const modeField = document.createElement('div');
+        modeField.className = 'field';
+        modeField.innerHTML = `
+            <label class="field__label" for="lobby-mode-field">Charter mode</label>
+            <select class="input" id="lobby-mode-field" data-testid="lobby-mode">
+                <option value="first-light">First Light — solo</option>
+                <option value="contest">The Contest — two rival chapters</option>
+            </select>
+            <span class="field__hint" data-role="mode-hint">One chapter, one shard, a gentle tutorial.</span>
+        `;
+        this.modeSelect = modeField.querySelector('[data-testid=lobby-mode]');
+        this.modeHint = modeField.querySelector('[data-role=mode-hint]');
+        this.modeSelect.addEventListener('change', () => this._setMode(this.modeSelect.value));
+
         const actions = document.createElement('div');
         actions.className = 'lobby__actions';
 
@@ -150,7 +170,7 @@ export class LobbyScreen {
         actions.append(startBtn, backBtn);
         backBtn.addEventListener('click', () => this.gsm.setState('MENU'));
 
-        form.append(seedField, sizeField, actions);
+        form.append(seedField, sizeField, modeField, actions);
         sheet.appendChild(form);
 
         const chart = document.createElement('aside');
@@ -181,6 +201,14 @@ export class LobbyScreen {
         this.container.style.display = 'none';
 
         this._setSize(this.game.settings.mapSize, false);
+    }
+
+    _setMode(value) {
+        const mode = MODE_DATA[value] ? value : 'first-light';
+        this.game.settings.mode = mode;
+        if (this.modeSelect) this.modeSelect.value = mode;
+        if (this.modeHint) this.modeHint.textContent = MODE_DATA[mode].note;
+        return MODE_DATA[mode];
     }
 
     _setSize(value) {
@@ -236,6 +264,7 @@ export class LobbyScreen {
         this.container.style.display = 'flex';
         this.seedInput.value = this.game.settings.mapSeed;
         this._setSize(this.game.settings.mapSize);
+        this._setMode(this.game.settings.mode || 'first-light');
     }
 
     hide() {

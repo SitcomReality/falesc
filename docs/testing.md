@@ -161,6 +161,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `engine-regression.mjs` | During playback, visible residents stay on the home shard; clicking the survey chart moves the camera; the camera clamps at both extremes; leaving during `DAY` lands in `MENU` with no late transition. |
 | `map-regression.mjs` | 72 maps (24 seeds × 3 sizes) have the expected sector counts, non-overlapping island AABBs, all shapes inside the world rectangle, and deterministic layouts. |
 | `demolition.mjs` | Clicking an occupied plot opens the service record; dismantling a 4-lumen Canteen refunds 2, removes it, and frees the plot. |
+| `contest.mjs` | Lobby Contest mode creates two rival chapters and three opening services; residents visit rival doors; standings/patronage/Devotion appear; a player Canteen earns visits; rival moves occur; the contest restores after reload and crowns the most-beloved chapter at the limit. |
 | `overlay-stack.mjs` | Nested bulletin + resident modals keep the body lock and HUD `inert` until the stack is empty; focus moves into the top modal. |
 | `report-save.mjs` | The report is saved in `REPORT`; reload + Continue reopens the same report and Begin Day advances from it without replaying the day. |
 | `departure.mjs` | Removing all beds leaves six residents homeless; one night is a warning, the second removes every resident and agent, empties the population, and records a defeat. |

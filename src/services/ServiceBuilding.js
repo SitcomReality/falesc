@@ -13,6 +13,7 @@ let nextServiceNumber = 1;
 export class ServiceBuilding {
     constructor({
         id = null,
+        chapter = null,
         programId,
         program,
         sectorId,
@@ -31,7 +32,12 @@ export class ServiceBuilding {
         closed = false,
         constructionDays = null
     }) {
-        this.id = id || `s${nextServiceNumber++}`;
+        this.id = id || `client-s${nextServiceNumber++}`;
+        this.chapter = chapter;
+        this.chapterId = chapter?.id || 'player';
+        this.chapterName = chapter?.name || 'Home Chapter';
+        this.chapterColour = chapter?.colour || '#FF6B5E';
+        this.isPlayerService = chapter?.isPlayer ?? true;
         this.programId = programId;
         this.program = program;
         this.sectorId = sectorId;
@@ -57,7 +63,8 @@ export class ServiceBuilding {
 
         this.container = new PIXI.Container();
         this.graphics = new PIXI.Graphics();
-        this.container.addChild(this.graphics);
+        this.bannerG = new PIXI.Graphics();
+        this.container.addChild(this.graphics, this.bannerG);
         this.container.sortableChildren = false;
         this.pulseTime = 0;
         this.sector = null;
@@ -118,7 +125,24 @@ export class ServiceBuilding {
 
     refreshGraphics() {
         BuildingRenderer.draw(this.graphics, this);
+        this.drawChapterBanner();
         this.container.alpha = this.closed ? 0.62 : this.state === 'PENDING' ? 0.72 : 1;
+    }
+
+    drawChapterBanner() {
+        this.bannerG.clear();
+        const colour = Number.parseInt(String(this.chapterColour).replace('#', ''), 16) || 0xff6b5e;
+        const x = 72;
+        this.bannerG.lineStyle(3, 0x211225, 0.95);
+        this.bannerG.moveTo(x, -4);
+        this.bannerG.lineTo(x, -150);
+        this.bannerG.beginFill(colour, 1);
+        this.bannerG.lineStyle(2, 0x211225, 1);
+        this.bannerG.moveTo(x + 1, -148);
+        this.bannerG.lineTo(x + 36, -138);
+        this.bannerG.lineTo(x + 1, -112);
+        this.bannerG.closePath();
+        this.bannerG.endFill();
     }
 
     promote() {
@@ -167,6 +191,7 @@ export class ServiceBuilding {
     toJSON() {
         return {
             id: this.id,
+            chapterId: this.chapterId,
             programId: this.programId,
             sectorId: this.sectorId,
             u: this.u,

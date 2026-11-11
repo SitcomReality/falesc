@@ -60,7 +60,8 @@ export const BALANCE = {
     end: {
         minPopulation: 4,
         comfortableFlourishing: 62,
-        firstLightPopulation: 12
+        firstLightPopulation: 12,
+        sharedSurvival: 25
     },
 
     playback: {

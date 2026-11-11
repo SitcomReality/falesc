@@ -28,9 +28,9 @@ export class ReportScreen {
             ? `Charter record · Day ${report.day}`
             : `Evening report · Day ${String(report.day).padStart(2, '0')}`;
         const visits = report.serviceVisits || {};
-        const serviceRows = this.game.charter.services.services.map((service) => `
+        const serviceRows = this.game.charter.allServices.map((service) => `
             <li>
-                <span>${escapeHtml(service.name)}</span>
+                <span>${escapeHtml(service.chapter?.isPlayer ? service.name : `${service.chapterName}'s ${service.name}`)}</span>
                 <span>${visits[service.id] || 0} visits</span>
             </li>
         `).join('');
@@ -47,6 +47,9 @@ export class ReportScreen {
         const quotes = report.quotes?.length
             ? report.quotes.map((quote) => `<blockquote>“${escapeHtml(quote.text)}”<cite>${escapeHtml(quote.resident)}</cite></blockquote>`).join('')
             : '<blockquote>“A quiet day.”<cite>The square</cite></blockquote>';
+        const standings = report.chapters?.length > 1
+            ? `<h2>Standings</h2><ul class="report__list report__list--services">${[...report.chapters].sort((a, b) => b.devotion - a.devotion).map((chapter) => `<li><span>${escapeHtml(chapter.name)}${chapter.isPlayer ? ' (you)' : ''}</span><span>${chapter.devotion.toFixed(1)} ♥ · ${chapter.visits} visits</span></li>`).join('')}</ul>`
+            : '';
         const arrivals = report.arrivals?.length
             ? `<h2>Arrivals</h2><ul class="report__list report__list--services">${report.arrivals.map((arrival) => `<li><span>${escapeHtml(arrival.name)}</span><span>new bed</span></li>`).join('')}</ul>`
             : '';
@@ -85,6 +88,7 @@ export class ReportScreen {
                     <section>
                         <h2>Word of mouth</h2>
                         <div class="report__quotes">${quotes}</div>
+                        ${standings}
                         ${arrivals}
                         ${departures}
                         <h2>Complaints</h2>

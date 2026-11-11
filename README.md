@@ -7,8 +7,9 @@ enough for the chapter to flourish.
 
 This build is the **First Light vertical slice**. One playable home shard, four
 needs, four services, a paused planning day, a deterministic playback, and an
-evening broadsheet. The shared commons, rival chapters and the Confluence vote
-are the design target — not this build.
+evening broadsheet. A **Contest preview** adds two rival chapters and shared
+residents on the same shard; the full shared commons, rival economy and the
+Confluence vote are the design target beyond that.
 
 Built with vanilla ES modules and [Pixi.js](https://pixijs.com/) 7. There is no
 build step: `index.html` loads `src/App.js`, which starts `src/FalescGame.js`,
@@ -18,8 +19,10 @@ the game makes no network requests at runtime.
 > **Status:** the First Light slice is playable end to end: plan, build, watch
 > the day, read the report, repeat. Residents arrive, leave when a need or a bed
 > goes unmet for days, and can empty the chapter. Balance is generous and not yet
-> tuned; only the home shard is playable. Rivals, building layers, auctions and
-> multiplayer are not implemented. See [docs/known-issues.md](docs/known-issues.md).
+> tuned; only the home shard is playable. A two-rival Contest preview is
+> available, but rival upkeep, housing competition and the Confluence vote are
+> not implemented. Building layers, auctions and multiplayer are also absent.
+> See [docs/known-issues.md](docs/known-issues.md).
 
 ## Run it locally
 
@@ -37,9 +40,10 @@ so any static file server works, but ES modules require `http://`, not `file://`
 
 ## How to play
 
-- Start a charter from the lobby. Day 1 gives you **six Tidelanders**, a fixed
-  **Welcome Post** with six beds, **10 lumen**, **two works**, and the
-  **Canteen** armed.
+- Start a charter from the lobby and choose **First Light** (solo) or
+  **The Contest** (two AI rivals on the same shard). Day 1 gives you six
+  Tidelanders, a fixed Welcome Post with six beds, 10 lumen, two works, and the
+  Canteen armed.
 - Read the morning bulletin. Arm a service with `1`–`4` (or click a dock card),
   then click a free plot on the home shard and name the place.
 - A service costs lumen and one work. It is `PENDING` for a day and opens at the
@@ -78,6 +82,7 @@ webgame_smoke --scenario scripts/scenarios/persistence.mjs
 webgame_smoke --scenario scripts/scenarios/departure.mjs
 webgame_smoke --scenario scripts/scenarios/overlay-stack.mjs
 webgame_smoke --scenario scripts/scenarios/report-save.mjs
+webgame_smoke --scenario scripts/scenarios/contest.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```
 
@@ -107,7 +112,10 @@ and works, wellbeing-driven lumen with upkeep and closures, deterministic day
 playback, an evening report, Devotion and Flourishing, victory/defeat, and
 local save v2.
 
-Not yet present: rivals, standings, the Confluence vote, building layers or
-retrofit, auctions, audio, multiplayer, or a keyboard build cursor. The
-Commons Beacon silhouette exists as endgame art but is not buildable. See
-[docs/known-issues.md](docs/known-issues.md).
+The **Contest preview** is present: two rival chapters build services, shared
+residents choose between them, Devotion standings and patronage appear in the
+HUD and report, and the day limit crowns the most-beloved chapter. Still absent:
+rival upkeep/economy and housing competition, the full shared commons, the
+Confluence vote, building layers or retrofit, auctions, audio, multiplayer, or a
+keyboard build cursor. The Commons Beacon silhouette exists as endgame art but
+is not buildable. See [docs/known-issues.md](docs/known-issues.md).

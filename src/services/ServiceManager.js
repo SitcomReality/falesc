@@ -8,11 +8,13 @@ import { ServiceBuilding } from './ServiceBuilding.js';
  * updates it; the Pixi container is kept beside the model for a cheap render.
  */
 export class ServiceManager {
-    constructor({ map = null, parentContainer = null } = {}) {
+    constructor({ map = null, parentContainer = null, chapter = null, occupancy = null, idPrefix = 's' } = {}) {
         this.map = map;
         this.parentContainer = parentContainer;
+        this.chapter = chapter;
+        this.occupancy = occupancy || new Map();
+        this.idPrefix = idPrefix;
         this.services = [];
-        this.occupancy = new Map();
         this._nextNumber = 1;
     }
 
@@ -66,7 +68,8 @@ export class ServiceManager {
         if (!check.ok) return check;
 
         const service = new ServiceBuilding({
-            id: `s${this._nextNumber++}`,
+            id: `${this.idPrefix}-s${this._nextNumber++}`,
+            chapter: this.chapter,
             programId,
             program,
             sectorId,
@@ -85,7 +88,7 @@ export class ServiceManager {
     }
 
     register(service) {
-        const idMatch = /^s(\d+)$/.exec(service.id);
+        const idMatch = /-s(\d+)$/.exec(service.id);
         if (idMatch) {
             this._nextNumber = Math.max(this._nextNumber, Number(idMatch[1]) + 1);
         }
@@ -191,11 +194,18 @@ export class ServiceManager {
 
     clear() {
         for (const service of this.services) {
+            for (const cell of service.cells) {
+                const key = cellKey(service.sectorId, cell.u, cell.v);
+                if (this.occupancy.get(key) === service) this.occupancy.delete(key);
+            }
+            if (service.entrance) {
+                const key = cellKey(service.sectorId, service.entrance.u, service.entrance.v);
+                if (this.occupancy.get(key) === service) this.occupancy.delete(key);
+            }
             if (service.container?.parent) service.container.parent.removeChild(service.container);
             service.destroy();
         }
         this.services = [];
-        this.occupancy.clear();
         this._nextNumber = 1;
     }
 
@@ -207,6 +217,7 @@ export class ServiceManager {
             if (this.isCellOccupied(entry.sectorId, entry.u, entry.v)) continue;
             const service = new ServiceBuilding({
                 id: entry.id,
+                chapter: this.chapter,
                 programId: entry.programId,
                 program,
                 sectorId: entry.sectorId,

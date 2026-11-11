@@ -39,8 +39,8 @@ no sea, beach or open-air planting. `npm run check` and the smoke test pass.
 
 **Remaining before Phase 1 is complete:**
 
-- **Tune the balance.** The current economy is generous and the goal is
-  reachable several days early; the budget does not yet force hard care choices.
+- **Tune the balance.** Early victory removes the long surplus tail, but the
+  opening four days still do not force a hard care choice.
 - **Departures are implemented.** Homelessness and chronic 92+ needs remove a
   resident after the threshold, and the population defeat is reachable. More
   social/word-of-mouth departure paths remain a later layer.
@@ -49,10 +49,15 @@ no sea, beach or open-air planting. `npm run check` and the smoke test pass.
 - Decide after that pass whether the four services need more differentiation
   before rivals, or whether the resident loop is strong enough to move on.
 
-**Not started:** Phase 2 (rivals, standings, shared commons), Phase 3 (layers,
-modules, finishes, policy, retrofit), Phase 4 (scenarios, Confluence vote,
-stewardship), Phase 5 (multiplayer, audio, accessibility polish). There are no
-rivals, standings, Confluence vote or building layers in the build today.
+**Phase 2 preview is now in the build:** two AI rival chapters, doctrine build
+moves, shared services/occupancy, shared residents, Devotion standings,
+patronage and a most-beloved-chapter end at the day limit. Rival upkeep/economy,
+rival housing competition, the survey patronage overlay and the Confluence vote
+remain.
+
+**Not started:** the rest of Phase 2, Phase 3 (layers, modules, finishes,
+policy, retrofit), Phase 4 (scenarios, Confluence vote, stewardship), Phase 5
+(multiplayer, audio, accessibility polish).
 
 ---
 

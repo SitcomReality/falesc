@@ -18,7 +18,7 @@ export class DaySimulator {
     constructor(charter) {
         this.charter = charter;
         this.rng = new SeededRandom(charter.seed + charter.day * 104729 + 17);
-        this.navigator = new IslandNavigator(charter.homeSector, charter.services.services);
+        this.navigator = new IslandNavigator(charter.homeSector, charter.allServices);
         this.events = [];
         this.complaints = [];
         this.complaintKeys = new Set();
@@ -36,7 +36,7 @@ export class DaySimulator {
         const needBefore = new Map();
         for (const resident of charter.activeResidents) {
             needBefore.set(resident.id, { ...resident.needs });
-            this.affinityBefore.set(resident.id, resident.affinity.player || 0);
+            this.affinityBefore.set(resident.id, { ...resident.affinity });
         }
 
         const loads = new Map();
@@ -64,7 +64,7 @@ export class DaySimulator {
         const report = this.buildReport(needBefore);
         LumenLedger.resolveDay(charter, report);
 
-        for (const service of charter.services.services) {
+        for (const service of charter.allServices) {
             service.resetDaily();
         }
         this.charter.evaluateEnding(report);
@@ -80,10 +80,10 @@ export class DaySimulator {
     }
 
     applyNightRest(resident) {
-        const home = this.charter.services.housingFor(resident);
+        const home = this.charter.homeFor(resident);
         if (home) {
             resident.adjustNeed('rest', -BALANCE.housing.restRecovery);
-            resident.addAffinity(BALANCE.housing.housedAffinity);
+            resident.addAffinity(BALANCE.housing.housedAffinity, home.chapterId);
             resident.clearUnmetDay('rest');
             resident.resetHomelessDays();
         } else {
@@ -96,8 +96,8 @@ export class DaySimulator {
     chooseAndSchedule(resident, phase, needBefore, loads) {
         if (!resident.active) return;
         const orderedNeeds = [...NEEDS].sort((a, b) => resident.needs[b.id] - resident.needs[a.id]);
-        const available = this.charter.services.activeServices
-            .filter((service) => service.entrance && service.program && isOpenAt(service.program, phase.id));
+        const available = this.charter.allServices
+            .filter((service) => service.state === 'ACTIVE' && !service.closed && service.entrance && service.program && isOpenAt(service.program, phase.id));
         let choice = null;
         let blockedByQueue = null;
 
@@ -152,12 +152,14 @@ export class DaySimulator {
             day: this.charter.day,
             phase: phase.id,
             serviceId: service.id,
-            serviceName: service.name,
+            serviceName: this.charter.serviceLabel(service),
+            chapterId: service.chapterId,
+            chapterName: service.chapter?.name || 'Home Chapter',
             needId: need.id,
             reason
         });
         this.complain(resident, need, reason);
-        resident.addAffinity(-0.03);
+        resident.addAffinity(-0.03, service.chapterId);
     }
 
     scoreService(resident, service, need, urgency, phase) {
@@ -173,13 +175,14 @@ export class DaySimulator {
         const load = this.phaseLoad.get(loadKey) || 0;
         const availability = load < service.capacity ? 1 : BALANCE.services.queuePenalty;
         const familiarity = 1 + Math.min(this.residentVisits(resident, service.id), 4) * 0.012;
+        const chapterBond = 1 + Math.min(resident.getAffinity(service.chapterId), 5) * 0.02;
         const novelty = this.rng.next() * 0.06 + 0.97;
         const rhythm = rhythmRise(resident.traits.rhythm, phase.id);
-        return urgency * match * quality * vibe * standards * proximity * availability * familiarity * novelty * rhythm;
+        return urgency * match * quality * vibe * standards * proximity * availability * familiarity * chapterBond * novelty * rhythm;
     }
 
     distanceToService(resident, service) {
-        const home = this.charter.services.housingFor(resident);
+        const home = this.charter.homeFor(resident);
         const origin = home?.entrance || service.entrance;
         if (!origin || !service.entrance) return 4;
         return Math.abs(origin.u - service.entrance.u) + Math.abs(origin.v - service.entrance.v);
@@ -238,7 +241,7 @@ export class DaySimulator {
         resident.adjustNeed(need.id, -effect);
         service.recordVisit(BALANCE.services.serviceHeart);
         const urgencyBonus = needValue >= 70 ? BALANCE.services.urgentVisitAffinity : 0;
-        resident.addAffinity(BALANCE.services.visitAffinity + urgencyBonus);
+        resident.addAffinity(BALANCE.services.visitAffinity + urgencyBonus, service.chapterId);
         resident.clearUnmetDay(need.id);
 
         const reason = this.buildReason(resident, service, need, queueIndex, phase.id);
@@ -246,7 +249,9 @@ export class DaySimulator {
             day: this.charter.day,
             phase: phase.id,
             serviceId: service.id,
-            serviceName: service.name,
+            serviceName: this.charter.serviceLabel(service),
+            chapterId: service.chapterId,
+            chapterName: service.chapter?.name || 'Home Chapter',
             needId: need.id,
             reason
         });
@@ -258,7 +263,9 @@ export class DaySimulator {
             residentId: resident.id,
             residentName: resident.name,
             serviceId: service.id,
-            serviceName: service.name,
+            serviceName: this.charter.serviceLabel(service),
+            chapterId: service.chapterId,
+            chapterName: service.chapter?.name || 'Home Chapter',
             needId: need.id,
             phase: phase.id,
             phaseIndex,
@@ -285,7 +292,7 @@ export class DaySimulator {
     }
 
     homeCell(resident) {
-        const home = this.charter.services.housingFor(resident);
+        const home = this.charter.homeFor(resident);
         if (home) return home.entrance;
         return this.charter.commonsCell;
     }
@@ -296,8 +303,9 @@ export class DaySimulator {
 
     buildReason(resident, service, need, queueIndex, phaseId) {
         const fragments = [];
+        const label = this.charter.serviceLabel(service);
         if (need.id === service.program.need) fragments.push(NEED_BY_ID[need.id].reason);
-        else fragments.push(`the ${service.name} had ${NEED_BY_ID[need.id].short.toLowerCase()} too`);
+        else fragments.push(`I found ${NEED_BY_ID[need.id].short.toLowerCase()} there too`);
         const temperament = resident.traits.temperament;
         if (temperament === 'cosy' && service.program.vibe === 'cosy') fragments.push('it is cosy');
         else if (temperament === 'social' && service.program.vibe === 'efficient') fragments.push('it is busy in a good way');
@@ -308,19 +316,19 @@ export class DaySimulator {
         else fragments.push('I did not mind the wait');
         if (this.residentVisits(resident, service.id) >= 2) fragments.push('I come here often');
         if (phaseId === 'evening') fragments.push('it was open late');
-        return `${service.name} — ${fragments.slice(0, 3).join(', ')}.`;
+        return `${label} — ${fragments.slice(0, 3).join(', ')}.`;
     }
 
     missingServiceReason(resident, need, phase) {
-        const all = this.charter.services.services.filter((service) => servesNeed(service.program, need.id));
+        const all = this.charter.allServices.filter((service) => servesNeed(service.program, need.id));
         const openNow = all.filter((service) => service.state === 'ACTIVE' && !service.closed && isOpenAt(service.program, phase.id));
         const pending = all.filter((service) => service.state === 'PENDING');
         const closed = all.filter((service) => service.closed);
         const later = all.filter((service) => service.state === 'ACTIVE' && !service.closed && !isOpenAt(service.program, phase.id));
-        if (openNow.length > 0) return `The ${openNow[0].name} was full when I needed ${need.short.toLowerCase()}.`;
-        if (pending.length > 0) return `The ${pending[0].name} opens tomorrow. I waited at the ${phase.name.toLowerCase()} window.`;
-        if (closed.length > 0) return `The ${closed[0].name} was closed when I needed ${need.short.toLowerCase()}.`;
-        if (later.length > 0) return `The ${later[0].name} was not open yet when I needed ${need.short.toLowerCase()}.`;
+        if (openNow.length > 0) return `${this.charter.serviceLabel(openNow[0])} was full when I needed ${need.short.toLowerCase()}.`;
+        if (pending.length > 0) return `${this.charter.serviceLabel(pending[0])} opens tomorrow. I waited at the ${phase.name.toLowerCase()} window.`;
+        if (closed.length > 0) return `${this.charter.serviceLabel(closed[0])} was closed when I needed ${need.short.toLowerCase()}.`;
+        if (later.length > 0) return `${this.charter.serviceLabel(later[0])} was not open yet when I needed ${need.short.toLowerCase()}.`;
         return `No one serves ${need.short.toLowerCase()} yet. I waited at the ${phase.name.toLowerCase()} window.`;
     }
 
@@ -383,13 +391,34 @@ export class DaySimulator {
             ? Math.round((residents.reduce((sum, resident) => sum + resident.wellbeing, 0) / residents.length) * 10) / 10
             : 0;
         charter.flourishing = wellbeing;
-        charter.devotion = Math.round(residents.reduce((sum, resident) => sum + (resident.affinity.player || 0), 0) * 10) / 10;
+        charter.devotion = charter.devotionByChapter.player || 0;
+        const devotionByChapter = charter.devotionByChapter;
+        const patronageByChapter = Object.fromEntries(charter.chapters.map((chapter) => [chapter.id, 0]));
+        for (const service of charter.allServices) {
+            const visits = this.serviceVisits.get(service.id) || service.dailyVisits || 0;
+            patronageByChapter[service.chapterId] = (patronageByChapter[service.chapterId] || 0) + visits;
+        }
+        const chapters = charter.chapters.map((chapter) => ({
+            id: chapter.id,
+            name: chapter.name,
+            colour: chapter.colour,
+            isPlayer: Boolean(chapter.isPlayer),
+            devotion: devotionByChapter[chapter.id] || 0,
+            visits: patronageByChapter[chapter.id] || 0
+        }));
 
         const visits = this.events.length;
-        const hearts = Math.round(residents.reduce((sum, resident) => sum + (resident.affinity.player || 0), 0) * 10) / 10;
-        const heartsGained = Math.round(residents.reduce((sum, resident) => sum + Math.max(0, (resident.affinity.player || 0) - (this.affinityBefore.get(resident.id) || 0)), 0) * 10) / 10;
-        const departedAffinity = this.departures.reduce((sum, departure) => sum + (this.affinityBefore.get(departure.id) || 0), 0);
-        const heartsLost = Math.round((residents.reduce((sum, resident) => sum + Math.max(0, (this.affinityBefore.get(resident.id) || 0) - (resident.affinity.player || 0)), 0) + departedAffinity) * 10) / 10;
+        const affinityTotal = (affinity) => Object.values(affinity || {}).reduce((sum, value) => sum + value, 0);
+        const hearts = Math.round(residents.reduce((sum, resident) => sum + affinityTotal(resident.affinity), 0) * 10) / 10;
+        const heartsGained = Math.round(residents.reduce((sum, resident) => {
+            const before = this.affinityBefore.get(resident.id) || {};
+            return sum + Object.entries(resident.affinity).reduce((delta, [chapterId, value]) => delta + Math.max(0, value - (before[chapterId] || 0)), 0);
+        }, 0) * 10) / 10;
+        const departedAffinity = this.departures.reduce((sum, departure) => sum + affinityTotal(this.affinityBefore.get(departure.id)), 0);
+        const heartsLost = Math.round((residents.reduce((sum, resident) => {
+            const before = this.affinityBefore.get(resident.id) || {};
+            return sum + Object.entries(before).reduce((delta, [chapterId, value]) => delta + Math.max(0, value - (resident.affinity[chapterId] || 0)), 0);
+        }, 0) + departedAffinity) * 10) / 10;
         const serviceVisits = {};
         for (const [serviceId, count] of this.serviceVisits) serviceVisits[serviceId] = count;
 
@@ -410,6 +439,9 @@ export class DaySimulator {
             wellbeing,
             flourishing: wellbeing,
             devotion: charter.devotion,
+            devotionByChapter,
+            patronageByChapter,
+            chapters,
             population: charter.population,
             housingCapacity: charter.housingCapacity,
             contributions: 0,

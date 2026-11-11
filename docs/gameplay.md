@@ -1,10 +1,11 @@
 # Gameplay and controls
 
-> **Status note:** this describes the **First Light vertical slice** as built
-> today. It is no longer the Prism Tide prototype. The wider design — rivals,
-> standings, the Confluence vote, building layers — is in
-> [design-refinement.md](design-refinement.md) and [design/](design/).
-> Gameplay facts here are the current build; the design target is elsewhere.
+> **Status note:** this describes the **First Light vertical slice** and the
+> **Contest preview** as built today. It is no longer the Prism Tide prototype.
+> The wider design — full rival economy, shared commons, the Confluence vote,
+> building layers — is in [design-refinement.md](design-refinement.md) and
+> [design/](design/). Gameplay facts here are the current build; the design
+> target is elsewhere.
 
 FALESC: The Confluence is an isometric city-builder about caring for a small
 chapter of Tidelanders on a floating shard. You have a day limit, a shared lumen
@@ -56,6 +57,23 @@ A new charter starts on **Day 1** with:
 The rest of the roster waits for spare beds and a flourishing of at least 20.
 The day limit is set by map size: **12** days on small, **14** on medium, **16**
 on large.
+
+## Charter modes
+
+The lobby offers two modes:
+
+| Mode | What it is |
+| --- | --- |
+| **First Light** | The solo tutorial slice: one chapter, one shard, the 12-resident / flourishing-62 goal. |
+| **The Contest** | A two-rival preview on the same shard. **The Gardener** and **The Host** own services and a finite construction budget; residents choose between all chapters' doors. The contest ends at the day limit, when the most-beloved chapter wins. |
+
+In Contest mode the First Light objective card is replaced by a live **Devotion**
+standings card. Rival services carry a chapter-coloured pennant, appear in the
+bulletin's rival move, and cannot be dismantled by the player. Rivals build one
+service per day from their doctrine; their services count for visits and
+patronage, but rival upkeep, rival housing and rival contribution economies are
+not implemented yet. The shared residents all live at the player's Welcome Post
+in this preview.
 
 ## Planning
 
@@ -219,11 +237,14 @@ The report is the day's story as a broadsheet:
 
 ## Victory and defeat
 
-- **Victory:** at the end of any day, the chapter has at least **12 housed
-  residents** and a **Flourishing of 62 or more**. The charter closes
+- **First Light victory:** at the end of any day, the chapter has at least **12
+  housed residents** and a **Flourishing of 62 or more**. The charter closes
   successfully immediately; the day limit is the deadline, not a survival timer.
-- **Defeat:** the population falls below **4** at the end of a day, or the day
-  limit arrives without both goals.
+- **First Light defeat:** the population falls below **4** at the end of a day,
+  or the day limit arrives without both goals.
+- **Contest:** at the day limit, the chapter with the most **Devotion** wins. If
+  shared flourishing is below the survival line, nobody wins. The preview does
+  not run the full Confluence festival/vote yet.
 - **Abandon:** the charter menu asks for confirmation, then ends the run early as
   a voluntary departure and clears the save.
 
@@ -309,8 +330,9 @@ yet.
 - **No building layers, modules, finishes, policies or retrofit.** The model
   carries default finish/policy values for future use; the player cannot choose
   them.
-- **No rivals, standings, patronage or Confluence vote.** The bulletin has no
-  rival move.
+- **The Contest is a preview.** Rivals build services and compete for visits
+  and Devotion, but they do not pay upkeep, own housing, or manage their own
+  lumen contributions. The full Confluence vote is not implemented.
 - **No auctions, stewardship, petitions or multiplayer.** The Multiplayer button
   is a disabled placeholder.
 - **No audio.**

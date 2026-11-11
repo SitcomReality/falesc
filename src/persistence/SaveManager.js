@@ -42,6 +42,10 @@ export class SaveManager {
                     && typeof resident.name === 'string'
                     && resident.traits
                     && resident.needs)
+                && (!charter.rivals || (Array.isArray(charter.rivals) && charter.rivals.every((rival) => rival
+                    && typeof rival.id === 'string'
+                    && typeof rival.name === 'string'
+                    && Array.isArray(rival.services))))
                 && charter.services.every((service) => service
                     && typeof service.programId === 'string'
                     && Number.isInteger(service.sectorId)

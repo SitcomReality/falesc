@@ -45,8 +45,11 @@ src/
   character/
     CharacterAnimation.js    IDLE/WALK/RUN/BEND animation
     CharacterRenderer.js     static geometry, limb posing
+  chapters/
+    RivalChapter.js          rival identity, budget, works and services
+    RivalAI.js               doctrine build order and opening services
   charter/
-    Charter.js               run model: day, lumen, works, roster, services, ending
+    Charter.js               run model: day, player chapter, rivals, roster, services, ending
   controls/
     InputManager.js          key bindings and modal lock
   design/
@@ -91,7 +94,8 @@ src/
     ScreenStateMachine.js    screen registry and phase changes
   ui/
     BuildModal.js, ServiceCardModal.js, BulletinModal.js,
-    OverlayManager.js, ResidentCardModal.js, Minimap.js, ChatterManager.js, icons.js
+    OverlayManager.js, StandingsCard.js, ResidentCardModal.js, Minimap.js,
+    ChatterManager.js, icons.js
   world/
     World.js                 Pixi app, layers, camera/input, map and minerals
 ```
@@ -214,18 +218,24 @@ with interactive panels re-enabling it, so the canvas stays pannable.
 | `services` | `ServiceManager` owning every service |
 | `flourishing` | Average active-resident wellbeing |
 | `devotion` | Sum of resident affinity with the player |
+| `mode` | `first-light` or `contest` |
+| `playerChapter`, `rivals` | The player chapter descriptor and rival chapters |
+| `occupancy` | Shared shard occupancy across every chapter |
 | `lastReport`, `history` | The evening report and prior reports |
 | `bulletin` | The current morning news |
 | `ending` | `{ outcome, day, title, message }` once decided |
 
 Construction-time flow: create the seeded roster, place the fixed **Welcome
-Post** near the grid centre (`housing`, capacity 6, `ACTIVE`, `fixed`), assign
-homes, refresh Flourishing/Devotion, and build the first bulletin. A roster
-resident is active only for the first six; the rest wait for spare beds.
+Post** near the grid centre (`housing`, capacity 6, `ACTIVE`, `fixed`); in
+`contest` mode create The Gardener and The Host with one signature active
+service each; assign homes, refresh Flourishing/Devotion, and build the first
+bulletin. A roster resident is active only for the first six; the rest wait for
+spare beds.
 
-Key getters: `activeResidents`, `population`, `housingCapacity`, `spareBeds`,
-`wellbeing`, `projectedContributions`, `projectedUpkeep`, `projectedNet`,
-`firstLightProgress`, `goalsMet`.
+Key getters: `activeResidents`, `playerResidents`, `allServices`, `chapters`,
+`population`, `housingCapacity`, `spareBeds`, `wellbeing`,
+`projectedContributions`, `projectedUpkeep`, `projectedNet`,
+`devotionByChapter`, `standings`, `firstLightProgress`, `goalsMet`.
 
 Key commands:
 
@@ -233,19 +243,42 @@ Key commands:
 - `build()` — placement, spend lumen and one work, assign homes, refresh.
 - `dismantle()` / `reopen()` — half-cost refund / shortfall recovery.
 - `openDay()` — run `DaySimulator`, store report, refresh derived values.
-- `beginNextDay()` — increment day, reset works, promote construction, reset
-  daily service state, assign homes, add arrivals, remember `pendingArrivals`,
-  build the next bulletin.
+- `beginNextDay()` — increment day, reset player/rival works, promote
+  construction, reset daily service state, assign homes, add arrivals, let
+  `RivalAI` make one move per rival, remember `pendingArrivals`, and build the
+  next bulletin.
 - `addArrivals()` — if flourishing ≥ 20 and beds are spare, activate up to two
   waiting residents. Residents who already departed are never re-admitted.
-- `evaluateEnding(report)` — population < 4 (including departures) is defeat;
-  meeting 12 housed residents + flourishing 62 is immediate victory; the day
-  limit without both goals is defeat. Writes `report.outcome`/`message`.
+- `evaluateEnding(report)` — First Light: population < 4 is defeat, meeting 12
+  housed + flourishing 62 is immediate victory, the limit without both is
+  defeat. Contest: at the limit, most Devotion wins unless shared flourishing is
+  below the survival line. Writes `report.outcome`/`message`.
 - `serialize()` / `restore()` — save v2 model data.
 
 The charter does not own DOM or the Pixi scene. `ServiceManager` creates
 `ServiceBuilding` objects, which do own their Pixi containers; the crowd and
 screens are attached by `FalescGame`.
+
+### Contest preview
+
+In `contest` mode `Charter.createRivals()` builds `RivalChapter` instances for
+The Gardener and The Host. Each rival has its own `ServiceManager`, a finite
+construction budget and one work per day. `RivalAI` seeds one signature active
+service and then, at the start of each planning day, attempts one doctrine-
+ordered build. Rival and player services share the same occupancy map, so their
+footprints and doors cannot overlap.
+
+The shared residents all live at the player's Welcome Post in this preview.
+Their `affinity` map gains hearts for whichever chapter owns the service they
+visit; housing grants affinity to the home chapter. `DaySimulator` offers every
+active service from `charter.allServices`, labels rival doors with their chapter
+name, and writes `devotionByChapter`, `patronageByChapter` and a chapter summary
+into the report. The HUD's `StandingsCard` and the report use those numbers.
+
+The preview deliberately stops short of a rival economy: rivals pay construction
+costs but not upkeep, do not own housing and do not receive wellbeing
+contributions. The end at the day limit compares Devotion; shared Flourishing
+below the survival line produces a no-winner defeat.
 
 ## 5. Day simulation and playback
 
@@ -336,7 +369,7 @@ paletteSeed, state, position
 
 Derived: `wellbeing` (`100 − average urgency`), `favouriteNeed`, `traitSummary`,
 `isHomeless`. `recordChoice()` keeps the last choice and up to eight recent
-visits (the card currently shows only the last); `addAffinity()` clamps to 0–5;
+visits (the card currently shows only the last); `addAffinity(amount, chapterId)` clamps per chapter;
 `updateUnmetDays()` is called once at dusk; `recordHomelessNight()` and
 `resetHomelessDays()` track bedlessness; `depart(reason, day)` removes the
 resident from the active roster while preserving them in the saved cast.
@@ -377,18 +410,20 @@ days, colour, icon and test id.
 `ServiceBuilding` mixes model and view: it stores program, footprint anchor,
 state, entrance, capacity, visits, hearts, closure and construction progress,
 and owns a Pixi container drawn by `BuildingRenderer`. `PENDING` services pulse
-and are ghosted; `ACTIVE` services are solid; closed services are dimmed.
+and are ghosted; `ACTIVE` services are solid; closed services are dimmed. Rival
+services carry a chapter-coloured pennant.
 `promote()` counts down `daysRemaining` and becomes `ACTIVE` at zero.
 `recordVisit()`, `resetDaily()`, `close()`, `reopen()` and `update()` keep the
 visual and daily state aligned.
 
 ### ServiceManager
 
-- `occupancy` is a `Map` from `sectorId:u:v` to service. Footprint cells **and**
-  the door cell are occupied.
+- `occupancy` is a shared `Map` from `sectorId:u:v` to service, so player and
+  rival footprints/doors cannot overlap. Footprint cells **and** the door cell
+  are occupied.
 - `canPlace()` delegates to `PlacementPolicy`.
-- `place()` validates, creates the service, registers cells, positions it and
-  adds its container.
+- `place()` validates, creates a chapter-prefixed service id, registers cells,
+  positions it and adds its container.
 - `remove()` clears occupancy and destroys the container.
 - `housingCapacity()`, `housingFor()`, `spareHousing()` and `assignHome()` fill
   houses in build order for a stable, legible report.
@@ -478,17 +513,18 @@ It stores:
   "charter": {
     "seed": 12345, "mapSize": "medium", "day": 3, "dayLimit": 14,
     "lumen": 12, "works": 2, "flourishing": 63.5, "devotion": 8.3,
-    "ending": null, "pendingArrivals": [], "lastReport": {},
-    "residents": [], "services": []
+    "mode": "contest", "ending": null, "pendingArrivals": [], "lastReport": {},
+    "residents": [], "services": [], "rivals": []
   },
   "camera": { "x": 0, "y": 0, "zoom": 0.5 }
 }
 ```
 
 The world is regenerated from the seed. Residents restore traits, needs,
-activity, home, affinity and memory (including departure and homeless-day
-state); services restore program, cells, state, door, capacity, visits, hearts
-and closure. `pendingArrivals` keeps the current morning's new residents for
+activity, home chapter, per-chapter affinity and memory (including departure and
+homeless-day state); services restore program, cells, state, door, capacity,
+visits, hearts and closure; rivals restore identity, doctrine, budget, works and
+services. `pendingArrivals` keeps the current morning's new residents for
 the next report; `lastReport` is a compact summary (no playback events) shown on
 the restored report screen. Unknown or structurally invalid saves are cleared,
 not partially loaded. Save v1 is intentionally abandoned. There is no
