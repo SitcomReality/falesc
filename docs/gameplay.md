@@ -337,6 +337,9 @@ pause or alter the day.
 
 ## Display preferences
 
+The pause menu's **Service roster** lists every player service with state,
+capacity, visits and wear; a row opens the full service record.
+
 The pause menu offers **Motion: full/reduced** and **Contrast: normal/high**.
 High contrast strengthens ink and paper, doubles key panel borders and keeps the
 coral/mint identity; both preferences persist between sessions. On a first visit

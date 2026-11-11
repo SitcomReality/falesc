@@ -77,6 +77,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-ledger">Ledger</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-journal">Journal</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-milestones">Milestones</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="open-service-roster">Service roster</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-grid-summary">Grid summary</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-commons-menu" hidden>The commons</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="save-return-menu">Save &amp; menu</button>
@@ -285,6 +286,10 @@ export class GameScreen {
         this.pausePanel.querySelector('[data-testid=open-milestones]').addEventListener('click', () => {
             this._setPauseOpen(false);
             this.game.openMilestones();
+        });
+        this.pausePanel.querySelector('[data-testid=open-service-roster]').addEventListener('click', () => {
+            this._setPauseOpen(false);
+            this.game.openServiceRoster();
         });
         this.pausePanel.querySelector('[data-testid=open-grid-summary]').addEventListener('click', () => {
             this._setPauseOpen(false);

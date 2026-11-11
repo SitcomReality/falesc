@@ -5161,3 +5161,66 @@ body.is-photo-mode .care-watch {
     background: var(--coral);
     color: var(--paper);
 }
+
+/* Service roster ---------------------------------------------------------- */
+.service-roster {
+    width: min(620px, calc(100vw - 32px));
+}
+
+.service-roster__list {
+    display: grid;
+    gap: 6px;
+    max-height: 430px;
+    overflow-y: auto;
+    margin: 10px 0;
+}
+
+.service-roster__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    align-items: baseline;
+    width: 100%;
+    padding: 9px 11px;
+    border: 1.5px solid rgba(33, 18, 37, 0.35);
+    border-radius: var(--radius);
+    background: var(--paper-warm);
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+}
+
+.service-roster__row:hover,
+.service-roster__row:focus-visible {
+    background: var(--mint);
+}
+
+.service-roster__name {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.service-roster__meta,
+.service-roster__numbers {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--ink-soft);
+}
+
+.service-roster__wear {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+    padding: 3px 6px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+.service-roster__wear.is-worn {
+    background: var(--coral);
+    color: var(--paper);
+}

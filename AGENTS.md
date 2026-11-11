@@ -94,6 +94,7 @@ webgame_smoke --scenario scripts/scenarios/service-adjacency.mjs
 webgame_smoke --scenario scripts/scenarios/service-floors.mjs
 webgame_smoke --scenario scripts/scenarios/housing-residents.mjs
 webgame_smoke --scenario scripts/scenarios/service-rename.mjs
+webgame_smoke --scenario scripts/scenarios/service-roster.mjs
 webgame_smoke --scenario scripts/scenarios/service-regulars.mjs
 webgame_smoke --scenario scripts/scenarios/repair-all.mjs
 webgame_smoke --scenario scripts/scenarios/report-worn.mjs
