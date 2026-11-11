@@ -82,7 +82,9 @@ src/
   navigation/
     IslandNavigator.js       per-island A* to doors
   persistence/
-    SaveManager.js, CharterArchive.js           versioned localStorage save v2
+    SaveManager.js
+  debug/
+    DebugApi.js              window.__falesc console surface, CharterArchive.js           versioned localStorage save v2
   residents/
     Resident.js              plain model: traits, needs, affinity, memory
     ResidentFactory.js       seeded 15-name roster, 6 founders
