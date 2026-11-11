@@ -65,15 +65,24 @@ export default async function ({ page, assert, log, screenshot }) {
     }
     const report = await page.evaluate(`(() => {
         const app = window.__falesc.app;
-        const service = app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
-        return { visits: app.charter.lastReport?.visits, service: { state: service?.state, visits: service?.visits, sectorId: service?.sectorId } };
+        const service = app.charter.commonsManager.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
+        return { visits: app.charter.lastReport?.visits, service: { state: service?.state, visits: service?.visits, sectorId: service?.sectorId, chapterId: service?.chapterId, builderChapterId: service?.builderChapterId } };
     })()`);
     log(JSON.stringify({ report }));
     assert.equal(report.service.state, 'ACTIVE');
     assert.equal(report.service.sectorId, setup.commons);
+    assert.equal(report.service.chapterId, 'commons');
+    assert.equal(report.service.builderChapterId, 'player');
     assert.ok(report.service.visits > 0, 'residents should shuttle to the commons isle');
     assert.ok(await page.text('[data-testid=report-screen]').then((text) => text.includes('Commons Baths')));
     await screenshot('commons-isle-report.png');
+    await page.evaluate(`(() => { const app = window.__falesc.app; const service = app.charter.commonsManager.services.find((entry) => entry.id === ${JSON.stringify(built.id)}); app.serviceCard.show(service); })()`);
+    await page.waitFor("window.__falesc.app.serviceCard.isOpen === true");
+    assert.ok(await page.text('[data-testid=structure-modal]').then((text) => text.includes('Shared service')));
+    assert.ok(await page.text('[data-testid=structure-modal]').then((text) => text.includes('The Commons')));
+    await screenshot('commons-service-card.png');
+    await page.click('[data-testid=structure-close]');
+    await page.waitFor("window.__falesc.app.serviceCard.isOpen === false");
 
     await page.evaluate("window.__falesc.app.saveGame()");
     await page.reload();
@@ -82,10 +91,11 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
     const restored = await page.evaluate(`(() => {
         const app = window.__falesc.app;
-        const service = app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
-        return { sectorId: service?.sectorId, transit: app.charter.transit, enabled: Boolean(app.charter.map.commonsEnabled) };
+        const service = app.charter.commonsManager.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
+        return { sectorId: service?.sectorId, chapterId: service?.chapterId, transit: app.charter.transit, enabled: Boolean(app.charter.map.commonsEnabled) };
     })()`);
     assert.equal(restored.sectorId, setup.commons);
+    assert.equal(restored.chapterId, 'commons');
     assert.ok(restored.transit.home && restored.transit.commons);
     assert.equal(restored.enabled, true);
     await page.pause(400);

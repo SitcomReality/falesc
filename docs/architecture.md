@@ -279,7 +279,11 @@ upkeep.
 ### Cross-island commons isle
 
 In Contest mode `Charter` marks the second-largest sector as `commonsSector`
-and sets `map.commonsEnabled`. `PlacementPolicy` accepts that sector as well as
+and sets `map.commonsEnabled`. `Charter.build()` routes placements on that
+sector into `commonsManager` and stamps `builderChapterId`; the service belongs
+to the commons chapter, has no chapter ledger upkeep, and is excluded from
+dismantle, retrofit and hours commands. `DaySimulator` credits a small affinity
+share to the builder on each visit. `PlacementPolicy` accepts that sector as well as
 the home shard. `Charter.setupTransit()` reserves a free gate cell on each
 shard; `DaySimulator.routeTo()` composes a home path, the cross-void shuttle
 leg and a commons path, then emits world-space points for `ResidentAgent`.

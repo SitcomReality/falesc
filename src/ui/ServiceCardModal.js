@@ -104,15 +104,17 @@ export class ServiceCardModal {
         this.nameEl.textContent = service.name;
         this.iconEl.innerHTML = programIcon(service.programId);
         this.programEl.textContent = program?.name || 'Service';
+        const shared = service.chapterId === 'commons';
         this.statsEl.innerHTML = `
             <span><strong>${working ? 'Working' : service.closed ? 'Closed' : 'Under construction'}</strong></span>
             <span>${escapeHtml(service.chapterName || 'Home Chapter')}</span>
             <span>${service.capacity} capacity</span>
-            <span>${service.chapterId !== 'player' ? 'rival budget' : `${upkeep} upkeep / day`}</span>
+            <span>${shared ? 'shared · upkeep waived' : service.chapterId !== 'player' ? 'rival budget' : `${upkeep} upkeep / day`}</span>
         `;
         this.blurbEl.textContent = program?.blurb || '';
         this.factsEl.innerHTML = `
             <div><dt>Chapter</dt><dd>${escapeHtml(service.chapterName || 'Home Chapter')}</dd></div>
+            ${service.builderChapterId ? `<div><dt>Built by</dt><dd>${escapeHtml(this.game?.charter?.chapterById(service.builderChapterId)?.name || 'A chapter')}</dd></div>` : ''}
             <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}${secondary ? ` · ${secondary.glyph} ${secondary.name}` : ''}</dd></div>
             <div><dt>Visits</dt><dd>${service.visits}</dd></div>
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
@@ -132,13 +134,17 @@ export class ServiceCardModal {
         this.errorEl.textContent = '';
         const rivalService = service.chapterId && service.chapterId !== 'player';
         const refund = Math.max(1, Math.floor((program?.cost || 0) / 2));
-        this.demolishBtn.textContent = rivalService
-            ? 'Rival service'
-            : `Dismantle · +${refund} lumen`;
+        this.demolishBtn.textContent = shared
+            ? 'Shared service'
+            : rivalService
+                ? 'Rival service'
+                : `Dismantle · +${refund} lumen`;
         this.demolishBtn.disabled = Boolean(service.fixed) || rivalService;
-        this.demolishBtn.title = rivalService
-            ? "A rival chapter's service cannot be dismantled."
-            : service.fixed ? 'The Welcome Post is part of the charter.' : '';
+        this.demolishBtn.title = shared
+            ? 'A shared commons service belongs to every chapter.'
+            : rivalService
+                ? "A rival chapter's service cannot be dismantled."
+                : service.fixed ? 'The Welcome Post is part of the charter.' : '';
         const canUpgrade = !rivalService && !service.fixed && working && service.level < 2;
         this.upgradeBtn.hidden = !canUpgrade;
         this.upgradeBtn.disabled = !canUpgrade || (this.game?.charter?.lumen || 0) < RETROFIT_MIN_COST;

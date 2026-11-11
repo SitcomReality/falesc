@@ -291,6 +291,9 @@ export class DaySimulator {
             * standardFit(resident.traits.standards, service.finish);
         resident.adjustNeed(need.id, -effect);
         service.recordVisit(BALANCE.services.serviceHeart);
+        if (service.builderChapterId && service.builderChapterId !== service.chapterId) {
+            resident.addAffinity(BALANCE.commons.builderAffinity, service.builderChapterId);
+        }
         if (resident.visitor && service.chapterId !== 'commons') {
             this.visitorFees[service.chapterId] = (this.visitorFees[service.chapterId] || 0) + BALANCE.visitors.fee;
         }

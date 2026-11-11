@@ -456,7 +456,7 @@ export class FalescGame {
             this.world.clearHover();
             if (existing.isTransit) {
                 this.gameScreen.toast('The shuttle docks here. Build on the outer isle from the same dock.', 'mint', 2200);
-            } else if (existing.chapterId === 'commons') {
+            } else if (existing.id === this.charter.commons.serviceId) {
                 this.showCommons();
             } else {
                 this.serviceCard.show(existing);

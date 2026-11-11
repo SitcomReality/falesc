@@ -29,6 +29,7 @@ export class ServiceBuilding {
         policy = null,
         level = 1,
         retrofitId = null,
+        builderChapterId = null,
         qualityBonus = 0,
         upkeepBonus = 0,
         visits = 0,
@@ -56,6 +57,7 @@ export class ServiceBuilding {
         this.capacity = capacityOverride ?? program?.capacity ?? 1;
         this.level = Number(level) || 1;
         this.retrofitId = retrofitId || null;
+        this.builderChapterId = builderChapterId || null;
         this.qualityBonus = Number(qualityBonus) || 0;
         this.upkeepBonus = Number(upkeepBonus) || 0;
         this.entrance = entrance;
@@ -210,6 +212,7 @@ export class ServiceBuilding {
             capacity: this.capacity,
             level: this.level,
             retrofitId: this.retrofitId,
+            builderChapterId: this.builderChapterId,
             qualityBonus: this.qualityBonus,
             upkeepBonus: this.upkeepBonus,
             fixed: this.fixed,

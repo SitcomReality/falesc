@@ -10,7 +10,7 @@ needs, five services, a paused planning day, a deterministic playback, and an
 evening broadsheet. A **Contest preview** adds two rival chapters, a shared lumen
 economy, shared residents and rival housing on the same shard, ending in a three-day campaign, a **Confluence vote**, a post-vote
 **stewardship** promise, a fundable **Commons Beacon** and transient **day visitors**; the full multi-round festival, auctions and a
-separate shared-commons layer are the design target beyond that.
+fully shared-commons archipelago are the design target beyond that.
 
 Built with vanilla ES modules and [Pixi.js](https://pixijs.com/) 7. There is no
 build step: `index.html` loads `src/App.js`, which starts `src/FalescGame.js`,
@@ -153,7 +153,7 @@ appear in the HUD and report. At the day limit the archipelago convenes a
 **Campaign and Confluence**: the final three days run a three-event festival
 programme where rivals publish promises and the player chooses one; every
 resident then votes and the result becomes the charter record. Still absent: a
-larger multi-round festival, a separate shared-commons island,
+larger multi-round festival, a shared commons treasury and fuller archipelago,
 auctions/systemic stewardship and a deeper rival strategy beyond need-pressure
 builds/recovery, building layers or retrofit, audio, multiplayer, or a keyboard
 build cursor. A patronage-flow overlay traces each resident's last choice from

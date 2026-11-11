@@ -421,6 +421,9 @@ export class Charter {
                 applyCommonsPolicyToService(service, policy.id);
             }
         }
+        for (const service of this.commonsManager?.services || []) {
+            applyCommonsPolicyToService(service, policy.id);
+        }
         this.assignHomes();
         this.refreshDerived();
         return { ok: true, policy };
@@ -583,7 +586,10 @@ export class Charter {
         if (!affordable.ok) return affordable;
         const program = PROGRAM_BY_ID[programId];
         const resolvedName = !name || name === programId ? program.name : name;
-        const result = this.services.place({
+        const sector = this.map.sectors.find((entry) => entry.id === sectorId);
+        const shared = Boolean(sector?.commons && this.commonsManager);
+        const manager = shared ? this.commonsManager : this.services;
+        const result = manager.place({
             programId,
             sectorId,
             u,
@@ -592,6 +598,7 @@ export class Charter {
             state: 'PENDING'
         });
         if (!result.ok) return result;
+        if (shared) result.service.builderChapterId = 'player';
         this.lumen -= program.cost;
         this.works -= 1;
         applyCommonsPolicyToService(result.service, this.commons?.policy);
@@ -773,6 +780,10 @@ export class Charter {
         this.works = BALANCE.worksPerDay;
         const promoted = this.services.promoteUnderConstruction();
         for (const service of this.services.services) service.resetDaily();
+        if (this.commonsManager) {
+            this.commonsManager.promoteUnderConstruction();
+            for (const service of this.commonsManager.services) service.resetDaily();
+        }
         for (const rival of this.rivals) {
             rival.works = BALANCE.contest.rivalWorksPerDay;
             rival.services.promoteUnderConstruction();

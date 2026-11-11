@@ -162,7 +162,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `map-regression.mjs` | 72 maps (24 seeds × 3 sizes) have the expected sector counts, non-overlapping island AABBs, all shapes inside the world rectangle, and deterministic layouts. |
 | `demolition.mjs` | Clicking an occupied plot opens the service record; dismantling a 4-lumen Canteen refunds 2, removes it, and frees the plot. |
 | `contest.mjs` | Lobby Contest mode creates two rival chapters with Welcome Houses and opening services; each chapter starts with three residents; residents visit rival doors; standings/patronage/Devotion appear; rival upkeep is charged; a rival grows by housing new arrivals; the player Canteen earns visits; rival moves occur; the patronage-flow overlay draws one arc per last choice; the contest restores after reload, then the day limit convenes the Confluence; the player makes a pledge, every resident votes, and a player victory proceeds to a stewardship choice before the charter ending. |
-| `commons-isle.mjs` | Builds a service on the second commons isle, verifies the reserved shuttle gates, cross-island visits, report entry and save/reload. |
+| `commons-isle.mjs` | Builds a shared Bathhouse on the second commons isle, verifies reserved shuttle gates, commons ownership, cross-island visits, the shared service card and save/reload. |
 | `bathhouse.mjs` | Builds the fifth service, checks its 2×2 footprint, capacity 5, late opening, visits and saved state. |
 | `service-hours.mjs` | Switches an open canteen to Round the clock, checks +2 upkeep and save/reload. |
 | `retrofit.mjs` | Builds a canteen, waits for it to open, opens the retrofit chooser, installs the Atelier, checks +0.22 quality/+1 upkeep (capacity unchanged) and save/reload. |

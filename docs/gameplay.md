@@ -151,8 +151,15 @@ reserved **shuttle gate** on each shard. A dashed shuttle line joins the gates;
 residents walk to the home gate, cross, and walk to the service door.
 
 Only the commons isle and the home shard are buildable. The other floating
-islands remain scenery. Rivals do not build on the commons isle, and its
-services are still player-owned for now; shared ownership is future work.
+islands remain scenery. Rivals do not build there.
+
+Services raised on the commons isle are **shared works of The Commons**. The
+player pays the construction cost and work, but the building belongs to the
+commons chapter: every resident can use it, its upkeep is waived for now, and it
+cannot be dismantled, retrofitted or given private hours. A small share of every
+shared-service visit still credits the builder chapter, so public generosity is
+visible in Devotion. The Commons modal counts the shared works standing on the
+isle.
 
 ## Retrofit
 

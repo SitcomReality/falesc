@@ -63,7 +63,7 @@ archipelago, long-term rival plan, multi-round festival events, auctions and sys
 stewardship remain.
 
 **Not started:** the rest of Phase 2, Phase 3 (layers, modules, finishes,
-policy, retrofit), the separate shared-commons island and assembly, deeper
+policy, retrofit), the shared commons treasury and assembly, deeper
 Phase 4 scenarios, and Phase 5
 (multiplayer, audio, accessibility polish).
 

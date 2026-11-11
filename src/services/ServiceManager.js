@@ -232,6 +232,7 @@ export class ServiceManager {
                 capacityOverride: entry.capacity,
                 level: entry.level,
                 retrofitId: entry.retrofitId,
+                builderChapterId: entry.builderChapterId,
                 qualityBonus: entry.qualityBonus,
                 upkeepBonus: entry.upkeepBonus,
                 fixed: entry.fixed,
