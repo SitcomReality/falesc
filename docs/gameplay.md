@@ -125,9 +125,14 @@ feature for now; First Light remains resident-only.
 
 ## Retrofit
 
-An open player service can be retrofitted once from its service record for
-**6 lumen**. A retrofit adds **2 capacity**, **+0.12 quality**, **+1 upkeep** and
-a **grand** finish. It applies to the service immediately and is saved with the
+An open player service can be retrofitted once from its service record. Choose
+one module:
+
+- **Sunroom** — 6 lumen: **+2 capacity**, **+0.05 quality**, **+1 upkeep**.
+- **Atelier** — 6 lumen: **+0.22 quality**, **+1 upkeep**, no extra seats.
+- **Night Kitchen** — 7 lumen: **+1 capacity**, **+0.12 quality**, **+2 upkeep**.
+
+All three give a **grand** finish. The module is permanent and saved with the
 charter; rivals do not retrofit. Policy capacity and retrofit capacity stack.
 
 ## The Commons Beacon

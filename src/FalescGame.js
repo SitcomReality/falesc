@@ -15,6 +15,7 @@ import { STEWARDSHIP_BY_ID } from './confluence/Stewardship.js';
 import { EndScreen } from './screens/EndScreen.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { ServiceCardModal } from './ui/ServiceCardModal.js';
+import { RetrofitModal } from './ui/RetrofitModal.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
 import { CommonsModal } from './ui/CommonsModal.js';
@@ -76,7 +77,16 @@ export class FalescGame {
             game: this,
             onDemolish: (service) => this.dismantleService(service),
             onReopen: (service) => this.reopenService(service),
-            onUpgrade: (service) => this.upgradeService(service),
+            onRetrofit: (service) => this.openRetrofit(service),
+            overlays: this.overlays
+        });
+        this.retrofitModal = new RetrofitModal({
+            game: this,
+            onChoose: (service, moduleId) => this.upgradeService(service, moduleId),
+            onDone: (service) => {
+                this.serviceCard.hide();
+                this.serviceCard.show(service);
+            },
             overlays: this.overlays
         });
         this.bulletinModal = new BulletinModal({
@@ -217,6 +227,7 @@ export class FalescGame {
         this.residentCard.hide();
         this.campaignModal.hide();
         this.commonsModal.hide();
+        this.retrofitModal.hide();
     }
 
     syncViews() {
@@ -463,9 +474,15 @@ export class FalescGame {
         return { ok: true };
     }
 
-    upgradeService(service) {
+    openRetrofit(service) {
+        if (!this.charter) return false;
+        this.retrofitModal.show(service);
+        return true;
+    }
+
+    upgradeService(service, moduleId) {
         if (!this.charter) return { ok: false, error: 'No charter.' };
-        const result = this.charter.upgradeService(service);
+        const result = this.charter.upgradeService(service, moduleId);
         if (!result.ok) return result;
         this.syncViews();
         this.gameScreen.updateHud(true);
@@ -664,6 +681,7 @@ export class FalescGame {
             this.residentCard.hide();
             this.campaignModal.hide();
             this.commonsModal.hide();
+            this.retrofitModal.hide();
             this.world.clearHover();
         }
         if (phase === GamePhase.CONFLUENCE) {

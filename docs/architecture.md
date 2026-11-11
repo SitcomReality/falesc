@@ -95,6 +95,7 @@ src/
   services/
     ServiceBuilding.js       service model plus its Pixi container
     ServiceManager.js        placement, occupancy, housing, promotion, visits
+    RetrofitModules.js       Sunroom, Atelier and Night Kitchen retrofit data
     PlacementPolicy.js       pure footprint/door/home-shard rules
   simulation/
     DaySimulator.js          deterministic day: drift, choice, queues, report
@@ -269,10 +270,10 @@ Key commands:
 
 The charter does not own DOM or the Pixi scene. `ServiceManager` creates
 `ServiceBuilding` objects, which do own their Pixi containers; the crowd and
-screens are attached by `FalescGame`. A service carries `level`, `qualityBonus`
-and `upkeepBonus` in addition to capacity; `Charter.upgradeService()` adds the
-one fixed retrofit (`BALANCE.upgrades`) and `ServiceManager.upkeepFor()` charges
-its extra upkeep.
+screens are attached by `FalescGame`. A service carries `level`, `retrofitId`, `qualityBonus` and `upkeepBonus` in
+addition to capacity; `Charter.upgradeService()` installs one module from
+`src/services/RetrofitModules.js`, and `ServiceManager.upkeepFor()` charges its
+upkeep.
 
 ### Contest preview
 

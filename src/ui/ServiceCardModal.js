@@ -1,6 +1,6 @@
 import { programIcon } from './icons.js';
 import { NEED_BY_ID } from '../design/needs.js';
-import { BALANCE } from '../design/balance.js';
+import { RETROFIT_BY_ID, RETROFIT_MIN_COST } from '../services/RetrofitModules.js';
 
 /**
  * Service record: the same card is used for inspection, reopening a closed
@@ -8,10 +8,10 @@ import { BALANCE } from '../design/balance.js';
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, onUpgrade, overlays, game }) {
+    constructor({ onDemolish, onReopen, onRetrofit, overlays, game }) {
         this.onDemolish = onDemolish;
         this.onReopen = onReopen;
-        this.onUpgrade = onUpgrade;
+        this.onRetrofit = onRetrofit;
         this.overlays = overlays;
         this.game = game;
         this.isOpen = false;
@@ -79,7 +79,7 @@ export class ServiceCardModal {
         this.panel.querySelector('[data-testid=structure-cancel]').addEventListener('click', () => this.hide());
         this.demolishBtn.addEventListener('click', () => this.demolish());
         this.reopenBtn.addEventListener('click', () => this.reopen());
-        this.upgradeBtn.addEventListener('click', () => this.upgrade());
+        this.upgradeBtn.addEventListener('click', () => this.requestRetrofit());
         this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
     }
 
@@ -108,7 +108,7 @@ export class ServiceCardModal {
             <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}${secondary ? ` · ${secondary.glyph} ${secondary.name}` : ''}</dd></div>
             <div><dt>Visits</dt><dd>${service.visits}</dd></div>
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
-            <div><dt>Condition</dt><dd>${service.level >= 2 ? 'Retrofitted' : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
+            <div><dt>Condition</dt><dd>${service.level >= 2 ? `Retrofitted · ${escapeHtml(RETROFIT_BY_ID[service.retrofitId]?.name || 'custom finish')}` : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
             <div><dt>Door</dt><dd>${service.entrance ? `cell ${service.entrance.u}, ${service.entrance.v}` : '—'}</dd></div>
         `;
         const lastChoice = this.game?.charter?.activeResidents
@@ -132,8 +132,8 @@ export class ServiceCardModal {
             : service.fixed ? 'The Welcome Post is part of the charter.' : '';
         const canUpgrade = !rivalService && !service.fixed && working && service.level < 2;
         this.upgradeBtn.hidden = !canUpgrade;
-        this.upgradeBtn.disabled = !canUpgrade || (this.game?.charter?.lumen || 0) < BALANCE.upgrades.cost;
-        this.upgradeBtn.textContent = `Retrofit · ${BALANCE.upgrades.cost} lumen`;
+        this.upgradeBtn.disabled = !canUpgrade || (this.game?.charter?.lumen || 0) < RETROFIT_MIN_COST;
+        this.upgradeBtn.textContent = 'Retrofit →';
         this.upgradeBtn.title = canUpgrade ? 'Add two seats, better finish and one upkeep.' : '';
         this.reopenBtn.hidden = !service.closed;
         this.reopenBtn.disabled = rivalService;
@@ -162,16 +162,9 @@ export class ServiceCardModal {
         this.hide(false);
     }
 
-    upgrade() {
+    requestRetrofit() {
         if (!this.isOpen || !this.service) return;
-        const service = this.service;
-        const result = this.onUpgrade(service);
-        if (result && result.ok === false) {
-            this.errorEl.textContent = result.error || 'That service cannot be retrofitted.';
-            return;
-        }
-        this.hide();
-        this.show(service);
+        this.onRetrofit(this.service);
     }
 
     reopen() {

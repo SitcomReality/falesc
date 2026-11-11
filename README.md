@@ -58,7 +58,8 @@ so any static file server works, but ES modules require `http://`, not `file://`
 - On Contest days, watch for 2–3 **day visitors**. They use services and pay a
   small fee to the chapter whose door they choose. A visitor who likes your
   chapter and a spare bed can be invited to stay; they then join the resident
-  vote. Open a player service and choose **Retrofit** to add capacity and quality.
+  vote. Open a player service and choose **Retrofit** to pick Sunroom, Atelier or
+  Night Kitchen.
 - In the last three Contest days, choose a **campaign promise** from the
   standings card or the automatic campaign dialog. Rivals publish theirs, and a
   three-day festival programme makes matching services more magnetic.

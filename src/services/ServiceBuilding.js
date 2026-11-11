@@ -28,6 +28,7 @@ export class ServiceBuilding {
         modules = [],
         policy = null,
         level = 1,
+        retrofitId = null,
         qualityBonus = 0,
         upkeepBonus = 0,
         visits = 0,
@@ -54,6 +55,7 @@ export class ServiceBuilding {
         this.policy = policy || { access: 'open', hours: 'day', vibe: program?.vibe || 'cosy' };
         this.capacity = capacityOverride ?? program?.capacity ?? 1;
         this.level = Number(level) || 1;
+        this.retrofitId = retrofitId || null;
         this.qualityBonus = Number(qualityBonus) || 0;
         this.upkeepBonus = Number(upkeepBonus) || 0;
         this.entrance = entrance;
@@ -207,6 +209,7 @@ export class ServiceBuilding {
             entrance: this.entrance,
             capacity: this.capacity,
             level: this.level,
+            retrofitId: this.retrofitId,
             qualityBonus: this.qualityBonus,
             upkeepBonus: this.upkeepBonus,
             fixed: this.fixed,

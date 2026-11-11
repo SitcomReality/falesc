@@ -182,7 +182,8 @@ after any behavioural change.
   first Commons Assembly lets each chapter nominate; residents vote, and the
   winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
   `CommonsBallot.js`). An open player service can be retrofitted once for 6
-  lumen, adding capacity, quality and upkeep; the service record owns the action.
+  lumen; Sunroom, Atelier or Night Kitchen trade seats, quality and upkeep. The
+  service record owns the action and the module is saved.
   This is a first pass; a separate shared-commons island,
   a larger multi-round festival, auctions and systemic stewardship effects are
   still missing.

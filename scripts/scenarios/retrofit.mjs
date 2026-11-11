@@ -36,19 +36,22 @@ export default async function ({ page, assert, log, screenshot }) {
     log(JSON.stringify({ before }));
     assert.equal(before.capacity, 4);
     assert.equal(await page.visible('[data-testid=structure-upgrade]'), true);
-    await screenshot('retrofit-offer.png');
-
     await page.click('[data-testid=structure-upgrade]');
+    await page.waitFor("window.__falesc.app.retrofitModal.isOpen === true");
+    await screenshot('retrofit-offer.png');
+    await page.click('[data-testid=retrofit-atelier]');
+    await page.waitFor("window.__falesc.app.retrofitModal.isOpen === false");
     const after = await page.evaluate(`(() => {
         const app = window.__falesc.app;
         const service = app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
-        return { capacity: service.capacity, level: service.level, finish: service.finish, quality: service.qualityBonus, upkeep: app.charter.services.upkeepFor(service), lumen: app.charter.player.lumen };
+        return { capacity: service.capacity, level: service.level, finish: service.finish, retrofitId: service.retrofitId, quality: service.qualityBonus, upkeep: app.charter.services.upkeepFor(service), lumen: app.charter.player.lumen };
     })()`);
     log(JSON.stringify({ after }));
-    assert.equal(after.capacity, before.capacity + 2);
+    assert.equal(after.capacity, before.capacity, 'the Atelier adds quality instead of seats');
     assert.equal(after.level, 2);
+    assert.equal(after.retrofitId, 'atelier');
     assert.equal(after.finish, 'grand');
-    assert.ok(after.quality > 0);
+    assert.ok(after.quality > 0.2);
     assert.equal(after.upkeep, before.upkeep + 1);
     assert.equal(after.lumen, before.lumen - 6);
     await screenshot('retrofit-done.png');
@@ -61,11 +64,12 @@ export default async function ({ page, assert, log, screenshot }) {
     const restored = await page.evaluate(`(() => {
         const app = window.__falesc.app;
         const service = app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)});
-        return { capacity: service.capacity, level: service.level, quality: service.qualityBonus, upkeep: app.charter.services.upkeepFor(service) };
+        return { capacity: service.capacity, level: service.level, retrofitId: service.retrofitId, quality: service.qualityBonus, upkeep: app.charter.services.upkeepFor(service) };
     })()`);
     log(JSON.stringify({ restored }));
-    assert.equal(restored.capacity, before.capacity + 2);
+    assert.equal(restored.capacity, before.capacity);
     assert.equal(restored.level, 2);
+    assert.equal(restored.retrofitId, 'atelier');
     assert.equal(restored.upkeep, before.upkeep + 1);
     await page.pause(400);
 }

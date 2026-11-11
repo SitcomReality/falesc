@@ -3,6 +3,7 @@ import { NEEDS } from '../design/needs.js';
 import { PROGRAM_BY_ID, servesNeed, isOpenAt } from '../design/programs.js';
 import { ResidentFactory } from '../residents/ResidentFactory.js';
 import { VisitorFactory } from '../residents/VisitorFactory.js';
+import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService } from '../commons/CommonsPolicies.js';
 import { nominateForRival, resolveCommonsBallot } from '../commons/CommonsBallot.js';
 import { ServiceManager } from '../services/ServiceManager.js';
@@ -548,7 +549,7 @@ export class Charter {
         return { ...result, cost: program.cost };
     }
 
-    upgradeService(service) {
+    upgradeService(service, moduleId = 'sunroom') {
         if (!service || service.chapterId && service.chapterId !== 'player') {
             return { ok: false, error: "A rival chapter's service cannot be retrofitted." };
         }
@@ -557,19 +558,22 @@ export class Charter {
             return { ok: false, error: 'Only an open, working service can be retrofitted.' };
         }
         if (service.level >= 2) return { ok: false, error: 'This service is already retrofitted.' };
-        if (this.lumen < BALANCE.upgrades.cost) {
-            return { ok: false, error: `A retrofit costs ${BALANCE.upgrades.cost} lumen.` };
+        const module = RETROFIT_BY_ID[moduleId];
+        if (!module) return { ok: false, error: 'Unknown retrofit module.' };
+        if (this.lumen < module.cost) {
+            return { ok: false, error: `The ${module.name} retrofit costs ${module.cost} lumen.` };
         }
-        this.lumen -= BALANCE.upgrades.cost;
+        this.lumen -= module.cost;
         service.level = 2;
-        service.capacity += BALANCE.upgrades.capacity;
-        service.qualityBonus = (service.qualityBonus || 0) + BALANCE.upgrades.quality;
-        service.upkeepBonus = (service.upkeepBonus || 0) + BALANCE.upgrades.upkeep;
+        service.retrofitId = module.id;
+        service.capacity += module.capacity;
+        service.qualityBonus = (service.qualityBonus || 0) + module.quality;
+        service.upkeepBonus = (service.upkeepBonus || 0) + module.upkeep;
         service.finish = 'grand';
-        service.modules = [...(service.modules || []), 'retrofit'];
+        service.modules = [...(service.modules || []), `retrofit:${module.id}`];
         service.refreshGraphics();
         this.refreshDerived();
-        return { ok: true, service, cost: BALANCE.upgrades.cost };
+        return { ok: true, service, module, cost: module.cost };
     }
 
     dismantle(service) {

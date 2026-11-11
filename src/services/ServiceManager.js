@@ -230,6 +230,7 @@ export class ServiceManager {
                 entrance: entry.entrance,
                 capacityOverride: entry.capacity,
                 level: entry.level,
+                retrofitId: entry.retrofitId,
                 qualityBonus: entry.qualityBonus,
                 upkeepBonus: entry.upkeepBonus,
                 fixed: entry.fixed,

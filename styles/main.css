@@ -3724,3 +3724,59 @@ body.has-modal > canvas {
     font-size: 11px;
     line-height: 1.35;
 }
+
+/* Retrofit modules ------------------------------------------------------- */
+
+.retrofit-modal {
+    width: min(620px, calc(100vw - 32px));
+}
+
+.retrofit-options {
+    display: grid;
+    gap: 7px;
+    margin: 12px 0;
+}
+
+.retrofit-option {
+    display: grid;
+    gap: 2px;
+    padding: 9px 11px;
+    text-align: left;
+    background: var(--paper-deep);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.retrofit-option:hover,
+.retrofit-option:focus-visible {
+    background: var(--paper);
+    transform: translateX(2px);
+}
+
+.retrofit-option:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.retrofit-option strong {
+    font-family: var(--display);
+    font-size: 19px;
+    line-height: 1.05;
+}
+
+.retrofit-option > span:nth-child(3) {
+    color: var(--ink-soft);
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.retrofit-option__stats {
+    color: var(--wine);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
