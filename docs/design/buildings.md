@@ -8,7 +8,7 @@
 > and layered customisation without a spreadsheet. Five small layers, each with
 > a clear visual and mechanical consequence, plus adjacency and footprint.
 >
-> **Status note (2026-11-11):** First Light implements the first eight programs,
+> **Status note (2026-11-11):** First Light implements the first nine programs,
 > footprints, a reserved door cell, capacity, queues, enter/exit, visits and
 > demolition. Shells, modules, player-chosen finish/policy and retrofit are
 > still target. The "current prototype" comparisons below are historical.
@@ -217,7 +217,7 @@ Beacon**. The current north-west light and south-east shadow rule stays.
 ## 10. What not to do
 
 - **No per-item stock and prices.** Use capacity, policy, finish and hours.
-- **No 40 building types at launch.** Six to eight programs, three shells and a
+- **No 40 building types at launch.** Nine programs, three shells and a
   handful of modules is enough.
 - **No income per tile.** A building's output is a service, not lumen.
 - **No 3D interiors.** The isometric map is the game.
