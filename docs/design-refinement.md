@@ -3,7 +3,7 @@
 > **Status: working design, partially built (2026-11-11).** The four key forks
 > are decided; see [decisions.md](design/decisions.md). The **First Light
 > vertical slice** now implements most of **Phase 0 and Phase 1**: the warm
-> nebula void, floating shards, four needs, eight buildable service programs,
+> nebula void, floating shards, four needs, nine buildable service programs,
 > planning, deterministic day playback, the evening report, wellbeing-driven
 > lumen, Devotion/Flourishing, resident cards with a "why", and save v2. A
 > **Contest preview** adds two AI rivals, shared residents/services, rival

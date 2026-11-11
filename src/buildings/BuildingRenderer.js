@@ -74,6 +74,15 @@ const PROGRAMS = {
             { x: 104, y: -86 }
         ]
     },
+    creche: {
+        hw: 112,
+        hh: 48,
+        guide: [
+            { x: -104, y: -96 },
+            { x: 0, y: -166 },
+            { x: 104, y: -96 }
+        ]
+    },
     observatory: {
         hw: 112,
         hh: 48,
@@ -140,6 +149,9 @@ export class BuildingRenderer {
                 break;
             case 'observatory':
                 BuildingRenderer.drawObservatory(graphics, state);
+                break;
+            case 'creche':
+                BuildingRenderer.drawCreche(graphics, state);
                 break;
             case 'clinic':
                 BuildingRenderer.drawClinic(graphics, state);
@@ -1446,6 +1458,22 @@ export class BuildingRenderer {
             graphics.drawCircle(-46 + light * 23, -62 - (light % 2) * 5, 3.2);
         }
         graphics.endFill();
+    }
+
+    static drawCreche(graphics, state) {
+        BuildingRenderer.drawHousing(graphics, state);
+        const pink = BuildingRenderer.tone(0xFFB3C7, state);
+        const ink = BuildingRenderer.tone(INK, state);
+        graphics.beginFill(pink, 1);
+        graphics.lineStyle(2, ink, 1);
+        graphics.drawPolygon([-26, -104, 26, -104, 0, -128]);
+        graphics.endFill();
+        graphics.beginFill(0xFFD36E, 1);
+        graphics.drawCircle(46, -64, 6);
+        graphics.endFill();
+        graphics.lineStyle(2, ink, 1);
+        graphics.moveTo(46, -58);
+        graphics.lineTo(46, -38);
     }
 
     static drawObservatory(graphics, state) {

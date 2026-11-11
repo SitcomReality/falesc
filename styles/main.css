@@ -1228,7 +1228,7 @@ body > canvas {
 
 /* Build dock */
 .build-dock {
-    width: min(900px, calc(100vw - 240px));
+    width: min(980px, calc(100vw - 240px));
     padding: 11px;
     background: var(--paper);
     border: var(--border);
@@ -1259,7 +1259,7 @@ body > canvas {
 
 .blueprints {
     display: grid;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-columns: repeat(9, minmax(0, 1fr));
     gap: 7px;
 }
 

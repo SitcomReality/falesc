@@ -113,6 +113,16 @@ export const ICONS = {
         <rect x="27" y="38" width="10" height="7" fill="#59E3C2" stroke="${INK}" stroke-width="1.5"/>
         <path d="M16 30l4-4M48 30l-4-4M32 18v-5" stroke="#FFD36E" stroke-width="2.5" stroke-linecap="round"/>
     `),
+    creche: svg(`
+        <path d="M8 50h52" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M14 47V29l20-13 20 13v18" fill="#FFF2D8" stroke="${INK}" stroke-width="2.5"/>
+        <path d="M12 29 34 14l22 15" fill="#FFB3C7" stroke="${INK}" stroke-width="2.5"/>
+        <rect x="19" y="34" width="10" height="9" fill="#C9B6FF" stroke="${INK}" stroke-width="1.5"/>
+        <rect x="38" y="34" width="10" height="9" fill="#C9B6FF" stroke="${INK}" stroke-width="1.5"/>
+        <path d="M34 48V38" stroke="#211225" stroke-width="2"/>
+        <circle cx="51" cy="18" r="4" fill="#FFD36E" stroke="${INK}" stroke-width="1.5"/>
+        <path d="M51 22v9" stroke="${INK}" stroke-width="1.5"/>
+    `),
     observatory: svg(`
         <path d="M6 50h52" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
         <path d="M12 47V31c0-10 9-18 20-18s20 8 20 18v16" fill="#FFF2D8" stroke="${INK}" stroke-width="2.5"/>

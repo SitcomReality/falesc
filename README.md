@@ -6,7 +6,7 @@ finite reserve of civic energy: keep people fed, rested, social and curious long
 enough for the chapter to flourish.
 
 This build is the **First Light vertical slice**. One home shard plus Contest commons and garden isles, four
-needs, eight services, a paused planning day, a deterministic playback, and an
+needs, nine services, a paused planning day, a deterministic playback, and an
 evening broadsheet. A **Contest preview** adds two rival chapters, a shared lumen
 economy, shared residents and rival housing on the same shard, ending in a three-day campaign, a **Confluence vote**, a post-vote
 **stewardship** promise, a fundable **Commons Beacon** and transient **day visitors**; the full multi-round festival, auctions and a
@@ -144,6 +144,7 @@ webgame_smoke --scenario scripts/scenarios/service-floors.mjs
 webgame_smoke --scenario scripts/scenarios/service-access.mjs
 webgame_smoke --scenario scripts/scenarios/service-vibe.mjs
 webgame_smoke --scenario scripts/scenarios/service-hours.mjs
+webgame_smoke --scenario scripts/scenarios/creche.mjs
 webgame_smoke --scenario scripts/scenarios/observatory.mjs
 webgame_smoke --scenario scripts/scenarios/amphitheatre.mjs
 webgame_smoke --scenario scripts/scenarios/clinic.mjs
@@ -176,7 +177,7 @@ victory, and mobile layout. The CLI equivalents and the manual checklist are in
 
 Playable First Light vertical slice: seeded floating-shard world, a named cast
 of fifteen with six First Light founders (nine Contest founders), four needs,
-eight service programs, construction
+nine service programs, construction
 and works, wellbeing-driven lumen with upkeep and closures, deterministic day
 playback, an evening report, Devotion and Flourishing, victory/defeat, and
 local save v2.

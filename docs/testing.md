@@ -185,6 +185,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `garden-isle.mjs` | Builds a player service on the third garden isle, verifies garden placement, the garden shuttle gate, cross-island visits and save/reload. |
 | `commons-isle.mjs` | Builds a shared Bathhouse on the second commons isle, verifies reserved shuttle gates, commons ownership, cross-island visits, the shared service card and save/reload. |
 | `building-finishes.mjs` | Builds a Grand canteen and a Humble tea house, checks cost/capacity/upkeep, the finish in the service record, and save/reload. |
+| `creche.mjs` | Builds the ninth service, the 2×2 Creche for Company + Rest, checks the dock shortcut, capacity/cost, visits and save/reload. |
 | `observatory.mjs` | Builds the eighth service, the 2×2 night Observatory, checks the dock shortcut, capacity/cost, visits and save/reload. |
 | `amphitheatre.mjs` | Builds the seventh service, the 2×2 Amphitheatre, checks the dock shortcut, capacity/cost, visits and save/reload. |
 | `clinic.mjs` | Builds the sixth service, the 2×2 Clinic, checks the dock shortcut, capacity/cost, cross-day visits and save/reload. |
