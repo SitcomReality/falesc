@@ -76,6 +76,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-ledger">Ledger</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-departures" hidden>Past residents</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="sound-toggle" aria-pressed="false">Sound: off</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="motion-toggle" aria-pressed="false">Motion: full</button>
                 <button type="button" class="btn btn--small btn--ghost charter-menu__abandon" data-testid="end-game">Abandon charter</button>
                 <div class="charter-menu__confirm" data-role="abandon-confirm" hidden>
                     <p>Abandon this charter? The save will be cleared.</p>
@@ -258,6 +259,8 @@ export class GameScreen {
         });
         this.soundButton = this.pausePanel.querySelector('[data-testid=sound-toggle]');
         this.soundButton.addEventListener('click', () => this.game.toggleAudio());
+        this.motionButton = this.pausePanel.querySelector('[data-testid=motion-toggle]');
+        this.motionButton.addEventListener('click', () => this.game.toggleMotion());
         this.abandonBtn = this.pausePanel.querySelector('[data-testid=end-game]');
         this.abandonConfirm = this.pausePanel.querySelector('[data-role=abandon-confirm]');
         this.abandonBtn.addEventListener('click', () => {
@@ -398,6 +401,9 @@ export class GameScreen {
         this.container.classList.toggle('is-contest', contest);
         this.container.classList.toggle('is-campaign', Boolean(charter.campaign?.active));
         const departed = charter.departedResidents?.length || 0;
+        const motion = this.game.motion === 'reduced';
+        this.motionButton.textContent = motion ? 'Motion: reduced' : 'Motion: full';
+        this.motionButton.setAttribute('aria-pressed', String(motion));
         this.departuresButton.hidden = departed === 0;
         this.departuresButton.textContent = departed ? `Past residents · ${departed}` : 'Past residents';
         this.standings.update(charter.standings(), contest, charter.campaign, charter.day, charter.commons);

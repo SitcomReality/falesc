@@ -1871,6 +1871,8 @@ body > canvas {
     position: absolute;
     top: 54px;
     right: 0;
+    max-height: calc(100vh - 72px);
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 7px;
@@ -4391,4 +4393,14 @@ body.has-modal > canvas {
 
 .charter-ledger__table td.is-negative {
     color: var(--wine);
+}
+
+/* Reduced motion ---------------------------------------------------------- */
+html.is-reduced-motion *,
+html.is-reduced-motion *::before,
+html.is-reduced-motion *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
 }

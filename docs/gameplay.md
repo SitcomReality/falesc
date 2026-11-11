@@ -13,6 +13,13 @@ budget, two works per day, and a cast of people with needs. The First Light
 charter is won by reaching **12 housed residents and a flourishing of 62** by the day
 limit.
 
+## Display preferences
+
+The charter menu has **Motion: full / reduced**. Reduced motion is saved in
+`falesc.motion.v1`, applies immediately and suppresses chrome animations and
+transitions. It does not shorten the day, change playback timing or alter the
+simulation.
+
 ## Controls
 
 The menu's **How to play** button and the pause menu's **Field guide** open a

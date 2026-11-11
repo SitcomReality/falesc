@@ -28,6 +28,7 @@ import { CharterArchiveModal } from './ui/CharterArchiveModal.js';
 import { NeedSurveyModal } from './ui/NeedSurveyModal.js';
 import { CharterLedgerModal } from './ui/CharterLedgerModal.js';
 import { recordCharter, recordFromCharter } from './persistence/CharterArchive.js';
+import { readMotion, writeMotion, applyMotion } from './settings/MotionPreference.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
 import { CommonsModal } from './ui/CommonsModal.js';
@@ -53,6 +54,8 @@ function defaultProgramId() {
  */
 export class FalescGame {
     constructor() {
+        this.motion = readMotion();
+        applyMotion(this.motion);
         this.settings = {
             mapSeed: Math.floor(Math.random() * 1000000),
             mapSize: 'medium',
@@ -731,6 +734,14 @@ export class FalescGame {
         if (!this.charter) return false;
         this.retrofitModal.show(service);
         return true;
+    }
+
+    toggleMotion() {
+        this.motion = this.motion === 'reduced' ? 'full' : 'reduced';
+        writeMotion(this.motion);
+        this.gameScreen?.updateHud?.(true);
+        this.gameScreen?.toast?.(this.motion === 'reduced' ? 'Reduced motion on.' : 'Reduced motion off.', 'mint', 1800);
+        return this.motion;
     }
 
     openLedger() {
