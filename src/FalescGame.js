@@ -132,7 +132,7 @@ export class FalescGame {
             onVibe: (service, vibeId) => this.setServiceVibe(service, vibeId),
             onAccess: (service, accessId) => this.setServiceAccess(service, accessId),
             onFocus: (service, focusId) => this.setServiceFocus(service, focusId),
-            onInterior: (service) => this.serviceInterior.show(service, this.charter),
+            onInterior: (service) => this.serviceInterior.show(service, this),
             overlays: this.overlays
         });
         this.floorPlan = new FloorPlanModal({

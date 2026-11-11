@@ -79,6 +79,11 @@ export class ServiceInteriorModal {
         const here = residents.filter((resident) => housing
             ? resident.homeServiceId === service.id
             : resident.memory?.lastChoice?.serviceId === service.id);
+        let roomCursor = 0;
+        for (const floor of floors) {
+            floor.occupants = housing ? here.slice(roomCursor, roomCursor + floor.seats) : [];
+            roomCursor += floor.seats;
+        }
         const people = here.length
             ? here.slice(0, 8).map((resident) => `<li><strong>${escapeHtml(resident.name)}</strong><span>${escapeHtml(resident.lastChoice || 'a familiar face')}</span></li>`).join('')
             : '<li class="service-interior__empty">No one is inside just now.</li>';
@@ -97,6 +102,7 @@ export class ServiceInteriorModal {
                         <span class="kicker">${floor.label}</span>
                         <strong>${escapeHtml(floor.plan?.name || program?.name || 'Service')}</strong>
                         <span>${floor.seats} ${housing ? 'beds' : 'seats'}${floor.plan ? ` · +${(floor.plan.quality || 0).toFixed(2)} quality` : ''}</span>
+                        ${floor.occupants.length ? `<span class="interior-room__people">${floor.occupants.map((resident) => escapeHtml(resident.name)).join(', ')}</span>` : ''}
                     </article>
                 `).join('')}
             </div>
