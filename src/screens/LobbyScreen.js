@@ -1,3 +1,5 @@
+import { chartShareUrl } from '../settings/ChartLink.js';
+
 const SIZE_DATA = {
     small: { islands: 4, shards: 46, days: 12, label: 'A quiet shard', note: 'Four islets, a short charter.' },
     medium: { islands: 6, shards: 64, days: 14, label: 'A working archipelago', note: 'Six islets, room for a commons.' },
@@ -99,13 +101,36 @@ export class LobbyScreen {
         randomBtn.textContent = 'Roll';
         randomBtn.title = 'Roll a new seed';
 
-        seedRow.append(this.seedInput, randomBtn);
+        const shareBtn = document.createElement('button');
+        shareBtn.type = 'button';
+        shareBtn.className = 'btn btn--small btn--paper';
+        shareBtn.dataset.testid = 'lobby-share';
+        shareBtn.textContent = 'Copy link';
+        shareBtn.title = 'Copy a link to this chart';
+        const shareStatus = document.createElement('span');
+        shareStatus.className = 'field__hint';
+        shareStatus.dataset.role = 'share-status';
+        shareStatus.setAttribute('aria-live', 'polite');
+        shareBtn.addEventListener('click', async () => {
+            const url = chartShareUrl({
+                seed: this.game.settings.mapSeed,
+                size: this.game.settings.mapSize,
+                mode: this.game.settings.mode || 'first-light'
+            });
+            try {
+                await navigator.clipboard.writeText(url);
+                shareStatus.textContent = 'Chart link copied.';
+            } catch {
+                shareStatus.textContent = url;
+            }
+        });
+        seedRow.append(this.seedInput, randomBtn, shareBtn);
 
         const seedHint = document.createElement('span');
         seedHint.className = 'field__hint';
         seedHint.textContent = 'The same seed always raises the same islands — and the same fifteen Tidelanders.';
 
-        seedField.append(seedLabel, seedRow, seedHint);
+        seedField.append(seedLabel, seedRow, seedHint, shareStatus);
 
         const setSeed = (value) => {
             const parsed = Number.parseInt(value, 10);

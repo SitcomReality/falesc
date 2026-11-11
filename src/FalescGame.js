@@ -36,6 +36,7 @@ import { recordCharter, recordFromCharter } from './persistence/CharterArchive.j
 import { recordMilestones } from './persistence/MilestoneArchive.js';
 import { readMotion, writeMotion, applyMotion } from './settings/MotionPreference.js';
 import { readContrast, writeContrast, applyContrast } from './settings/ContrastPreference.js';
+import { readChartParams } from './settings/ChartLink.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
 import { CommonsModal } from './ui/CommonsModal.js';
@@ -73,6 +74,10 @@ export class FalescGame {
             mode: 'first-light',
             chapterName: 'Home Chapter'
         };
+        const chartParams = readChartParams();
+        if (chartParams.seed !== null) this.settings.mapSeed = chartParams.seed;
+        if (chartParams.size) this.settings.mapSize = chartParams.size;
+        if (chartParams.mode) this.settings.mode = chartParams.mode;
         this.charter = null;
         this.world = new World({
             onTap: (x, y) => this.onWorldTap(x, y),
