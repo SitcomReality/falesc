@@ -83,6 +83,16 @@ export default async function ({ page, assert, screenshot, log }) {
     assert.ok(built.result.ok, 'the player should still be able to build on the shared shard');
     assert.ok(built.rivalMoves.length > 0, 'a rival should make a move at the start of the day');
     assert.ok(built.standings.some((chapter) => chapter.plan), 'rivals should announce a long-term plan');
+    await page.click('.standings-row[data-chapter-id=gardener]');
+    await page.waitFor("window.__falesc.app.rivalDossier.isOpen === true");
+    const dossier = await page.text('[data-testid=rival-dossier]');
+    assert.ok(dossier.includes('The Gardener'));
+    assert.ok(dossier.includes('Planning') || dossier.includes('Saving for'));
+    assert.ok(dossier.includes('Canteen'));
+    await page.pause(300);
+    await screenshot('rival-dossier.png');
+    await page.click('[data-testid=rival-dossier-close]');
+    await page.waitFor("window.__falesc.app.rivalDossier.isOpen === false");
 
     // The Canteen opens overnight; day 3 is the first day it can earn visits.
     await page.evaluate("window.__falesc.openDay()");

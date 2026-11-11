@@ -112,6 +112,13 @@ building; solo First Light does not use the dividend. The **patronage flow overl
 `P`) traces each resident's last choice from their home door to the service
 door, coloured by chapter.
 
+## Rival dossiers
+
+Click a rival row in the Devotion standings to open its **dossier**: doctrine,
+Devotion, residents, visits, lumen, works, upkeep, its current plan and every
+service it operates. The dossier is read-only and is available whenever the
+standings are shown.
+
 ## Rival plans
 
 Each rival publishes a **long-term plan** in the Devotion standings: the next

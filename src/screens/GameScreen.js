@@ -183,7 +183,8 @@ export class GameScreen {
         this.standings = new StandingsCard({
             onToggleFlows: () => this.game.togglePatronage(),
             onOpenCampaign: () => this.game.showCampaign(),
-            onOpenCommons: () => this.game.showCommons()
+            onOpenCommons: () => this.game.showCommons(),
+            onOpenChapter: (chapterId) => this.game.showChapterDossier(chapterId)
         });
         this.container.append(top, objective, this.standings.element, hint, toast, bottom);
         document.body.appendChild(this.container);

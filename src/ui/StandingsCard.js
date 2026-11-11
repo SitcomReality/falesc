@@ -4,8 +4,9 @@ import { COMMONS_POLICY_BY_ID } from '../commons/CommonsPolicies.js';
  * Live Devotion standings for the Contest preview. Hidden in First Light.
  */
 export class StandingsCard {
-    constructor({ onToggleFlows = null, onOpenCampaign = null, onOpenCommons = null } = {}) {
+    constructor({ onToggleFlows = null, onOpenCampaign = null, onOpenCommons = null, onOpenChapter = null } = {}) {
         this.onToggleFlows = onToggleFlows;
+        this.onOpenChapter = onOpenChapter;
         this.onOpenCampaign = onOpenCampaign;
         this.onOpenCommons = onOpenCommons;
         this.signature = null;
@@ -34,6 +35,17 @@ export class StandingsCard {
             <ol class="standings-list" data-role="list"></ol>
         `;
         this.listEl = this.element.querySelector('[data-role=list]');
+        this.listEl.addEventListener('click', (event) => {
+            const row = event.target.closest('[data-chapter-id]');
+            if (row && this.onOpenChapter) this.onOpenChapter(row.dataset.chapterId);
+        });
+        this.listEl.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            const row = event.target.closest('[data-chapter-id]');
+            if (!row) return;
+            event.preventDefault();
+            this.onOpenChapter?.(row.dataset.chapterId);
+        });
         this.flowButton = this.element.querySelector('[data-testid=patronage-toggle]');
         this.flowButton.addEventListener('click', () => {
             if (this.onToggleFlows) this.onToggleFlows();
@@ -96,7 +108,7 @@ export class StandingsCard {
         if (signature === this.signature) return;
         this.signature = signature;
         this.listEl.innerHTML = ordered.map((chapter, index) => `
-            <li class="standings-row${chapter.isPlayer ? ' is-player' : ''}">
+            <li class="standings-row${chapter.isPlayer ? ' is-player' : ''}" ${chapter.isPlayer ? '' : `data-chapter-id="${chapter.id}" tabindex="0" role="button" aria-label="Open ${escapeHtml(chapter.name)} dossier"`}>
                 <span class="standings-row__rank">${index + 1}</span>
                 <span class="standings-row__dot" style="background:${chapter.colour}"></span>
                 <span class="standings-row__name">${escapeHtml(chapter.name)}${chapter.isPlayer ? ' (you)' : ''}</span>

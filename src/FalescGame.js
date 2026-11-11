@@ -27,6 +27,7 @@ import { DepartureArchiveModal } from './ui/DepartureArchiveModal.js';
 import { CharterArchiveModal } from './ui/CharterArchiveModal.js';
 import { NeedSurveyModal } from './ui/NeedSurveyModal.js';
 import { CharterLedgerModal } from './ui/CharterLedgerModal.js';
+import { RivalDossierModal } from './ui/RivalDossierModal.js';
 import { recordCharter, recordFromCharter } from './persistence/CharterArchive.js';
 import { readMotion, writeMotion, applyMotion } from './settings/MotionPreference.js';
 import { BulletinModal } from './ui/BulletinModal.js';
@@ -121,6 +122,7 @@ export class FalescGame {
         this.departureArchive = new DepartureArchiveModal({ game: this, overlays: this.overlays });
         this.needSurvey = new NeedSurveyModal({ game: this, overlays: this.overlays });
         this.ledger = new CharterLedgerModal({ game: this, overlays: this.overlays });
+        this.rivalDossier = new RivalDossierModal({ game: this, overlays: this.overlays });
         this.charterArchive = new CharterArchiveModal({
             overlays: this.overlays,
             onClear: () => this.menuScreen?.show()
@@ -300,6 +302,7 @@ export class FalescGame {
         this.charterArchive.hide();
         this.needSurvey.hide();
         this.ledger.hide();
+        this.rivalDossier.hide();
         this.visitorCard.hide();
     }
 
@@ -745,6 +748,13 @@ export class FalescGame {
         this.gameScreen?.updateHud?.(true);
         this.gameScreen?.toast?.(this.motion === 'reduced' ? 'Reduced motion on.' : 'Reduced motion off.', 'mint', 1800);
         return this.motion;
+    }
+
+    showChapterDossier(chapterId) {
+        const chapter = this.charter?.rivals.find((entry) => entry.id === chapterId);
+        if (!chapter) return false;
+        this.rivalDossier.show(chapter);
+        return true;
     }
 
     openLedger() {
