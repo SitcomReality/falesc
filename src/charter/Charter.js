@@ -606,6 +606,27 @@ export class Charter {
             : `${service.chapter.name}'s ${service.name}`;
     }
 
+    milestones() {
+        const services = this.allServices;
+        const open = services.filter((service) => service.state === 'ACTIVE' && !service.closed);
+        const needIds = NEEDS.map((need) => need.id);
+        return [
+            { id: 'first_build', label: 'Raise a service', done: this.services.services.some((service) => !service.fixed) },
+            { id: 'all_needs', label: 'Serve all four needs', done: needIds.every((needId) => open.some((service) => servesNeed(service.program, needId))) },
+            { id: 'six_housed', label: 'House six Tidelanders', done: this.housedPopulation >= 6 },
+            { id: 'full_house', label: 'House twelve Tidelanders', done: this.housedPopulation >= 12 },
+            { id: 'flourishing', label: 'Reach a flourishing of 62', done: this.flourishing >= BALANCE.end.comfortableFlourishing },
+            { id: 'district', label: 'Form a named district', done: (this.districtGroups || []).length > 0 },
+            { id: 'floor', label: 'Add an upper floor', done: services.some((service) => (service.floorPlans || []).length > 0) },
+            { id: 'module', label: 'Install a retrofit module', done: services.some((service) => (service.retrofits || []).length > 0) },
+            { id: 'beacon', label: 'Light the Commons Beacon', done: Boolean(this.commons?.active) },
+            { id: 'assembly', label: 'Hold a Commons Assembly', done: Boolean(this.commons?.policy) },
+            { id: 'annex', label: 'Add a Beacon annex', done: (this.commons?.level || 1) > 1 },
+            { id: 'visitor', label: 'Welcome a trial guest', done: this.roster.some((resident) => resident.memory?.trialStartDay) },
+            { id: 'garden', label: 'Build on the garden isle', done: services.some((service) => service.sector?.garden) }
+        ];
+    }
+
     careWatch() {
         const residents = this.activeResidents.filter((resident) => {
             const urgent = NEEDS.some((need) => (resident.needs[need.id] || 0) >= 85);

@@ -315,6 +315,13 @@ line with the count. Click it to open the need survey. The survey lists the resi
 a reason; clicking a name opens their resident card. It is a live planning
 signal, not a separate warning system.
 
+## Milestones
+
+The pause menu's **Milestones** is a read-only checklist of firsts: first
+service, all four needs, six and twelve housed, flourishing 62, a district, an
+upper floor, a retrofit, the Beacon, an Assembly, an annex, a trial guest and a
+garden-isle build. Milestones grant no lumen.
+
 ## Charter journal
 
 The pause menu's **Journal** records short milestones: ground-breaking, the

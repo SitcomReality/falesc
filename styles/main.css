@@ -4712,3 +4712,49 @@ html.is-reduced-motion *::after {
     font-size: 14px;
     line-height: 1.2;
 }
+
+/* Milestones -------------------------------------------------------------- */
+.milestones {
+    width: min(560px, calc(100vw - 32px));
+}
+
+.milestones__list {
+    display: grid;
+    gap: 5px;
+    max-height: 420px;
+    overflow-y: auto;
+    margin: 14px 0;
+    padding: 0 4px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.milestones__list li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(33, 18, 37, 0.18);
+    color: var(--ink-soft);
+}
+
+.milestones__list li span {
+    width: 18px;
+    flex: 0 0 18px;
+    font-family: var(--mono);
+    font-size: 13px;
+}
+
+.milestones__list li strong {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.milestones__list li.is-done {
+    color: var(--ink);
+}
+
+.milestones__list li.is-done span {
+    color: #1c7a60;
+}
