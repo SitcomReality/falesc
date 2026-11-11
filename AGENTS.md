@@ -50,6 +50,7 @@ webgame_smoke --scenario scripts/scenarios/campaign.mjs
 webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 webgame_smoke --scenario scripts/scenarios/commons.mjs
 webgame_smoke --scenario scripts/scenarios/visitors.mjs
+webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 ```
 
 The CLI equivalents and the full scenario list are in
@@ -173,8 +174,8 @@ after any behavioural change.
   Beacon can be funded by every chapter; once lit it gives every resident a
   nightly comfort and opens as a six-seat all-needs shared service. Contest days
   also bring 2–3 transient visitors who use services, pay 1 lumen per visit and
-  leave before the next day; they are not residents, voters or save entries.
-  This is a first pass; a separate shared-commons island,
+  leave before the next day. A charmed visitor with a spare bed can be invited
+  from the report and becomes an ordinary resident. This is a first pass; a separate shared-commons island,
   a larger multi-round festival, auctions and systemic stewardship effects are
   still missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do

@@ -244,6 +244,18 @@ export class FalescGame {
         return true;
     }
 
+    inviteVisitor(visitorId) {
+        if (!this.charter) return { ok: false, reason: 'No charter.' };
+        const result = this.charter.inviteVisitor(visitorId);
+        if (!result.ok) return result;
+        this.crowd.sync();
+        this.gameScreen.updateHud(true);
+        this.reportScreen.show();
+        this.saveGame();
+        this.gameScreen.toast(`${result.resident.name} has a bed of their own now.`, 'mint', 2400);
+        return result;
+    }
+
     contributeCommons(amount) {
         if (!this.charter) return { ok: false, reason: 'No charter.' };
         const result = this.charter.contributeCommons(this.charter.player, amount);
@@ -795,6 +807,8 @@ export class FalescGame {
                         visitors: report.visitors || 0,
                         visitorFees: report.visitorFees || 0,
                         playerVisitorFees: report.playerVisitorFees || 0,
+                        visitorDetails: (report.visitorDetails || []).map((visitor) => ({ ...visitor })),
+                        stayedVisitors: report.stayedVisitors || 0,
                         visitorFeesByChapter: report.visitorFeesByChapter || {},
                         upkeep: report.upkeep,
                         net: report.net,
@@ -810,6 +824,8 @@ export class FalescGame {
                         visitors: report.visitors || 0,
                         visitorFees: report.visitorFees || 0,
                         playerVisitorFees: report.playerVisitorFees || 0,
+                        visitorDetails: (report.visitorDetails || []).map((visitor) => ({ ...visitor })),
+                        stayedVisitors: report.stayedVisitors || 0,
                         commons: report.commons || null,
                         population: report.population,
                         quotes: report.quotes,

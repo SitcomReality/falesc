@@ -33,7 +33,7 @@ Severity is about impact on the slice, not effort:
 | 11 | Low | WebGL context loss is not handled |
 | 12 | Low | Visual regression is not enabled and no baseline is committed |
 | 13 | Low | Minor teardown and cleanup gaps remain |
-| 14 | Low | Visitors are one-day service users with no overnight stay, vote or personal card |
+| 14 | Low | Visitors have no card or return arc; overnight stays only through a full residency invite |
 
 ## Open issues
 
@@ -322,20 +322,21 @@ baselined once the ambient flow is settled; see
 day, flagged `visitor` and excluded from `activeResidents`, housing, Devotion,
 arrivals and the Confluence vote.
 - They are cleared on the next day and are not serialized.
-- They have no resident card, portrait, history or overnight needs.
+- They have no resident card, portrait or return arc; an invited visitor becomes a
+full resident with a bed and a vote, so there is no middle state.
 - They exist only in Contest mode; First Light remains resident-only.
 
 **Impact**
 
-Visitors give the services a second audience and a visible trade income, but they
-are not full people with arcs. They cannot become residents, testify in the
-vote, or return across days.
+Visitors give the services a second audience and a visible trade income. A charmed
+visitor can become a resident, but there is no visitor card, no returning
+relationship and no overnight stay without joining.
 
 **Suggested fix**
 
-Add a visitor card, a small return/relationship track, and eventually a route for
-a visitor to request a bed. Consider solo visitors once the First Light economy
-is retuned.
+Add a visitor card, a small return/relationship track, and a trial-stay state
+before full residency. Consider solo visitors once the First Light economy is
+retuned.
 
 ## Fixed in recent slices
 
@@ -365,7 +366,7 @@ These are no longer open:
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
-- **Day visitors.** 2–3 transient Contest visitors arrive each day, use services, pay visitor fees and leave before the next day. Covered by `visitors.mjs`.
+- **Day visitors.** 2–3 transient Contest visitors arrive each day, use services, pay visitor fees and leave before the next day unless invited to stay. Covered by `visitors.mjs` and `visitor-stay.mjs`.
 - **Shared Commons Beacon.** A reserved 2×2 shared civic project can be funded by the player and rivals; when lit it applies a nightly multi-need comfort and becomes a six-seat all-needs service. It is covered by `commons.mjs`.
 - **Contest full-season probe.** `contest-season.mjs` plays all 14 medium days, checks the campaign and Confluence, and records the economy/population trajectory for tuning.
 - **Contest economy, campaign and Confluence preview.** Two rival chapters, shared services/residents, rival housing/economy/closures, recovery and need-pressure builds, Devotion standings, the patronage-flow overlay, a three-day campaign with a festival programme and rival promises, a pledge/vote Confluence finale and a post-vote stewardship epilogue are implemented and covered by `contest.mjs`, `contest-recovery.mjs`, `campaign.mjs` and `confluence-defeat.mjs`.

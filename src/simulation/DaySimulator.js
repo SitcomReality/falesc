@@ -410,6 +410,14 @@ export class DaySimulator {
         charter.devotion = charter.devotionByChapter.player || 0;
         const campaignEvent = this.campaignEvent;
         const visitors = this.charter.visitors || [];
+        const visitorDetails = visitors.map((visitor) => ({
+            id: visitor.id,
+            name: visitor.name,
+            wellbeing: Math.round(visitor.wellbeing * 10) / 10,
+            visits: visitor.memory.recentVisits?.length || 0,
+            affinity: Math.round(visitor.getAffinity('player') * 100) / 100,
+            lastChoice: visitor.memory.lastChoice?.serviceName || null
+        }));
         const visitorFees = Object.values(this.visitorFees).reduce((sum, value) => sum + value, 0);
         const commons = this.charter.commons ? {
             active: Boolean(this.charter.commons.active),
@@ -468,6 +476,8 @@ export class DaySimulator {
             visitors: visitors.length,
             visitorFees,
             visitorFeesByChapter: { ...this.visitorFees },
+            visitorDetails,
+            stayedVisitors: 0,
             commons,
             devotionByChapter,
             patronageByChapter,

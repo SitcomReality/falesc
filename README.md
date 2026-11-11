@@ -55,8 +55,9 @@ so any static file server works, but ES modules require `http://`, not `file://`
 - Fund the shared **Commons Beacon** from the HUD card; every chapter can give
   lumen, and once lit it eases every resident's needs at night.
 - On Contest days, watch for 2–3 **day visitors**. They use services and pay a
-  small fee to the chapter whose door they choose, but they leave before the
-  next day and never join the resident vote.
+  small fee to the chapter whose door they choose. A visitor who likes your
+  chapter and a spare bed can be invited to stay; they then join the resident
+  vote.
 - In the last three Contest days, choose a **campaign promise** from the
   standings card or the automatic campaign dialog. Rivals publish theirs, and a
   three-day festival programme makes matching services more magnetic.
@@ -105,6 +106,7 @@ webgame_smoke --scenario scripts/scenarios/campaign.mjs
 webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 webgame_smoke --scenario scripts/scenarios/commons.mjs
 webgame_smoke --scenario scripts/scenarios/visitors.mjs
+webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```
 

@@ -321,7 +321,10 @@ for the phase loop and the crowd, but excluded from `activeResidents`, housing,
 arrivals, Devotion and votes. `Charter.beginNextDay()` clears them. A visitor
 visit adds `BALANCE.visitors.fee` to `DaySimulator.visitorFees`; `LumenLedger`
 adds that to the owning chapter and reports `visitorFees` separately. Visitors
-are not serialized.
+are not serialized. A charmed visitor (`affinity.player >= 0.15`) can be invited
+from the report when the player has a spare bed; `Charter.inviteVisitor()`
+clears the visitor flag, adds them to the roster, assigns a bed and saves them
+as an ordinary resident.
 
 `DaySimulator.applyNightRest()` eases every need by `BALANCE.commons.comfort`
 (3) after the home rest, and `servesNeed()` lets the six-seat Beacon answer any

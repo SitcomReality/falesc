@@ -232,8 +232,8 @@ The vote must not feel arbitrary. Before the result:
 
 The current Contest brings **2–3 day visitors** each day. They use services and
 pay a small visitor fee to the chapter whose door they use, but they do not
-stay, vote or join the resident roster. A fuller visitor arc, return visits and
-a path from visitor to resident remain target.
+stay or vote unless a charmed visitor is offered a spare bed. A fuller visitor
+card, return visits and a trial-stay state remain target.
 
 ### The Commons Beacon
 

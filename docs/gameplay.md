@@ -117,8 +117,11 @@ are not residents: they have no bed, no vote and no place in the roster, and
 they leave when the next day begins. They do use the archipelago's services and
 pay **1 lumen per visit** to the chapter whose door they use. Their fees appear
 in the evening report and the chapter ledgers; their visits count in the
-event's totals and can crowd queues. The Commons Beacon charges no fee. Visitors
-are a Contest feature for now; First Light remains resident-only.
+event's totals and can crowd queues. The Commons Beacon charges no fee. A visitor who has spent time with one of
+your services (player affinity at least **0.15**) and a **spare bed** can be
+invited to stay from the evening report; they join the resident roster, keep
+their name and memory, and can vote in the Confluence. Visitors are a Contest
+feature for now; First Light remains resident-only.
 
 ## The Commons Beacon
 

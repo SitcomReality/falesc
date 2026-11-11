@@ -3562,3 +3562,49 @@ body.has-modal > canvas {
     font-size: 12px;
     line-height: 1.45;
 }
+
+/* Visitor invitations ---------------------------------------------------- */
+
+.btn--tiny {
+    padding: 4px 8px;
+    font-size: 9px;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.report__visitors {
+    display: grid;
+    gap: 4px;
+}
+
+.report__visitor {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 0;
+    border-top: 1px solid rgba(33, 18, 37, 0.18);
+}
+
+.report__visitor strong {
+    display: block;
+    font-family: var(--display);
+    font-size: 15px;
+    line-height: 1.1;
+}
+
+.report__visitor small {
+    display: block;
+    margin-top: 1px;
+    color: var(--ink-soft);
+    font-size: 10px;
+}
+
+.report__visitor-note {
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}

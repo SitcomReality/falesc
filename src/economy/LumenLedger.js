@@ -133,7 +133,7 @@ export class LumenLedger {
         }))).map((entry) => {
             const economy = summaries.find((summary) => summary.chapterId === entry.id);
             return economy
-                ? { ...entry, contributions: economy.contributions, dividend: economy.dividend, upkeep: economy.upkeep, net: economy.net, lumen: economy.lumen, residents: economy.residents, closures: economy.closures }
+                ? { ...entry, contributions: economy.contributions, dividend: economy.dividend, visitorFees: economy.visitorFees, upkeep: economy.upkeep, net: economy.net, lumen: economy.lumen, residents: economy.residents, closures: economy.closures }
                 : entry;
         });
         return { summaries, player };

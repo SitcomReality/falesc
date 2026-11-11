@@ -11,7 +11,8 @@ export const BALANCE = {
     visitors: {
         min: 2,
         max: 3,
-        fee: 1
+        fee: 1,
+        stayAffinity: 0.15
     },
     commons: {
         target: 20,

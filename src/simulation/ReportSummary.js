@@ -36,6 +36,8 @@ export function summarizeReport(report) {
         visitorFees: report.visitorFees || 0,
         playerVisitorFees: report.playerVisitorFees || 0,
         visitorFeesByChapter: { ...(report.visitorFeesByChapter || {}) },
+        visitorDetails: (report.visitorDetails || []).map((visitor) => ({ ...visitor })),
+        stayedVisitors: report.stayedVisitors || 0,
         commons: report.commons ? { ...report.commons } : null,
         outcome: report.outcome || null,
         message: report.message,

@@ -1,4 +1,5 @@
 import { NEEDS } from '../design/needs.js';
+import { BALANCE } from '../design/balance.js';
 
 /**
  * The evening broadsheet. This is the emotional payoff: visits, hearts,
@@ -51,7 +52,7 @@ export class ReportScreen {
         const contest = report.chapters?.length > 1;
         const standings = contest
             ? `<h2>Standings</h2><ul class="report__list report__list--services">${[...report.chapters].sort((a, b) => b.devotion - a.devotion).map((chapter) => `<li><span>${escapeHtml(chapter.name)}${chapter.isPlayer ? ' (you)' : ''}</span><span>${chapter.devotion.toFixed(1)} ♥ · ${chapter.visits} visits${Number.isFinite(chapter.residents) ? ` · ${chapter.residents} residents` : ''}</span></li>`).join('')}</ul>`
-                + `<h2>Chapter ledgers</h2><ul class="report__list report__list--services">${report.chapters.map((chapter) => `<li><span>${escapeHtml(chapter.name)}</span><span>+${chapter.contributions ?? 0}${chapter.visitorFees ? ` +${chapter.visitorFees} visitors` : ''} −${chapter.upkeep ?? 0} · ${chapter.lumen ?? 0} lumen</span></li>`).join('')}</ul>`
+                + `<h2>Chapter ledgers</h2><ul class="report__list report__list--services">${report.chapters.map((chapter) => `<li><span>${escapeHtml(chapter.name)}</span><span>+${chapter.contributions ?? 0}${chapter.visitorFees ? ` +${chapter.visitorFees} visitor${chapter.visitorFees === 1 ? '' : 's'}` : ''} −${chapter.upkeep ?? 0} · ${chapter.lumen ?? 0} lumen</span></li>`).join('')}</ul>`
             : '';
         const arrivals = report.arrivals?.length
             ? `<h2>Arrivals</h2><ul class="report__list report__list--services">${report.arrivals.map((arrival) => `<li><span>${escapeHtml(arrival.name)}</span><span>${escapeHtml(arrival.chapterName ? `${arrival.chapterName} · new bed` : 'new bed')}</span></li>`).join('')}</ul>`
@@ -65,8 +66,23 @@ export class ReportScreen {
         const festival = report.campaignEvent
             ? `<p class="report__warning">Festival programme: <strong>${escapeHtml(report.campaignEvent.title)}</strong> — ${escapeHtml(report.campaignEvent.blurb)}</p>`
             : '';
+        const stayedVisitors = report.stayedVisitors || 0;
         const visitorsNote = report.visitors
-            ? `<p class="report__warning">${report.visitors} day visitors left ${report.visitorFees ?? 0} lumen across the archipelago; your chapter earned ${report.playerVisitorFees ?? 0}.</p>`
+            ? `<p class="report__warning">${report.visitors} day visitors left ${report.visitorFees ?? 0} lumen across the archipelago; your chapter earned ${report.playerVisitorFees ?? 0}.${stayedVisitors ? ` Of them, ${stayedVisitors} chose a bed and stayed.` : ''}</p>`
+            : '';
+        const liveVisitorIds = new Set((this.game.charter?.visitors || []).map((visitor) => visitor.id));
+        const visitorRows = (report.visitorDetails || [])
+            .filter((visitor) => liveVisitorIds.has(visitor.id))
+            .map((visitor) => {
+                const charmed = visitor.affinity >= BALANCE.visitors.stayAffinity;
+                const canStay = charmed && (this.game.charter?.spareBeds || 0) > 0;
+                const action = canStay
+                    ? `<button type="button" class="btn btn--paper btn--tiny" data-testid="invite-visitor" data-visitor-id="${escapeHtml(visitor.id)}">Invite to stay</button>`
+                    : `<span class="report__visitor-note">${charmed ? 'no spare bed' : 'still a stranger'}</span>`;
+                return `<li class="report__visitor"><span><strong>${escapeHtml(visitor.name)}</strong><small>${visitor.visits || 0} ${visitor.visits === 1 ? 'visit' : 'visits'} · ${visitor.wellbeing ?? 0} wellbeing</small></span>${action}</li>`;
+            }).join('');
+        const visitorsSection = visitorRows
+            ? `<h2>Visitors</h2><ul class="report__list report__visitors">${visitorRows}</ul>`
             : '';
         const commonsVisits = report.patronageByChapter?.commons || 0;
         const commonsNote = report.commons
@@ -104,6 +120,7 @@ export class ReportScreen {
                     <section>
                         <h2>Word of mouth</h2>
                         <div class="report__quotes">${quotes}</div>
+                        ${visitorsSection}
                         ${standings}
                         ${arrivals}
                         ${departures}
@@ -124,6 +141,12 @@ export class ReportScreen {
             if (ending) this.game.finishCharter();
             else if (confluence) this.game.showConfluence();
             else this.game.beginNextDay();
+        });
+        this.container.querySelectorAll('[data-testid=invite-visitor]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const result = this.game.inviteVisitor(button.dataset.visitorId);
+                if (!result.ok) this.game.gameScreen.toast(result.reason, 'coral', 2200);
+            });
         });
         this.container.style.display = 'flex';
         requestAnimationFrame(() => {

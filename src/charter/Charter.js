@@ -520,6 +520,28 @@ export class Charter {
         this.visitors = [];
     }
 
+    inviteVisitor(visitorId) {
+        const visitor = this.visitors.find((entry) => entry.id === visitorId);
+        if (!visitor) return { ok: false, reason: 'That visitor has already left.' };
+        if (this.spareBeds <= 0) return { ok: false, reason: 'There is no spare bed.' };
+        if (visitor.getAffinity('player') < BALANCE.visitors.stayAffinity) {
+            return { ok: false, reason: 'They did not spend enough time with your chapter.' };
+        }
+        this.visitors = this.visitors.filter((entry) => entry.id !== visitorId);
+        visitor.visitor = false;
+        visitor.active = true;
+        visitor.state = 'idle';
+        visitor.homeChapterId = 'player';
+        visitor.homeServiceId = null;
+        this.roster.push(visitor);
+        this.assignHomes();
+        this.refreshDerived();
+        if (this.lastReport) {
+            this.lastReport.stayedVisitors = (this.lastReport.stayedVisitors || 0) + 1;
+        }
+        return { ok: true, resident: visitor };
+    }
+
     openDay() {
         if (this.ending) return { report: this.lastReport, events: [] };
         this.spawnVisitors();
