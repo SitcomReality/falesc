@@ -53,15 +53,17 @@ export class ServiceCardModal {
             </div>
             <p class="modal__blurb" data-role="blurb"></p>
             <dl class="service-facts" data-role="facts"></dl>
-            <label class="service-hours" data-role="hours-wrap" hidden>Hours
-                <select data-testid="service-hours">${SERVICE_HOURS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
-            </label>
-            <label class="service-hours" data-role="vibe-wrap" hidden>Atmosphere
-                <select data-testid="service-vibe">${SERVICE_VIBES.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
-            </label>
-            <label class="service-hours" data-role="access-wrap" hidden>Welcome
-                <select data-testid="service-access">${SERVICE_ACCESS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
-            </label>
+            <div class="service-policy-row">
+                <label class="service-hours" data-role="hours-wrap" hidden>Hours
+                    <select data-testid="service-hours">${SERVICE_HOURS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
+                </label>
+                <label class="service-hours" data-role="vibe-wrap" hidden>Atmosphere
+                    <select data-testid="service-vibe">${SERVICE_VIBES.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
+                </label>
+                <label class="service-hours" data-role="access-wrap" hidden>Welcome
+                    <select data-testid="service-access">${SERVICE_ACCESS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
+                </label>
+            </div>
             <p class="modal__note" data-role="note"></p>
             <p class="modal__error" data-role="error" aria-live="polite"></p>
             <div class="modal__actions">
