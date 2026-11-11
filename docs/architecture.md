@@ -185,7 +185,7 @@ service, agent or overlay between runs.
 
 ## 3. State machine and screens
 
-`src/controls/             document-level HUD keyboard controller
+`src/controls/             HUD keyboard controller and build cursor/placement preview
 src/charter/Bulletin.js    morning bulletin copy
 src/state/GamePhase.js` defines:
 

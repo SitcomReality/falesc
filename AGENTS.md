@@ -127,9 +127,10 @@ after any behavioural change.
 | `src/residents/` | `Resident` model, seeded resident/visitor factories, visual agent, crowd |
 | `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
 | `src/state/` | `GamePhase` constants and `ScreenStateMachine` |
-| `src/controls/` | Document-level HUD keyboard shortcuts |
+| `src/controls/` | HUD keyboard shortcuts and the build cursor / placement preview |
 | `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, Confluence, stewardship, end |
 | `src/audio/` | Procedural soundscape, persisted mute toggle |
+| `src/settings/` | Persisted motion and contrast preferences, OS defaults |
 | `src/ui/` | Shared `OverlayManager`, build/service/bulletin/campaign/commons/resident/visitor modals, standings, survey chart, chatter, icons |
 | `src/map/` | Seeded single-pass island generation, packing, grids, sector art, paths |
 | `src/character/`, `src/Character.js` | Procedural chibi rig and animation |

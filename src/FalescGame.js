@@ -49,6 +49,7 @@ import { BUILDABLE_PROGRAMS, PROGRAM_BY_ID } from './design/programs.js';
 import { DAY_PHASES, BALANCE } from './design/balance.js';
 import { BuildingRenderer } from './buildings/BuildingRenderer.js';
 import { installDebugApi } from './debug/DebugApi.js';
+import { BuildCursor } from './controls/BuildCursor.js';
 
 /** The dock opens on the Canteen: the first unmet need in a new charter. */
 function defaultProgramId() {
@@ -92,8 +93,6 @@ export class FalescGame {
 
         this.selectedProgramId = defaultProgramId();
         this.pendingBuildLocation = null;
-        this.keyboardCursor = null;
-        this.keyboardCursorActive = false;
         this.hintDismissed = false;
         this.frameCount = 0;
         this.tideMood = -1;
@@ -101,6 +100,7 @@ export class FalescGame {
         this.playbackSpeed = 1;
         this.endResult = null;
         this.overlays = new OverlayManager({ inputManager: this.world.input });
+        this.buildCursor = new BuildCursor(this);
 
         this.buildModal = new BuildModal({
             onBuild: (name, finish) => this.finalizeBuild(name, finish),
@@ -537,184 +537,43 @@ export class FalescGame {
             this.world.clearHover();
             return;
         }
-        this.paintPlacementPreview(target, program);
+        this.buildCursor.paint(target, program);
     }
 
-    paintPlacementPreview(target, program) {
-        const check = this.charter.services.canPlace(program.id, target.sector.id, target.u, target.v);
-        const key = `${target.sector.id}:${target.u}:${target.v}:${program.id}:${check.ok}`;
-        if (key === this.world.hoverCellKey) return;
-        this.world.hoverCellKey = key;
-
-        const width = program.footprint.w;
-        const height = program.footprint.h;
-        this.world.hoverG.clear();
-        for (let dv = 0; dv < height; dv++) {
-            for (let du = 0; du < width; du++) {
-                this.drawCellHighlight(target.sector, target.u + du, target.v + dv, check.ok);
-            }
-        }
-
-        this.world.hoverGhostG.clear();
-        if (check.ok) {
-            const center = target.sector._project(target.u + width / 2, target.v + height / 2);
-            this.world.hoverGhost.position.set(center.x, center.y);
-            BuildingRenderer.draw(this.world.hoverGhostG, {
-                programId: program.id,
-                blueprintId: program.id,
-                state: 'PENDING'
-            });
-            this.world.hoverGhost.alpha = 0.34;
-            this.world.hoverGhost.visible = true;
-        } else {
-            this.world.hoverGhost.visible = false;
-        }
+    get keyboardCursorActive() {
+        return this.buildCursor?.active || false;
     }
 
-    drawCellHighlight(sector, u, v, valid) {
-        if (u < 0 || v < 0 || u >= sector.gridSize || v >= sector.gridSize) return;
-        const corners = [
-            sector._project(u, v),
-            sector._project(u + 1, v),
-            sector._project(u + 1, v + 1),
-            sector._project(u, v + 1)
-        ];
-        this.world.hoverG.beginFill(valid ? 0x59e3c2 : 0xff6b5e, valid ? 0.2 : 0.14);
-        this.world.hoverG.lineStyle(2.5, 0x211225, 0.9);
-        this.world.hoverG.moveTo(corners[0].x, corners[0].y);
-        for (let index = 1; index < corners.length; index++) {
-            this.world.hoverG.lineTo(corners[index].x, corners[index].y);
-        }
-        this.world.hoverG.closePath();
-        this.world.hoverG.endFill();
+    get keyboardCursor() {
+        return this.buildCursor?.cursor || null;
     }
 
     findGridTarget(x, y) {
-        const sectors = this.buildableSectors();
-        for (const sector of sectors) {
-            const cell = sector.getGridCell(x, y);
-            if (cell.u < 0 || cell.v < 0 || cell.u >= sector.gridSize || cell.v >= sector.gridSize) continue;
-            return { sector, u: Math.floor(cell.u), v: Math.floor(cell.v) };
-        }
-        return null;
+        return this.buildCursor.findGridTarget(x, y);
     }
 
-
     toggleKeyboardCursor() {
-        if (!this.charter || this.screenStateMachine.state !== GamePhase.PLAYING || this.hasBlockingModal()) return false;
-        if (this.keyboardCursorActive) {
-            this.clearKeyboardCursor();
-            return false;
-        }
-        const home = this.world.homeSector;
-        const program = PROGRAM_BY_ID[this.selectedProgramId];
-        const maxU = Math.max(0, home.gridSize - (program?.footprint?.w || 1));
-        const maxV = Math.max(0, home.gridSize - (program?.footprint?.h || 1));
-        this.keyboardCursor = {
-            sectorId: home.id,
-            u: Math.min(maxU, Math.floor(home.gridSize / 2)),
-            v: Math.min(maxV, Math.floor(home.gridSize / 2))
-        };
-        this.keyboardCursorActive = true;
-        this.world.input.setCameraSuppressed(true);
-        this.renderKeyboardCursor();
-        this.gameScreen.announceCursor('Build cursor on. Arrow keys move, G switches isle, Enter opens the build dialog, Escape leaves.');
-        this.gameScreen.toast('Build cursor: arrows move, G switches isle, Enter opens, Esc leaves.', 'mint', 3200);
-        return true;
+        return this.buildCursor.toggle();
     }
 
     moveKeyboardCursor(dx, dy) {
-        if (!this.keyboardCursorActive || !this.keyboardCursor) return false;
-        const sectors = this.buildableSectors();
-        const sector = sectors.find((entry) => entry.id === this.keyboardCursor.sectorId) || sectors[0];
-        const program = PROGRAM_BY_ID[this.selectedProgramId];
-        const maxU = Math.max(0, sector.gridSize - (program?.footprint?.w || 1));
-        const maxV = Math.max(0, sector.gridSize - (program?.footprint?.h || 1));
-        this.keyboardCursor.u = Math.max(0, Math.min(maxU, this.keyboardCursor.u + dx));
-        this.keyboardCursor.v = Math.max(0, Math.min(maxV, this.keyboardCursor.v + dy));
-        this.renderKeyboardCursor();
-        return true;
+        return this.buildCursor.move(dx, dy);
     }
 
     switchKeyboardSector() {
-        if (!this.keyboardCursorActive || !this.keyboardCursor) return false;
-        const sectors = this.buildableSectors();
-        if (sectors.length < 2) return false;
-        const current = this.keyboardCursor.sectorId;
-        const next = sectors.find((sector) => sector.id !== current) || sectors[0];
-        const program = PROGRAM_BY_ID[this.selectedProgramId];
-        this.keyboardCursor = {
-            sectorId: next.id,
-            u: Math.max(0, Math.min(next.gridSize - (program?.footprint?.w || 1), Math.floor(next.gridSize / 2))),
-            v: Math.max(0, Math.min(next.gridSize - (program?.footprint?.h || 1), Math.floor(next.gridSize / 2)))
-        };
-        this.renderKeyboardCursor();
-        return true;
+        return this.buildCursor.switchSector();
     }
 
     renderKeyboardCursor() {
-        if (!this.keyboardCursorActive || !this.keyboardCursor || !this.charter) {
-            this.world.clearHover();
-            return;
-        }
-        const sector = this.buildableSectors().find((entry) => entry?.id === this.keyboardCursor.sectorId);
-        if (!sector) {
-            this.clearKeyboardCursor();
-            return;
-        }
-        const program = PROGRAM_BY_ID[this.selectedProgramId];
-        if (!program) {
-            this.world.clearHover();
-            return;
-        }
-        this.paintPlacementPreview({ sector, u: this.keyboardCursor.u, v: this.keyboardCursor.v }, program);
-        const check = this.charter.services.canPlace(program.id, sector.id, this.keyboardCursor.u, this.keyboardCursor.v);
-        const isle = sector.garden ? 'garden isle' : sector.commons ? 'commons isle' : 'home shard';
-        this.gameScreen.announceCursor(`Build cursor on the ${isle}, cell ${this.keyboardCursor.u}, ${this.keyboardCursor.v}. ${check.ok ? 'Plot is free.' : check.reason}`);
+        return this.buildCursor.render();
     }
 
     confirmKeyboardCursor() {
-        if (!this.keyboardCursorActive || !this.keyboardCursor || !this.charter) return false;
-        const sector = this.buildableSectors().find((entry) => entry?.id === this.keyboardCursor.sectorId);
-        if (!sector) return false;
-        const u = this.keyboardCursor.u;
-        const v = this.keyboardCursor.v;
-        const existing = this.charter.services.serviceAt(sector.id, u, v);
-        this.clearKeyboardCursor();
-        if (existing) {
-            if (existing.isTransit) {
-                this.gameScreen.toast('The shuttle docks here. Build on the outer isle from the same dock.', 'mint', 2200);
-            } else if (existing.id === this.charter.commons.serviceId) {
-                this.showCommons();
-            } else {
-                this.serviceCard.show(existing);
-            }
-            return true;
-        }
-        const program = PROGRAM_BY_ID[this.selectedProgramId];
-        if (!program) return false;
-        const check = this.charter.services.canPlace(program.id, sector.id, u, v);
-        if (!check.ok) {
-            this.gameScreen.toast(check.reason, 'coral');
-            return false;
-        }
-        const sharedCapital = sector.commons ? (this.charter.commons?.capital || 0) : 0;
-        const affordable = this.charter.canBuild(program.id, 'comfortable', sharedCapital);
-        if (!affordable.ok) {
-            this.gameScreen.toast(affordable.reason, 'coral');
-            return false;
-        }
-        this.pendingBuildLocation = { sectorId: sector.id, u, v };
-        this.buildModal.show(program, { lumen: this.charter.lumen + sharedCapital, works: this.charter.works });
-        return true;
+        return this.buildCursor.confirm();
     }
 
     clearKeyboardCursor() {
-        this.gameScreen?.announceCursor?.('Build cursor off.');
-        this.keyboardCursorActive = false;
-        this.keyboardCursor = null;
-        this.world.input.setCameraSuppressed(false);
-        this.world.clearHover();
+        return this.buildCursor.clear();
     }
 
     onWorldTap(x, y) {
