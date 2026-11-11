@@ -12,7 +12,8 @@ export const BLUEPRINTS = [
         category: 'Harvest',
         cost: 3,
         income: 2,
-        blurb: 'A nimble derrick for coaxing lumen out of the reef. Cheap, quick, and the sensible first move.',
+        blurb: 'A nimble derrick for coaxing lumen out of the reef. Cheap, quick, and the sensible first move. Crystals within reach add +1 lumen per tide.',
+        affinityBonus: 1,
         accent: 'mint',
         testid: 'blueprint-prism-rig'
     },
@@ -22,7 +23,8 @@ export const BLUEPRINTS = [
         category: 'Harvest',
         cost: 5,
         income: 3,
-        blurb: 'Terraced pools that let the tide do the work. A bigger investment with a steadier return.',
+        blurb: 'Terraced pools that let the tide do the work. A bigger investment with a steadier return. Crystals within reach add +1 lumen per tide.',
+        affinityBonus: 1,
         accent: 'cyan',
         testid: 'blueprint-tide-garden'
     },
@@ -54,6 +56,7 @@ export const BLUEPRINTS = [
 export const BLUEPRINT_BY_ID = Object.fromEntries(BLUEPRINTS.map((blueprint) => [blueprint.id, blueprint]));
 
 export const BEACON_ID = 'aurora_beacon';
+export const AFFINITY_RANGE = 460;
 export const DEFAULT_BLUEPRINT_ID = 'prism_rig';
 
 /** Dynamic Beacon price after Lantern House discounts (never below 6). */

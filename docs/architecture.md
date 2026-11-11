@@ -180,6 +180,9 @@ the build grid on a random island. Both use per-item seeded RNG streams.
 
 `effectiveCost(blueprint, buildings)` computes the dynamic Beacon cost. Starting
 lumen is 8; one action per tide; active structures pay income at resolution.
+Prism Rigs and Tide Gardens within `AFFINITY_RANGE` (460 px) of a crystal gain
++1 lumen/tide; `Building.income` stores the base plus bonus, and the bonus is
+persisted and included in HUD/snapshot income.
 
 ### Build interaction
 
@@ -201,7 +204,7 @@ lumen is 8; one action per tide; active structures pay income at resolution.
 Buildings are added to `characterLayer` so they share Y-sorted draw order with
 characters and minerals. `BuildingRenderer` draws four distinct illustrated
 silhouettes; under-construction states are ghosted and scaffolded, and `PENDING`
-pulses.
+pulses. A small living-crystal outcrop marks a structure with crystal affinity.
 
 ## 7. Characters, animation, and AI
 

@@ -53,14 +53,20 @@ active this tide starts paying next tide.
 
 | Blueprint | Cost | Income | Role |
 | --- | --- | --- | --- |
-| **Prism Rig** | 3 lumen | +2 / tide | Cheap, reliable opening economy. |
-| **Tide Garden** | 5 lumen | +3 / tide | Stronger economy, slower payback. |
+| **Prism Rig** | 3 lumen | +2 / tide | Cheap, reliable opening economy. +1 when built within 460 px of a crystal. |
+| **Tide Garden** | 5 lumen | +3 / tide | Stronger economy, slower payback. +1 when built within 460 px of a crystal. |
 | **Lantern House** | 4 lumen | +1 / tide | Support. Each one reduces the Aurora Beacon's price by 3 (floor 6). |
 | **Aurora Beacon** | 12 lumen (dynamic) | — | Unique charter goal. Must become `ACTIVE` to win. |
 
 The Beacon's displayed price is dynamic: `max(6, 12 − 3 × Lantern Houses)`. An
 armed blueprint costs nothing until the build dialog is confirmed. If the plot
 creation fails, no lumen or action is spent.
+
+**Crystal affinity.** Prism Rigs and Tide Gardens within 460 world pixels of a
+crystal gain +1 lumen per tide. The build dialog announces it, the structure
+gets a small crystal outcrop, and the bonus is stored in the save. The first
+free plot in the default seed is deliberately not within range, so a player who
+only clicks the obvious centre pays for the lesson.
 
 The build dock disables blueprints that are unaffordable, already unique, or
 blocked because the tide's build action is spent. Hovering a disabled card
@@ -104,7 +110,8 @@ discarded rather than partially loaded.
 ## Current limitations
 
 - No demolition or upgrades.
-- No placement restrictions around minerals, characters, or ownership.
+- No placement restrictions around minerals, characters, or ownership; crystal
+  affinity is a positive bonus, not a blocking rule.
 - No audio.
 - No multiplayer; the menu labels it “soon”.
 - No keyboard build cursor: placement is pointer/touch only.

@@ -43,7 +43,33 @@ export class BuildingRenderer {
                 break;
         }
 
+        if (building.bonusIncome > 0) BuildingRenderer.drawAffinityCluster(graphics);
+
         if (ghost) BuildingRenderer.drawScaffold(graphics, building.state === 'PENDING');
+    }
+
+    static drawAffinityCluster(graphics) {
+        // A small living-crystal outcrop marks a structure with crystal affinity.
+        graphics.beginFill(MINT, 0.16);
+        graphics.lineStyle(0);
+        graphics.drawCircle(-88, 50, 24);
+        graphics.endFill();
+
+        const shards = [
+            { x: -104, y: 52, w: 9, h: 30 },
+            { x: -92, y: 58, w: 7, h: 21 },
+            { x: -113, y: 58, w: 6, h: 17 }
+        ];
+        for (const shard of shards) {
+            graphics.beginFill(shard.h === 30 ? MINT : MINT_LIGHT, 0.95);
+            graphics.lineStyle(2, INK, 1);
+            graphics.moveTo(shard.x, shard.y - shard.h);
+            graphics.lineTo(shard.x + shard.w, shard.y - shard.h * 0.35);
+            graphics.lineTo(shard.x + shard.w / 2, shard.y + 4);
+            graphics.lineTo(shard.x - shard.w / 2, shard.y - shard.h * 0.35);
+            graphics.closePath();
+            graphics.endFill();
+        }
     }
 
     static outline(graphics, color = INK, width = 3, alpha = 1) {

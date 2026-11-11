@@ -85,11 +85,12 @@ export class BuildModal {
         });
     }
 
-    show(blueprint, lumen, buildings = []) {
+    show(blueprint, lumen, buildings = [], bonusIncome = 0) {
         if (this.isOpen) return;
         this.isOpen = true;
         this.blueprint = blueprint;
         this.buildings = buildings;
+        this.bonusIncome = bonusIncome;
         this.lumen = lumen;
         this.lastFocused = document.activeElement;
 
@@ -100,6 +101,7 @@ export class BuildModal {
             <span><strong>${cost} lumen</strong></span>
             ${blueprint.income ? `<span>+${blueprint.income} lumen / tide</span>` : ''}
             ${blueprint.beaconDiscount ? `<span>Beacon −${blueprint.beaconDiscount}</span>` : ''}
+            ${bonusIncome > 0 ? `<span><strong>Crystal +${bonusIncome} / tide</strong></span>` : ''}
             ${blueprint.unique ? '<span>Charter structure</span>' : ''}
         `;
         this.blurbEl.textContent = blueprint.blurb;

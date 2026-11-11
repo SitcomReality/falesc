@@ -29,6 +29,7 @@ node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios
 node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/map-regression.mjs
 node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/engine-regression.mjs
 node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/determinism.mjs
+node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/affinity.mjs
 node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/mobile.mjs --width 390 --height 844
 node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/showcase.mjs
 ```
@@ -150,6 +151,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `map-regression.mjs` | 72 sampled seeds/sizes produce non-intersecting islands, all shapes inside the world rectangle, and deterministic layouts. |
 | `engine-regression.mjs` | 15 NPCs stay on their home island and out of buildings through 3,600 updates; the camera clamps at both extremes; leaving during the interstitial cancels the pending turn. |
 | `determinism.mjs` | The same seed produces identical island geometry, character palettes/proportions, and mineral variations across reloads. |
+| `affinity.mjs` | A Prism Rig near a crystal gets +1 income, the dialog announces it, and the bonus survives save/continue. |
 | `mobile.mjs` | Menu, lobby, HUD, and build dialog are captured at 390×844; the build dialog is visible. |
 | `showcase.mjs` | Places one of each blueprint, marks them active, and captures the illustrated structures and HUD for design review. |
 

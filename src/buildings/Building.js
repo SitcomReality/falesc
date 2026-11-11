@@ -1,14 +1,17 @@
 import * as PIXI from 'pixi.js';
 import { BuildingRenderer } from './BuildingRenderer.js';
+import { BLUEPRINT_BY_ID } from './blueprints.js';
 
 export class Building {
-    constructor(id, sectorId, u, v, name, blueprintId = 'prism_rig') {
+    constructor(id, sectorId, u, v, name, blueprintId = 'prism_rig', bonusIncome = 0) {
         this.id = id;
         this.sectorId = sectorId;
         this.u = u;
         this.v = v;
         this.name = name;
         this.blueprintId = blueprintId;
+        this.bonusIncome = Math.max(0, bonusIncome | 0);
+        this.income = (BLUEPRINT_BY_ID[blueprintId]?.income || 0) + this.bonusIncome;
         // Three-phase lifecycle:
         // PENDING (ephemeral placeholder) -> RESERVED (ghost) -> ACTIVE (solid)
         this.state = 'PENDING';

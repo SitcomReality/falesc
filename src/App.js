@@ -16,7 +16,7 @@ import { SeededRandom } from './map/SeededRandom.js';
 import { BuildingManager } from './buildings/BuildingManager.js';
 import { BuildingRenderer } from './buildings/BuildingRenderer.js';
 import { drawSettlementPaths } from './map/SettlementPaths.js';
-import { BLUEPRINT_BY_ID, BEACON_ID, DEFAULT_BLUEPRINT_ID, effectiveCost } from './buildings/blueprints.js';
+import { BLUEPRINT_BY_ID, BEACON_ID, DEFAULT_BLUEPRINT_ID, AFFINITY_RANGE, effectiveCost } from './buildings/blueprints.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { Minimap } from './ui/Minimap.js';
 import { SaveManager } from './persistence/SaveManager.js';
@@ -83,9 +83,13 @@ class GameApp {
 
         // UI
         this.pendingBuildLocation = null;
+        this.pendingBuildBonus = 0;
         this.buildModal = new BuildModal({
             onBuild: (name) => this.finalizeBuild(name),
-            onCancel: () => { this.pendingBuildLocation = null; },
+            onCancel: () => {
+                this.pendingBuildLocation = null;
+                this.pendingBuildBonus = 0;
+            },
             inputManager: this.inputManager
         });
 
@@ -198,7 +202,7 @@ class GameApp {
                     lumen: game.stateManager.lumen,
                     income: buildings
                         .filter((building) => building.state === 'ACTIVE')
-                        .reduce((total, building) => total + (BLUEPRINT_BY_ID[building.blueprintId]?.income || 0), 0),
+                        .reduce((total, building) => total + (building.income ?? (BLUEPRINT_BY_ID[building.blueprintId]?.income || 0)), 0),
                     selectedBlueprint: game.stateManager.selectedBlueprint,
                     seed: game.stateManager.settings.mapSeed,
                     mapSize: game.stateManager.settings.mapSize,
@@ -274,6 +278,7 @@ class GameApp {
                 v: building.v,
                 name: building.name,
                 blueprintId: building.blueprintId,
+                bonusIncome: building.bonusIncome || 0,
                 state: building.state
             })),
             camera: {
@@ -307,6 +312,18 @@ class GameApp {
         this.stateManager.activeScreen?.updateTurnDisplay?.(true);
         this.saveGame();
         return true;
+    }
+
+    /** How many crystals are within reach of a plot, for harvest blueprints. */
+    crystalAffinity(x, y, blueprint) {
+        if (!blueprint?.affinityBonus) return 0;
+        for (const mineral of this.minerals) {
+            if (mineral.type !== 'CRYSTAL') continue;
+            if (Math.hypot(mineral.x - x, mineral.y - y) <= AFFINITY_RANGE) {
+                return blueprint.affinityBonus;
+            }
+        }
+        return 0;
     }
 
     selectBlueprint(id) {
@@ -441,7 +458,8 @@ class GameApp {
         }
 
         const { sectorId, u, v } = this.pendingBuildLocation;
-        const building = this.buildingManager.createBuilding(sectorId, u, v, name, blueprintId);
+        const bonus = this.pendingBuildBonus || 0;
+        const building = this.buildingManager.createBuilding(sectorId, u, v, name, blueprintId, bonus);
         if (!building) {
             return { ok: false, error: 'That plot cannot be built on.' };
         }
@@ -450,12 +468,14 @@ class GameApp {
         state.actionsRemaining -= 1;
         state.hintDismissed = true;
         this.pendingBuildLocation = null;
+        this.pendingBuildBonus = 0;
         this.clearHover();
         // Keep the same blueprint armed for the next tide, but refresh the HUD
         // immediately so the cost, action count and affordability are correct.
         this.rebuildPaths();
         this.stateManager.activeScreen?.updateTurnDisplay?.(true);
-        this.stateManager.activeScreen?.toast?.(`${building.name} reserved — ${blueprint.name} takes 2 tides to work.`, 'mint');
+        const affinityCopy = bonus > 0 ? ' Crystal affinity +1.' : '';
+        this.stateManager.activeScreen?.toast?.(`${building.name} reserved — ${blueprint.name} takes 2 tides to work.${affinityCopy}`, 'mint');
         this.saveGame();
         return { ok: true };
     }
@@ -485,8 +505,10 @@ class GameApp {
                         u: cell.u,
                         v: cell.v
                     };
+                    const pos = sector._project(cell.u + 0.5, cell.v + 0.5);
+                    this.pendingBuildBonus = this.crystalAffinity(pos.x, pos.y, blueprint);
                     this.clearHover();
-                    this.buildModal.show(blueprint, state.lumen, buildings);
+                    this.buildModal.show(blueprint, state.lumen, buildings, this.pendingBuildBonus);
                     return;
                 }
             }
@@ -497,7 +519,7 @@ class GameApp {
         const buildings = this.buildingManager.buildings;
         const active = buildings.filter((building) => building.state === 'ACTIVE');
         const underConstruction = buildings.filter((building) => building.state !== 'ACTIVE');
-        const income = active.reduce((total, building) => total + (BLUEPRINT_BY_ID[building.blueprintId]?.income || 0), 0);
+        const income = active.reduce((total, building) => total + (building.income ?? (BLUEPRINT_BY_ID[building.blueprintId]?.income || 0)), 0);
         return {
             income,
             active: active.length,

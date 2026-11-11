@@ -33,9 +33,10 @@ Severity is about impact on the prototype, not effort:
 
 - `BuildingManager.isCellOccupied()` checks only other buildings.
 - Placement does not check minerals, characters, terrain type, ownership, or
-  adjacency. Cost and uniqueness are enforced in `App.finalizeBuild()`, and the
-  dialog keeps an inline error, but the world itself does not explain a rejected
-  plot.
+  adjacency as blockers. Cost and uniqueness are enforced in
+  `App.finalizeBuild()`, and the dialog keeps an inline error, but the world
+  itself does not explain a rejected plot. Crystal affinity is only a positive
+  proximity bonus.
 - All buildings are one tile, cannot be removed, and cannot be upgraded.
 - Blueprints have a fixed cost/income; Lantern House's Beacon discount is the
   only placement-adjacent decision.

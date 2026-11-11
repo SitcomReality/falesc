@@ -180,8 +180,10 @@ The smallest loop that makes the sandbox a game:
   buildings generate income.
 - **Starting purse:** enough for one Prism Rig plus a little change.
 - **Blueprints:**
-  - **Prism Rig** — cheap, reliable Lumen income. The opening move.
-  - **Tide Garden** — stronger income, higher cost, adds a little local colour.
+  - **Prism Rig** — cheap, reliable Lumen income. The opening move. Crystals
+    within reach add +1 Lumen/tide, so plot choice matters.
+  - **Tide Garden** — stronger income, higher cost, adds a little local colour;
+    also rewards crystal-adjacent plots.
   - **Lantern House** — support structure; increases the settlement's glow and
     grants a small passive bonus (population/morale in a later pass).
   - **Aurora Beacon** — the charter goal. Expensive, unique, unlocks victory

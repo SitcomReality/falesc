@@ -252,7 +252,7 @@ export class GameScreen {
         const lumen = state.lumen || 0;
         const income = buildings.reduce((total, building) => {
             if (building.state !== 'ACTIVE') return total;
-            return total + (BLUEPRINT_BY_ID[building.blueprintId]?.income || 0);
+            return total + (building.income ?? (BLUEPRINT_BY_ID[building.blueprintId]?.income || 0));
         }, 0);
         const daysLeft = Math.max(0, dayLimit - state.currentTurn);
         const actions = state.actionsRemaining;

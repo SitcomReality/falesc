@@ -22,7 +22,7 @@ export class BuildingManager {
         return this.buildings.some(b => b.sectorId === sectorId && b.u === iu && b.v === iv);
     }
     
-    createBuilding(sectorId, u, v, name, blueprintId = 'prism_rig') {
+    createBuilding(sectorId, u, v, name, blueprintId = 'prism_rig', bonusIncome = 0) {
         const iu = Math.floor(u);
         const iv = Math.floor(v);
 
@@ -43,7 +43,7 @@ export class BuildingManager {
         }
         
         const id = `b_${Date.now()}_${Math.floor(Math.random()*1000)}`;
-        const building = new Building(id, sectorId, iu, iv, name, blueprintId);
+        const building = new Building(id, sectorId, iu, iv, name, blueprintId, bonusIncome);
         
         // Grid centers
         const pos = projectGridToWorld(iu + 0.5, iv + 0.5, sector.centerX, sector.centerY, sector.gridSize, TILE_WIDTH, TILE_HEIGHT);
@@ -70,7 +70,7 @@ export class BuildingManager {
         for (const building of this.buildings) {
             if (building.state === 'ACTIVE') {
                 activeBefore += 1;
-                income += BLUEPRINT_BY_ID[building.blueprintId]?.income || 0;
+                income += building.income ?? (BLUEPRINT_BY_ID[building.blueprintId]?.income || 0);
             }
         }
 
@@ -131,7 +131,8 @@ export class BuildingManager {
                 entry.u,
                 entry.v,
                 entry.name || BLUEPRINT_BY_ID[entry.blueprintId].name,
-                entry.blueprintId
+                entry.blueprintId,
+                entry.bonusIncome || 0
             );
             if (!building) continue;
             while (building.state !== entry.state && building.state !== 'ACTIVE') {
