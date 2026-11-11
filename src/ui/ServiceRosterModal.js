@@ -11,6 +11,7 @@ export class ServiceRosterModal {
         this.onOpenService = onOpenService;
         this.onRepairService = onRepairService;
         this.isOpen = false;
+        this.showAll = false;
         this.container = document.createElement('div');
         this.container.className = 'modal-scrim';
         this.container.dataset.testid = 'service-roster-scrim';
@@ -43,14 +44,16 @@ export class ServiceRosterModal {
     }
 
     render() {
-        const services = this.game?.charter?.services?.services || [];
+        const services = this.showAll
+            ? (this.game?.charter?.allServices || [])
+            : (this.game?.charter?.services?.services || []);
         const rows = services.map((service) => `
             <div class="service-roster__row" data-service-id="${escapeHtml(service.id)}" role="button" tabindex="0">
                 <span class="service-roster__name">${escapeHtml(service.name)}</span>
-                <span class="service-roster__meta">${escapeHtml(service.program?.name || service.programId)} · ${escapeHtml(service.state.toLowerCase())}${service.closed ? ' · closed' : ''}</span>
+                <span class="service-roster__meta">${escapeHtml(service.program?.name || service.programId)} · ${escapeHtml(service.chapterName || service.chapterId)} · ${escapeHtml(service.state.toLowerCase())}${service.closed ? ' · closed' : ''}</span>
                 <span class="service-roster__numbers">${service.capacity} capacity · ${service.visits} visits</span>
                 <span class="service-roster__wear${service.condition < 50 ? ' is-worn' : ''}">${Math.round(service.condition ?? 100)}% wear</span>
-                ${service.condition < 100 ? `<button type="button" class="service-roster__repair" data-repair-id="${escapeHtml(service.id)}">Repair · ${this.game?.charter?.repairCost?.(service) || 3}</button>` : ''}
+                ${service.chapterId === 'player' && service.condition < 100 ? `<button type="button" class="service-roster__repair" data-repair-id="${escapeHtml(service.id)}">Repair · ${this.game?.charter?.repairCost?.(service) || 3}</button>` : ''}
             </div>
         `).join('');
         this.panel.innerHTML = `
@@ -60,6 +63,7 @@ export class ServiceRosterModal {
                     <h3 class="modal__title" id="service-roster-title">Service roster</h3>
                 </div>
                 <button type="button" class="modal__close" data-testid="service-roster-close" aria-label="Close service roster">×</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="service-roster-all">${this.showAll ? 'Mine only' : 'All chapters'}</button>
             </div>
             <p class="modal__blurb">Every player service in one place. Open a row for hours, focus, floors, repairs and the people who use it.</p>
             <div class="service-roster__list">${rows || '<p class="report__quiet">No player services yet.</p>'}</div>
@@ -68,6 +72,10 @@ export class ServiceRosterModal {
             </div>
         `;
         this.panel.querySelectorAll('[data-testid^=service-roster-close], [data-testid=service-roster-done]').forEach((button) => button.addEventListener('click', () => this.hide()));
+        this.panel.querySelector('[data-testid=service-roster-all]')?.addEventListener('click', () => {
+            this.showAll = !this.showAll;
+            this.render();
+        });
         this.panel.querySelectorAll('[data-service-id]').forEach((row) => {
             const open = () => {
                 const service = services.find((entry) => entry.id === row.dataset.serviceId);
@@ -111,6 +119,7 @@ export class ServiceRosterModal {
     hide() {
         if (!this.isOpen) return;
         this.isOpen = false;
+        this.showAll = false;
         this.container.style.display = 'none';
         this.container.classList.remove('is-open');
         this.container.setAttribute('aria-hidden', 'true');
