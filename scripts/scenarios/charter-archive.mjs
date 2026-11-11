@@ -29,6 +29,7 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.ok(text.includes('Day 5'));
     assert.ok(text.includes('Every door open.'));
     assert.ok(text.includes('Best so far:'));
+    assert.ok(text.includes('visits'));
     await page.pause(300);
     await screenshot('charter-archive.png');
     await page.click('[data-testid=charter-archive-clear]');

@@ -26,6 +26,7 @@ export function recordFromCharter(charter, ending = {}) {
         outcome: ending.outcome || 'abandon',
         population: stats.population ?? charter?.population ?? 0,
         flourishing: Math.round(stats.flourishing ?? charter?.flourishing ?? 0),
+        visits: stats.visits ?? 0,
         stewardship: ending.stewardship?.name || null,
         commons: charter?.commons?.active ? 'lit' : 'unlit',
         chosenAt: new Date().toISOString()
