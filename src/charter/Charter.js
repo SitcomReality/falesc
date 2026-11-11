@@ -16,8 +16,7 @@ import { computeAdjacency } from '../services/ServiceAdjacency.js';
 import { cellKey } from '../services/PlacementPolicy.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
-import { summarizeReport } from '../simulation/ReportSummary.js';
-import { RivalChapter } from '../chapters/RivalChapter.js';
+import { serializeCharter, restoreCharter } from '../persistence/CharterSerializer.js';
 import { SeededRandom } from '../map/SeededRandom.js';
 import { buildBulletin } from './Bulletin.js';
 import { chooseCampaignPledge, createRivalChapters, planRivalDay } from '../chapters/RivalAI.js';
@@ -1356,129 +1355,11 @@ export class Charter {
     }
 
     serialize() {
-        return {
-            seed: this.seed,
-            mapSize: this.mapSize,
-            mode: this.mode,
-            day: this.day,
-            dayLimit: this.dayLimit,
-            lumen: this.lumen,
-            works: this.works,
-            flourishing: this.flourishing,
-            devotion: this.devotion,
-            ending: this.ending,
-            confluenceReady: this.confluenceReady,
-            campaign: this.campaign?.toJSON() || null,
-            returningVisitors: this.returningVisitors.map((visitor) => visitor.toJSON()),
-            trialVisitors: this.trialVisitors.map((visitor) => visitor.toJSON()),
-            legacy: this.legacy,
-            transit: {
-                home: this.transit.home ? { ...this.transit.home } : null,
-                commons: this.transit.commons ? { ...this.transit.commons } : null,
-                garden: this.transit.garden ? { ...this.transit.garden } : null
-            },
-            commons: {
-                ...this.commons,
-                service: this.commonsManager?.serialize() || []
-            },
-            pendingArrivals: this.pendingArrivals,
-            referrals: this.referrals,
-            lastReport: summarizeReport(this.lastReport),
-            history: this.history.slice(-60),
-            journal: this.journal.slice(-120),
-            request: this.request ? { ...this.request } : null,
-            residents: this.roster.map((resident) => resident.toJSON()),
-            services: this.services.serialize(),
-            rivals: this.rivals.map((rival) => rival.toJSON())
-        };
+        return serializeCharter(this);
     }
 
     restore(saved) {
-        this.mode = saved.mode || 'first-light';
-        this.day = saved.day || 1;
-        this.dayLimit = saved.dayLimit || BALANCE.dayLimits[this.mapSize] || 14;
-        this.lumen = Number.isFinite(saved.lumen) ? saved.lumen : BALANCE.startingLumen;
-        this.works = Number.isFinite(saved.works) ? saved.works : BALANCE.worksPerDay;
-        this.ending = saved.ending || null;
-        this.confluenceReady = Boolean(saved.confluenceReady);
-        this.campaign = Campaign.fromJSON(saved.campaign, this.seed);
-        this.pendingArrivals = Array.isArray(saved.pendingArrivals) ? saved.pendingArrivals : [];
-        this.referrals = Math.max(0, Math.min(1, Number(saved.referrals) || 0));
-        this.roster = ResidentFactory.fromSave(saved.residents || []);
-        if (this.roster.length === 0) this.roster = ResidentFactory.createRoster(this.seed, BALANCE.rosterSize);
-        this.services.restore(saved.services || []);
-        if (Array.isArray(saved.rivals)) {
-            this.rivals = saved.rivals.map((entry) => {
-                const rival = new RivalChapter({
-                    ...entry,
-                    map: this.map,
-                    parentContainer: this.services.parentContainer,
-                    occupancy: this.occupancy
-                });
-                rival.services.restore(entry.services || []);
-                return rival;
-            });
-        } else if (this.mode === 'contest') {
-            this.createRivals();
-        }
-        this.lastRivalMoves = this.rivals.map((rival) => rival.lastMove).filter(Boolean);
-        this.returningVisitors = VisitorFactory.restore(saved.returningVisitors || []);
-        this.trialVisitors = VisitorFactory.restoreTrial(saved.trialVisitors || []);
-        if (saved.transit?.home && saved.transit?.commons) {
-            this.transit = {
-                home: { ...saved.transit.home },
-                commons: { ...saved.transit.commons },
-                garden: saved.transit.garden ? { ...saved.transit.garden } : null
-            };
-            this.reserveTransit(this.transit.home);
-            this.reserveTransit(this.transit.commons);
-            this.reserveTransit(this.transit.garden);
-        }
-        if (saved.commons) {
-            const serviceEntries = Array.isArray(saved.commons.service) ? saved.commons.service : [];
-            this.commons = {
-                level: Math.max(1, Number(saved.commons.level) || 1),
-                target: saved.commons.target || BALANCE.commons.target,
-                fund: Number(saved.commons.fund) || 0,
-                purse: Number(saved.commons.purse) || 0,
-                capital: Number(saved.commons.capital) || 0,
-                capitalContributors: { ...(saved.commons.capitalContributors || {}) },
-                active: Boolean(saved.commons.active),
-                contributors: { ...(saved.commons.contributors || {}) },
-                activatedDay: saved.commons.activatedDay || null,
-                serviceId: saved.commons.serviceId || null,
-                policy: saved.commons.policy || null,
-                chosenDay: saved.commons.chosenDay || null,
-                assembly: saved.commons.assembly ? {
-                    ...this.commons.assembly,
-                    ...saved.commons.assembly,
-                    nominations: { ...(saved.commons.assembly.nominations || {}) },
-                    finalists: [...(saved.commons.assembly.finalists || [])],
-                    votes: [...(saved.commons.assembly.votes || [])],
-                    counts: { ...(saved.commons.assembly.counts || {}) },
-                    petition: saved.commons.assembly.petition || this.commons.assembly.petition
-                } : this.commons.assembly
-            };
-            if (this.commonsManager) this.commonsManager.restore(serviceEntries);
-        } else if (this.contest) {
-            this.setupCommons();
-        }
-        if (this.commonsSector && (!this.transit.home || !this.transit.commons)) {
-            this.setupTransit();
-        }
-        if (this.commons.active && !this.commons.policy && this.commons.assembly.stage === 'none') {
-            this.commons.assembly.stage = 'nominations';
-        }
-        this.commonsCell = this.findCommonsCell(this.homeSector);
-        this.refreshAdjacency();
-        this.assignHomes();
-        this.refreshDerived();
-        this.report = null;
-        this.lastReport = saved.lastReport || null;
-        this.history = Array.isArray(saved.history) ? saved.history.slice(-60) : [];
-        this.journal = Array.isArray(saved.journal) ? saved.journal.slice(-120) : [];
-        this.request = saved.request ? { ...saved.request } : this.buildDailyRequest();
-        this.bulletin = this.buildBulletin(this.pendingArrivals, this.lastRivalMoves);
+        return restoreCharter(this, saved);
     }
 
     buildDailyRequest() {

@@ -612,7 +612,8 @@ price per visit, no stock, and no passive harvest income.
 
 ## 9. Persistence
 
-`src/persistence/SaveManager.js`:
+`src/persistence/CharterSerializer.js  charter save/restore
+src/persistence/SaveManager.js`:
 
 - key `falesc.save.v2`, version `2`;
 - `read()` removes the legacy `falesc.save.v1` key, parses the payload, rejects

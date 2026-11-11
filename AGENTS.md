@@ -137,6 +137,7 @@ after any behavioural change.
 | `src/minerals/` | Seeded static rock/crystal scenery |
 | `src/buildings/BuildingRenderer.js` | Service silhouettes (art only; no building model) |
 | `src/persistence/SaveManager.js` | Versioned `localStorage` save v2 (model data only) |
+| `src/persistence/CharterSerializer.js` | Charter save shape and restore |
 | `src/debug/DebugApi.js` | The browser-console `window.__falesc` surface, extracted from the coordinator |
 | `scripts/scenarios/` | Browser regressions for the resident/visitor loop, economy, saves, maps, determinism, victory, mobile |
 | `vendor/` | Pinned Pixi.js build and license (committed; no fetch at runtime) |
