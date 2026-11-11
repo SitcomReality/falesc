@@ -71,6 +71,11 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-bulletin">Morning bulletin</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-residents">Residents</button>
                 <button type="button" class="btn btn--small btn--ghost charter-menu__abandon" data-testid="end-game">Abandon charter</button>
+                <div class="charter-menu__confirm" data-role="abandon-confirm" hidden>
+                    <p>Abandon this charter? The save will be cleared.</p>
+                    <button type="button" class="btn btn--small btn--danger" data-testid="confirm-abandon">Yes, abandon</button>
+                    <button type="button" class="btn btn--small btn--paper" data-testid="cancel-abandon">Keep playing</button>
+                </div>
             </div>
         `;
 
@@ -82,7 +87,7 @@ export class GameScreen {
                 <span class="objective-card__days" data-role="days-left">14 days left</span>
             </div>
             <p class="objective-card__name">House twelve Tidelanders</p>
-            <div class="objective-card__track" role="progressbar" aria-valuemin="0" aria-valuemax="12" aria-valuenow="6" aria-label="Residents housed">
+            <div class="objective-card__track" role="progressbar" aria-valuemin="0" aria-valuemax="15" aria-valuenow="6" aria-label="Residents housed">
                 <div class="objective-card__fill" data-role="population-fill"></div>
             </div>
             <div class="objective-card__foot">
@@ -98,7 +103,7 @@ export class GameScreen {
         const hint = document.createElement('div');
         hint.className = 'hud__hint';
         hint.dataset.role = 'hint';
-        hint.textContent = 'Build a Canteen, then open the day and watch where people go.';
+        hint.innerHTML = '<span data-role="hint-copy">Build a Canteen, then open the day and watch where people go.</span><button type="button" class="hud__hint-close" data-role="hint-dismiss" aria-label="Dismiss hint">×</button>';
 
         const toast = document.createElement('div');
         toast.className = 'hud-toast';
@@ -133,6 +138,7 @@ export class GameScreen {
         this.programButtons = new Map();
         for (const program of BUILDABLE_PROGRAMS) {
             const need = program.need ? NEED_BY_ID[program.need] : null;
+            const secondary = program.secondaryNeed ? NEED_BY_ID[program.secondaryNeed] : null;
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'blueprint';
@@ -144,7 +150,7 @@ export class GameScreen {
             button.innerHTML = `
                 <span class="blueprint__icon" aria-hidden="true">${programIcon(program.id)}</span>
                 <span class="blueprint__name">${program.name}</span>
-                <span class="blueprint__need">${need ? `${need.glyph} ${need.name}` : 'civic'} · ${program.durationText}</span>
+                <span class="blueprint__need">${need ? `${need.glyph} ${need.name}` : 'civic'}${secondary ? ` + ${secondary.name}` : ''} · ${program.durationText}</span>
                 <span class="blueprint__meta">
                     <span class="blueprint__cost" data-role="cost">${program.cost} lumen</span>
                     <span data-role="upkeep">${program.upkeep} upkeep</span>
@@ -185,6 +191,11 @@ export class GameScreen {
         this.flourishingTrack = objective.querySelectorAll('[role=progressbar]')[1];
         this.goalCopy = objective.querySelector('[data-role=goal-copy]');
         this.hintEl = hint;
+        this.hintCopy = hint.querySelector('[data-role=hint-copy]');
+        hint.querySelector('[data-role=hint-dismiss]').addEventListener('click', () => {
+            this.game.hintDismissed = true;
+            this.hintEl.classList.add('is-hidden');
+        });
         this.toastEl = toast;
         this.worksNote = dock.querySelector('[data-role=works-note]');
         this.dockNote = dock.querySelector('[data-role=dock-note]');
@@ -194,8 +205,13 @@ export class GameScreen {
         this._setPauseOpen = (open) => {
             this.pausePanel.hidden = !open;
             this.menuButton.setAttribute('aria-expanded', String(open));
-            if (open) this.pausePanel.querySelector('[data-testid=resume-game]').focus({ preventScroll: true });
-            else this.menuButton.focus({ preventScroll: true });
+            if (open) {
+                this.pausePanel.querySelector('[data-testid=resume-game]').focus({ preventScroll: true });
+            } else {
+                this.abandonConfirm.hidden = true;
+                this.abandonBtn.hidden = false;
+                this.menuButton.focus({ preventScroll: true });
+            }
         };
         this.menuButton.addEventListener('click', () => this._setPauseOpen(this.pausePanel.hidden));
         this.pausePanel.querySelector('[data-testid=resume-game]').addEventListener('click', () => this._setPauseOpen(false));
@@ -207,7 +223,19 @@ export class GameScreen {
             this._setPauseOpen(false);
             this.game.showResidentRoster();
         });
-        this.pausePanel.querySelector('[data-testid=end-game]').addEventListener('click', () => {
+        this.abandonBtn = this.pausePanel.querySelector('[data-testid=end-game]');
+        this.abandonConfirm = this.pausePanel.querySelector('[data-role=abandon-confirm]');
+        this.abandonBtn.addEventListener('click', () => {
+            this.abandonConfirm.hidden = false;
+            this.abandonBtn.hidden = true;
+            this.pausePanel.querySelector('[data-testid=cancel-abandon]').focus({ preventScroll: true });
+        });
+        this.pausePanel.querySelector('[data-testid=cancel-abandon]').addEventListener('click', () => {
+            this.abandonConfirm.hidden = true;
+            this.abandonBtn.hidden = false;
+            this.abandonBtn.focus({ preventScroll: true });
+        });
+        this.pausePanel.querySelector('[data-testid=confirm-abandon]').addEventListener('click', () => {
             this.pausePanel.hidden = true;
             this.game.endCharter('abandon');
         });
@@ -303,11 +331,11 @@ export class GameScreen {
         this._setText(this.projectionEl, 'projection', projection);
         this._setText(this.daysLeftEl, 'daysLeft', daysLeft === 1 ? 'Last day' : `${daysLeft} days left`);
 
-        const populationPercent = Math.min(100, (charter.population / populationGoal) * 100);
+        const populationPercent = Math.min(100, (charter.housedPopulation / populationGoal) * 100);
         if (force || this._cache.populationPercent !== populationPercent) {
             this._cache.populationPercent = populationPercent;
             this.populationFill.style.width = `${populationPercent}%`;
-            this.populationTrack?.setAttribute('aria-valuenow', String(charter.population));
+            this.populationTrack?.setAttribute('aria-valuenow', String(charter.housedPopulation));
         }
         const flourishingPercent = Math.max(0, Math.min(100, charter.flourishing));
         if (force || this._cache.flourishingPercent !== flourishingPercent) {
@@ -315,7 +343,7 @@ export class GameScreen {
             this.flourishingFill.style.width = `${flourishingPercent}%`;
             this.flourishingTrack?.setAttribute('aria-valuenow', String(Math.round(charter.flourishing)));
         }
-        this._setText(this.populationProgress, 'populationProgress', `${charter.population} / ${populationGoal} residents`);
+        this._setText(this.populationProgress, 'populationProgress', `${charter.housedPopulation} / ${populationGoal} residents`);
         this._setText(this.flourishingLabel, 'flourishingLabel', `Flourishing ${Math.round(charter.flourishing)}`);
         const goalsMet = charter.goalsMet;
         this._setText(this.goalCopy, 'goalCopy', goalsMet
@@ -352,7 +380,7 @@ export class GameScreen {
             && !this.game.hintDismissed;
         this.hintEl.classList.toggle('is-hidden', !showHint);
         if (showHint) {
-            this._setText(this.hintEl, 'hint', this.game.selectedProgramId
+            this._setText(this.hintCopy, 'hint', this.game.selectedProgramId
                 ? `Tap a free plot to raise the ${selectedName}.`
                 : 'Build a Canteen, then open the day and watch where people go.');
         }

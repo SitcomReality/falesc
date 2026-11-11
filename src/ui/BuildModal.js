@@ -92,6 +92,7 @@ export class BuildModal {
         this.lastFocused = document.activeElement;
 
         const need = NEED_BY_ID[program.need];
+        const secondary = program.secondaryNeed ? NEED_BY_ID[program.secondaryNeed] : null;
         this.iconEl.innerHTML = programIcon(program.id);
         this.nameEl.textContent = program.name;
         this.statsEl.innerHTML = `
@@ -101,7 +102,7 @@ export class BuildModal {
         `;
         this.blurbEl.textContent = program.blurb;
         this.factsEl.innerHTML = `
-            <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}</dd></div>
+            <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}${secondary ? ` · ${secondary.glyph} ${secondary.name}` : ''}</dd></div>
             <div><dt>Capacity</dt><dd>${program.capacity} at a time · ${program.durationText}</dd></div>
             <div><dt>Hours</dt><dd>${program.open.length ? program.open.join(' · ') : 'always'}</dd></div>
             <div><dt>Footprint</dt><dd>${program.footprint.w}×${program.footprint.h} cells</dd></div>

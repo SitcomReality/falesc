@@ -27,9 +27,15 @@ export class Minimap {
         this.canvas.width = this.resolution;
         this.canvas.height = this.resolution;
         this.canvas.setAttribute('aria-label', 'Survey chart of the archipelago. Click to move the camera.');
-        this.canvas.setAttribute('role', 'img');
+        this.canvas.setAttribute('role', 'button');
+        this.canvas.tabIndex = 0;
         this.canvas.title = 'Click the chart to move the camera';
         this.canvas.addEventListener('click', (event) => this.onClick(event));
+        this.canvas.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            this.centerOnMap();
+        });
         this.projection = null;
 
         this.wrapper.appendChild(this.canvas);
@@ -202,6 +208,14 @@ export class Minimap {
             viewWidth,
             viewHeight
         );
+    }
+
+    centerOnMap() {
+        const map = this.game.world?.map;
+        if (!map) return;
+        this.game.world.camera.position.x = (map.bounds.minX + map.bounds.maxX) / 2;
+        this.game.world.camera.position.y = (map.bounds.minY + map.bounds.maxY) / 2;
+        this.game.world.camera.updateTransform();
     }
 
     onClick(event) {

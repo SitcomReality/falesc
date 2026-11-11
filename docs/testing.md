@@ -156,12 +156,14 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | --- | --- |
 | `resident-day.mjs` | A Tidelander is scheduled into the Canteen, walks and enters during playback, emerges with a lower need, remembers the visit, and the card quotes the why line. |
 | `economy.mjs` | Founding state is 10 lumen / 2 works / 6 residents; two builds cost 8 lumen and both works; the report satisfies `lumenAfter = prior + contributions − upkeep`; a new house adds beds and arrivals; both services open overnight. |
-| `persistence.mjs` | Save v2 holds day 3, lumen, works, services, residents, needs and last choice; reload + **Continue charter** restores them and the Canteen comes back `ACTIVE`. |
+| `persistence.mjs` | Save v2 holds day 3, lumen, works, services, residents, needs and last choice; reload + **Continue charter** restores them, the Canteen comes back `ACTIVE`, a resident card renders without NaN, and a new build gets a non-colliding service id. |
 | `determinism.mjs` | The same seed, actions and day produce byte-identical reports, resident needs, service visits/hearts and quote lines across two full runs. |
 | `engine-regression.mjs` | During playback, visible residents stay on the home shard; clicking the survey chart moves the camera; the camera clamps at both extremes; leaving during `DAY` lands in `MENU` with no late transition. |
 | `map-regression.mjs` | 72 maps (24 seeds × 3 sizes) have the expected sector counts, non-overlapping island AABBs, all shapes inside the world rectangle, and deterministic layouts. |
 | `demolition.mjs` | Clicking an occupied plot opens the service record; dismantling a 4-lumen Canteen refunds 2, removes it, and frees the plot. |
-| `victory.mjs` | A full, real-UI medium charter plans services across fourteen days and reaches 12 residents + flourishing 62; the end screen reports `victory`. |
+| `corrupt-save.mjs` | A parseable v2 payload with the wrong service shape is discarded; Continue stays hidden and the key is removed. |
+| `abandon-confirm.mjs` | The first Abandon click asks for confirmation and keeps the run alive; cancel returns to play; the second confirm reaches the end screen. |
+| `victory.mjs` | A full, real-UI medium charter plans services across fourteen days and reaches 12 housed residents + flourishing 62; the end screen reports `victory`. |
 | `showcase.mjs` | Visual tool: places one of each service, marks them open, and captures the illustrated shard and a day for design review. Not a pass/fail regression. |
 | `mobile.mjs` | Captures menu, lobby, HUD and build dialog at a narrow viewport; the build dialog must be visible. Run with `--width 390 --height 844`. |
 

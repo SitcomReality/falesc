@@ -62,7 +62,7 @@ export class ReportScreen {
                 </header>
                 <div class="report__numbers">
                     <div><span class="kicker">Visits</span><strong>${report.visits}</strong></div>
-                    <div><span class="kicker">Hearts</span><strong>${report.hearts.toFixed(1)}</strong></div>
+                    <div><span class="kicker">Hearts gained</span><strong>${(report.heartsGained ?? report.hearts ?? 0).toFixed(1)}${report.heartsLost > 0 ? ` <span class="report__loss">−${report.heartsLost.toFixed(1)}</span>` : ''}</strong></div>
                     <div><span class="kicker">Contributions</span><strong>+${report.contributions}</strong></div>
                     <div><span class="kicker">Upkeep</span><strong>−${report.upkeep}</strong></div>
                     <div><span class="kicker">Lumen</span><strong>${report.lumenAfter}</strong></div>

@@ -88,6 +88,7 @@ export class ServiceCardModal {
 
         const program = service.program;
         const need = program?.need ? NEED_BY_ID[program.need] : null;
+        const secondary = program?.secondaryNeed ? NEED_BY_ID[program.secondaryNeed] : null;
         const working = service.state === 'ACTIVE' && !service.closed;
         const upkeep = this.game?.charter?.services.upkeepFor(service) ?? program?.upkeep ?? 0;
         this.nameEl.textContent = service.name;
@@ -100,7 +101,7 @@ export class ServiceCardModal {
         `;
         this.blurbEl.textContent = program?.blurb || '';
         this.factsEl.innerHTML = `
-            <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}</dd></div>
+            <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}${secondary ? ` · ${secondary.glyph} ${secondary.name}` : ''}</dd></div>
             <div><dt>Visits</dt><dd>${service.visits}</dd></div>
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
             <div><dt>Door</dt><dd>${service.entrance ? `cell ${service.entrance.u}, ${service.entrance.v}` : '—'}</dd></div>

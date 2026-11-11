@@ -1485,8 +1485,8 @@ body > canvas {
 .modal__close {
     display: grid;
     place-items: center;
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
     flex: none;
     background: transparent;
     border: 1.5px solid var(--ink);
@@ -2556,6 +2556,7 @@ body.has-modal > canvas {
         gap: 8px;
     }
     .day-strip__track { order: 4; width: 100%; flex-basis: 100%; }
+    .hud__hint { top: 218px; bottom: auto; }
     .report__numbers { grid-template-columns: repeat(3, 1fr); }
     .report__columns { grid-template-columns: 1fr; gap: 10px; }
     .report__foot { flex-direction: column; align-items: flex-start; }
@@ -2613,8 +2614,8 @@ body.has-modal > canvas {
 
     .hud__menu {
         flex: none;
-        width: 38px;
-        min-height: 38px;
+        width: 44px;
+        min-height: 44px;
     }
 
     .objective-card {
@@ -2653,4 +2654,60 @@ body.has-modal > canvas {
     font-variation-settings: 'SOFT' 60, 'WONK' 1, 'opsz' 32;
     font-size: 16px;
     line-height: 1.35;
+}
+
+.charter-menu__confirm {
+    display: grid;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(33, 18, 37, 0.3);
+}
+
+.charter-menu__confirm[hidden] {
+    display: none;
+}
+
+.charter-menu__confirm p {
+    margin: 0 0 2px;
+    color: var(--wine);
+    font-family: var(--mono);
+    font-size: 9px;
+    line-height: 1.45;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.report__loss {
+    color: var(--wine);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 400;
+}
+
+.hud__hint-close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+    padding: 0;
+    background: transparent;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.hud__hint-close:hover,
+.hud__hint-close:focus-visible {
+    background: var(--ink);
+    color: var(--cream);
+}
+
+#minimap:focus-visible {
+    outline: 3px solid var(--mint);
+    outline-offset: 3px;
 }

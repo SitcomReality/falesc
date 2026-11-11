@@ -18,7 +18,7 @@ export class SeededRandom {
     }
 
     nextInt(min, max) {
-        return Math.floor(this.nextRange(min, max + 1));
+        return Math.min(max, Math.floor(this.nextRange(min, max + 1)));
     }
 
     shuffle(array) {

@@ -26,6 +26,7 @@ export class DaySimulator {
         this.arrivalNotes = [];
         this.serviceVisits = new Map();
         this.phaseLoad = new Map();
+        this.affinityBefore = new Map();
     }
 
     run() {
@@ -33,6 +34,7 @@ export class DaySimulator {
         const needBefore = new Map();
         for (const resident of charter.activeResidents) {
             needBefore.set(resident.id, { ...resident.needs });
+            this.affinityBefore.set(resident.id, resident.affinity.player || 0);
         }
 
         const loads = new Map();
@@ -118,12 +120,6 @@ export class DaySimulator {
         const { service, need } = choice;
         const loadKey = `${service.id}:${phase.id}`;
         const load = loads.get(loadKey) || 0;
-        if (load >= service.capacity + BALANCE.services.maxQueue) {
-            this.complain(resident, need, `The ${service.name} queue was too long. I gave up.`);
-            resident.addAffinity(-0.03);
-            return;
-        }
-
         const queueIndex = load;
         loads.set(loadKey, load + 1);
         this.scheduleVisit(resident, service, need, phase, queueIndex, needBefore);
@@ -141,7 +137,7 @@ export class DaySimulator {
         const loadKey = `${service.id}:${phase.id}`;
         const load = this.phaseLoad.get(loadKey) || 0;
         const availability = load < service.capacity ? 1 : BALANCE.services.queuePenalty;
-        const familiarity = 1 + Math.min(service.visits, 4) * 0.012;
+        const familiarity = 1 + Math.min(this.residentVisits(resident, service.id), 4) * 0.012;
         const novelty = this.rng.next() * 0.06 + 0.97;
         const rhythm = rhythmRise(resident.traits.rhythm, phase.id);
         return urgency * match * quality * vibe * standards * proximity * availability * familiarity * novelty * rhythm;
@@ -210,7 +206,7 @@ export class DaySimulator {
         resident.addAffinity(BALANCE.services.visitAffinity + urgencyBonus);
         resident.clearUnmetDay(need.id);
 
-        const reason = this.buildReason(resident, service, need, queueIndex);
+        const reason = this.buildReason(resident, service, need, queueIndex, phase.id);
         resident.recordChoice({
             day: this.charter.day,
             phase: phase.id,
@@ -259,9 +255,12 @@ export class DaySimulator {
         return this.charter.commonsCell;
     }
 
-    buildReason(resident, service, need, queueIndex) {
+    residentVisits(resident, serviceId) {
+        return (resident.memory.recentVisits || []).filter((visit) => visit.serviceId === serviceId).length;
+    }
+
+    buildReason(resident, service, need, queueIndex, phaseId) {
         const fragments = [];
-        const phase = service.program.open?.[service.program.open.length - 1];
         if (need.id === service.program.need) fragments.push(NEED_BY_ID[need.id].reason);
         else fragments.push(`the ${service.name} had ${NEED_BY_ID[need.id].short.toLowerCase()} too`);
         const temperament = resident.traits.temperament;
@@ -272,17 +271,22 @@ export class DaySimulator {
         if (waiting === 0) fragments.push('there was no queue');
         else if (waiting === 1) fragments.push('the queue was short');
         else fragments.push('I did not mind the wait');
-        if (service.visits > 2) fragments.push('I come here often');
-        if (phase === 'evening') fragments.push('it was open late');
+        if (this.residentVisits(resident, service.id) >= 2) fragments.push('I come here often');
+        if (phaseId === 'evening') fragments.push('it was open late');
         return `${service.name} — ${fragments.slice(0, 3).join(', ')}.`;
     }
 
     missingServiceReason(resident, need, phase) {
-        const alternatives = this.charter.services.activeServices.filter((service) => servesNeed(service.program, need.id));
-        if (alternatives.length === 0) {
-            return `No one serves ${need.short.toLowerCase()} yet. I waited at the ${phase.name.toLowerCase()} window.`;
-        }
-        return `The ${alternatives[0].name} was closed when I needed ${need.short.toLowerCase()}.`;
+        const all = this.charter.services.services.filter((service) => servesNeed(service.program, need.id));
+        const openNow = all.filter((service) => service.state === 'ACTIVE' && !service.closed && isOpenAt(service.program, phase.id));
+        const pending = all.filter((service) => service.state === 'PENDING');
+        const closed = all.filter((service) => service.closed);
+        const later = all.filter((service) => service.state === 'ACTIVE' && !service.closed && !isOpenAt(service.program, phase.id));
+        if (openNow.length > 0) return `The ${openNow[0].name} was full when I needed ${need.short.toLowerCase()}.`;
+        if (pending.length > 0) return `The ${pending[0].name} opens tomorrow. I waited at the ${phase.name.toLowerCase()} window.`;
+        if (closed.length > 0) return `The ${closed[0].name} was closed when I needed ${need.short.toLowerCase()}.`;
+        if (later.length > 0) return `The ${later[0].name} was not open yet when I needed ${need.short.toLowerCase()}.`;
+        return `No one serves ${need.short.toLowerCase()} yet. I waited at the ${phase.name.toLowerCase()} window.`;
     }
 
     complain(resident, need, text) {
@@ -335,6 +339,8 @@ export class DaySimulator {
 
         const visits = this.events.length;
         const hearts = Math.round(residents.reduce((sum, resident) => sum + (resident.affinity.player || 0), 0) * 10) / 10;
+        const heartsGained = Math.round(residents.reduce((sum, resident) => sum + Math.max(0, (resident.affinity.player || 0) - (this.affinityBefore.get(resident.id) || 0)), 0) * 10) / 10;
+        const heartsLost = Math.round(residents.reduce((sum, resident) => sum + Math.max(0, (this.affinityBefore.get(resident.id) || 0) - (resident.affinity.player || 0)), 0) * 10) / 10;
         const serviceVisits = {};
         for (const [serviceId, count] of this.serviceVisits) serviceVisits[serviceId] = count;
 
@@ -349,6 +355,8 @@ export class DaySimulator {
             day: charter.day,
             visits,
             hearts,
+            heartsGained,
+            heartsLost,
             needs,
             wellbeing,
             flourishing: wellbeing,

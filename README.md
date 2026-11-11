@@ -51,7 +51,7 @@ so any static file server works, but ES modules require `http://`, not `file://`
   at dusk, complaints and a few quotes. **Begin Day N** returns to planning with
   a fresh pair of works.
 - Spare beds plus a flourishing of at least 20 bring new residents. The run ends
-  at the day limit: **12 residents and flourishing 62** wins First Light. Fewer
+  at the day limit: **12 housed residents and flourishing 62** wins First Light. Fewer
   than four residents, or missing the goal at the limit, loses.
 
 `WASD`/arrows pan, wheel zooms, middle-drag pans, one-finger drag pans and a

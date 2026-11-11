@@ -365,6 +365,13 @@ These are no longer open:
   the story.
 - **Save v2.** Residents, services, needs, affinity, last choice, door state and
   closure survive a reload; v1 is intentionally discarded.
+- **Save round-trip hardening.** Resident affinity and service ids restore
+  correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
+- **Safer destructive actions.** Abandoning a charter is a two-step confirmation
+  and the save is cleared only after the confirmation.
+- **Truthful choice feedback.** "I come here often" is per resident, "open late"
+  uses the actual phase, queue give-ups are visible in the resident card, and
+  full services are re-evaluated before a resident gives up.
 - **The world reads as FALESC.** Warm nebula backdrop, floating shards with deep
   keels, crystal veins, cables and debris, vacuum props, no sea/beach/open-air
   plants, Garden Dome glasshouse, airlocks, and a Commons Beacon silhouette as

@@ -1,6 +1,6 @@
 import { BALANCE } from '../design/balance.js';
 import { NEEDS } from '../design/needs.js';
-import { PROGRAM_BY_ID, servesNeed } from '../design/programs.js';
+import { PROGRAM_BY_ID, servesNeed, isOpenAt } from '../design/programs.js';
 import { ResidentFactory } from '../residents/ResidentFactory.js';
 import { ServiceManager } from '../services/ServiceManager.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
@@ -62,6 +62,14 @@ export class Charter {
         return this.activeResidents.length;
     }
 
+    get housedResidents() {
+        return this.activeResidents.filter((resident) => resident.homeServiceId && this.services.housingFor(resident));
+    }
+
+    get housedPopulation() {
+        return this.housedResidents.length;
+    }
+
     get housingCapacity() {
         return this.services.housingCapacity();
     }
@@ -90,7 +98,7 @@ export class Charter {
 
     get firstLightProgress() {
         return {
-            population: this.population,
+            population: this.housedPopulation,
             populationGoal: BALANCE.end.firstLightPopulation,
             flourishing: this.flourishing,
             flourishingGoal: BALANCE.end.comfortableFlourishing
@@ -98,7 +106,7 @@ export class Charter {
     }
 
     get goalsMet() {
-        return this.population >= BALANCE.end.firstLightPopulation
+        return this.housedPopulation >= BALANCE.end.firstLightPopulation
             && this.flourishing >= BALANCE.end.comfortableFlourishing;
     }
 
@@ -277,12 +285,12 @@ export class Charter {
                 message: 'Too few Tidelanders remain to keep the commons. The doors close one by one.'
             };
         } else if (this.day >= this.dayLimit) {
-            if (this.population >= BALANCE.end.firstLightPopulation && this.flourishing >= BALANCE.end.comfortableFlourishing) {
+            if (this.housedPopulation >= BALANCE.end.firstLightPopulation && this.flourishing >= BALANCE.end.comfortableFlourishing) {
                 this.ending = {
                     outcome: 'victory',
                     day: this.day,
                     title: 'The commons holds.',
-                    message: `${this.population} Tidelanders, a full larder, and a flourishing of ${this.flourishing}. The Confluence has something to celebrate.`
+                    message: `${this.housedPopulation} Tidelanders housed, a full larder, and a flourishing of ${this.flourishing}. The Confluence has something to celebrate.`
                 };
             } else {
                 this.ending = {
@@ -312,13 +320,18 @@ export class Charter {
         }
         const topNeed = NEEDS.reduce((best, need) => (!best || averages[need.id] > averages[best.id] ? need : best), null);
         const urgentCount = topNeed ? residents.filter((resident) => resident.needs[topNeed.id] >= BALANCE.needs.bulletinThreshold).length : 0;
-        const serving = this.services.activeServices.filter((service) => servesNeed(service.program, topNeed?.id));
-        const pending = this.services.services.filter((service) => service.state === 'PENDING' && servesNeed(service.program, topNeed?.id));
-        const closed = this.services.services.filter((service) => service.closed && servesNeed(service.program, topNeed?.id));
+        const matching = topNeed ? this.services.services.filter((service) => servesNeed(service.program, topNeed.id)) : [];
+        const openNow = matching.filter((service) => service.state === 'ACTIVE' && !service.closed && !service.program?.passive && isOpenAt(service.program, 'morning'));
+        const later = matching.filter((service) => service.state === 'ACTIVE' && !service.closed && !service.program?.passive && !isOpenAt(service.program, 'morning'));
+        const passive = matching.filter((service) => service.state === 'ACTIVE' && !service.closed && service.program?.passive);
+        const pending = matching.filter((service) => service.state === 'PENDING');
+        const closed = matching.filter((service) => service.closed);
         let serviceHint = `Nobody serves ${topNeed?.short?.toLowerCase()} yet.`;
-        if (serving.length > 0) serviceHint = `${serving[0].name} is the nearest open door.`;
+        if (topNeed?.id === 'rest' && passive.length > 0) serviceHint = 'Residents recover Rest in their own beds overnight.';
+        else if (openNow.length > 0) serviceHint = `${openNow[0].name} is open now.`;
         else if (pending.length > 0) serviceHint = `${pending[0].name} opens tomorrow.`;
         else if (closed.length > 0) serviceHint = `${closed[0].name} is closed after an upkeep shortfall.`;
+        else if (later.length > 0) serviceHint = `${later[0].name} opens later today.`;
 
         items.push({
             kicker: 'Unmet need',
@@ -404,6 +417,7 @@ export class Charter {
             day: this.day,
             dayLimit: this.dayLimit,
             population: this.population,
+            housedPopulation: this.housedPopulation,
             housingCapacity: this.housingCapacity,
             lumen: this.lumen,
             works: this.works,

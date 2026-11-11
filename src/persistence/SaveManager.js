@@ -31,7 +31,29 @@ export class SaveManager {
                 this.clear();
                 return null;
             }
-            if (!data.charter || !Number.isInteger(data.charter.seed)) return null;
+            const charter = data.charter;
+            const valid = charter
+                && Number.isInteger(charter.seed)
+                && Array.isArray(charter.services)
+                && Array.isArray(charter.residents)
+                && charter.residents.length > 0
+                && charter.residents.every((resident) => resident
+                    && typeof resident.id === 'string'
+                    && typeof resident.name === 'string'
+                    && resident.traits
+                    && resident.needs)
+                && charter.services.every((service) => service
+                    && typeof service.programId === 'string'
+                    && Number.isInteger(service.sectorId)
+                    && Number.isInteger(service.u)
+                    && Number.isInteger(service.v)
+                    && service.entrance
+                    && Number.isInteger(service.entrance.u)
+                    && Number.isInteger(service.entrance.v));
+            if (!valid) {
+                this.clear();
+                return null;
+            }
             return data;
         } catch {
             return null;

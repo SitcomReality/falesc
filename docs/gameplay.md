@@ -9,7 +9,7 @@
 FALESC: The Confluence is an isometric city-builder about caring for a small
 chapter of Tidelanders on a floating shard. You have a day limit, a shared lumen
 budget, two works per day, and a cast of people with needs. The First Light
-charter is won by reaching **12 residents and a flourishing of 62** by the day
+charter is won by reaching **12 housed residents and a flourishing of 62** by the day
 limit.
 
 ## Controls
@@ -203,8 +203,8 @@ reopened from its service record for lumen. The report names what closed.
 
 The report is the day's story as a broadsheet:
 
-- **Visits** and **Hearts** (the chapter's total affinity, not hearts gained
-  today), **Contributions**, **Upkeep**, **Lumen**, **Flourishing**.
+- **Visits** and **Hearts gained** (with a small loss note when affinity falls),
+  **Contributions**, **Upkeep**, **Lumen**, **Flourishing**.
 - **Needs at dusk** for all four needs.
 - **Doors and visits** — every service, including those with zero visits.
 - **Word of mouth** — up to three resident quotes, or a quiet fallback.
@@ -216,11 +216,12 @@ The report is the day's story as a broadsheet:
 
 ## Victory and defeat
 
-- **Victory:** at the day limit, the chapter has at least **12 residents** and a
-  **Flourishing of 62 or more**.
+- **Victory:** at the day limit, the chapter has at least **12 housed residents**
+  and a **Flourishing of 62 or more**.
 - **Defeat:** the population falls below **4** at the end of a day, or the day
   limit arrives without both goals.
-- **Abandon:** the charter menu ends the run early as a voluntary departure.
+- **Abandon:** the charter menu asks for confirmation, then ends the run early as
+  a voluntary departure and clears the save.
 
 The end screen shows days weathered, residents, Devotion, Flourishing and lumen,
 plus the outcome and a quote. It offers **Return to the drift** (menu) or **New
@@ -286,7 +287,7 @@ and clamped.
 
 The menu shows **Continue charter** when a valid save exists. Save v1 is
 intentionally removed and discarded; an unknown save version is cleared, and a
-corrupt payload is ignored rather than half-loaded. There is no export/import
+structurally invalid v2 payload is cleared rather than half-loaded. There is no export/import
 yet.
 
 ## Current limitations

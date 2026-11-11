@@ -87,6 +87,10 @@ export class Resident {
         }
     }
 
+    recordGiveUp(choice) {
+        this.memory.lastChoice = { ...choice, outcome: 'gave-up' };
+    }
+
     recordComplaint(needId, day, text) {
         this.memory.complaints = (this.memory.complaints || 0) + 1;
         this.memory.lastComplaint = { day, needId, text };
