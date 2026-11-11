@@ -61,7 +61,8 @@ export class ServiceInteriorModal {
     }
 
     moveHouse(residentId) {
-        const target = this.otherHomes?.[0];
+        const selected = this.panel.querySelector('[data-testid=house-target]')?.value;
+        const target = this.otherHomes?.find((home) => home.id === selected) || this.otherHomes?.[0];
         if (!target) return;
         const result = this.game?.charter?.moveResidentHome?.(residentId, target.id);
         if (!result?.ok) return;
@@ -138,6 +139,9 @@ export class ServiceInteriorModal {
             </div>
             <h3 class="service-interior__label">Who is here</h3>
             <ul class="service-interior__people">${people}</ul>
+            ${housing && this.otherHomes.length ? `<label class="service-interior__staff">Move to
+                <select data-testid="house-target">${this.otherHomes.map((home) => `<option value="${escapeHtml(home.id)}">${escapeHtml(home.name)}</option>`).join('')}</select>
+            </label>` : ''}
             ${canStaff ? `<label class="service-interior__staff">Staff
                 <select data-testid="service-staff" data-staff-select>
                     <option value="">Nobody yet</option>

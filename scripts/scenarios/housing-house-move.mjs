@@ -9,19 +9,23 @@ export default async function ({ page, assert, screenshot }) {
     await page.evaluate("window.__falesc.app.bulletinModal.hide()");
     const setup = await page.evaluate(`(() => {
         const app = window.__falesc.app;
-        const cell = window.__falesc.findFreeCell('housing');
-        const result = app.charter.build({ programId: 'housing', sectorId: cell.sectorId, u: cell.u, v: cell.v, name: 'Second House' });
-        result.service.promote();
+        const first = window.__falesc.findFreeCell('housing');
+        const firstHouse = app.charter.build({ programId: 'housing', sectorId: first.sectorId, u: first.u, v: first.v, name: 'Second House' });
+        const second = window.__falesc.findFreeCell('housing');
+        const secondHouse = app.charter.build({ programId: 'housing', sectorId: second.sectorId, u: second.u, v: second.v, name: 'Third House' });
+        firstHouse.service.promote();
+        secondHouse.service.promote();
         app.charter.assignHomes();
         app.syncViews();
         const welcome = app.charter.services.services.find((service) => service.id === app.charter.welcomePost.id);
         app.serviceCard.show(welcome);
-        return { ok: result.ok, target: result.service.id, welcome: welcome.id };
+        return { ok: firstHouse.ok && secondHouse.ok, target: secondHouse.service.id, welcome: welcome.id };
     })()`);
     assert.equal(setup.ok, true);
     await page.click('[data-testid=service-interior-open]');
     await page.waitFor("window.__falesc.app.serviceInterior.isOpen === true");
     assert.ok(await page.visible('[data-move-house]'));
+    await page.evaluate(`document.querySelector('[data-testid=house-target]').value = ${JSON.stringify(setup.target)}`);
     await page.click('[data-move-house]');
     const moved = await page.evaluate(`window.__falesc.app.charter.activeResidents.filter((resident) => resident.homeServiceId === ${JSON.stringify(setup.target)}).length`);
     assert.equal(moved, 1);

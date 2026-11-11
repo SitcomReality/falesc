@@ -206,7 +206,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `service-rename.mjs` | Renames a Canteen to The Long Table, checks the title and confirms the name saves. |
 | `service-roster-repair-all.mjs` | Wears a service, opens the roster and repairs all from its footer. |
 | `service-roster-worn.mjs` | Builds a Canteen, wears the Welcome Post, filters to Worn only and back to all services. |
-| `housing-house-move.mjs` | Builds a second house, moves a resident to it and checks the bed and population count. |
+| `housing-house-move.mjs` | Builds two houses, chooses the second as the move target and checks the bed and population count. |
 | `housing-bed-move.mjs` | Adds a Dormer, opens the interior, moves a resident up and back down. |
 | `housing-floor-save.mjs` | Saves and reloads a charter and checks bedroom floor assignments survive. |
 | `housing-interior.mjs` | Opens the Welcome Post interior and checks six residents are assigned to its ground-floor beds. |
