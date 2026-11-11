@@ -84,6 +84,7 @@ export class Charter {
             fund: 0,
             purse: 0,
             capital: 0,
+            capitalContributors: {},
             active: false,
             contributors: {},
             activatedDay: null,
@@ -1043,6 +1044,16 @@ export class Charter {
                 }
             }
         }
+        this.lastCapitalGifts = [];
+        if (this.contest && this.commons && this.commons.capital < 30) {
+            for (const rival of this.rivals) {
+                if (rival.lumen < BALANCE.commons.minRivalLumen) continue;
+                rival.lumen -= 1;
+                this.commons.capital += 1;
+                this.commons.capitalContributors[rival.id] = (this.commons.capitalContributors[rival.id] || 0) + 1;
+                this.lastCapitalGifts.push({ chapterId: rival.id, chapterName: rival.name });
+            }
+        }
         if (this.contest && !this.campaign && this.day >= this.dayLimit - BALANCE.campaign.days + 1) {
             this.startCampaign();
         }
@@ -1207,6 +1218,14 @@ export class Charter {
             });
         }
 
+        if (this.lastCapitalGifts?.length) {
+            items.push({
+                kicker: 'Commons capital',
+                title: 'The commons fills its purse',
+                text: `${this.lastCapitalGifts.map((gift) => gift.chapterName).join(' and ')} put lumen into the shared capital budget.`
+            });
+        }
+
         for (const trial of this.lastTrialResults || []) {
             items.push({
                 kicker: 'Trial stay',
@@ -1355,6 +1374,7 @@ export class Charter {
                 fund: Number(saved.commons.fund) || 0,
                 purse: Number(saved.commons.purse) || 0,
                 capital: Number(saved.commons.capital) || 0,
+                capitalContributors: { ...(saved.commons.capitalContributors || {}) },
                 active: Boolean(saved.commons.active),
                 contributors: { ...(saved.commons.contributors || {}) },
                 activatedDay: saved.commons.activatedDay || null,

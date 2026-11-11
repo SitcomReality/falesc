@@ -84,8 +84,9 @@ when the curve is chosen.
 - Other generated islands have scenery and minerals but no buildable grid.
 - Services built on the commons isle are shared works owned by The Commons.
   A commons purse fed by every chapter pays their upkeep; the player can top
-  it up and fund a shared capital budget that pays for commons construction.
-  There is still no rival construction there and no fuller archipelago. The Commons Beacon remains a project on the home shard.
+  it up and fund a shared capital budget that pays for commons construction;
+  rivals add 1 lumen a day. There is still no rival construction there and no
+  fuller archipelago. The Commons Beacon remains a project on the home shard.
   interaction, services, transit or residents.
 
 **Impact**
@@ -409,6 +410,7 @@ These are no longer open:
 - **Service retrofit.** An active player service can install up to two of Sunroom, Atelier and Night Kitchen; each module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
 - **Outer commons isle.** A second buildable shard in the Contest, reached by reserved shuttle gates; player services on it earn cross-island visits. Covered by `commons-isle.mjs`.
 - **Stewardship legacy.** A winning stewardship promise is saved in `falesc.legacy.v1` and grants a small starting effect to the next charter. Covered by `campaign.mjs`.
+- **Rival capital gifts.** Each rival adds 1 lumen/day to the shared capital budget while it can. Covered by `commons-rival-capital.mjs`.
 - **Commons capital budget.** Player gifts pay for shared commons construction before the builder's own lumen. Covered by `commons-capital.mjs`.
 - **Commons purse.** Every chapter gives 1 lumen when shared works stand; the purse pays shared upkeep and closes/reopens the shared doors together. Covered by `commons-purse.mjs`.
 - **Shared commons works.** Buildings raised on the Contest commons isle belong to The Commons, are usable by every resident and credit their builder. Covered by `commons-isle.mjs`.

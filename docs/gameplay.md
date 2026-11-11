@@ -174,7 +174,9 @@ them again. The report shows the purse, shared upkeep and any closures. The play
 also give **5** or **10** lumen to the purse from the Commons modal; a gift can
 reopen shared doors that had closed. Gifts to the **capital budget** pay for the
 next shared works before the builder's own lumen: a 10-lumen capital gift builds
-a 4-lumen commons canteen and leaves 6 in the budget.
+a 4-lumen commons canteen and leaves 6 in the budget. Each rival also puts 1
+lumen into the capital budget each day while it has at least 6 in hand, up to a
+30-lumen reserve.
 
 ## Retrofit
 
