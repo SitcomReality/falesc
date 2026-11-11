@@ -3,6 +3,7 @@ import { NEEDS, NEED_BY_ID, mostUrgentNeed } from '../design/needs.js';
 import { servesNeed } from '../design/programs.js';
 import { isServiceOpenAt, serviceQualityModifier } from '../services/ServicePolicies.js';
 import { accessFitFor } from '../services/ServiceAccess.js';
+import { focusFitFor } from '../services/ServiceFocus.js';
 import { rhythmRise, vibeFit, standardFit } from '../design/traits.js';
 import { SeededRandom } from '../map/SeededRandom.js';
 import { IslandNavigator } from '../navigation/IslandNavigator.js';
