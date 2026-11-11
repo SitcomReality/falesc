@@ -229,7 +229,7 @@ after any behavioural change.
   service record owns the action and the module is saved. Open services can also
   choose As built, Round the clock, Daylight or Evening hours, plus a free
   Cosy/Lively/Curious/Efficient atmosphere and an Open/Chapter first/Visitors
-  first welcome policy. The eight buildable
+  first welcome policy, including Care first for residents in crisis. The eight buildable
   services include the 2×2 Bathhouse for Rest + Company, the 2×2 Clinic for
   Rest + Sustenance, the 2×2 Amphitheatre for Company + Wonder and the 2×2
   Observatory for Wonder at night. A build chooses a

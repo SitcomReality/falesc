@@ -17,6 +17,11 @@ export const SERVICE_ACCESS = [
         id: 'visitors',
         name: 'Visitors first',
         blurb: 'Day guests are welcomed warmly: +6% visitor fit; residents −2%.'
+    },
+    {
+        id: 'care',
+        name: 'Care first',
+        blurb: 'Residents in crisis get +6% fit; everyone else −2%. The queue bends toward need.'
     }
 ];
 
@@ -30,6 +35,12 @@ export function accessFitFor(service, resident) {
     }
     if (access === 'visitors') {
         return resident?.visitor ? 1.06 : 0.98;
+    }
+    if (access === 'care') {
+        const needs = resident?.needs || {};
+        const urgent = Object.values(needs).some((value) => Number(value) >= 85);
+        const inCrisis = resident?.wellbeing < 30 || urgent || (resident?.memory?.homelessDays || 0) > 0;
+        return inCrisis ? 1.06 : 0.98;
     }
     return 1;
 }

@@ -201,6 +201,8 @@ Each service also has a **Welcome** policy:
 - **Chapter first** — the owning chapter's residents get +4% fit; visitors get
   −2%.
 - **Visitors first** — day guests get +6% fit; residents get −2%.
+- **Care first** — residents in crisis get +6% fit; everyone else gets −2%.
+  Crisis means a need at 85+, wellbeing below 30, or a night without a bed.
 
 Nobody is refused entry; the room simply reads better to one audience.
 

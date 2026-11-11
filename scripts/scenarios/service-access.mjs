@@ -44,6 +44,11 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.equal(after.access, 'visitors');
     assert.equal(after.capacity, before.capacity);
     assert.ok(await page.text('[data-testid=structure-modal]').then((text) => text.includes('Visitors first')));
+    await page.evaluate("(() => { const select = document.querySelector('[data-testid=service-access]'); select.value = 'care'; select.dispatchEvent(new Event('change', { bubbles: true })); })()");
+    await page.waitFor("window.__falesc.app.serviceCard.isOpen === true");
+    const care = await page.evaluate(`(() => { const service = window.__falesc.app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)}); return service?.policy?.access; })()`);
+    assert.equal(care, 'care');
+    assert.ok(await page.text('[data-testid=structure-modal]').then((text) => text.includes('Care first')));
     await screenshot('service-access.png');
 
     await page.evaluate("window.__falesc.app.saveGame()");
@@ -52,6 +57,6 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.click('[data-testid=menu-continue]');
     await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
     const restored = await page.evaluate(`(() => { const service = window.__falesc.app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(built.id)}); return service?.policy?.access; })()`);
-    assert.equal(restored, 'visitors');
+    assert.equal(restored, 'care');
     await page.pause(400);
 }
