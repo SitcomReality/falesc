@@ -53,12 +53,9 @@ import { BUILDABLE_PROGRAMS, PROGRAM_BY_ID } from './design/programs.js';
 import { DAY_PHASES, BALANCE } from './design/balance.js';
 import { BuildingRenderer } from './buildings/BuildingRenderer.js';
 import { installDebugApi } from './debug/DebugApi.js';
+import * as DayPlayback from './app/DayPlayback.js';
+import { defaultProgramId } from './design/programs.js';
 import { BuildCursor } from './controls/BuildCursor.js';
-
-/** The dock opens on the Canteen: the first unmet need in a new charter. */
-function defaultProgramId() {
-    return 'canteen';
-}
 
 /**
  * Application coordinator: wires the scene, charter model, screens and day
@@ -874,33 +871,7 @@ export class FalescGame {
     /* ------------------------------------------------------------------ */
 
     openDay() {
-        if (!this.charter || this.screenStateMachine.state !== GamePhase.PLAYING) return false;
-        this.clearKeyboardCursor();
-        this.audio.play('day');
-        if (this.hasBlockingModal()) return false;
-        this.world.clearHover();
-        this.buildModal.hide(false);
-        this.pendingBuildLocation = null;
-        this.patronageFlow.hide();
-        this.gameScreen.setPatronageState(false);
-        this.chatter.clear();
-        const simulation = this.charter.openDay();
-        // Anyone who left at dusk no longer has an agent on the shard.
-        this.crowd.sync();
-        const duration = DAY_PHASES.length * BALANCE.playback.phaseSeconds;
-        this.playback = {
-            clock: 0,
-            duration,
-            speed: 1,
-            report: simulation.report
-        };
-        this.playbackSpeed = 1;
-        this.playbackPaused = false;
-        this.crowd.preparePlayback(simulation.events);
-        this.dayScreen.setSpeed(1);
-        this.dayScreen.update({ day: this.charter.day, phase: DAY_PHASES[0].name, progress: 0 });
-        this.screenStateMachine.setState(GamePhase.DAY);
-        return true;
+        return DayPlayback.openDay(this);
     }
 
     togglePhotoMode() {
@@ -913,67 +884,19 @@ export class FalescGame {
     }
 
     togglePlaybackPause() {
-        if (this.screenStateMachine.state !== GamePhase.DAY || !this.playback) return false;
-        this.playbackPaused = !this.playbackPaused;
-        this.dayScreen.setPaused(this.playbackPaused);
-        return this.playbackPaused;
+        return DayPlayback.togglePlaybackPause(this);
     }
-
     setPlaybackSpeed(speed) {
-        const next = [1, 2, 4].includes(Number(speed)) ? Number(speed) : 1;
-        this.playbackSpeed = next;
-        if (this.playback) this.playback.speed = next;
-        this.dayScreen.setSpeed(next);
+        return DayPlayback.setPlaybackSpeed(this, speed);
     }
-
     skipDay() {
-        if (!this.playback) return;
-        this.playback.clock = this.playback.duration;
-        this.finishDayPlayback();
+        return DayPlayback.skipDay(this);
     }
-
     finishDayPlayback() {
-        if (this.screenStateMachine.state !== GamePhase.DAY) return;
-        this.playback = null;
-        this.playbackPaused = false;
-        this.crowd.resetToPlanningPositions();
-        this.screenStateMachine.setState(GamePhase.REPORT);
-        this.saveGame();
+        return DayPlayback.finishDayPlayback(this);
     }
-
     beginNextDay() {
-        if (!this.charter || this.screenStateMachine.state !== GamePhase.REPORT) return false;
-        if (this.charter.confluenceReady) {
-            this.showConfluence();
-            return true;
-        }
-        if (this.charter.ending) {
-            this.finishCharter();
-            return true;
-        }
-        const result = this.charter.beginNextDay();
-        if (result.ended) {
-            this.finishCharter();
-            return true;
-        }
-        this.selectedProgramId = defaultProgramId();
-        this.hintDismissed = false;
-        this.crowd.sync();
-        this.syncViews();
-        this.screenStateMachine.setState(GamePhase.PLAYING);
-        if (this.charter.campaign?.active && !this.charter.campaign.playerPledge) {
-            this.showCampaign();
-        } else {
-            this.showBulletin();
-        }
-        if (result.arrivals?.length) {
-            this.gameScreen.toast(`${result.arrivals.length} new Tidelander${result.arrivals.length === 1 ? '' : 's'} at the Welcome Post.`, 'mint');
-        }
-        for (const trial of result.trialResults || []) {
-            this.gameScreen.toast(trial.outcome === 'stayed' ? `${trial.name} passes the trial and stays.` : `${trial.name} leaves after the trial.`, trial.outcome === 'stayed' ? 'mint' : 'coral', 2400);
-        }
-        this.saveGame();
-        return true;
+        return DayPlayback.beginNextDay(this);
     }
 
     showConfluence() {
@@ -1184,20 +1107,7 @@ export class FalescGame {
     }
 
     updatePlayback(dt) {
-        if (!this.playback || this.playbackPaused) return;
-        this.playback.clock += dt * this.playback.speed;
-        const clock = Math.min(this.playback.duration, this.playback.clock);
-        const phaseSeconds = BALANCE.playback.phaseSeconds;
-        const phaseIndex = Math.min(DAY_PHASES.length - 1, Math.floor(clock / phaseSeconds));
-        const phase = DAY_PHASES[phaseIndex];
-        this.crowd.updatePlayback(clock, dt * this.playback.speed);
-        this.charter?.services.update(dt * this.playback.speed);
-        this.dayScreen.update({
-            day: this.charter?.day || 1,
-            phase: phase.name,
-            progress: clock / this.playback.duration
-        });
-        if (clock >= this.playback.duration) this.finishDayPlayback();
+        return DayPlayback.updatePlayback(this, dt);
     }
 
     sortObjects() {

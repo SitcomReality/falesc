@@ -317,3 +317,8 @@ export function footprintCells(program, u, v) {
     }
     return cells;
 }
+
+/** The dock opens on the Canteen: the first unmet need in a new charter. */
+export function defaultProgramId() {
+    return 'canteen';
+}
