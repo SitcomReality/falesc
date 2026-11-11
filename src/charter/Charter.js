@@ -27,6 +27,7 @@ import { ConfluenceVote } from '../confluence/ConfluenceVote.js';
 import * as CommonsAssembly from './CommonsAssembly.js';
 import * as CommonsPurse from './CommonsPurse.js';
 import * as CampaignRoom from './CampaignRoom.js';
+import * as ServiceCommands from './ServiceCommands.js';
 import { milestones as charterMilestones, careWatch as charterCareWatch, needSurvey as charterNeedSurvey, standings as charterStandings, historyEntry as charterHistoryEntry, stats as charterStats } from './CharterProjections.js';
 
 /**
@@ -721,247 +722,46 @@ export class Charter {
     }
 
     canBuild(programId, finish = 'comfortable', extraLumen = 0) {
-        const program = PROGRAM_BY_ID[programId];
-        if (!program || !program.buildable) return { ok: false, reason: 'That program is not available in this charter.' };
-        if (this.works <= 0) return { ok: false, reason: 'No works left today. Open the day to reset them.' };
-        const cost = finishCost(program, finish);
-        if (this.lumen + extraLumen < cost) {
-            return { ok: false, reason: `Need ${cost - this.lumen - extraLumen} more lumen.` };
-        }
-        return { ok: true };
+        return ServiceCommands.canBuild(this, programId, finish, extraLumen);
     }
-
     build({ programId, sectorId, u, v, name, finish = 'comfortable' }) {
-        const program = PROGRAM_BY_ID[programId];
-        const sector = this.map.sectors.find((entry) => entry.id === sectorId);
-        const shared = Boolean(sector?.commons && this.commonsManager);
-        const capital = shared ? this.commons.capital : 0;
-        const affordable = this.canBuild(programId, finish, capital);
-        if (!affordable.ok) return affordable;
-        const finishOption = finishFor(finish);
-        const cost = finishCost(program, finish);
-        const funded = Math.min(capital, cost);
-        const resolvedName = !name || name === programId ? program.name : name;
-        const manager = shared ? this.commonsManager : this.services;
-        const result = manager.place({
-            programId,
-            sectorId,
-            u,
-            v,
-            name: resolvedName,
-            state: 'PENDING',
-            finish: finishOption.id
-        });
-        if (!result.ok) return result;
-        if (shared) result.service.builderChapterId = 'player';
-        result.service.capacity = Math.max(1, result.service.capacity + finishOption.capacityDelta);
-        result.service.upkeepBonus = (result.service.upkeepBonus || 0) + finishOption.upkeepDelta;
-        if (!shared && this.legacyBonus?.programs.includes(programId)) {
-            result.service.capacity += this.legacyBonus.amount;
-        }
-        if (shared) this.commons.capital -= funded;
-        this.lumen -= (cost - funded);
-        this.works -= 1;
-        applyCommonsPolicyToService(result.service, this.commons?.policy);
-        this.refreshAdjacency();
-        this.assignHomes();
-        this.refreshDerived();
-        this.log('build', `${resolvedName} broke ground${shared ? ' on the commons' : sector?.garden ? ' on the garden isle' : ''}.`);
-        return { ...result, cost, funded };
+        return ServiceCommands.build(this, { programId, sectorId, u, v, name, finish });
     }
-
     renameService(service, name) {
-        if (!service || (service.chapterId && service.chapterId !== 'player')) {
-            return { ok: false, error: "A rival chapter's service cannot be renamed." };
-        }
-        const cleaned = String(name ?? '').replace(/\s+/g, ' ').trim().slice(0, 32);
-        if (!cleaned) return { ok: false, error: 'Give the service a name first.' };
-        service.name = cleaned;
-        service.refreshGraphics();
-        this.refreshDerived();
-        return { ok: true, name: cleaned };
+        return ServiceCommands.renameService(this, service, name);
     }
-
     repairCost() {
-        const policy = COMMONS_POLICY_BY_ID[this.commons?.policy];
-        return Math.max(1, 3 - (policy?.repairDiscount || 0));
+        return ServiceCommands.repairCost(this);
     }
-
     repairAllServices() {
-        let count = 0;
-        let spent = 0;
-        for (const service of this.services.services) {
-            if (service.condition >= 100) continue;
-            const cost = this.repairCost();
-            if (this.lumen < cost) break;
-            this.lumen -= cost;
-            spent += cost;
-            count += 1;
-            service.condition = 100;
-            service.refreshGraphics();
-        }
-        if (count > 0) this.refreshDerived();
-        return { ok: count > 0, count, spent };
+        return ServiceCommands.repairAllServices(this);
     }
-
     repairService(service) {
-        if (!service || (service.chapterId && service.chapterId !== 'player')) {
-            return { ok: false, error: "A rival chapter's service cannot be repaired." };
-        }
-        if (service.condition >= 100) return { ok: false, error: 'This service is already in good repair.' };
-        const cost = this.repairCost();
-        if (this.lumen < cost) return { ok: false, error: `A repair costs ${cost} lumen.` };
-        this.lumen -= cost;
-        service.condition = 100;
-        service.refreshGraphics();
-        this.refreshDerived();
-        return { ok: true, cost, condition: service.condition };
+        return ServiceCommands.repairService(this, service);
     }
-
     setServiceFocus(service, focusId) {
-        const focus = SERVICE_FOCUS_BY_ID[focusId];
-        if (!focus) return { ok: false, error: 'That is not a focus.' };
-        if (!service || service.state !== 'ACTIVE' || service.closed) {
-            return { ok: false, error: 'Only an open, working service can choose a focus.' };
-        }
-        if (!service.program?.secondaryNeed) return { ok: false, error: 'This service already has one purpose.' };
-        service.policy = { ...(service.policy || {}), focus: focus.id };
-        service.refreshGraphics();
-        this.refreshDerived();
-        return { ok: true, focus };
+        return ServiceCommands.setServiceFocus(this, service, focusId);
     }
-
     setServiceAccess(service, accessId) {
-        if (!service || (service.chapterId && service.chapterId !== 'player')) {
-            return { ok: false, error: "A rival chapter's access cannot be changed." };
-        }
-        if (service.fixed) return { ok: false, error: 'The Welcome Post keeps its own welcome.' };
-        if (service.state !== 'ACTIVE' || service.closed) {
-            return { ok: false, error: 'Only an open service can change access.' };
-        }
-        if (!SERVICE_ACCESS_BY_ID[accessId]) return { ok: false, error: 'Unknown access policy.' };
-        service.policy = { ...(service.policy || {}), access: accessId };
-        service.refreshGraphics();
-        this.refreshDerived();
-        return { ok: true, service, access: accessId };
+        return ServiceCommands.setServiceAccess(this, service, accessId);
     }
-
     setServiceVibe(service, vibeId) {
-        if (!service || (service.chapterId && service.chapterId !== 'player')) {
-            return { ok: false, error: "A rival chapter's atmosphere cannot be changed." };
-        }
-        if (service.fixed) return { ok: false, error: 'The Welcome Post keeps its own atmosphere.' };
-        if (service.state !== 'ACTIVE' || service.closed) {
-            return { ok: false, error: 'Only an open service can change atmosphere.' };
-        }
-        if (!SERVICE_VIBE_BY_ID[vibeId]) return { ok: false, error: 'Unknown service atmosphere.' };
-        service.policy = { ...(service.policy || {}), vibe: vibeId };
-        service.refreshGraphics();
-        this.refreshDerived();
-        return { ok: true, service, vibe: vibeId };
+        return ServiceCommands.setServiceVibe(this, service, vibeId);
     }
-
     setServiceHours(service, hoursId) {
-        if (!service || (service.chapterId && service.chapterId !== 'player')) {
-            return { ok: false, error: "A rival chapter's hours cannot be changed." };
-        }
-        if (service.fixed || service.programId === 'housing') {
-            return { ok: false, error: 'Housing keeps the charter hours.' };
-        }
-        if (service.state !== 'ACTIVE' || service.closed) {
-            return { ok: false, error: 'Only an open service can change hours.' };
-        }
-        if (!SERVICE_HOURS_BY_ID[hoursId]) return { ok: false, error: 'Unknown service hours.' };
-        service.policy = { ...(service.policy || {}), hours: hoursId };
-        service.refreshGraphics();
-        this.refreshDerived();
-        return { ok: true, service, hours: hoursId };
+        return ServiceCommands.setServiceHours(this, service, hoursId);
     }
-
     upgradeService(service, moduleId = 'sunroom') {
-        if (!service || service.chapterId && service.chapterId !== 'player') {
-            return { ok: false, error: "A rival chapter's service cannot be retrofitted." };
-        }
-        if (service.fixed) return { ok: false, error: 'The Welcome Post is already part of the charter.' };
-        if (service.state !== 'ACTIVE' || service.closed) {
-            return { ok: false, error: 'Only an open, working service can be retrofitted.' };
-        }
-        const installed = service.retrofits;
-        if (installed.includes(moduleId)) return { ok: false, error: 'That module is already installed.' };
-        if (installed.length >= 2) return { ok: false, error: 'This service already has two retrofit modules.' };
-        const module = RETROFIT_BY_ID[moduleId];
-        if (!module) return { ok: false, error: 'Unknown retrofit module.' };
-        if (this.lumen < module.cost) {
-            return { ok: false, error: `The ${module.name} retrofit costs ${module.cost} lumen.` };
-        }
-        this.lumen -= module.cost;
-        service.level = 2;
-        service.retrofitId = module.id;
-        service.capacity += module.capacity;
-        service.qualityBonus = (service.qualityBonus || 0) + module.quality;
-        service.upkeepBonus = (service.upkeepBonus || 0) + module.upkeep;
-        service.finish = 'grand';
-        service.modules = [...(service.modules || []), `retrofit:${module.id}`];
-        service.refreshGraphics();
-        this.refreshDerived();
-        return { ok: true, service, module, cost: module.cost };
+        return ServiceCommands.upgradeService(this, service, moduleId);
     }
-
     addFloor(service, planId = 'dormer') {
-        if (!service || (service.chapterId && service.chapterId !== 'player')) {
-            return { ok: false, error: "A rival chapter's service cannot grow." };
-        }
-        if (service.fixed) return { ok: false, error: 'The Welcome Post is already part of the charter.' };
-        if (service.state !== 'ACTIVE' || service.closed) {
-            return { ok: false, error: 'Only an open, working service can add a floor.' };
-        }
-        if (service.floors >= BALANCE.floors.max) return { ok: false, error: 'This service already has three floors.' };
-        const plan = FLOOR_PLAN_BY_ID[planId] || FLOOR_PLAN_BY_ID.dormer;
-        if (this.lumen < plan.cost) {
-            return { ok: false, error: `A floor costs ${plan.cost} lumen.` };
-        }
-        this.lumen -= plan.cost;
-        service.floors += 1;
-        service.floorPlans = [...(service.floorPlans || []), plan.id];
-        service.capacity += service.programId === 'housing' ? plan.housingCapacity : plan.serviceCapacity;
-        service.qualityBonus = (service.qualityBonus || 0) + plan.quality;
-        service.upkeepBonus = (service.upkeepBonus || 0) + plan.upkeep;
-        service.refreshGraphics();
-        this.assignHomes();
-        this.refreshDerived();
-        return { ok: true, service, cost: plan.cost, plan };
+        return ServiceCommands.addFloor(this, service, planId);
     }
-
     dismantle(service) {
-        if (!service) return { ok: false, reason: 'That service is already gone.' };
-        if (service.chapterId && service.chapterId !== 'player') {
-            return { ok: false, reason: "A rival chapter's service cannot be dismantled." };
-        }
-        if (service.fixed) return { ok: false, reason: 'The Welcome Post cannot be dismantled.' };
-        const cost = finishCost(service.program, service.finish);
-        const refund = Math.max(1, Math.floor(cost / 2));
-        const removed = this.services.remove(service);
-        if (!removed) return { ok: false, reason: 'That service could not be dismantled.' };
-        this.lumen += refund;
-        this.refreshAdjacency();
-        for (const resident of this.activeResidents) {
-            if (resident.homeServiceId === service.id) resident.homeServiceId = null;
-        }
-        this.assignHomes();
-        this.refreshDerived();
-        return { ok: true, refund, name: service.name };
+        return ServiceCommands.dismantle(this, service);
     }
-
     reopen(service) {
-        if (!service || !service.closed) return { ok: false, reason: 'That service is already open.' };
-        if (service.chapterId && service.chapterId !== 'player') {
-            return { ok: false, reason: "A rival chapter's service is not yours to reopen." };
-        }
-        const cost = this.services.reopenCost(service);
-        if (this.lumen < cost) return { ok: false, reason: `Need ${cost - this.lumen} more lumen to reopen.` };
-        this.lumen -= cost;
-        service.reopen();
-        return { ok: true, cost };
+        return ServiceCommands.reopen(this, service);
     }
 
     sharedWorkServices() {
