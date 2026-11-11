@@ -156,8 +156,10 @@ isle**. It is buildable by the player and reachable by residents through a
 reserved **shuttle gate** on each shard. A dashed shuttle line joins the gates;
 residents walk to the home gate, cross, and walk to the service door.
 
-Only the commons isle and the home shard are buildable. The other floating
-islands remain scenery. Rivals do not build there.
+A third, player-owned **garden isle** is also buildable in the Contest. It has
+its own shuttle gate to the home pad, but no commons ownership: services there
+belong to their builder like home services. The remaining floating islands
+remain scenery. Rivals do not build on the garden isle.
 
 Services raised on the commons isle are **shared works of The Commons**. The
 player pays the construction cost and work, but the building belongs to the

@@ -487,7 +487,7 @@ export class FalescGame {
     }
 
     findGridTarget(x, y) {
-        const sectors = [this.world.homeSector, this.charter?.commonsSector].filter(Boolean);
+        const sectors = [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].filter(Boolean);
         for (const sector of sectors) {
             const cell = sector.getGridCell(x, y);
             if (cell.u < 0 || cell.v < 0 || cell.u >= sector.gridSize || cell.v >= sector.gridSize) continue;
@@ -521,7 +521,7 @@ export class FalescGame {
 
     moveKeyboardCursor(dx, dy) {
         if (!this.keyboardCursorActive || !this.keyboardCursor) return false;
-        const sectors = [this.world.homeSector, this.charter?.commonsSector].filter(Boolean);
+        const sectors = [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].filter(Boolean);
         const sector = sectors.find((entry) => entry.id === this.keyboardCursor.sectorId) || sectors[0];
         const program = PROGRAM_BY_ID[this.selectedProgramId];
         const maxU = Math.max(0, sector.gridSize - (program?.footprint?.w || 1));
@@ -534,7 +534,7 @@ export class FalescGame {
 
     switchKeyboardSector() {
         if (!this.keyboardCursorActive || !this.keyboardCursor) return false;
-        const sectors = [this.world.homeSector, this.charter?.commonsSector].filter(Boolean);
+        const sectors = [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].filter(Boolean);
         if (sectors.length < 2) return false;
         const current = this.keyboardCursor.sectorId;
         const next = sectors.find((sector) => sector.id !== current) || sectors[0];
@@ -553,7 +553,7 @@ export class FalescGame {
             this.world.clearHover();
             return;
         }
-        const sector = [this.world.homeSector, this.charter?.commonsSector].find((entry) => entry?.id === this.keyboardCursor.sectorId);
+        const sector = [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].find((entry) => entry?.id === this.keyboardCursor.sectorId);
         if (!sector) {
             this.clearKeyboardCursor();
             return;
@@ -568,7 +568,7 @@ export class FalescGame {
 
     confirmKeyboardCursor() {
         if (!this.keyboardCursorActive || !this.keyboardCursor || !this.charter) return false;
-        const sector = [this.world.homeSector, this.charter?.commonsSector].find((entry) => entry?.id === this.keyboardCursor.sectorId);
+        const sector = [this.world.homeSector, this.charter?.commonsSector, this.charter?.gardenSector].find((entry) => entry?.id === this.keyboardCursor.sectorId);
         if (!sector) return false;
         const u = this.keyboardCursor.u;
         const v = this.keyboardCursor.v;
@@ -1166,7 +1166,7 @@ export class FalescGame {
             findFreeCell(programId = null) {
                 if (!game.charter || !game.world.map) return null;
                 const program = PROGRAM_BY_ID[programId || game.selectedProgramId] || PROGRAM_BY_ID[defaultProgramId()];
-                const sectors = [game.world.homeSector, game.charter.commonsSector].filter(Boolean);
+                const sectors = [game.world.homeSector, game.charter.commonsSector, game.charter.gardenSector].filter(Boolean);
                 for (const sector of sectors) {
                     for (let v = 0; v < sector.gridSize; v++) {
                         for (let u = 0; u < sector.gridSize; u++) {

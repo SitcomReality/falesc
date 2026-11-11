@@ -21,7 +21,7 @@ Severity is about impact on the slice, not effort:
 | # | Severity | Issue |
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
-| 2 | Medium | Home shard plus one commons isle are buildable; shared works, a purse and a capital budget exist, but no fuller archipelago |
+| 2 | Medium | Home, commons and garden isles are buildable; shared works, purse and capital exist, but no fuller archipelago |
 | 3 | Medium | Floors are stacked blocks, not full floor plans; districts are named clusters, not shaped neighbourhoods |
 | 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
@@ -72,15 +72,16 @@ delayed or traded off. Remove or wire the unused affinity knobs. Keep
 `victory.mjs` as the end-to-end guard, and add a tighter "close run" scenario
 when the curve is chosen.
 
-### 2. Only the home shard and one commons isle are playable
+### 2. Only the home shard and two outer isles are playable
 
 **Evidence**
 
-- `PlacementPolicy.evaluatePlacement()` allows `map.homeSector` and, in the
-  Contest, one marked `commonsSector`; every other sector still rejects.
-- `FalescGame.findGridTarget()` projects into home and the Contest commons isle.
-- Residents reach the commons isle through a reserved shuttle gate and a
-  cross-island route; rivals still build only on the home shard.
+- `PlacementPolicy.evaluatePlacement()` allows the home shard, the Contest
+  `commonsSector` and the Contest `gardenSector`; every other sector still rejects.
+- `FalescGame.findGridTarget()` projects into all three buildable sectors.
+- Residents reach the commons and garden isles through reserved shuttle gates
+  and cross-island routes; rivals build on the home shard and may fund shared
+  commons works.
 - Other generated islands have scenery and minerals but no buildable grid.
 - Services built on the commons isle are shared works owned by The Commons.
   A commons purse fed by every chapter pays their upkeep; the player can top
@@ -100,7 +101,7 @@ the camera has settled on the home shard.
 Keep the home shard as the Phase 1 scope, but make the boundary explicit in the
 lobby and HUD. The next step is the Phase 2 shared commons, not quietly enabling
 placement on scenery. Add further islands only with their own navigation, ownership and camera
-affordances. The commons isle is the first
+affordances; the garden isle is the second proof. The commons isle is the first
 proof of cross-island transit and shared ownership.
 
 ### 3. Floors are blocks and districts are named clusters
@@ -409,6 +410,7 @@ These are no longer open:
 - **Building finishes.** A build chooses Humble, Comfortable or Grand; the shell changes cost, capacity, upkeep and the resident standard fit and is saved. Covered by `building-finishes.mjs`.
 - **Service hours.** Open services can choose As built, Round the clock, Daylight or Evening; the choice changes open phases, quality and upkeep and is saved.
 - **Service retrofit.** An active player service can install up to two of Sunroom, Atelier and Night Kitchen; each module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
+- **Garden isle.** A third buildable Contest shard with player-owned services, reached through the home shuttle pad. Covered by `garden-isle.mjs`.
 - **Outer commons isle.** A second buildable shard in the Contest, reached by reserved shuttle gates; player services on it earn cross-island visits. Covered by `commons-isle.mjs`.
 - **Stewardship legacy.** A winning stewardship promise is saved in `falesc.legacy.v1` and grants a small starting effect to the next charter. Covered by `campaign.mjs`.
 - **Rival commons works.** A rival can spend the shared capital on a commons work when fewer than two shared works stand. Covered by `commons-rival-work.mjs`.

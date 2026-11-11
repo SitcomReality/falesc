@@ -24,6 +24,9 @@ export class DaySimulator {
         this.commonsNavigator = charter.commonsSector
             ? new IslandNavigator(charter.commonsSector, charter.allServices)
             : null;
+        this.gardenNavigator = charter.gardenSector
+            ? new IslandNavigator(charter.gardenSector, charter.allServices)
+            : null;
         this.navigator = this.homeNavigator;
         this.campaignEvent = charter.campaign?.eventFor?.(charter.day) || null;
         this.events = [];
@@ -210,7 +213,13 @@ export class DaySimulator {
     routeTo(resident, service) {
         const homeCell = this.homeCell(resident);
         const homeSectorId = this.charter.homeSector.id;
-        if (service.sectorId === homeSectorId || !this.commonsNavigator) {
+        const targetSector = service.sectorId === this.charter.commonsSector?.id
+            ? this.charter.commonsSector
+            : service.sectorId === this.charter.gardenSector?.id
+                ? this.charter.gardenSector
+                : null;
+        const targetNavigator = targetSector === this.charter.commonsSector ? this.commonsNavigator : this.gardenNavigator;
+        if (service.sectorId === homeSectorId || !targetSector || !targetNavigator) {
             const cells = this.homeNavigator.path(homeCell, service.entrance) || [homeCell, service.entrance];
             const worldPath = this.homeNavigator.worldPath(cells);
             return {
@@ -221,7 +230,8 @@ export class DaySimulator {
             };
         }
         const gates = this.charter.transit;
-        if (!gates?.home || !gates?.commons) {
+        const targetGate = targetSector === this.charter.commonsSector ? gates?.commons : gates?.garden;
+        if (!gates?.home || !targetGate) {
             const worldPath = this.homeNavigator.worldPath([homeCell, service.entrance]);
             return {
                 worldPath,
@@ -231,15 +241,15 @@ export class DaySimulator {
             };
         }
         const homeCells = this.homeNavigator.path(homeCell, gates.home) || [homeCell, gates.home];
-        const commonsCells = this.commonsNavigator.path(gates.commons, service.entrance) || [gates.commons, service.entrance];
+        const targetCells = targetNavigator.path(targetGate, service.entrance) || [targetGate, service.entrance];
         const homeWorld = this.homeNavigator.worldPath(homeCells);
-        const commonsWorld = this.commonsNavigator.worldPath(commonsCells);
-        const worldPath = [...homeWorld, ...commonsWorld];
+        const targetWorld = targetNavigator.worldPath(targetCells);
+        const worldPath = [...homeWorld, ...targetWorld];
         return {
             worldPath,
             returnWorldPath: [...worldPath].reverse(),
-            length: this.homeNavigator.pathLength(homeCells) + this.commonsNavigator.pathLength(commonsCells) + 6,
-            doorPoint: commonsWorld[commonsWorld.length - 1] || { x: 0, y: 0 }
+            length: this.homeNavigator.pathLength(homeCells) + targetNavigator.pathLength(targetCells) + 6,
+            doorPoint: targetWorld[targetWorld.length - 1] || { x: 0, y: 0 }
         };
     }
 

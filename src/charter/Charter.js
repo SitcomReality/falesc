@@ -62,8 +62,10 @@ export class Charter {
         });
         this.player.services = this.services;
         this.commonsSector = mode === 'contest' ? map.commonsSector : null;
+        this.gardenSector = mode === 'contest' ? map.gardenSector : null;
         if (map.commonsSector) map.commonsEnabled = mode === 'contest';
-        this.transit = { home: null, commons: null };
+        if (map.gardenSector) map.gardenEnabled = mode === 'contest';
+        this.transit = { home: null, commons: null, garden: null };
         this.commonsChapter = { id: 'commons', name: 'The Commons', colour: '#FFD36E', isPlayer: false };
         this.commonsManager = mode === 'contest'
             ? new ServiceManager({
@@ -331,12 +333,15 @@ export class Charter {
         const home = this.findTransitCell(this.homeSector, this.commonsSector);
         const commons = this.findTransitCell(this.commonsSector, this.homeSector);
         if (!home || !commons) return;
+        const garden = this.gardenSector ? this.findTransitCell(this.gardenSector, this.homeSector) : null;
         this.transit = {
             home: { sectorId: this.homeSector.id, ...home },
-            commons: { sectorId: this.commonsSector.id, ...commons }
+            commons: { sectorId: this.commonsSector.id, ...commons },
+            garden: garden ? { sectorId: this.gardenSector.id, ...garden } : null
         };
         this.reserveTransit(this.transit.home);
         this.reserveTransit(this.transit.commons);
+        this.reserveTransit(this.transit.garden);
     }
 
     findTransitCell(sector, other) {
@@ -1315,7 +1320,8 @@ export class Charter {
             legacy: this.legacy,
             transit: {
                 home: this.transit.home ? { ...this.transit.home } : null,
-                commons: this.transit.commons ? { ...this.transit.commons } : null
+                commons: this.transit.commons ? { ...this.transit.commons } : null,
+                garden: this.transit.garden ? { ...this.transit.garden } : null
             },
             commons: {
                 ...this.commons,
@@ -1362,10 +1368,12 @@ export class Charter {
         if (saved.transit?.home && saved.transit?.commons) {
             this.transit = {
                 home: { ...saved.transit.home },
-                commons: { ...saved.transit.commons }
+                commons: { ...saved.transit.commons },
+                garden: saved.transit.garden ? { ...saved.transit.garden } : null
             };
             this.reserveTransit(this.transit.home);
             this.reserveTransit(this.transit.commons);
+            this.reserveTransit(this.transit.garden);
         }
         if (saved.commons) {
             const serviceEntries = Array.isArray(saved.commons.service) ? saved.commons.service : [];

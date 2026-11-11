@@ -116,7 +116,12 @@ export class MapGenerator {
             .filter((sector) => sector !== this.homeSector)
             .sort((a, b) => b.gridSize - a.gridSize || a.centerX - b.centerX)[0] || null;
         if (this.commonsSector) this.commonsSector.commons = true;
+        this.gardenSector = this.sectors
+            .filter((sector) => sector !== this.homeSector && sector !== this.commonsSector && sector.gridSize >= 3)
+            .sort((a, b) => b.gridSize - a.gridSize || a.centerX - b.centerX)[0] || null;
+        if (this.gardenSector) this.gardenSector.garden = true;
         this.commonsEnabled = false;
+        this.gardenEnabled = false;
     }
 
     findPlacement(layout, placed, minSpacing) {

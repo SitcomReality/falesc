@@ -18,7 +18,7 @@ that document is prototype-era; the current world is the void described in
 
 **Design direction.** The refined design — resident needs, service buildings,
 planning plus playback, care-based competition and the Confluence — is
-substantially implemented across a home shard and a Contest commons isle, including a **Contest preview**
+substantially implemented across a home shard, a Contest commons isle and a Contest garden isle, including a **Contest preview**
 with two AI rivals, a shared lumen economy, shared residents, rival housing,
 recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
 a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
@@ -70,6 +70,7 @@ webgame_smoke --scenario scripts/scenarios/amphitheatre.mjs
 webgame_smoke --scenario scripts/scenarios/clinic.mjs
 webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
 webgame_smoke --scenario scripts/scenarios/building-finishes.mjs
+webgame_smoke --scenario scripts/scenarios/garden-isle.mjs
 webgame_smoke --scenario scripts/scenarios/commons-isle.mjs
 ```
 
@@ -134,10 +135,10 @@ after any behavioural change.
 - **No gameplay timers.** Day timing is ticker-driven. The only `setTimeout` is
   the HUD toast; focus moves use `requestAnimationFrame`. Do not add
   `setTimeout`/`setInterval` for simulation.
-- **One home shard plus one commons isle.** Contest placement also accepts the
-  marked second sector (`map.commonsSector`) via `map.commonsEnabled`; every
-  other island remains scenery. Do not make further islands buildable without
-  their own navigation and ownership.
+- **Home, commons and garden isles.** Contest placement accepts the home shard,
+  the marked commons sector (`map.commonsEnabled`) and the marked garden sector
+  (`map.gardenEnabled`); every other island remains scenery. The garden isle is
+  player-owned and uses the home shuttle pad.
 - **Keep generated output out of git.** `.artifacts/`, `node_modules/`, logs and
   local env files are ignored. Scenarios are source; screenshots are not.
 - **Test after changes.** `npm run check` catches broken imports and syntax; the

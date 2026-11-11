@@ -5,7 +5,7 @@ floating shards in a warm nebula void. Six Tidelanders, one Welcome Post, and a
 finite reserve of civic energy: keep people fed, rested, social and curious long
 enough for the chapter to flourish.
 
-This build is the **First Light vertical slice**. One home shard plus a Contest commons isle, four
+This build is the **First Light vertical slice**. One home shard plus Contest commons and garden isles, four
 needs, eight services, a paused planning day, a deterministic playback, and an
 evening broadsheet. A **Contest preview** adds two rival chapters, a shared lumen
 economy, shared residents and rival housing on the same shard, ending in a three-day campaign, a **Confluence vote**, a post-vote
@@ -129,6 +129,7 @@ webgame_smoke --scenario scripts/scenarios/amphitheatre.mjs
 webgame_smoke --scenario scripts/scenarios/clinic.mjs
 webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
 webgame_smoke --scenario scripts/scenarios/building-finishes.mjs
+webgame_smoke --scenario scripts/scenarios/garden-isle.mjs
 webgame_smoke --scenario scripts/scenarios/commons-isle.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```

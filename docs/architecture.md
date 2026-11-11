@@ -282,7 +282,8 @@ upkeep.
 ### Cross-island commons isle
 
 In Contest mode `Charter` marks the second-largest sector as `commonsSector`
-and sets `map.commonsEnabled`. `Charter.build()` routes placements on that
+and the next full-grid sector as `gardenSector`, setting `map.commonsEnabled`
+and `map.gardenEnabled`. `Charter.build()` routes placements on that
 sector into `commonsManager` and stamps `builderChapterId`; the service belongs
 to the commons chapter and is excluded from dismantle, retrofit and hours
 commands. `Charter.collectCommonsLevy()` takes 1 lumen per chapter into
@@ -295,7 +296,9 @@ builder on each visit. `PlacementPolicy` accepts that sector as well as
 the home shard. `Charter.setupTransit()` reserves a free gate cell on each
 shard; `DaySimulator.routeTo()` composes a home path, the cross-void shuttle
 leg and a commons path, then emits world-space points for `ResidentAgent`.
-`TransitGate` draws the two pads and the dashed link (read-only). Rivals still
+`TransitGate` draws the home pad, one pad per outer isle and the dashed links
+(read-only). `DaySimulator` routes a garden service through the home pad and
+the garden navigator just like the commons route. Rivals still
 search only `rival.services.map.homeSector`.
 
 ### Contest preview
