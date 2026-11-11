@@ -55,6 +55,7 @@ data as the game and never changes a rule.
 | `Escape` in a dialog or menu | Cancel / close / return to planning |
 | Day controls | `1×` `2×` `4×` speed and **Skip** |
 | Report | **Begin Day N** (or **Read the charter record** when the run ends) |
+| Charter menu (☰) → Save & menu | Save and leave without ending the charter |
 | Charter menu (☰) → Abandon charter | End the run voluntarily |
 
 Clicking a resident takes precedence over clicking the plot beneath them when

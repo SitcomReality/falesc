@@ -75,6 +75,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-need-survey">Need survey</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-ledger">Ledger</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-commons-menu" hidden>The commons</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="save-return-menu">Save &amp; menu</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-departures" hidden>Past residents</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="sound-toggle" aria-pressed="false">Sound: off</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="motion-toggle" aria-pressed="false">Motion: full</button>
@@ -256,6 +257,10 @@ export class GameScreen {
         this.pausePanel.querySelector('[data-testid=open-commons-menu]').addEventListener('click', () => {
             this._setPauseOpen(false);
             this.game.showCommons();
+        });
+        this.pausePanel.querySelector('[data-testid=save-return-menu]').addEventListener('click', () => {
+            this._setPauseOpen(false);
+            this.game.returnToMenu();
         });
         this.departuresButton = this.pausePanel.querySelector('[data-testid=open-departures]');
         this.departuresButton.addEventListener('click', () => {

@@ -67,6 +67,7 @@ export class FalescGame {
             onTap: (x, y) => this.onWorldTap(x, y),
             onHover: (point) => this.onWorldHover(point)
         });
+        this.setWorldVisible(false);
         this.crowd = new ResidentCrowd({
             objectLayer: this.world.objectLayer,
             shadowLayer: this.world.shadowLayer
@@ -221,6 +222,7 @@ export class FalescGame {
 
     continueCharter() {
         this._archiveRecorded = false;
+        this.setWorldVisible(true);
         const save = this.saveManager.read();
         if (!save?.charter) return false;
         this.settings.mapSeed = save.charter.seed;
@@ -973,6 +975,18 @@ export class FalescGame {
         this.screenStateMachine.setState(GamePhase.END);
     }
 
+    returnToMenu() {
+        if (!this.charter) return false;
+        this.saveGame();
+        this.setWorldVisible(false);
+        this.screenStateMachine.setState(GamePhase.MENU);
+        return true;
+    }
+
+    setWorldVisible(visible) {
+        if (this.world?.app?.view) this.world.app.view.style.visibility = visible ? 'visible' : 'hidden';
+    }
+
     endCharter(outcome = 'abandon') {
         if (!this.charter) {
             this.screenStateMachine.setState(GamePhase.MENU);
@@ -1022,6 +1036,7 @@ export class FalescGame {
     }
 
     onPhaseChanged(phase, previous) {
+        if (phase === GamePhase.MENU) this.setWorldVisible(false);
         if (previous === GamePhase.DAY && phase !== GamePhase.DAY) {
             this.crowd.resetToPlanningPositions();
         }
