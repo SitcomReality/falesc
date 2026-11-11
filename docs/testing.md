@@ -167,6 +167,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `contest.mjs` | Lobby Contest mode creates two rival chapters with Welcome Houses and opening services; each chapter starts with three residents; residents visit rival doors; standings/patronage/Devotion appear; rival upkeep is charged; a rival grows by housing new arrivals; the player Canteen earns visits; rival moves occur; the patronage-flow overlay draws one arc per last choice; the contest restores after reload, then the day limit convenes the Confluence; the player makes a pledge, every resident votes, and a player victory proceeds to a stewardship choice before the charter ending. |
 | `commons-isle.mjs` | Builds a shared Bathhouse on the second commons isle, verifies reserved shuttle gates, commons ownership, cross-island visits, the shared service card and save/reload. |
 | `building-finishes.mjs` | Builds a Grand canteen and a Humble tea house, checks cost/capacity/upkeep, the finish in the service record, and save/reload. |
+| `observatory.mjs` | Builds the eighth service, the 2×2 night Observatory, checks the dock shortcut, capacity/cost, visits and save/reload. |
 | `amphitheatre.mjs` | Builds the seventh service, the 2×2 Amphitheatre, checks the dock shortcut, capacity/cost, visits and save/reload. |
 | `clinic.mjs` | Builds the sixth service, the 2×2 Clinic, checks the dock shortcut, capacity/cost, cross-day visits and save/reload. |
 | `bathhouse.mjs` | Builds the fifth service, checks its 2×2 footprint, capacity 5, late opening, visits and saved state. |

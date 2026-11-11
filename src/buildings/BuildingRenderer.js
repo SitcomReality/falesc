@@ -74,6 +74,15 @@ const PROGRAMS = {
             { x: 104, y: -86 }
         ]
     },
+    observatory: {
+        hw: 112,
+        hh: 48,
+        guide: [
+            { x: -104, y: -96 },
+            { x: 0, y: -166 },
+            { x: 104, y: -96 }
+        ]
+    },
     amphitheatre: {
         hw: 184,
         hh: 78,
@@ -128,6 +137,9 @@ export class BuildingRenderer {
                 break;
             case 'amphitheatre':
                 BuildingRenderer.drawAmphitheatre(graphics, state);
+                break;
+            case 'observatory':
+                BuildingRenderer.drawObservatory(graphics, state);
                 break;
             case 'clinic':
                 BuildingRenderer.drawClinic(graphics, state);
@@ -1434,6 +1446,32 @@ export class BuildingRenderer {
             graphics.drawCircle(-46 + light * 23, -62 - (light % 2) * 5, 3.2);
         }
         graphics.endFill();
+    }
+
+    static drawObservatory(graphics, state) {
+        BuildingRenderer.drawHousing(graphics, state);
+        const trim = BuildingRenderer.tone(CREAM, state);
+        const dome = BuildingRenderer.tone(LAVENDER, state);
+        const glass = BuildingRenderer.tone(MINT, state);
+        const ink = BuildingRenderer.tone(INK, state);
+        const metal = BuildingRenderer.tone(PAPER_WARM, state);
+        graphics.beginFill(dome, 1);
+        graphics.lineStyle(3, ink, 1);
+        graphics.drawEllipse(0, -98, 54, 34);
+        graphics.endFill();
+        graphics.beginFill(trim, 1);
+        graphics.lineStyle(2, ink, 1);
+        graphics.drawEllipse(0, -98, 44, 24);
+        graphics.endFill();
+        graphics.beginFill(glass, 0.95);
+        graphics.drawRect(-4, -118, 8, 34);
+        graphics.endFill();
+        graphics.lineStyle(7, metal, 1);
+        graphics.moveTo(-18, -112);
+        graphics.lineTo(34, -132);
+        graphics.lineStyle(3, ink, 0.9);
+        graphics.moveTo(34, -132);
+        graphics.lineTo(40, -135);
     }
 
     static drawCommonsBeacon(graphics, state) {

@@ -1,7 +1,7 @@
 # Known issues and technical debt
 
 > **Context:** this is the **First Light vertical slice** — one playable home
-> shard, four needs, seven services, planning/playback/report, and a solo
+> shard, four needs, eight services, planning/playback/report, and a solo
 > chapter. The refined design is in [design-refinement.md](design-refinement.md)
 > and the build order in [design/roadmap.md](design/roadmap.md). Issues below
 > are current limitations of this build, not of the target design.
@@ -107,7 +107,7 @@ proof of cross-island transit and shared ownership.
 
 **Evidence**
 
-- The seven buildable programs are fixed compositions. `ServiceBuilding` stores
+- The eight buildable programs are fixed compositions. `ServiceBuilding` stores
   `finish`, `policy`, `level`, `retrofitId`, `qualityBonus` and `upkeepBonus`;
   up to two retrofit modules change them, and retrofit sets the grand finish.
 - Extra floors add capacity and upkeep and draw a stacked upper storey above

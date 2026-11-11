@@ -113,6 +113,15 @@ export const ICONS = {
         <rect x="27" y="38" width="10" height="7" fill="#59E3C2" stroke="${INK}" stroke-width="1.5"/>
         <path d="M16 30l4-4M48 30l-4-4M32 18v-5" stroke="#FFD36E" stroke-width="2.5" stroke-linecap="round"/>
     `),
+    observatory: svg(`
+        <path d="M6 50h52" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M12 47V31c0-10 9-18 20-18s20 8 20 18v16" fill="#FFF2D8" stroke="${INK}" stroke-width="2.5"/>
+        <path d="M9 31c4-14 12-21 23-21s19 7 23 21" fill="#C9B6FF" stroke="${INK}" stroke-width="2.5"/>
+        <path d="M22 12 41 5" stroke="#59E3C2" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="42" cy="5" r="3" fill="#FFD36E" stroke="${INK}" stroke-width="1.5"/>
+        <rect x="28" y="35" width="8" height="12" fill="#211225"/>
+        <path d="M18 43h9M37 43h9" stroke="#FFD36E" stroke-width="2"/>
+    `),
     commons_beacon: svg(`
         <path d="M8 50h48" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
         <path d="M23 49 27 22h10l4 27Z" fill="#C9B6FF" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
