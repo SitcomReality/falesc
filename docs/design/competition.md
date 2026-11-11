@@ -14,7 +14,7 @@
 > finale, including a six-event, three-day campaign programme of rival/player promises and a
 > post-vote stewardship promise and a fundable shared Commons Beacon. A separate
 > shared-commons island, long-term rival plan, a multi-round festival, auctions
-> and systemic stewardship remain target.
+> and systemic stewardship remain target. Rivals now publish a visible long-term plan.
 >
 > The competition is for **patronage and love**, not profit. Rivals win residents
 > by being better hosts. There is no price war, no landlord rent, and no cash

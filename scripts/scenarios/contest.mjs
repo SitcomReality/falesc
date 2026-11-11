@@ -82,6 +82,7 @@ export default async function ({ page, assert, screenshot, log }) {
     log(JSON.stringify({ built }));
     assert.ok(built.result.ok, 'the player should still be able to build on the shared shard');
     assert.ok(built.rivalMoves.length > 0, 'a rival should make a move at the start of the day');
+    assert.ok(built.standings.some((chapter) => chapter.plan), 'rivals should announce a long-term plan');
 
     // The Canteen opens overnight; day 3 is the first day it can earn visits.
     await page.evaluate("window.__falesc.openDay()");

@@ -6,7 +6,7 @@ import { ServiceManager } from '../services/ServiceManager.js';
  * same shared Tidelanders as everyone else's.
  */
 export class RivalChapter {
-    constructor({ id, name, colour, doctrine, programs = [], lumen = 18, works = 1, lastMove = null, map, parentContainer, occupancy }) {
+    constructor({ id, name, colour, doctrine, programs = [], lumen = 18, works = 1, lastMove = null, plan = null, map, parentContainer, occupancy }) {
         this.id = id;
         this.name = name;
         this.colour = colour;
@@ -16,6 +16,7 @@ export class RivalChapter {
         this.lumen = lumen;
         this.works = works;
         this.lastMove = lastMove;
+        this.plan = plan;
         this.services = new ServiceManager({
             map,
             parentContainer,
@@ -39,6 +40,7 @@ export class RivalChapter {
             lumen: this.lumen,
             works: this.works,
             lastMove: this.lastMove,
+            plan: this.plan,
             services: this.services.serialize()
         };
     }

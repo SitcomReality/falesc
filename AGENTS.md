@@ -194,7 +194,8 @@ after any behavioural change.
   large) so three chapters can build for a full season.
 - Rival chapters pay construction costs and upkeep, receive contributions from
   their own residents, own fixed Welcome Houses, reopen services lost to
-  shortfalls, and choose builds by need pressure plus doctrine. The last three
+  shortfalls, publish a visible long-term plan and choose builds by need pressure
+  plus doctrine. The last three
   days run a campaign: a seeded six-event, two-bell-per-day festival programme
   makes matching promises more magnetic, rivals publish promises, the player chooses one, and
   the final vote uses both; the player may sponsor one extra bell for 5 lumen. A player victory then chooses one of four stewardship

@@ -591,7 +591,8 @@ export class Charter {
             visits: patronage[chapter.id] || 0,
             residents: this.activeResidents.filter((resident) => resident.homeChapterId === chapter.id).length,
             lumen: chapter.lumen,
-            upkeep: chapter.services.totalUpkeep()
+            upkeep: chapter.services.totalUpkeep(),
+            plan: chapter.plan ? { ...chapter.plan } : null
         }));
     }
 

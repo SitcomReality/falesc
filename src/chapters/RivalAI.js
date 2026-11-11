@@ -99,6 +99,7 @@ export function planRivalDay(rival, charter) {
     const civic = tryCommonsBuild(rival, charter);
     if (civic) return civic;
 
+    choosePlan(rival, charter);
     const pressure = needPressure(charter);
     const candidates = (rival.programs || [])
         .map((programId, index) => {
@@ -117,6 +118,7 @@ export function planRivalDay(rival, charter) {
         .sort((a, b) => b.score - a.score || a.index - b.index);
 
     for (const candidate of candidates) {
+        if (rival.plan?.programId === candidate.programId && rival.plan.startedDay === charter.day) continue;
         const plot = findFreePlot(rival, candidate.programId);
         if (!plot) continue;
         const built = countProgram(rival, candidate.programId);
@@ -132,6 +134,7 @@ export function planRivalDay(rival, charter) {
         applyCommonsPolicyToService(result.service, charter.commons?.policy);
         rival.lumen -= candidate.program.cost;
         rival.works -= 1;
+        if (rival.plan?.programId === candidate.programId) rival.plan = null;
         rival.lastMove = {
             chapterId: rival.id,
             chapterName: rival.name,
@@ -143,6 +146,36 @@ export function planRivalDay(rival, charter) {
         return rival.lastMove;
     }
     return null;
+}
+
+function choosePlan(rival, charter) {
+    const stale = rival.plan && charter.day - (rival.plan.startedDay || charter.day) > 3;
+    if (rival.plan && !stale) return;
+    const pressure = needPressure(charter);
+    const residents = charter.activeResidents.filter((resident) => resident.homeChapterId === rival.id);
+    const spare = rival.services.spareHousing(residents);
+    const candidates = (rival.programs || [])
+        .map((programId, index) => {
+            const program = PROGRAM_BY_ID[programId];
+            if (!program || !program.buildable) return null;
+            if (countProgram(rival, programId) >= programLimit(programId)) return null;
+            const doctrineBias = Math.max(0, 12 - index * 3);
+            const housingBias = programId === 'housing' && spare <= 0 ? 8 : 0;
+            return { programId, program, score: (pressure[program.need] || 0) + doctrineBias + housingBias, index };
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.score - a.score || a.index - b.index);
+    const next = candidates[0];
+    if (!next) {
+        rival.plan = null;
+        return;
+    }
+    rival.plan = {
+        programId: next.programId,
+        name: next.programId === 'housing' ? 'More housing' : next.program.name,
+        need: next.program.need,
+        startedDay: charter.day
+    };
 }
 
 function tryReopen(rival, charter) {

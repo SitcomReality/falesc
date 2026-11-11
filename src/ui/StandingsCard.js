@@ -87,7 +87,7 @@ export class StandingsCard {
         }
         const ordered = [...chapters].sort((a, b) => b.devotion - a.devotion || b.visits - a.visits);
         const signature = JSON.stringify([
-            ordered.map((chapter) => [chapter.id, chapter.devotion, chapter.visits, chapter.residents]),
+            ordered.map((chapter) => [chapter.id, chapter.devotion, chapter.visits, chapter.residents, chapter.plan?.name || null]),
             campaignActive,
             campaign?.playerPledge || null,
             campaign?.eventFor?.(day)?.title || null,
@@ -101,7 +101,7 @@ export class StandingsCard {
                 <span class="standings-row__dot" style="background:${chapter.colour}"></span>
                 <span class="standings-row__name">${escapeHtml(chapter.name)}${chapter.isPlayer ? ' (you)' : ''}</span>
                 <strong class="standings-row__hearts">${chapter.devotion.toFixed(1)} ♥</strong>
-                <span class="standings-row__visits">${chapter.residents} residents · ${chapter.visits} visits</span>
+                <span class="standings-row__visits">${chapter.residents} residents · ${chapter.visits} visits${chapter.plan ? ` · planning ${escapeHtml(chapter.plan.name)}` : ''}</span>
             </li>
         `).join('');
     }

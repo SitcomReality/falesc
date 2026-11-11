@@ -149,7 +149,7 @@ carry a real trade-off.
   player-authored programme or promises that change the buildings themselves;
   the two bells per day make the festival longer, not fully interactive.
 - Rivals reopen services lost to a shortfall, choose builds by shared need
-  pressure plus doctrine, and can grow through housing. They still make one move
+  pressure plus doctrine, and can grow through housing. Rivals now publish a long-term plan and honour it when they can, but still make one move
   per day and do not plan a long-term service mix or respond to the player's
   specific moves.
 - A player winner chooses one of four stewardship promises. The promise now
