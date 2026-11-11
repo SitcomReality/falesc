@@ -1067,6 +1067,19 @@ export class BuildingRenderer {
         graphics.endFill();
     }
 
+    static storeyTop(programId) {
+        const heights = {
+            housing: 112,
+            canteen: 78,
+            tea_house: 96,
+            bathhouse: 96,
+            garden_dome: 150,
+            commons_beacon: 160,
+            clinic: 112
+        };
+        return heights[programId] || 96;
+    }
+
     static drawBathhouse(graphics, state) {
         BuildingRenderer.drawTeaHouse(graphics, state);
         const trim = BuildingRenderer.tone(CREAM, state);

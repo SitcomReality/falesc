@@ -24,7 +24,7 @@ recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
 a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
 a fundable shared Commons Beacon that becomes a six-seat all-needs civic service,
 transient day visitors who pay for service visits, and a two-module service retrofit. The full multi-round festival, auctions, deeper legacy effects, deeper rival
-strategy, true stacked floors and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
+strategy, full interior floors and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
 ## Start here

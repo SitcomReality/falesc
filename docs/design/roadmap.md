@@ -63,7 +63,7 @@ shared works funded by a commons purse, and 2–3 day visitors trade with the
 services. A fuller commons archipelago, long-term rival plan, multi-round
 festival events, auctions and deeper legacy effects remain.
 
-**Not started:** the rest of Phase 2, Phase 3 (true stacked floors,
+**Not started:** the rest of Phase 2, Phase 3 (full interior floors,
 shaped districts and access policy), shared capital budgeting, deeper Phase 4
 scenarios, and Phase 5
 (multiplayer, audio, accessibility polish).

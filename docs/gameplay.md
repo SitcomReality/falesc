@@ -258,7 +258,7 @@ standards trait.
 
 An open, player-built service can add up to **two extra floors** for **4 lumen**
 each. Each floor adds **+1 capacity** (**+2** for housing), **+1 upkeep**, and a
-small floor plaque above the building. The Welcome Post, shared commons works
+stacked upper storey above the building. The Welcome Post, shared commons works
 and rival services do not grow this way.
 
 Hovering the grid shows a mint diamond and a ghost of the armed service when the

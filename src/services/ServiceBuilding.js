@@ -152,15 +152,42 @@ export class ServiceBuilding {
 
     drawFloorTabs() {
         this.floorG.clear();
+        const top = -BuildingRenderer.storeyTop(this.programId) + 10;
         for (let floor = 1; floor < this.floors; floor++) {
-            const y = -104 - (floor - 1) * 13;
-            this.floorG.beginFill(0xFFF8EA, 0.94);
-            this.floorG.lineStyle(2, 0x211225, 0.9);
-            this.floorG.drawRoundedRect(-25, y, 50, 9, 3);
+            const base = top - (floor - 1) * 22;
+            const hw = 46;
+            const hh = 17;
+            const height = 20;
+            const roof = base - height;
+            // Top diamond.
+            this.floorG.beginFill(0xFFF2D8, 1);
+            this.floorG.lineStyle(2.5, 0x211225, 1);
+            this.floorG.moveTo(0, roof);
+            this.floorG.lineTo(hw, roof + hh);
+            this.floorG.lineTo(0, roof + hh * 2);
+            this.floorG.lineTo(-hw, roof + hh);
+            this.floorG.closePath();
             this.floorG.endFill();
-            this.floorG.beginFill(0x59E3C2, 0.95);
-            for (let windowIndex = 0; windowIndex < 3; windowIndex++) {
-                this.floorG.drawCircle(-13 + windowIndex * 13, y + 4.5, 2.1);
+            // Left wall.
+            this.floorG.beginFill(0xF3D9AE, 1);
+            this.floorG.moveTo(-hw, roof + hh);
+            this.floorG.lineTo(0, roof + hh * 2);
+            this.floorG.lineTo(0, base + hh * 2);
+            this.floorG.lineTo(-hw, base + hh);
+            this.floorG.closePath();
+            this.floorG.endFill();
+            // Right wall.
+            this.floorG.beginFill(0xFFD36E, 1);
+            this.floorG.moveTo(hw, roof + hh);
+            this.floorG.lineTo(0, roof + hh * 2);
+            this.floorG.lineTo(0, base + hh * 2);
+            this.floorG.lineTo(hw, base + hh);
+            this.floorG.closePath();
+            this.floorG.endFill();
+            // Windows on the lit face.
+            this.floorG.beginFill(0x211225, 0.75);
+            for (let windowIndex = 0; windowIndex < 2; windowIndex++) {
+                this.floorG.drawRect(-30 + windowIndex * 20, roof + hh + 6, 8, 5);
             }
             this.floorG.endFill();
         }
