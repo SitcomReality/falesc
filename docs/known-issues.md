@@ -145,9 +145,9 @@ carry a real trade-off.
 - In the last three days both rivals publish a promise and the player chooses one;
   a seeded six-event programme (two bells per day) gives a 1.06–1.12 service-appeal
   multiplier to a chapter whose promise matches one or both of the day's needs,
-  and promises also affect the final vote. It is still a single promise each, with no campaign spending,
-  player-authored events or promises that change the buildings themselves; the
-  two bells per day make the festival longer, not interactive.
+  and promises also affect the final vote. It is still a single promise each, with one sponsored bell and no
+  player-authored programme or promises that change the buildings themselves;
+  the two bells per day make the festival longer, not fully interactive.
 - Rivals reopen services lost to a shortfall, choose builds by shared need
   pressure plus doctrine, and can grow through housing. They still make one move
   per day and do not plan a long-term service mix or respond to the player's

@@ -29,6 +29,14 @@ export default async function ({ page, assert, log, screenshot }) {
     const firstEvent = opened.campaign.events[0];
     assert.ok(await page.visible('[data-testid=campaign-modal]'));
     await screenshot('campaign-modal.png');
+    await page.evaluate("window.__falesc.app.charter.player.lumen = 30; window.__falesc.app.gameScreen.updateHud(true)");
+    await page.click('[data-testid=campaign-sponsor-company]');
+    await page.waitFor("Boolean(window.__falesc.app.charter.campaign.sponsored)");
+    const sponsored = await page.evaluate("({ events: window.__falesc.app.charter.campaign.events.length, need: window.__falesc.app.charter.campaign.sponsored?.need, lumen: window.__falesc.app.charter.player.lumen })");
+    log(JSON.stringify({ sponsored }));
+    assert.equal(sponsored.events, 7);
+    assert.equal(sponsored.need, 'company');
+    assert.equal(sponsored.lumen, 25);
 
     await page.evaluate(`document.querySelector('[data-testid=campaign-pledge-${firstNeed}]').click()`);
     await page.click('[data-testid=campaign-confirm]');

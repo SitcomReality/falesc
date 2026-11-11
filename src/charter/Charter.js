@@ -324,6 +324,17 @@ export class Charter {
         return this.campaign?.eventFor?.(this.day) || null;
     }
 
+    sponsorCampaign(needId) {
+        if (!this.campaign?.active) return { ok: false, reason: 'There is no festival to sponsor.' };
+        if (this.campaign.sponsored) return { ok: false, reason: 'Your chapter already sponsored a bell.' };
+        if (this.lumen < 5) return { ok: false, reason: 'A sponsored bell costs 5 lumen.' };
+        const event = this.campaign.sponsor(needId, this.day);
+        if (!event) return { ok: false, reason: 'That needs a festival bell.' };
+        this.lumen -= 5;
+        this.refreshDerived();
+        return { ok: true, event, cost: 5 };
+    }
+
     setCampaignPledge(pledgeId) {
         if (!this.campaign?.active) return { ok: false, reason: 'The campaign has not started.' };
         if (!PLEDGE_BY_ID[pledgeId]) return { ok: false, reason: 'That is not a campaign promise.' };

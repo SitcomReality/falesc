@@ -128,6 +128,7 @@ export class FalescGame {
         });
         this.campaignModal = new CampaignModal({
             onChoose: (pledgeId) => this.chooseCampaignPledge(pledgeId),
+            onSponsor: (needId) => this.sponsorCampaign(needId),
             overlays: this.overlays
         });
         this.commonsModal = new CommonsModal({
@@ -401,6 +402,17 @@ export class FalescGame {
         if (!this.charter?.campaign?.active) return false;
         this.campaignModal.show(this.charter.campaign, this.charter);
         return true;
+    }
+
+    sponsorCampaign(needId) {
+        if (!this.charter) return { ok: false, reason: 'No charter.' };
+        const result = this.charter.sponsorCampaign(needId);
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.audio.play('build');
+        this.gameScreen.toast('A sponsored bell joins the festival.', 'mint', 2200);
+        return result;
     }
 
     chooseCampaignPledge(pledgeId) {

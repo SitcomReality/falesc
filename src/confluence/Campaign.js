@@ -7,12 +7,13 @@ import { SeededRandom } from '../map/SeededRandom.js';
  * when its need is in the air, making campaign choices matter in the simulation.
  */
 export class Campaign {
-    constructor({ startedDay, dayLimit, rivalPledges = {}, playerPledge = null, events = null, seed = 0 }) {
+    constructor({ startedDay, dayLimit, rivalPledges = {}, playerPledge = null, sponsored = null, events = null, seed = 0 }) {
         this.startedDay = startedDay;
         this.dayLimit = dayLimit;
         this.seed = seed;
         this.rivalPledges = { ...rivalPledges };
         this.playerPledge = playerPledge;
+        this.sponsored = sponsored ? { ...sponsored } : null;
         this.events = Array.isArray(events) && events.length
             ? events.map((event) => ({ ...event }))
             : buildEvents(startedDay, dayLimit, seed);
@@ -28,6 +29,21 @@ export class Campaign {
 
     get playerPledgeName() {
         return PLEDGE_BY_ID[this.playerPledge]?.name || null;
+    }
+
+    sponsor(need, day) {
+        if (!EVENT_COPY[need] || this.sponsored) return null;
+        const event = {
+            day,
+            need,
+            session: 'Sponsored bell',
+            title: `A bell for ${need}`,
+            blurb: 'Your chapter paid for this bell. The need is on the day’s programme.',
+            source: 'player'
+        };
+        this.events.push(event);
+        this.sponsored = event;
+        return event;
     }
 
     setPlayerPledge(pledgeId) {
@@ -69,6 +85,7 @@ export class Campaign {
             seed: this.seed,
             rivalPledges: { ...this.rivalPledges },
             playerPledge: this.playerPledge,
+            sponsored: this.sponsored ? { ...this.sponsored } : null,
             events: this.events.map((event) => ({ ...event }))
         };
     }
@@ -81,6 +98,7 @@ export class Campaign {
             seed: data.seed ?? fallbackSeed,
             rivalPledges: data.rivalPledges || {},
             playerPledge: data.playerPledge || null,
+            sponsored: data.sponsored || null,
             events: data.events || null
         });
     }

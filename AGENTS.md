@@ -194,9 +194,9 @@ after any behavioural change.
 - Rival chapters pay construction costs and upkeep, receive contributions from
   their own residents, own fixed Welcome Houses, reopen services lost to
   shortfalls, and choose builds by need pressure plus doctrine. The last three
-  days run a campaign: a seeded three-event festival programme makes matching
-  promises more magnetic, rivals publish promises, the player chooses one, and
-  the final vote uses both. A player victory then chooses one of four stewardship
+  days run a campaign: a seeded six-event, two-bell-per-day festival programme
+  makes matching promises more magnetic, rivals publish promises, the player chooses one, and
+  the final vote uses both; the player may sponsor one extra bell for 5 lumen. A player victory then chooses one of four stewardship
   promises for the epilogue; a rival winner skips that choice. A shared Commons
   Beacon can be funded by every chapter; once lit it gives every resident a
   nightly comfort and opens as a six-seat all-needs shared service. Contest days

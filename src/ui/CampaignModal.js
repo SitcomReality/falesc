@@ -1,11 +1,13 @@
 import { PLEDGES } from '../confluence/Pledges.js';
+import { NEEDS } from '../design/needs.js';
 
 /**
  * Campaign promise chooser. Rivals publish their promises; the player picks
  * one of the same four needs. The promise persists into the Confluence vote.
  */
 export class CampaignModal {
-    constructor({ onChoose, overlays }) {
+    constructor({ onChoose, onSponsor, overlays }) {
+        this.onSponsor = onSponsor;
         this.onChoose = onChoose;
         this.overlays = overlays;
         this.isOpen = false;
@@ -33,6 +35,7 @@ export class CampaignModal {
             <p class="modal__blurb">The rivals have published their promises. Choose what your chapter will be known for when the archipelago votes.</p>
             <h4 class="campaign-modal__label">Festival programme</h4>
             <ul class="campaign-events" data-role="events" data-testid="campaign-events"></ul>
+            <div class="campaign-sponsor" data-role="sponsor"></div>
             <h4 class="campaign-modal__label">Rival promises</h4>
             <ul class="campaign-rivals" data-role="rivals"></ul>
             <h4 class="campaign-modal__label">Your promise</h4>
@@ -44,6 +47,7 @@ export class CampaignModal {
         `;
 
         this.eventsEl = this.panel.querySelector('[data-role=events]');
+        this.sponsorEl = this.panel.querySelector('[data-role=sponsor]');
         this.rivalsEl = this.panel.querySelector('[data-role=rivals]');
         this.pledgesEl = this.panel.querySelector('[data-role=pledges]');
         this.confirmBtn = this.panel.querySelector('[data-testid=campaign-confirm]');
@@ -74,6 +78,11 @@ export class CampaignModal {
         this.eventsEl.innerHTML = (campaign.events || []).map((event) => `
             <li><span>Day ${event.day} · ${escapeHtml(event.session || 'Festival')}</span><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.blurb)}</small></li>
         `).join('');
+        const lumen = this.game?.charter?.lumen || this.charter?.lumen || 0;
+        this.sponsorEl.innerHTML = this.campaign?.sponsored
+            ? `<p class="modal__note">Your sponsored bell: <strong>${escapeHtml(this.campaign.sponsored.title)}</strong>.</p>`
+            : `<p class="modal__note">Sponsor one more bell for 5 lumen. It counts toward a matching promise today.</p><div class="campaign-sponsor__options">${NEEDS.map((need) => `<button type="button" class="btn btn--small btn--paper" data-testid="campaign-sponsor-${need.id}" data-need="${need.id}" ${lumen >= 5 ? '' : 'disabled'}>${escapeHtml(need.name)} · 5</button>`).join('')}</div>`;
+        this.sponsorEl.querySelectorAll('[data-need]').forEach((button) => button.addEventListener('click', () => this.sponsor(button.dataset.need)));
         this.rivalsEl.innerHTML = rivalRows || '<li><span>No rival promises yet.</span></li>';
         const selected = campaign.playerPledge || PLEDGES[0].id;
         const locked = Boolean(campaign.playerPledge);
@@ -101,6 +110,12 @@ export class CampaignModal {
             panel: this.panel,
             initialFocus: () => this.confirmBtn
         });
+    }
+
+    sponsor(needId) {
+        const result = this.onSponsor(needId);
+        if (!result?.ok) return;
+        this.show(this.campaign, this.charter);
     }
 
     choose() {
