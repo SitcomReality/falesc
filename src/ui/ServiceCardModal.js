@@ -160,10 +160,12 @@ export class ServiceCardModal {
     onKeyDown(event) {
         if (event.key === 'Escape') {
             event.preventDefault();
+            event.stopPropagation();
             this.hide();
             return;
         }
         if (event.key !== 'Tab') return;
+        event.stopPropagation();
         const focusable = Array.from(
             this.panel.querySelectorAll('button:not(:disabled), [tabindex]:not([tabindex="-1"])')
         ).filter((element) => element.offsetParent !== null);

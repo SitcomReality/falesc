@@ -57,6 +57,7 @@ export default async function ({ page, assert, log }) {
     await page.evaluate("window.__falesc.beginNextDay()");
     await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
     await page.evaluate("window.__falesc.app.bulletinModal.hide()");
+    await page.pause(400);
 
     const moved = await page.evaluate(`(() => {
         const app = window.__falesc.app;

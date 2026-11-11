@@ -92,6 +92,9 @@ export class EndScreen {
         this.flourishingEl.textContent = String(Math.round(stats.flourishing ?? charter?.flourishing ?? 0));
         this.lumenEl.textContent = String(stats.lumen ?? charter?.lumen ?? 0);
         this.container.style.display = 'flex';
+        requestAnimationFrame(() => {
+            this.container.querySelector('[data-testid=end-menu]')?.focus({ preventScroll: true });
+        });
     }
 
     hide() {

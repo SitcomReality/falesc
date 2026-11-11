@@ -113,6 +113,20 @@ export class CharacterRenderer {
         headG.drawCircle(-headR / 3, -headR / 3, headR / 3);
         headG.endFill();
 
+        // Void helmet visor: a dark band across the face with a mint glint.
+        // The head colour remains the resident's helmet, so the crowd keeps its
+        // variety while the chibi silhouette reads as suited for vacuum.
+        headG.lineStyle(1.5, 0x211225, 0.9);
+        headG.beginFill(0x211225, 0.82);
+        headG.drawRoundedRect(-headR * 0.72, -headR * 0.22, headR * 1.44, headR * 0.52, 6);
+        headG.endFill();
+        headG.lineStyle(1.5, 0xFFF8EA, 0.55);
+        headG.moveTo(-headR * 0.5, -headR * 0.02);
+        headG.lineTo(-headR * 0.12, -headR * 0.02);
+        headG.lineStyle(1.5, 0x59E3C2, 0.9);
+        headG.moveTo(headR * 0.16, -headR * 0.02);
+        headG.lineTo(headR * 0.52, -headR * 0.02);
+
         // Ensure transforms are reset; actual placement done per-frame
         bodyG.position.set(0, 0);
         bodyG.rotation = 0;

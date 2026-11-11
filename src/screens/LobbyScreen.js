@@ -57,6 +57,7 @@ export class LobbyScreen {
         this.seedInput.id = 'lobby-seed-field';
         this.seedInput.type = 'number';
         this.seedInput.inputMode = 'numeric';
+        this.seedInput.placeholder = 'e.g. 40421';
         this.seedInput.value = this.game.settings.mapSeed;
         this.seedInput.dataset.testid = 'lobby-seed';
 

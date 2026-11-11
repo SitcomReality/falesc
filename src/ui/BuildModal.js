@@ -146,10 +146,12 @@ export class BuildModal {
     onKeyDown(event) {
         if (event.key === 'Escape') {
             event.preventDefault();
+            event.stopPropagation();
             this.hide();
             return;
         }
         if (event.key !== 'Tab') return;
+        event.stopPropagation();
         const focusable = Array.from(
             this.panel.querySelectorAll('button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])')
         ).filter((el) => el.offsetParent !== null);

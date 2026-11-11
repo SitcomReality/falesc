@@ -153,6 +153,7 @@ export class ResidentCardModal {
     onKeyDown(event) {
         if (event.key === 'Escape') {
             event.preventDefault();
+            event.stopPropagation();
             this.hide();
             return;
         }
@@ -167,6 +168,7 @@ export class ResidentCardModal {
             return;
         }
         if (event.key !== 'Tab') return;
+        event.stopPropagation();
         const focusable = Array.from(this.panel.querySelectorAll('button:not(:disabled)'));
         if (focusable.length === 0) return;
         const first = focusable[0];

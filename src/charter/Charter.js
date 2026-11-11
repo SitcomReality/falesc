@@ -313,11 +313,18 @@ export class Charter {
         const topNeed = NEEDS.reduce((best, need) => (!best || averages[need.id] > averages[best.id] ? need : best), null);
         const urgentCount = topNeed ? residents.filter((resident) => resident.needs[topNeed.id] >= BALANCE.needs.bulletinThreshold).length : 0;
         const serving = this.services.activeServices.filter((service) => servesNeed(service.program, topNeed?.id));
+        const pending = this.services.services.filter((service) => service.state === 'PENDING' && servesNeed(service.program, topNeed?.id));
+        const closed = this.services.services.filter((service) => service.closed && servesNeed(service.program, topNeed?.id));
+        let serviceHint = `Nobody serves ${topNeed?.short?.toLowerCase()} yet.`;
+        if (serving.length > 0) serviceHint = `${serving[0].name} is the nearest open door.`;
+        else if (pending.length > 0) serviceHint = `${pending[0].name} opens tomorrow.`;
+        else if (closed.length > 0) serviceHint = `${closed[0].name} is closed after an upkeep shortfall.`;
+
         items.push({
             kicker: 'Unmet need',
             title: topNeed ? `${topNeed.name} is on everyone's mind` : 'A quiet morning',
             text: topNeed
-                ? `${urgentCount} Tidelanders need ${topNeed.short.toLowerCase()}. ${serving.length > 0 ? `${serving[0].name} is the nearest door.` : `Nobody serves ${topNeed.short.toLowerCase()} yet.`}`
+                ? `${urgentCount} Tidelanders need ${topNeed.short.toLowerCase()}. ${serviceHint}`
                 : 'No one is urgent yet. The day is yours.'
         });
 

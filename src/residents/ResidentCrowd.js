@@ -98,7 +98,7 @@ export class ResidentCrowd {
         for (const agent of this.agents.values()) {
             agent.updatePlayback(clock);
             agent.character.update(dt);
-            agent.character.graphics.zIndex = agent.hidden ? -Infinity : agent.character.y;
+            agent.character.graphics.zIndex = agent.hidden ? -1000000 : agent.character.y;
         }
     }
 

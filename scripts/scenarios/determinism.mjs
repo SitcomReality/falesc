@@ -27,6 +27,7 @@ export default async function ({ page, assert, log }) {
             await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
             await page.evaluate("window.__falesc.app.bulletinModal.hide()");
         }
+        await page.pause(400);
         return page.evaluate(`(() => {
             const s = window.__falesc.snapshot();
             return {

@@ -213,6 +213,7 @@ export class GameScreen {
         });
 
         this._onKey = (event) => {
+            if (event.defaultPrevented) return;
             if (event.ctrlKey || event.metaKey || event.altKey) return;
             if (this.gsm.state !== 'PLAYING') return;
             if (this.game.hasBlockingModal?.()) return;

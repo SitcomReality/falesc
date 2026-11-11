@@ -149,7 +149,7 @@ export class ResidentAgent {
         this.hidden = hidden;
         this.character.graphics.visible = !hidden;
         this.character.shadow.visible = !hidden;
-        this.character.graphics.zIndex = hidden ? -Infinity : this.character.y;
+        this.character.graphics.zIndex = hidden ? -1000000 : this.character.y;
     }
 
     updateBubble(dt) {

@@ -44,15 +44,11 @@ export function findEntrance(sector, program, u, v, occupiedCells) {
     const width = program?.footprint?.w || 1;
     const height = program?.footprint?.h || 1;
     const candidates = [];
-    const midU = u + Math.floor(width / 2);
-    const midV = v + Math.floor(height / 2);
-
     // Prefer a door on the south-facing edge (the camera-facing side).
     for (let du = 0; du < width; du++) candidates.push({ u: u + du, v: v + height });
     for (let dv = 0; dv < height; dv++) candidates.push({ u: u - 1, v: v + dv });
     for (let dv = 0; dv < height; dv++) candidates.push({ u: u + width, v: v + dv });
     for (let du = 0; du < width; du++) candidates.push({ u: u + du, v: v - 1 });
-    candidates.push({ u: midU, v: midV });
 
     for (const cell of candidates) {
         if (cell.u < 0 || cell.v < 0 || cell.u >= sector.gridSize || cell.v >= sector.gridSize) continue;

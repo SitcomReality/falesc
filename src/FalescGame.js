@@ -519,7 +519,8 @@ export class FalescGame {
     /* ------------------------------------------------------------------ */
 
     update(delta) {
-        const dt = delta / 60;
+        // A hidden tab should not advance planning ambience or day playback.
+        const dt = document.hidden ? 0 : delta / 60;
         this.world.update(dt);
 
         const state = this.screenStateMachine.state;

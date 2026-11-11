@@ -124,7 +124,7 @@ export class DaySimulator {
             return;
         }
 
-        const queueIndex = Math.max(0, load - service.capacity);
+        const queueIndex = load;
         loads.set(loadKey, load + 1);
         this.scheduleVisit(resident, service, need, phase, queueIndex, needBefore);
     }
@@ -268,8 +268,9 @@ export class DaySimulator {
         if (temperament === 'cosy' && service.program.vibe === 'cosy') fragments.push('it is cosy');
         else if (temperament === 'social' && service.program.vibe === 'efficient') fragments.push('it is busy in a good way');
         else if (temperament === 'curious' && service.program.vibe === 'curious') fragments.push('it is strange and green');
-        if (queueIndex === 0) fragments.push('there was no queue');
-        else if (queueIndex === 1) fragments.push('the queue was short');
+        const waiting = queueIndex >= (service.capacity || 1) ? queueIndex - (service.capacity || 1) + 1 : 0;
+        if (waiting === 0) fragments.push('there was no queue');
+        else if (waiting === 1) fragments.push('the queue was short');
         else fragments.push('I did not mind the wait');
         if (service.visits > 2) fragments.push('I come here often');
         if (phase === 'evening') fragments.push('it was open late');

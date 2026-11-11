@@ -13,7 +13,7 @@ export class DayScreen {
                 <div class="day-strip__now">
                     <span class="kicker">Opening the day</span>
                     <strong data-role="day">Day 01</strong>
-                    <span class="day-strip__phase" data-role="phase">Morning</span>
+                    <span class="day-strip__phase" data-role="phase" aria-live="polite">Morning</span>
                 </div>
                 <div class="day-strip__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Day playback progress">
                     <i data-role="progress"></i>
