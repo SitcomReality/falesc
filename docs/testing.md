@@ -193,7 +193,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `bathhouse.mjs` | Builds the fifth service, checks its 2×2 footprint, capacity 5, late opening, visits and saved state. |
 | `service-district.mjs` | Builds three connected services, checks the named district/bonus and world label, the service record and save/reload. |
 | `service-adjacency.mjs` | Builds a player canteen beside a rival service, checks the mixed-neighbour quality bonus, the service record and save/reload. |
-| `service-floors.mjs` | Adds a Dormer and a Roof Garden to an active canteen, checks floor plans, capacity/quality/upkeep/lumen, the floor button hiding at three floors, the world stack and save/reload. |
+| `service-floors.mjs` | Builds a Canteen, opens the interior stack, adds Dormer and Roof Garden floors, checks capacity/upkeep/quality and reload persistence. | Adds a Dormer and a Roof Garden to an active canteen, checks floor plans, capacity/quality/upkeep/lumen, the floor button hiding at three floors, the world stack and save/reload. |
 | `service-regulars.mjs` | Visits a Canteen for a day, opens its record, checks the Last seen here names and opens a resident from the list. |
 | `service-condition.mjs` | Wears a Canteen to 42%, checks the wear row and repair button, repairs it for 3 lumen and confirms the condition saves. |
 | `service-access.mjs` | Switches a canteen through Visitors first and Care first, checks the policies and save/reload without changing capacity. |

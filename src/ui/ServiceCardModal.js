@@ -68,6 +68,7 @@ export class ServiceCardModal {
                     <select data-testid="service-access">${SERVICE_ACCESS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
                 </label>
             </div>
+            <div class="service-interior" data-role="interior"></div>
             <div class="service-regulars" data-role="regulars" hidden></div>
             <p class="modal__note" data-role="note"></p>
             <p class="modal__error" data-role="error" aria-live="polite"></p>
@@ -88,6 +89,7 @@ export class ServiceCardModal {
         this.blurbEl = this.panel.querySelector('[data-role=blurb]');
         this.factsEl = this.panel.querySelector('[data-role=facts]');
         this.regularsEl = this.panel.querySelector('[data-role=regulars]');
+        this.interiorEl = this.panel.querySelector('[data-role=interior]');
         this.hoursWrap = this.panel.querySelector('[data-role=hours-wrap]');
         this.hoursSelect = this.panel.querySelector('[data-testid=service-hours]');
         this.vibeWrap = this.panel.querySelector('[data-role=vibe-wrap]');
@@ -168,6 +170,19 @@ export class ServiceCardModal {
             : service.closed
                 ? `Closed after an upkeep shortfall. Reopening costs ${this.game?.charter?.services.reopenCost(service) || 1} lumen.`
                 : 'The door is open. The day report will tell you who came through it.';
+        const floorRows = [
+            { label: 'Ground', name: program?.name || 'Service', detail: `${program?.capacity || service.capacity} seats` },
+            ...(service.floorPlans || []).map((id, index) => {
+                const plan = FLOOR_PLAN_BY_ID[id];
+                const seats = service.programId === 'housing' ? (plan?.housingCapacity || 0) : (plan?.serviceCapacity || 0);
+                return {
+                    label: index === 0 ? 'First floor' : 'Second floor',
+                    name: plan?.name || id,
+                    detail: seats ? `+${seats} ${service.programId === 'housing' ? 'beds' : 'seats'} · +${(plan?.quality || 0).toFixed(2)} quality` : `no new seats · +${(plan?.quality || 0).toFixed(2)} quality`
+                };
+            })
+        ];
+        this.interiorEl.innerHTML = `<span class="kicker">The interior</span>${floorRows.map((row) => `<div class="service-interior__floor"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.detail)}</small></div>`).join('')}`;
         const regulars = (this.game?.charter?.activeResidents || [])
             .filter((resident) => resident.memory?.lastChoice?.serviceId === service.id)
             .slice(0, 4);

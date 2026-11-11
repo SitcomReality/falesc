@@ -5022,3 +5022,52 @@ html.is-high-contrast :focus-visible {
 .service-regulars__person:focus-visible {
     background: var(--mint);
 }
+
+/* Service interior -------------------------------------------------------- */
+.service-interior {
+    display: grid;
+    gap: 3px;
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    border: 1px solid rgba(33, 18, 37, 0.28);
+    border-radius: var(--radius);
+    background: rgba(255, 211, 110, 0.14);
+}
+
+.service-interior .kicker {
+    color: var(--wine);
+    margin-bottom: 2px;
+}
+
+.service-interior__floor {
+    display: grid;
+    grid-template-columns: 78px 1fr auto;
+    gap: 6px;
+    align-items: baseline;
+    padding: 3px 0;
+    border-top: 1px dashed rgba(33, 18, 37, 0.18);
+    font-family: var(--mono);
+    font-size: 9px;
+}
+
+.service-interior__floor:first-of-type {
+    border-top: 0;
+}
+
+.service-interior__floor span {
+    white-space: nowrap;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.service-interior__floor strong {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.service-interior__floor small {
+    color: var(--ink-soft);
+    font-size: 8px;
+}
