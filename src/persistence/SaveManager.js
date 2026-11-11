@@ -27,40 +27,62 @@ export class SaveManager {
             const raw = this.storage.getItem(SAVE_KEY);
             if (!raw) return null;
             const data = JSON.parse(raw);
-            if (!data || data.version !== SAVE_VERSION) {
-                this.clear();
-                return null;
-            }
-            const charter = data.charter;
-            const valid = charter
-                && Number.isInteger(charter.seed)
-                && Array.isArray(charter.services)
-                && Array.isArray(charter.residents)
-                && charter.residents.length > 0
-                && charter.residents.every((resident) => resident
-                    && typeof resident.id === 'string'
-                    && typeof resident.name === 'string'
-                    && resident.traits
-                    && resident.needs)
-                && (!charter.rivals || (Array.isArray(charter.rivals) && charter.rivals.every((rival) => rival
-                    && typeof rival.id === 'string'
-                    && typeof rival.name === 'string'
-                    && Array.isArray(rival.services))))
-                && charter.services.every((service) => service
-                    && typeof service.programId === 'string'
-                    && Number.isInteger(service.sectorId)
-                    && Number.isInteger(service.u)
-                    && Number.isInteger(service.v)
-                    && service.entrance
-                    && Number.isInteger(service.entrance.u)
-                    && Number.isInteger(service.entrance.v));
-            if (!valid) {
+            if (!this.validate(data)) {
                 this.clear();
                 return null;
             }
             return data;
         } catch {
             return null;
+        }
+    }
+
+    validate(data) {
+        if (!data || data.version !== SAVE_VERSION) return false;
+        const charter = data.charter;
+        return Boolean(charter
+            && Number.isInteger(charter.seed)
+            && Array.isArray(charter.services)
+            && Array.isArray(charter.residents)
+            && charter.residents.length > 0
+            && charter.residents.every((resident) => resident
+                && typeof resident.id === 'string'
+                && typeof resident.name === 'string'
+                && resident.traits
+                && resident.needs)
+            && (!charter.rivals || (Array.isArray(charter.rivals) && charter.rivals.every((rival) => rival
+                && typeof rival.id === 'string'
+                && typeof rival.name === 'string'
+                && Array.isArray(rival.services))))
+            && charter.services.every((service) => service
+                && typeof service.programId === 'string'
+                && Number.isInteger(service.sectorId)
+                && Number.isInteger(service.u)
+                && Number.isInteger(service.v)
+                && service.entrance
+                && Number.isInteger(service.entrance.u)
+                && Number.isInteger(service.entrance.v)));
+    }
+
+    exportText() {
+        const data = this.read();
+        return data ? JSON.stringify(data, null, 2) : null;
+    }
+
+    importText(text) {
+        try {
+            const data = JSON.parse(text);
+            if (!this.validate(data)) return { ok: false, error: 'This is not a FALESC save file.' };
+            const written = this.write({
+                phase: data.phase,
+                settings: data.settings,
+                charter: data.charter,
+                camera: data.camera
+            });
+            if (!written) return { ok: false, error: 'The save could not be stored.' };
+            return { ok: true, data };
+        } catch {
+            return { ok: false, error: 'This is not a valid JSON save.' };
         }
     }
 

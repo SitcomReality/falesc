@@ -515,10 +515,12 @@ report screen, bulletin and end quote.
 The world is regenerated from the seed on continue, and the camera is restored
 and clamped.
 
-The menu shows **Continue charter** when a valid save exists. Save v1 is
-intentionally removed and discarded; an unknown save version is cleared, and a
-structurally invalid v2 payload is cleared rather than half-loaded. There is no export/import
-yet.
+The menu shows **Continue charter** when a valid save exists, together with
+**Export save** and **Import save**. Export downloads the full v2 payload as
+JSON; import validates it, writes it to `falesc.save.v2` and loads the charter.
+Save v1 is intentionally removed and discarded; an unknown save version is
+cleared, and a structurally invalid v2 payload is cleared rather than
+half-loaded.
 
 ## Current limitations
 

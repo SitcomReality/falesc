@@ -26,7 +26,7 @@ Severity is about impact on the slice, not effort:
 | 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
-| 7 | Low | Save v1 is discarded, a mid-`DAY` reload loses the day, and there is no export/import |
+| 7 | Low | Save v1 is discarded and a mid-`DAY` reload loses the day; v2 has JSON export/import |
 | 8 | Low | The resident card stops at the last choice; no portrait or visit history |
 | 9 | Low | Crowd movement has no local avoidance |
 | 10 | Low | Procedural audio exists, but the multiplayer button remains a disabled placeholder |

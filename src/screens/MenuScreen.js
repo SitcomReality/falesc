@@ -37,13 +37,37 @@ export class MenuScreen {
         continueBtn.hidden = true;
         this.continueBtn = continueBtn;
 
+        const exportBtn = this.createButton('Export save', 'menu-export', () => {
+            this.game?.exportSave();
+        }, 'btn btn--paper');
+        exportBtn.hidden = true;
+        this.exportBtn = exportBtn;
+
+        const importBtn = this.createButton('Import save', 'menu-import', () => {
+            this.importInput.click();
+        }, 'btn btn--paper');
+        this.importBtn = importBtn;
+        this.importInput = document.createElement('input');
+        this.importInput.type = 'file';
+        this.importInput.accept = 'application/json,.json';
+        this.importInput.dataset.testid = 'menu-import-file';
+        this.importInput.hidden = true;
+        this.importInput.addEventListener('change', async () => {
+            const file = this.importInput.files?.[0];
+            if (!file) return;
+            const text = await file.text();
+            const result = this.game?.importSave(text);
+            if (result?.ok === false) window.alert(result.error || 'The save could not be imported.');
+            this.importInput.value = '';
+        });
+
         const joinBtn = this.createButton('Multiplayer', 'menu-join', () => {}, 'btn btn--ghost');
         joinBtn.disabled = true;
         joinBtn.title = 'Multiplayer is not implemented yet';
         joinBtn.insertAdjacentHTML('beforeend', '<span class="kicker" style="margin-left:4px;opacity:.7">later</span>');
 
-        actions.append(startBtn, continueBtn, joinBtn);
-        inner.append(eyebrow, title, tagline, actions);
+        actions.append(startBtn, continueBtn, exportBtn, importBtn, joinBtn);
+        inner.append(eyebrow, title, tagline, actions, this.importInput);
 
         const aside = document.createElement('aside');
         aside.className = 'menu__aside paper';
@@ -81,6 +105,7 @@ export class MenuScreen {
         this.container.style.display = 'flex';
         const canContinue = Boolean(this.game?.saveManager?.hasSave());
         if (this.continueBtn) this.continueBtn.hidden = !canContinue;
+        if (this.exportBtn) this.exportBtn.hidden = !canContinue;
         const first = this.container.querySelector('[data-testid=menu-start]');
         if (first) first.focus({ preventScroll: true });
     }

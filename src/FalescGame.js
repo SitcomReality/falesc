@@ -926,6 +926,34 @@ export class FalescGame {
     /* Persistence                                                         */
     /* ------------------------------------------------------------------ */
 
+    exportSave() {
+        const text = this.saveManager.exportText();
+        if (!text) {
+            this.gameScreen?.toast('There is no charter to export yet.', 'coral');
+            return false;
+        }
+        const blob = new Blob([text], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `falesc-save-day-${this.charter?.day || 1}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        this.gameScreen?.toast('Charter exported.', 'mint', 1800);
+        return true;
+    }
+
+    importSave(text) {
+        const result = this.saveManager.importText(text);
+        if (!result.ok) return result;
+        if (this.screenStateMachine.state !== GamePhase.MENU) this.disposeCharter();
+        const loaded = this.continueCharter();
+        if (!loaded) return { ok: false, error: 'The imported charter could not be loaded.' };
+        return { ok: true };
+    }
+
     saveGame() {
         if (!this.charter) return false;
         if (![GamePhase.PLAYING, GamePhase.REPORT].includes(this.screenStateMachine.state)) return false;
@@ -1205,6 +1233,12 @@ export class FalescGame {
             },
             saveGame() {
                 return game.saveGame();
+            },
+            exportSave() {
+                return game.exportSave();
+            },
+            importSave(text) {
+                return game.importSave(text);
             },
             continueGame() {
                 return game.continueCharter();
