@@ -101,6 +101,7 @@ webgame_smoke --scenario scripts/scenarios/chart-link.mjs
 webgame_smoke --scenario scripts/scenarios/chapter-name.mjs
 webgame_smoke --scenario scripts/scenarios/open-charter.mjs
 webgame_smoke --scenario scripts/scenarios/archive-clear-filter.mjs
+webgame_smoke --scenario scripts/scenarios/drift-rank.mjs
 webgame_smoke --scenario scripts/scenarios/charter-archive.mjs
 webgame_smoke --scenario scripts/scenarios/legacy-workshop.mjs
 webgame_smoke --scenario scripts/scenarios/legacy-menu.mjs

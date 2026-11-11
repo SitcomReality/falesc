@@ -1,4 +1,5 @@
 import { readArchive, clearArchive, restoreArchive } from '../persistence/CharterArchive.js';
+import { readDriftRank } from '../persistence/DriftRank.js';
 import { escapeHtml } from './html.js';
 
 /**
@@ -63,6 +64,7 @@ export class CharterArchiveModal {
 
     render() {
         const allRecords = readArchive();
+        const drift = readDriftRank();
         const filtered = this.filter === 'all' ? allRecords : allRecords.filter((record) => (record.mode || 'first-light') === this.filter);
         const records = [...filtered].sort((a, b) => this.sort === 'best' ? score(b) - score(a) : 0);
         const bestPopulation = records.length ? Math.max(...records.map((record) => record.population || 0)) : 0;
@@ -93,6 +95,7 @@ export class CharterArchiveModal {
                 <button type="button" class="modal__close" data-testid="charter-archive-close" aria-label="Close charter archive">×</button>
             </div>
             <p class="modal__blurb">The last ${records.length || 0} charter${records.length === 1 ? '' : 's'}, ${this.sort === 'best' ? 'best first' : 'newest first'}. A victory records its stewardship; a defeat records what the chapter reached.</p>
+            <p class="charter-archive__drift">Drift rank ${drift.rank} · ${escapeHtml(drift.label)} · ${drift.charters} charter${drift.charters === 1 ? '' : 's'} · +${drift.bonus} starting lumen${drift.nextAt ? ` · next at ${drift.nextAt}` : ''}.</p>
             <div class="charter-archive__filters" role="group" aria-label="Filter charters">
                 <button type="button" class="btn btn--small ${this.filter === 'all' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-filter-all">All</button>
                 <button type="button" class="btn btn--small ${this.filter === 'first-light' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-filter-first-light">First Light</button>

@@ -5450,3 +5450,11 @@ body.is-photo-mode .care-watch {
     text-transform: none;
     letter-spacing: 0;
 }
+
+.charter-archive__drift {
+    margin: 0 0 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+}

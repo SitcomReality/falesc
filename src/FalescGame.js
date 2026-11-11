@@ -15,6 +15,7 @@ import { ConfluenceScreen } from './screens/ConfluenceScreen.js';
 import { StewardshipScreen } from './screens/StewardshipScreen.js';
 import { STEWARDSHIP_BY_ID } from './confluence/Stewardship.js';
 import { readLegacy, writeLegacy } from './confluence/StewardshipLegacy.js';
+import { readDriftRank } from './persistence/DriftRank.js';
 import { EndScreen } from './screens/EndScreen.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { ServiceCardModal } from './ui/ServiceCardModal.js';
@@ -244,8 +245,10 @@ export class FalescGame {
         const size = this.settings.mapSize || 'medium';
         this.initializeWorld(seed, size);
         const legacy = readLegacy();
+        const drift = readDriftRank();
         this.charter = new Charter({
             seed,
+            startingLumenBonus: drift.bonus,
             mapSize: size,
             mode: this.settings.mode || 'first-light',
             chapterName: this.settings.chapterName || 'Home Chapter',
