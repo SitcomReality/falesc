@@ -14,6 +14,8 @@ import { EndScreen } from './screens/EndScreen.js';
 import { MapGenerator } from './map/MapGenerator.js';
 import { SeededRandom } from './map/SeededRandom.js';
 import { BuildingManager } from './buildings/BuildingManager.js';
+import { BuildingRenderer } from './buildings/BuildingRenderer.js';
+import { drawSettlementPaths } from './map/SettlementPaths.js';
 import { BLUEPRINT_BY_ID, BEACON_ID, DEFAULT_BLUEPRINT_ID, effectiveCost } from './buildings/blueprints.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { Minimap } from './ui/Minimap.js';
@@ -44,14 +46,29 @@ class GameApp {
 
         // Containers (Layers)
         this.mapLayer = new PIXI.Container();
+        this.pathLayer = new PIXI.Container();
+        this.pathG = new PIXI.Graphics();
+        this.pathLayer.addChild(this.pathG);
         this.shadowLayer = new PIXI.Container();
+        this.interactionLayer = new PIXI.Container();
         this.characterLayer = new PIXI.Container();
 
         // Z-Index sorting enabled
         this.characterLayer.sortableChildren = true;
 
+        // A single-cell hover marker and a ghost of the armed structure.
+        this.hoverG = new PIXI.Graphics();
+        this.hoverGhostG = new PIXI.Graphics();
+        this.hoverGhost = new PIXI.Container();
+        this.hoverGhost.addChild(this.hoverGhostG);
+        this.hoverGhost.visible = false;
+        this.hoverCellKey = null;
+        this.interactionLayer.addChild(this.hoverG, this.hoverGhost);
+
         this.worldContainer.addChild(this.mapLayer);
+        this.worldContainer.addChild(this.pathLayer);
         this.worldContainer.addChild(this.shadowLayer);
+        this.worldContainer.addChild(this.interactionLayer);
         this.worldContainer.addChild(this.characterLayer);
 
         // AI System
@@ -88,6 +105,7 @@ class GameApp {
         const originalSetState = this.stateManager.setState.bind(this.stateManager);
         this.stateManager.setState = (newState) => {
             if (newState !== GameState.PLAYING) this.buildModal.hide();
+            if (newState !== GameState.PLAYING) this.clearHover();
             if (newState === GameState.MENU || newState === GameState.LOBBY || newState === GameState.END) {
                 this.stateManager.cancelPendingTurn();
             }
@@ -99,14 +117,24 @@ class GameApp {
         // simulation step and the victory/defeat check.
         this.stateManager.onTideResolve = () => this.resolveTide();
         this.stateManager.onTideStart = () => this.previewTide();
-        this.stateManager.onStateSettled = () => this.saveGame();
+        this.stateManager.onStateSettled = () => {
+            this.saveGame();
+            const summary = this.stateManager.lastTideSummary;
+            if (summary && this.stateManager.state === GameState.PLAYING) {
+                const message = summary.income > 0
+                    ? `Tide ${this.stateManager.currentTurn}: +${summary.income} lumen`
+                    : summary.message || `Tide ${this.stateManager.currentTurn} begins`;
+                this.stateManager.activeScreen?.toast?.(message, summary.income > 0 ? 'sun' : 'mint');
+            }
+        };
 
         // Camera System
         this.camera = new Camera(
             this.app,
             this.worldContainer,
             (x, y) => this.onWorldTap(x, y),
-            this.inputManager
+            this.inputManager,
+            (x, y) => this.onWorldHover(x, y)
         );
 
         // Minimap (2D canvas overlay)
@@ -264,6 +292,7 @@ class GameApp {
         this.stateManager.settings.mapSize = save.settings.mapSize;
         this.initializeWorld();
         this.buildingManager.restore(save.buildings || []);
+        this.rebuildPaths();
         this.stateManager.restoreRun(save);
 
         if (this.map) {
@@ -291,8 +320,98 @@ class GameApp {
         if (effectiveCost(blueprint, buildings) > state.lumen) return false;
 
         state.selectedBlueprint = id;
+        this.hoverCellKey = null;
         this.stateManager.activeScreen?.updateTurnDisplay?.(true);
         return true;
+    }
+
+    /** Remove the hover highlight and ghost preview. */
+    rebuildPaths() {
+        if (!this.map) {
+            this.pathG.clear();
+            return;
+        }
+        drawSettlementPaths(this.pathG, this.map, this.buildingManager.buildings);
+    }
+
+    clearHover() {
+        if (!this.hoverG) return;
+        this.hoverG.clear();
+        this.hoverGhostG.clear();
+        this.hoverGhost.visible = false;
+        this.hoverCellKey = null;
+    }
+
+    /**
+     * Draw a single-cell highlight under the mouse. Valid plots are mint;
+     * occupied or unaffordable plots are coral. The armed blueprint is shown as
+     * a translucent ghost so placement is not a blind click.
+     */
+    onWorldHover(point) {
+        if (!point || this.stateManager.state !== GameState.PLAYING || !this.map) {
+            this.clearHover();
+            return;
+        }
+        if (this.buildModal.isOpen || this.stateManager.actionsRemaining <= 0) {
+            this.clearHover();
+            return;
+        }
+
+        const blueprintId = this.stateManager.selectedBlueprint || DEFAULT_BLUEPRINT_ID;
+        const blueprint = BLUEPRINT_BY_ID[blueprintId];
+        if (!blueprint) {
+            this.clearHover();
+            return;
+        }
+
+        let target = null;
+        for (const sector of this.map.sectors) {
+            const cell = sector.getGridCell(point.x, point.y);
+            if (cell.u >= 0 && cell.u < sector.gridSize && cell.v >= 0 && cell.v < sector.gridSize) {
+                target = { sector, u: Math.floor(cell.u), v: Math.floor(cell.v) };
+                break;
+            }
+        }
+
+        if (!target) {
+            this.clearHover();
+            return;
+        }
+
+        const occupied = this.buildingManager.isCellOccupied(target.sector.id, target.u, target.v);
+        const uniqueBlocked = blueprint.unique && this.buildingManager.buildings.some((building) => building.blueprintId === blueprintId);
+        const affordable = effectiveCost(blueprint, this.buildingManager.buildings) <= this.stateManager.lumen;
+        const valid = !occupied && !uniqueBlocked && affordable;
+        const key = `${target.sector.id}:${target.u}:${target.v}:${blueprintId}:${valid}`;
+        if (key === this.hoverCellKey) return;
+        this.hoverCellKey = key;
+
+        const { sector, u, v } = target;
+        const corners = [
+            sector._project(u, v),
+            sector._project(u + 1, v),
+            sector._project(u + 1, v + 1),
+            sector._project(u, v + 1)
+        ];
+        const ink = 0x211225;
+        this.hoverG.clear();
+        this.hoverG.beginFill(valid ? 0x59e3c2 : 0xff6b5e, valid ? 0.22 : 0.16);
+        this.hoverG.lineStyle(3, ink, 0.9);
+        this.hoverG.moveTo(corners[0].x, corners[0].y);
+        for (let i = 1; i < corners.length; i++) this.hoverG.lineTo(corners[i].x, corners[i].y);
+        this.hoverG.closePath();
+        this.hoverG.endFill();
+
+        this.hoverGhostG.clear();
+        if (valid) {
+            const pos = sector._project(u + 0.5, v + 0.5);
+            this.hoverGhost.position.set(pos.x, pos.y);
+            BuildingRenderer.draw(this.hoverGhostG, { blueprintId, state: 'PENDING' });
+            this.hoverGhost.alpha = 0.3;
+            this.hoverGhost.visible = true;
+        } else {
+            this.hoverGhost.visible = false;
+        }
     }
 
     finalizeBuild(name) {
@@ -331,9 +450,12 @@ class GameApp {
         state.actionsRemaining -= 1;
         state.hintDismissed = true;
         this.pendingBuildLocation = null;
+        this.clearHover();
         // Keep the same blueprint armed for the next tide, but refresh the HUD
         // immediately so the cost, action count and affordability are correct.
+        this.rebuildPaths();
         this.stateManager.activeScreen?.updateTurnDisplay?.(true);
+        this.stateManager.activeScreen?.toast?.(`${building.name} reserved — ${blueprint.name} takes 2 tides to work.`, 'mint');
         this.saveGame();
         return { ok: true };
     }
@@ -363,6 +485,7 @@ class GameApp {
                         u: cell.u,
                         v: cell.v
                     };
+                    this.clearHover();
                     this.buildModal.show(blueprint, state.lumen, buildings);
                     return;
                 }
@@ -507,6 +630,7 @@ class GameApp {
         this.mapLayer.removeChildren();
         this.characterLayer.removeChildren();
         this.shadowLayer.removeChildren();
+        this.pathG.clear();
     }
 
     addMineral(x, y, type, paletteId, rng = null) {

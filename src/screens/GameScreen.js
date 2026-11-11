@@ -69,6 +69,13 @@ export class GameScreen {
         hint.dataset.role = 'hint';
         hint.textContent = 'Pick a blueprint, then tap a free plot to raise it.';
 
+        const toast = document.createElement('div');
+        toast.className = 'hud-toast';
+        toast.dataset.role = 'toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        toast.textContent = '';
+
         // Bottom -----------------------------------------------------------
         const bottom = document.createElement('div');
         bottom.className = 'hud__bottom';
@@ -152,7 +159,7 @@ export class GameScreen {
         };
         document.addEventListener('keydown', this._onPauseKey);
 
-        this.container.append(top, objective, hint, bottom);
+        this.container.append(top, objective, hint, toast, bottom);
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
 
@@ -166,6 +173,8 @@ export class GameScreen {
         this.beaconCostEl = objective.querySelector('[data-role=beacon-cost]');
         this.objectiveTrack = objective.querySelector('[role=progressbar]');
         this.hintEl = hint;
+        this.toastEl = toast;
+        this._toastTimer = null;
         this.actionsNote = dock.querySelector('[data-role=actions-note]');
         this.dock = dock;
     }
@@ -179,6 +188,23 @@ export class GameScreen {
         this.container.style.display = 'none';
         if (this.pausePanel) this.pausePanel.hidden = true;
         if (this.menuButton) this.menuButton.setAttribute('aria-expanded', 'false');
+        if (this._toastTimer) {
+            clearTimeout(this._toastTimer);
+            this._toastTimer = null;
+        }
+        if (this.toastEl) this.toastEl.classList.remove('is-visible');
+    }
+
+    toast(message, tone = 'mint', duration = 3000) {
+        if (!this.toastEl || !message) return;
+        if (this._toastTimer) clearTimeout(this._toastTimer);
+        this.toastEl.textContent = message;
+        this.toastEl.dataset.tone = tone;
+        this.toastEl.classList.add('is-visible');
+        this._toastTimer = setTimeout(() => {
+            this.toastEl.classList.remove('is-visible');
+            this._toastTimer = null;
+        }, duration);
     }
 
     _setText(element, key, value) {
@@ -207,14 +233,19 @@ export class GameScreen {
         this._setText(this.lumenEl, 'lumen', String(lumen));
         this._setText(this.incomeEl, 'income', `+${income} / tide`);
         this._setText(this.daysLeftEl, 'daysLeft', daysLeft === 1 ? '1 day left' : `${daysLeft} days left`);
-        this._setText(this.objectiveMeta, 'objectiveMeta', `${beacon ? 1 : 0} / 1 beacon`);
+        const beaconActive = beacon?.state === 'ACTIVE';
+        this._setText(
+            this.objectiveMeta,
+            'objectiveMeta',
+            beaconActive ? 'Beacon alight' : beacon ? 'Beacon rising' : '0 / 1 beacon'
+        );
         this._setText(this.beaconCostEl, 'beaconCost', `${effectiveCost(BLUEPRINT_BY_ID[BEACON_ID], buildings)} lumen`);
 
-        const progress = beacon ? 100 : 0;
+        const progress = beaconActive ? 100 : beacon ? 55 : 0;
         if (this._cache.progress !== progress) {
             this._cache.progress = progress;
             this.objectiveFill.style.width = `${progress}%`;
-            this.objectiveTrack.setAttribute('aria-valuenow', beacon ? '1' : '0');
+            this.objectiveTrack.setAttribute('aria-valuenow', beaconActive ? '1' : beacon ? '0.55' : '0');
         }
 
         // Blueprint affordances.

@@ -66,6 +66,15 @@
       "screenshot": "playing.png"
     },
     {
+      "name": "hover a free plot",
+      "eval": "(() => { const g = window.__falesc.app; const cell = window.__falesc.findFreeCell(); const p = window.__falesc.worldToScreen(cell.x, cell.y); const canvas = document.querySelector('body > canvas'); canvas.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: p.x, clientY: p.y, pointerType: 'mouse', pointerId: 9 })); window.__hoverWasVisible = g.hoverGhost.visible; canvas.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'mouse', pointerId: 9 })); return { shown: window.__hoverWasVisible, cleared: g.hoverCellKey === null }; })()"
+    },
+    {
+      "name": "hover preview shown and cleared",
+      "assert": "window.__hoverWasVisible === true && window.__falesc.app.hoverCellKey === null",
+      "message": "expected a ghost preview while hovering a free plot and a cleared highlight after leaving"
+    },
+    {
       "name": "open build modal on a free cell",
       "eval": "(() => { const cell = window.__falesc.findFreeCell(); window.__falesc.app.onWorldTap(cell.x, cell.y); return cell; })()"
     },
@@ -143,7 +152,7 @@
     },
     {
       "name": "zoom out to map overview",
-      "eval": "(() => { const g = window.__falesc; g.app.camera.zoom = 0.2; g.app.camera.position.x = g.app.MAP_WIDTH / 2; g.app.camera.position.y = g.app.MAP_HEIGHT / 2; g.app.camera.updateTransform(); return { zoom: g.app.camera.zoom }; })()"
+      "eval": "(() => { const g = window.__falesc; g.app.camera.zoom = g.app.camera.minZoom; g.app.camera.position.x = g.app.MAP_WIDTH / 2; g.app.camera.position.y = g.app.MAP_HEIGHT / 2; g.app.camera.updateTransform(); return { zoom: g.app.camera.zoom }; })()"
     },
     {
       "name": "let zoom render",

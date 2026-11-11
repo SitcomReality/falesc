@@ -251,8 +251,11 @@ elapsed frame time, which is why visual regression is not enabled yet.
 Inside `worldContainer`:
 
 1. `mapLayer` — sector graphics (foam, cliffs, sand, grid, shore props).
-2. `shadowLayer` — character and mineral shadows.
-3. `characterLayer` — characters, minerals, buildings; `sortableChildren` sorts
+2. `pathLayer` — cream stepping-stone paths from structures to their island's
+   central square, rebuilt only when the building set changes.
+3. `shadowLayer` — character and mineral shadows.
+4. `interactionLayer` — hover cell highlight and the armed-blueprint ghost.
+5. `characterLayer` — characters, minerals, buildings; `sortableChildren` sorts
    by `zIndex` derived from ground Y.
 
 The Pixi canvas is WebGL and transparent. Behind it, `index.html` renders an

@@ -1,9 +1,10 @@
 export class Camera {
-    constructor(app, worldContainer, onWorldTap, inputManager) {
+    constructor(app, worldContainer, onWorldTap, inputManager, onWorldHover = null) {
         this.app = app;
         this.world = worldContainer;
         this.onWorldTap = onWorldTap;
         this.input = inputManager;
+        this.onWorldHover = onWorldHover;
 
         this.position = { x: app.screen.width / 2, y: app.screen.height / 2 };
         this.zoom = 1;
@@ -46,6 +47,7 @@ export class Camera {
             const pointer = this.pointers.get(e.pointerId);
             if (pointer) pointer.isTap = false;
             this.onPointerUp(e);
+            if (typeof this.onWorldHover === 'function') this.onWorldHover(null);
         });
         
         // Wheel Zoom
@@ -197,7 +199,14 @@ export class Camera {
 
     onPointerMove(e) {
         const ptr = this.pointers.get(e.pointerId);
-        if (!ptr) return;
+        if (!ptr) {
+            // Hover is independent of a held button. This drives the cell
+            // highlight and blueprint ghost before a placement click.
+            if (e.pointerType === 'mouse' && typeof this.onWorldHover === 'function') {
+                this.onWorldHover(this.screenToWorld(e.clientX, e.clientY));
+            }
+            return;
+        }
 
         const prevX = ptr.x;
         const prevY = ptr.y;
@@ -207,6 +216,10 @@ export class Camera {
         // Tap Threshold Check (if moved > 10px, it's not a tap)
         const distMoved = Math.hypot(ptr.x - ptr.startX, ptr.y - ptr.startY);
         if (distMoved > 10) ptr.isTap = false;
+
+        if (e.pointerType === 'mouse' && typeof this.onWorldHover === 'function' && !this.isMousePanning) {
+            this.onWorldHover(this.screenToWorld(ptr.x, ptr.y));
+        }
 
         // Interaction Logic
         if (e.pointerType === 'mouse') {

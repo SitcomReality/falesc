@@ -76,7 +76,7 @@ Run both before committing; they catch different classes of mistake.
 - page errors are failures, console errors are warnings;
 - the harness samples `#minimap` for the canvas-content check.
 
-The current run reports **43/43 checks** (38 scripted steps plus automatic
+The current run reports **45/45 checks** (40 scripted steps plus automatic
 checks for page errors, console errors, external requests, title, and canvas
 content).
 
@@ -92,7 +92,8 @@ content).
 | Turn flow | interstitial, ~2 s turn advance, `PENDING → RESERVED` |
 | Second turn | `RESERVED → ACTIVE`, turn 3, `+2` income |
 | Charter menu | open, visible, resume, close |
-| Camera | zoom-out to 0.2 and map-overview screenshot, restore |
+| Hover | pointer move shows a validated cell highlight and blueprint ghost; pointer leave clears both |
+| Camera | fit-zoom overview screenshot, restore |
 | Modal lifecycle | modal closes when the game ends, cannot build in `END` |
 | Rendering | screenshots of playing, pending, active, overview, and end |
 

@@ -272,7 +272,7 @@ src/
   constants.js              palettes, shapes, tile sizes
   controls/InputManager.js  key bindings and modal lock
   screens/                  menu, lobby, HUD, interstitial, end
-  map/                      single-pass generation, packing, sectors, grid math
+  map/                      single-pass generation, packing, sectors, grid math, paths
   buildings/                blueprints, model, manager, illustrated renderer
   character/                procedural character rendering/animation
   ai/                       crowd manager and land-aware NPC controller
