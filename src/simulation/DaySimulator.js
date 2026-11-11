@@ -25,9 +25,7 @@ export class DaySimulator {
         this.quotes = [];
         this.arrivalNotes = [];
         this.serviceVisits = new Map();
-        this.residentStartCells = new Map();
         this.phaseLoad = new Map();
-        this.phaseWait = new Map();
     }
 
     run() {

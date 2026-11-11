@@ -51,7 +51,6 @@ export class Minimap {
         const ctx = this.ctx;
         const map = this.game.world?.map;
         const width = this.resolution;
-        const height = this.resolution;
         const scale = width / this.size;
         ctx.setTransform(scale, 0, 0, scale, 0, 0);
         ctx.clearRect(0, 0, this.size, this.size);

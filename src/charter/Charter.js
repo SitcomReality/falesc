@@ -123,7 +123,7 @@ export class Charter {
 
     findStartingAnchor(sector) {
         const program = PROGRAM_BY_ID.housing;
-        const center = Math.floor(sector.gridSize / 2) - 1;
+        const center = Math.floor((sector.gridSize - 1) / 2);
         const candidates = [
             { u: center, v: center },
             { u: center - 1, v: center },
