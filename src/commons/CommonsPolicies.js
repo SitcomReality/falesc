@@ -52,6 +52,19 @@ export function applyCommonsPolicyToService(service, policyId) {
     return true;
 }
 
+export function removeCommonsPolicyFromService(service) {
+    const tags = (service?.modules || []).filter((entry) => entry.startsWith('commons:'));
+    if (tags.length === 0) return false;
+    for (const tag of tags) {
+        const policyId = tag.slice('commons:'.length);
+        const policy = COMMONS_POLICY_BY_ID[policyId];
+        if (policy?.capacity) service.capacity = Math.max(1, service.capacity - policy.capacity);
+    }
+    service.modules = service.modules.filter((entry) => !entry.startsWith('commons:'));
+    service.refreshGraphics?.();
+    return true;
+}
+
 export function commonsComfortFor(charter) {
     const policy = COMMONS_POLICY_BY_ID[charter?.commons?.policy];
     return BALANCE.commons.comfort + (policy?.comfort || 0);

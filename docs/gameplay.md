@@ -205,6 +205,12 @@ policy of their own:
   becomes the Assembly policy. The player does not cast a resident vote, only
 the chapter's nomination.
 
+After the chosen policy has stood for one full day, the Commons modal offers
+**Call a second reading**. The old policy stays in force while the second
+round nominates and votes; the winner replaces it, and existing services are
+reverted from the old policy before the new one applies. A charter gets at most
+one second reading.
+
 The four policies are:
 
 - **Shared Table** — every Canteen and Tea House gains 2 seats.
@@ -214,8 +220,8 @@ The four policies are:
   beds restore one more Rest.
 
 The winning policy applies to existing services and to every service built
-afterwards by the player or a rival. It is saved with the charter. The ballot is
-one-time and there is no petition phase or second reading.
+afterwards by the player or a rival. It is saved with the charter. The first
+ballot and the single second reading are the whole Assembly cycle.
 
 ## Planning
 

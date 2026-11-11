@@ -190,7 +190,7 @@ after any behavioural change.
   their card with traits, needs, affinity and last door. Once the Beacon is lit, the
   first Commons Assembly lets residents petition, each chapter nominate and
   residents vote; the winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
-  `CommonsBallot.js`). An open player service can be retrofitted once for 6
+  `CommonsBallot.js`). One second reading can amend it after a full day. An open player service can be retrofitted once for 6
   lumen; Sunroom, Atelier or Night Kitchen trade seats, quality and upkeep. The
   service record owns the action and the module is saved. Open services can also
   choose As built, Round the clock, Daylight or Evening hours. The five buildable

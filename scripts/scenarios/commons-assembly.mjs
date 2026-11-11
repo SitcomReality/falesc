@@ -88,5 +88,30 @@ export default async function ({ page, assert, log, screenshot }) {
     const restored = await page.evaluate("window.__falesc.snapshot()");
     assert.equal(restored.commons.policy, chosen.commons.policy);
     assert.equal(restored.commons.assembly.stage, 'resolved');
+
+    await page.evaluate("window.__falesc.openDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
+    await page.evaluate("window.__falesc.skipDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
+    await page.evaluate("window.__falesc.app.beginNextDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+    await page.evaluate("window.__falesc.app.bulletinModal.hide()");
+    await page.evaluate("window.__falesc.showCommons()");
+    await page.waitFor("window.__falesc.app.commonsModal.isOpen === true");
+    assert.ok(await page.evaluate("Boolean(document.querySelector('[data-testid=commons-second-reading]'))"));
+    await page.click('[data-testid=commons-second-reading]');
+    const second = await page.evaluate("window.__falesc.snapshot()");
+    assert.equal(second.commons.assembly.reading, 2);
+    assert.equal(second.commons.assembly.stage, 'nominations');
+    const nextPolicy = chosen.commons.policy === 'open_beds' ? 'commons_garden' : 'open_beds';
+    await page.click(`[data-testid=commons-policy-${nextPolicy}]`);
+    await page.click('[data-testid=commons-call-vote]');
+    const chosenAgain = await page.evaluate("window.__falesc.snapshot()");
+    log(JSON.stringify({ secondPolicy: chosenAgain.commons.policy, reading: chosenAgain.commons.assembly.reading }));
+    assert.equal(chosenAgain.commons.assembly.reading, 2);
+    assert.equal(chosenAgain.commons.assembly.stage, 'resolved');
+    assert.ok(chosenAgain.services.find((service) => service.programId === 'canteen').capacity <= built.capacity.canteen + 2, 'policy capacity does not stack across readings');
+    await screenshot('commons-second-reading.png');
+    await page.click('[data-testid=commons-close]');
     await page.pause(400);
 }

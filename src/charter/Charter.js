@@ -5,7 +5,7 @@ import { ResidentFactory } from '../residents/ResidentFactory.js';
 import { VisitorFactory } from '../residents/VisitorFactory.js';
 import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
 import { SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
-import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService } from '../commons/CommonsPolicies.js';
+import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService, removeCommonsPolicyFromService } from '../commons/CommonsPolicies.js';
 import { nominateForRival, petitionFor, resolveCommonsBallot } from '../commons/CommonsBallot.js';
 import { ServiceManager } from '../services/ServiceManager.js';
 import { cellKey } from '../services/PlacementPolicy.js';
@@ -89,6 +89,7 @@ export class Charter {
             chosenDay: null,
             assembly: {
                 stage: 'none',
+                reading: 1,
                 playerNomination: null,
                 nominations: {},
                 finalists: [],
@@ -407,9 +408,31 @@ export class Charter {
         return { ok: true, purse: this.commons.purse, gave: value };
     }
 
+    callSecondReading() {
+        if (!this.commons.active) return { ok: false, reason: 'Light the Beacon first.' };
+        if (!this.commons.policy) return { ok: false, reason: 'The first reading has not finished.' };
+        if (this.commons.assembly.reading >= 2) return { ok: false, reason: 'The commons has already held its second reading.' };
+        if (this.commons.assembly.stage !== 'resolved') return { ok: false, reason: 'The first reading is still open.' };
+        if (this.day <= (this.commons.chosenDay || this.day)) return { ok: false, reason: 'Let the chosen policy stand for one full day first.' };
+        this.commons.assembly = {
+            ...this.commons.assembly,
+            stage: 'nominations',
+            reading: 2,
+            playerNomination: null,
+            nominations: {},
+            finalists: [],
+            votes: [],
+            counts: {},
+            winnerId: null,
+            petition: petitionFor(this.activeResidents),
+            day: this.day
+        };
+        return { ok: true, policy: COMMONS_POLICY_BY_ID[this.commons.policy], assembly: this.commons.assembly };
+    }
+
     nominateCommonsPolicy(policyId) {
         if (!this.commons.active) return { ok: false, reason: 'Light the Beacon before calling an assembly.' };
-        if (this.commons.policy) return { ok: false, reason: 'The assembly has already chosen.' };
+        if (this.commons.policy && this.commons.assembly.reading < 2) return { ok: false, reason: 'The assembly has already chosen.' };
         if (this.commons.assembly.stage !== 'nominations') return { ok: false, reason: 'Nominations are closed.' };
         const policy = COMMONS_POLICY_BY_ID[policyId];
         if (!policy) return { ok: false, reason: 'That is not a Commons policy.' };
@@ -418,6 +441,7 @@ export class Charter {
         const petition = this.commons.assembly.petition || petitionFor(this.activeResidents);
         const finalists = [...new Set([...Object.values(nominations), petition?.policyId].filter(Boolean))];
         this.commons.assembly = {
+            ...this.commons.assembly,
             stage: 'ballot',
             playerNomination: policy.id,
             nominations,
@@ -433,7 +457,7 @@ export class Charter {
 
     resolveCommonsAssembly() {
         if (!this.commons.active) return { ok: false, reason: 'Light the Beacon first.' };
-        if (this.commons.policy) return { ok: false, reason: 'The assembly has already chosen.' };
+        if (this.commons.policy && this.commons.assembly.reading < 2) return { ok: false, reason: 'The assembly has already chosen.' };
         if (this.commons.assembly.stage !== 'ballot') return { ok: false, reason: 'There is no ballot to call.' };
         const result = resolveCommonsBallot(this.activeResidents, this.commons.assembly.finalists);
         if (!result.winnerId) return { ok: false, reason: 'No one voted.' };
@@ -448,7 +472,7 @@ export class Charter {
 
     chooseCommonsPolicy(policyId) {
         if (!this.commons.active) return { ok: false, reason: 'Light the Beacon before calling an assembly.' };
-        if (this.commons.policy) return { ok: false, reason: 'The assembly has already chosen.' };
+        if (this.commons.policy && this.commons.assembly.reading < 2) return { ok: false, reason: 'The assembly has already chosen.' };
         const policy = COMMONS_POLICY_BY_ID[policyId];
         if (!policy) return { ok: false, reason: 'That is not a Commons policy.' };
         this.commons.policy = policy.id;
@@ -459,10 +483,12 @@ export class Charter {
         }
         for (const chapter of this.chapters) {
             for (const service of chapter.services.services) {
+                removeCommonsPolicyFromService(service);
                 applyCommonsPolicyToService(service, policy.id);
             }
         }
         for (const service of this.commonsManager?.services || []) {
+            removeCommonsPolicyFromService(service);
             applyCommonsPolicyToService(service, policy.id);
         }
         this.assignHomes();

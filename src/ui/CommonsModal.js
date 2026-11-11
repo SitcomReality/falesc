@@ -7,11 +7,12 @@ import { COMMONS_POLICIES, COMMONS_POLICY_BY_ID } from '../commons/CommonsPolici
  * every resident, not a private service.
  */
 export class CommonsModal {
-    constructor({ onContribute, onPurse, onNominate, onVote, overlays }) {
+    constructor({ onContribute, onPurse, onNominate, onVote, onSecondReading, overlays }) {
         this.onContribute = onContribute;
         this.onPurse = onPurse;
         this.onNominate = onNominate;
         this.onVote = onVote;
+        this.onSecondReading = onSecondReading;
         this.overlays = overlays;
         this.isOpen = false;
         this.charter = null;
@@ -70,43 +71,50 @@ export class CommonsModal {
             const visits = service?.visits || 0;
             const policy = COMMONS_POLICY_BY_ID[commons.policy];
             const assembly = commons.assembly || { stage: 'nominations', nominations: {}, finalists: [] };
-            const stage = policy ? 'resolved' : assembly.stage;
+            const inSecondReading = Boolean(policy && assembly.stage !== 'resolved');
+            const stage = inSecondReading ? assembly.stage : policy ? 'resolved' : assembly.stage;
             const petitionPolicy = COMMONS_POLICY_BY_ID[assembly.petition?.policyId];
             const petitionNote = petitionPolicy && stage === 'nominations'
                 ? `<p class="commons-petition">Residents' petition: <strong>${escapeHtml(petitionPolicy.name)}</strong> · ${assembly.petition.signatures} signatures. It will join the ballot.</p>`
                 : '';
-            const voteTally = policy && assembly.counts
+            const voteTally = policy && assembly.counts && stage === 'resolved'
                 ? `<h4 class="campaign-modal__label">The vote</h4><ul class="commons-contributors">${Object.entries(assembly.counts).map(([policyId, count]) => `<li><span>${escapeHtml(COMMONS_POLICY_BY_ID[policyId]?.name || policyId)}</span><strong>${count}</strong></li>`).join('')}</ul>`
                 : '';
-            const assemblyHtml = policy
-                ? `<div class="commons-policy-chosen"><p class="kicker">Assembly policy</p><strong>${escapeHtml(policy.name)}</strong><span>${escapeHtml(policy.detail)}</span></div>${voteTally}`
-                : stage === 'ballot'
-                    ? `<p class="commons-assembly-copy">Nominations are in. Every resident now chooses among the finalist policies.</p>
-                       <ul class="commons-finalists">${assembly.finalists.map((policyId) => {
-                           const entry = COMMONS_POLICY_BY_ID[policyId];
-                           if (!entry) return '';
-                           const backers = Object.entries(assembly.nominations || {})
-                               .filter(([, nominated]) => nominated === policyId)
-                               .map(([chapterId]) => this.charter.chapterById(chapterId)?.name || chapterId);
-                           if (assembly.petition?.policyId === policyId) backers.push(`Residents' petition (${assembly.petition.signatures})`);
-                           return `<li><span class="kicker">${escapeHtml(backers.join(' · ') || 'The commons')}</span><strong>${escapeHtml(entry.name)}</strong><span>${escapeHtml(entry.detail)}</span></li>`;
-                       }).join('')}</ul>
-                       <div class="modal__actions"><button type="button" class="btn btn--primary" data-testid="commons-call-vote">Call the vote</button></div>`
-                    : `<p class="commons-assembly-copy">The Beacon is lit. Each chapter nominates one shared policy; residents are also signing a petition. The residents then choose among the finalists.</p>
-                       ${petitionNote}
-                       <div class="commons-policies">${COMMONS_POLICIES.map((entry) => `
-                           <button type="button" class="commons-policy" data-testid="commons-policy-${entry.id}" data-policy="${entry.id}">
-                               <span class="kicker">${escapeHtml(entry.kicker)}</span>
-                               <strong>${escapeHtml(entry.name)}</strong>
-                               <span>${escapeHtml(entry.detail)}</span>
-                               <span class="commons-policy__action">Nominate →</span>
-                           </button>
-                       `).join('')}</div>`;
+            const ballotHtml = `<p class="commons-assembly-copy">Nominations are in. Every resident now chooses among the finalist policies.</p>
+                <ul class="commons-finalists">${assembly.finalists.map((policyId) => {
+                    const entry = COMMONS_POLICY_BY_ID[policyId];
+                    if (!entry) return '';
+                    const backers = Object.entries(assembly.nominations || {})
+                        .filter(([, nominated]) => nominated === policyId)
+                        .map(([chapterId]) => this.charter.chapterById(chapterId)?.name || chapterId);
+                    if (assembly.petition?.policyId === policyId) backers.push(`Residents' petition (${assembly.petition.signatures})`);
+                    return `<li><span class="kicker">${escapeHtml(backers.join(' · ') || 'The commons')}</span><strong>${escapeHtml(entry.name)}</strong><span>${escapeHtml(entry.detail)}</span></li>`;
+                }).join('')}</ul>
+                <div class="modal__actions"><button type="button" class="btn btn--primary" data-testid="commons-call-vote">Call the vote</button></div>`;
+            const nominationsHtml = `<p class="commons-assembly-copy">${inSecondReading ? 'The first reading still stands while the commons considers an amendment. Each chapter nominates one alternative; residents sign a petition; the residents then choose.' : 'The Beacon is lit. Each chapter nominates one shared policy; residents are also signing a petition. The residents then choose among the finalists.'}</p>
+                ${petitionNote}
+                <div class="commons-policies">${COMMONS_POLICIES.map((entry) => `
+                    <button type="button" class="commons-policy" data-testid="commons-policy-${entry.id}" data-policy="${entry.id}">
+                        <span class="kicker">${escapeHtml(entry.kicker)}</span>
+                        <strong>${escapeHtml(entry.name)}</strong>
+                        <span>${escapeHtml(entry.detail)}</span>
+                        <span class="commons-policy__action">Nominate →</span>
+                    </button>
+                `).join('')}</div>`;
+            const canSecondReading = policy && !inSecondReading && (assembly.reading || 1) < 2 && this.charter.day > (commons.chosenDay || this.charter.day);
+            const secondReadingButton = canSecondReading
+                ? `<div class="modal__actions"><button type="button" class="btn btn--paper" data-testid="commons-second-reading">Call a second reading</button></div>`
+                : '';
+            const assemblyHtml = inSecondReading
+                ? (stage === 'ballot' ? ballotHtml : nominationsHtml)
+                : policy
+                    ? `<div class="commons-policy-chosen"><p class="kicker">Assembly policy</p><strong>${escapeHtml(policy.name)}</strong><span>${escapeHtml(policy.detail)}</span></div>${voteTally}${secondReadingButton}`
+                    : (stage === 'ballot' ? ballotHtml : nominationsHtml);
             this.panel.innerHTML = `
                 <div class="modal__head">
                     <div>
                         <p class="kicker" style="color:var(--wine)">The Commons · shared project</p>
-                        <h3 class="modal__title" id="commons-title">${policy ? 'The assembly has spoken.' : stage === 'ballot' ? 'The ballot is open.' : 'The Beacon is lit.'}</h3>
+                        <h3 class="modal__title" id="commons-title">${inSecondReading ? 'The second reading.' : policy ? 'The assembly has spoken.' : stage === 'ballot' ? 'The ballot is open.' : 'The Beacon is lit.'}</h3>
                     </div>
                     <button type="button" class="modal__close" data-testid="commons-close-x" aria-label="Close commons">×</button>
                 </div>
@@ -157,10 +165,17 @@ export class CommonsModal {
         this.panel.querySelector('[data-testid=commons-give-10]')?.addEventListener('click', () => this.give(10));
         this.panel.querySelector('[data-testid=commons-purse-5]')?.addEventListener('click', () => this.givePurse(5));
         this.panel.querySelector('[data-testid=commons-purse-10]')?.addEventListener('click', () => this.givePurse(10));
+        this.panel.querySelector('[data-testid=commons-second-reading]')?.addEventListener('click', () => this.callSecondReading());
         this.panel.querySelectorAll('[data-testid^=commons-policy-]').forEach((button) => {
             button.addEventListener('click', () => this.nominate(button.dataset.policy));
         });
         this.panel.querySelector('[data-testid=commons-call-vote]')?.addEventListener('click', () => this.vote());
+    }
+
+    callSecondReading() {
+        const result = this.onSecondReading();
+        if (!result?.ok) return;
+        this.render();
     }
 
     givePurse(amount) {

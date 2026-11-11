@@ -115,6 +115,7 @@ export class FalescGame {
             onPurse: (amount) => this.contributePurse(amount),
             onNominate: (policyId) => this.nominateCommonsPolicy(policyId),
             onVote: () => this.resolveCommonsAssembly(),
+            onSecondReading: () => this.callSecondReading(),
             overlays: this.overlays
         });
 
@@ -314,6 +315,16 @@ export class FalescGame {
         this.gameScreen.updateHud(true);
         this.saveGame();
         this.gameScreen.toast(`${result.policy.name} is on the ballot.`, 'mint', 2200);
+        return result;
+    }
+
+    callSecondReading() {
+        if (!this.charter) return { ok: false, reason: 'No charter.' };
+        const result = this.charter.callSecondReading();
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast('The second reading is open.', 'mint', 2400);
         return result;
     }
 

@@ -405,6 +405,7 @@ These are no longer open:
 - **Stewardship legacy.** A winning stewardship promise is saved in `falesc.legacy.v1` and grants a small starting effect to the next charter. Covered by `campaign.mjs`.
 - **Commons purse.** Every chapter gives 1 lumen when shared works stand; the purse pays shared upkeep and closes/reopens the shared doors together. Covered by `commons-purse.mjs`.
 - **Shared commons works.** Buildings raised on the Contest commons isle belong to The Commons, are usable by every resident and credit their builder. Covered by `commons-isle.mjs`.
+- **Commons second reading.** After one full day the Assembly can be called once more to amend its policy; old capacity tags are reverted before the new policy applies. Covered by `commons-assembly.mjs`.
 - **Commons Assembly ballot and petition.** A lit Beacon lets residents petition, each chapter nominate and all residents vote; existing and future services inherit the winner's capacity or comfort effect. Covered by `commons-assembly.mjs`.
 - **Day visitors.** 2–3 transient Contest visitors arrive each day, use services, pay visitor fees and leave before the next day unless offered a trial stay; charmed visitors can return, and a visitor card shows their traits, needs and last door. Covered by `visitors.mjs`, `visitor-stay.mjs` and `visitor-return.mjs`.
 - **Shared Commons Beacon.** A reserved 2×2 shared civic project can be funded by the player and rivals; when lit it applies a nightly multi-need comfort and becomes a six-seat all-needs service. It is covered by `commons.mjs`.
