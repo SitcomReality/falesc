@@ -30,6 +30,13 @@ export default async function ({ page, assert, screenshot }) {
     await screenshot('service-staff.png');
     await page.click('[data-testid=service-interior-done]');
     assert.ok((await page.text('[data-testid=structure-modal]')).includes('Staff'));
+    await page.evaluate(`window.__falesc.app.residentCard.show(window.__falesc.app.charter.activeResidents.find((resident) => resident.id === ${JSON.stringify(setup.resident)}))`);
+    const card = await page.text('[data-testid=resident-modal]');
+    assert.ok(card.includes('Work'));
+    assert.ok(card.includes('Staffed Canteen'));
+    await page.pause(300);
+    await screenshot('resident-work.png');
+    await page.evaluate("window.__falesc.app.residentCard.hide()");
     await page.evaluate("window.__falesc.app.serviceCard.hide()");
     await page.evaluate("window.__falesc.openDay()");
     await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
