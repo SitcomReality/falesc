@@ -188,7 +188,7 @@ export class ServiceManager {
     upkeepFor(service) {
         return service.closed || service.state !== 'ACTIVE'
             ? 0
-            : (service.program?.upkeep || 0) + (service.upkeepBonus || 0) + serviceUpkeepModifier(service);
+            : Math.max(0, (service.program?.upkeep || 0) + (service.upkeepBonus || 0) + serviceUpkeepModifier(service) - (service.staffId ? 1 : 0));
     }
 
     totalUpkeep() {

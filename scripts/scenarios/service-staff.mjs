@@ -24,6 +24,8 @@ export default async function ({ page, assert, screenshot }) {
     const staff = await page.evaluate(`(() => { const app = window.__falesc.app; const service = app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(setup.id)}); return { staffId: service.staffId, work: app.charter.activeResidents.find((resident) => resident.id === ${JSON.stringify(setup.resident)}).workServiceId }; })()`);
     assert.equal(staff.staffId, setup.resident);
     assert.equal(staff.work, setup.id);
+    const upkeep = await page.evaluate(`window.__falesc.app.charter.services.upkeepFor(window.__falesc.app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(setup.id)}))`);
+    assert.equal(upkeep, 1);
     const saved = await page.evaluate(`window.__falesc.app.saveManager.read().charter.services.find((entry) => entry.id === ${JSON.stringify(setup.id)}).staffId`);
     assert.equal(saved, setup.resident);
     await page.pause(300);
