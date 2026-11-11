@@ -1,13 +1,6 @@
 import { programIcon } from './icons.js';
-import { NEED_BY_ID } from '../design/needs.js';
-import { RETROFIT_BY_ID, RETROFIT_MIN_COST } from '../services/RetrofitModules.js';
-import { SERVICE_HOURS, SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
-import { SERVICE_VIBES, SERVICE_VIBE_BY_ID } from '../services/ServiceVibes.js';
-import { SERVICE_ACCESS, SERVICE_ACCESS_BY_ID } from '../services/ServiceAccess.js';
-import { SERVICE_FOCUS } from '../services/ServiceFocus.js';
-import { FLOOR_PLAN_BY_ID } from '../services/FloorPlans.js';
-import { finishCost } from '../services/BuildingFinishes.js';
-import { escapeHtml } from './html.js';
+import { serviceCardMarkup } from './serviceCard/ServiceCardMarkup.js';
+import { buildServiceCardView } from './serviceCard/ServiceCardView.js';
 
 /**
  * Service record: the same card is used for inspection, reopening a closed
@@ -44,59 +37,7 @@ export class ServiceCardModal {
         this.panel.setAttribute('aria-modal', 'true');
         this.panel.setAttribute('aria-labelledby', 'structure-modal-title');
 
-        this.panel.innerHTML = `
-            <div class="modal__head">
-                <div>
-                    <p class="kicker" style="color:var(--wine)">Service record</p>
-                    <div class="service-card__title-row">
-                        <h3 class="modal__title" id="structure-modal-title" data-role="name">Canteen</h3>
-                        <button type="button" class="service-card__rename" data-testid="service-rename">Rename</button>
-                    </div>
-                </div>
-                <button type="button" class="modal__close" data-testid="structure-close" aria-label="Close service record">×</button>
-            </div>
-            <div class="service-rename" data-role="rename-row" hidden>
-                <input class="modal__input" data-testid="service-name-input" maxlength="32" aria-label="Service name">
-                <button type="button" class="btn btn--small btn--mint" data-testid="service-name-save">Save name</button>
-                <button type="button" class="btn btn--small btn--paper" data-testid="service-name-cancel">Cancel</button>
-            </div>
-            <div class="blueprint-summary">
-                <span class="blueprint-summary__icon" data-role="icon" aria-hidden="true"></span>
-                <span class="blueprint-summary__body">
-                    <span class="blueprint-summary__name" data-role="program">Canteen</span>
-                    <span class="blueprint-summary__stats" data-role="stats"></span>
-                </span>
-            </div>
-            <p class="modal__blurb" data-role="blurb"></p>
-            <dl class="service-facts" data-role="facts"></dl>
-            <div class="service-policy-row">
-                <label class="service-hours" data-role="hours-wrap" hidden>Hours
-                    <select data-testid="service-hours">${SERVICE_HOURS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
-                </label>
-                <label class="service-hours" data-role="vibe-wrap" hidden>Atmosphere
-                    <select data-testid="service-vibe">${SERVICE_VIBES.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
-                </label>
-                <label class="service-hours" data-role="access-wrap" hidden>Welcome
-                    <select data-testid="service-access">${SERVICE_ACCESS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
-                </label>
-                <label class="service-hours" data-role="focus-wrap" hidden>Focus
-                    <select data-testid="service-focus"></select>
-                </label>
-            </div>
-            <div class="service-interior" data-role="interior"></div>
-            <div class="service-regulars" data-role="regulars" hidden></div>
-            <p class="modal__note" data-role="note"></p>
-            <p class="modal__error" data-role="error" aria-live="polite"></p>
-            <div class="modal__actions">
-                <button type="button" class="btn btn--paper" data-testid="service-interior-open">Step inside</button>
-                <button type="button" class="btn btn--paper" data-testid="structure-cancel">Keep it</button>
-                <button type="button" class="btn btn--mint" data-testid="structure-upgrade" hidden>Retrofit</button>
-                <button type="button" class="btn btn--paper" data-testid="structure-floor" hidden>Add a floor · 4</button>
-                <button type="button" class="btn btn--mint" data-testid="structure-reopen" hidden>Reopen</button>
-                <button type="button" class="btn btn--mint" data-testid="structure-repair" hidden>Repair · 3</button>
-                <button type="button" class="btn btn--danger" data-testid="structure-demolish">Dismantle</button>
-            </div>
-        `;
+        this.panel.innerHTML = serviceCardMarkup();
 
         this.nameEl = this.panel.querySelector('[data-role=name]');
         this.renameRow = this.panel.querySelector('[data-role=rename-row]');
@@ -155,133 +96,51 @@ export class ServiceCardModal {
         this.isOpen = true;
         this.service = service;
 
-        const program = service.program;
-        const need = program?.need ? NEED_BY_ID[program.need] : null;
-        const secondary = program?.secondaryNeed ? NEED_BY_ID[program.secondaryNeed] : null;
-        const working = service.state === 'ACTIVE' && !service.closed;
-        const upkeep = this.game?.charter?.services.upkeepFor(service) ?? program?.upkeep ?? 0;
+        const view = buildServiceCardView(service, this.game);
         this.nameEl.textContent = service.name;
         this.renameRow.hidden = true;
         this.iconEl.innerHTML = programIcon(service.programId);
-        this.programEl.textContent = program?.name || 'Service';
-        const shared = service.chapterId === 'commons';
-        this.statsEl.innerHTML = `
-            <span><strong>${working ? 'Working' : service.closed ? 'Closed' : 'Under construction'}</strong></span>
-            <span>${escapeHtml(service.chapterName || 'Home Chapter')}</span>
-            <span>${service.totalCapacity} capacity</span>
-            <span>${shared ? 'shared · purse-funded' : service.chapterId !== 'player' ? 'rival budget' : `${upkeep} upkeep / day`}</span>
-        `;
-        this.blurbEl.textContent = program?.blurb || '';
-        const staff = service.staffId ? (this.game?.charter?.roster || []).find((resident) => resident.id === service.staffId) : null;
-        this.factsEl.innerHTML = `
-            <div><dt>Chapter</dt><dd>${escapeHtml(service.chapterName || 'Home Chapter')}</dd></div>
-            ${service.builderChapterId ? `<div><dt>Built by</dt><dd>${escapeHtml(this.game?.charter?.chapterById(service.builderChapterId)?.name || 'A chapter')}</dd></div>` : ''}
-            <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}${secondary ? ` · ${secondary.glyph} ${secondary.name}` : ''}</dd></div>
-            ${staff ? `<div><dt>Staff</dt><dd>${escapeHtml(staff.name)}</dd></div>` : ''}
-            <div><dt>Visits</dt><dd>${service.visits}</dd></div>
-            <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
-            <div><dt>Finish</dt><dd>${escapeHtml(service.finish || 'comfortable')}</dd></div>
-            <div><dt>Floors</dt><dd>${service.floors || 1} / 3${(service.floorPlans || []).length ? ` · ${(service.floorPlans || []).map((id) => escapeHtml(FLOOR_PLAN_BY_ID[id]?.name || id)).join(', ')}` : ''}</dd></div>
-            ${service.adjacencyBonus ? `<div><dt>Neighbours</dt><dd>+${service.adjacencyBonus.toFixed(2)} quality · ${service.adjacencyNeighbours || 0} door${service.adjacencyNeighbours === 1 ? '' : 's'}</dd></div>` : ''}
-            ${service.districtName ? `<div><dt>District</dt><dd>${escapeHtml(service.districtName)} · +${service.districtBonus.toFixed(2)} quality · ${service.districtSize} doors</dd></div>` : ''}
-            <div><dt>Condition</dt><dd>${service.retrofits?.length ? `Retrofitted · ${service.retrofits.map((id) => escapeHtml(RETROFIT_BY_ID[id]?.name || id)).join(' + ')}` : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
-            <div><dt>Wear</dt><dd>${Math.round(service.condition ?? 100)}%</dd></div>
-            <div><dt>Hours</dt><dd>${escapeHtml(SERVICE_HOURS_BY_ID[service.policy?.hours]?.name || 'As built')}</dd></div>
-            <div><dt>Door</dt><dd>${service.entrance ? `cell ${service.entrance.u}, ${service.entrance.v}` : '—'}</dd></div>
-        `;
-        const lastChoice = this.game?.charter?.activeResidents
-            .map((resident) => resident.memory.lastChoice)
-            .filter((choice) => choice?.serviceId === service.id)
-            .pop();
-        this.noteEl.textContent = lastChoice
-            ? `Last word: “${lastChoice.reason}”`
-            : service.closed
-                ? `Closed after an upkeep shortfall. Reopening costs ${this.game?.charter?.services.reopenCost(service) || 1} lumen.`
-                : 'The door is open. The day report will tell you who came through it.';
-        const housing = service.programId === 'housing';
-        const floorPlans = (service.floorPlans || []).map((id) => FLOOR_PLAN_BY_ID[id]).filter(Boolean);
-        const upperSeats = floorPlans.reduce((sum, plan) => sum + (housing ? (plan.housingCapacity || 0) : (plan.serviceCapacity || 0)), 0);
-        const floorRows = [
-            { label: 'Ground', name: program?.name || 'Service', detail: `${Math.max(0, service.totalCapacity - upperSeats)} ${housing ? 'beds' : 'seats'}` },
-            ...(service.floorPlans || []).map((id, index) => {
-                const plan = FLOOR_PLAN_BY_ID[id];
-                const seats = housing ? (plan?.housingCapacity || 0) : (plan?.serviceCapacity || 0);
-                return {
-                    label: index === 0 ? 'First floor' : 'Second floor',
-                    name: plan?.name || id,
-                    detail: seats ? `+${seats} ${housing ? 'beds' : 'seats'} · +${(plan?.quality || 0).toFixed(2)} quality` : `no new seats · +${(plan?.quality || 0).toFixed(2)} quality`
-                };
-            })
-        ];
-        this.interiorEl.innerHTML = `<span class="kicker">The interior</span>${floorRows.map((row) => `<div class="service-interior__floor"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.detail)}</small></div>`).join('')}`;
-        const regulars = (this.game?.charter?.activeResidents || [])
-            .filter((resident) => housing
-                ? resident.homeServiceId === service.id
-                : resident.memory?.lastChoice?.serviceId === service.id)
-            .slice(0, 4);
-        this.regularsEl.hidden = regulars.length === 0;
-        this.regularsEl.innerHTML = regulars.length
-            ? `<span class="kicker">${housing ? 'Residents here' : 'Last seen here'}</span>${regulars.map((resident) => `<button type="button" class="service-regulars__person" data-resident-id="${escapeHtml(resident.id)}">${escapeHtml(resident.name)}</button>`).join('')}`
-            : '';
+        this.programEl.textContent = view.programName;
+        this.statsEl.innerHTML = view.stats;
+        this.blurbEl.textContent = view.blurb;
+        this.factsEl.innerHTML = view.facts;
+        this.noteEl.textContent = view.note;
+        this.interiorEl.innerHTML = view.interior;
+        this.regularsEl.hidden = !view.regulars;
+        this.regularsEl.innerHTML = view.regulars;
         this.regularsEl.querySelectorAll('[data-resident-id]').forEach((button) => {
             button.addEventListener('click', () => this.onOpenResident?.(button.dataset.residentId));
         });
         this.errorEl.textContent = '';
-        const rivalService = service.chapterId && service.chapterId !== 'player';
-        const refund = Math.max(1, Math.floor(finishCost(program, service.finish) / 2));
-        this.demolishBtn.textContent = shared
-            ? 'Shared service'
-            : rivalService
-                ? 'Rival service'
-                : `Dismantle · +${refund} lumen`;
-        this.demolishBtn.disabled = Boolean(service.fixed) || rivalService;
-        this.demolishBtn.title = shared
-            ? 'A shared commons service belongs to every chapter.'
-            : rivalService
-                ? "A rival chapter's service cannot be dismantled."
-                : service.fixed ? 'The Welcome Post is part of the charter.' : '';
-        const repairCost = this.game?.charter?.repairCost?.(service) ?? 3;
-        this.repairBtn.textContent = `Repair · ${repairCost}`;
-        const canRepair = !rivalService && working && (service.condition ?? 100) < 100;
-        this.repairBtn.hidden = !canRepair;
-        this.repairBtn.disabled = !canRepair || (this.game?.charter?.lumen || 0) < repairCost;
-        const canUpgrade = !rivalService && !service.fixed && working && (service.retrofits?.length || 0) < 2;
-        this.upgradeBtn.hidden = !canUpgrade;
-        this.upgradeBtn.disabled = !canUpgrade || (this.game?.charter?.lumen || 0) < RETROFIT_MIN_COST;
-        this.upgradeBtn.textContent = (service.retrofits?.length || 0) === 1 ? 'Add a second module →' : 'Add a module →';
-        this.upgradeBtn.title = canUpgrade ? 'Add a permanent module: seats, quality or a later kitchen.' : '';
-        const canFloor = !rivalService && !service.fixed && working && (service.floors || 1) < 3;
-        this.floorBtn.hidden = !canFloor;
-        this.floorBtn.disabled = !canFloor || (this.game?.charter?.lumen || 0) < 4;
-        const canSetFocus = !rivalService && working && Boolean(program?.secondaryNeed);
-        this.focusWrap.hidden = !canSetFocus;
-        if (canSetFocus) {
-            const currentFocus = service.policy?.focus || 'balanced';
-            this.focusSelect.innerHTML = [
-                `<option value="balanced">Both needs</option>`,
-                `<option value="primary">${escapeHtml(need ? `${need.name} first` : 'Primary need')}</option>`,
-                `<option value="secondary">${escapeHtml(secondary ? `${secondary.name} first` : 'Secondary need')}</option>`
-            ].join('');
-            this.focusSelect.value = SERVICE_FOCUS.some((entry) => entry.id === currentFocus) ? currentFocus : 'balanced';
+
+        this.demolishBtn.textContent = view.demolish.text;
+        this.demolishBtn.disabled = view.demolish.disabled;
+        this.demolishBtn.title = view.demolish.title;
+        this.repairBtn.textContent = view.repair.text;
+        this.repairBtn.hidden = view.repair.hidden;
+        this.repairBtn.disabled = view.repair.disabled;
+        this.upgradeBtn.hidden = view.upgrade.hidden;
+        this.upgradeBtn.disabled = view.upgrade.disabled;
+        this.upgradeBtn.textContent = view.upgrade.text;
+        this.upgradeBtn.title = view.upgrade.title;
+        this.floorBtn.hidden = view.floor.hidden;
+        this.floorBtn.disabled = view.floor.disabled;
+        this.focusWrap.hidden = view.focus.hidden;
+        if (!view.focus.hidden) {
+            this.focusSelect.innerHTML = view.focus.options;
+            this.focusSelect.value = view.focus.value;
         }
-        const canSetHours = !rivalService && !service.fixed && service.programId !== 'housing' && working;
-        this.hoursWrap.hidden = !canSetHours;
-        this.hoursSelect.value = SERVICE_HOURS_BY_ID[service.policy?.hours] ? service.policy.hours : 'as_built';
-        const canSetVibe = !rivalService && !service.fixed && working;
-        this.vibeWrap.hidden = !canSetVibe;
-        this.vibeSelect.value = SERVICE_VIBE_BY_ID[service.policy?.vibe] ? service.policy.vibe : (program?.vibe || 'cosy');
-        this.vibeSelect.disabled = !canSetVibe;
-        const canSetAccess = !rivalService && !service.fixed && working;
-        this.accessWrap.hidden = !canSetAccess;
-        this.accessSelect.value = SERVICE_ACCESS_BY_ID[service.policy?.access] ? service.policy.access : 'open';
-        this.accessSelect.disabled = !canSetAccess;
-        this.reopenBtn.hidden = !service.closed;
-        this.reopenBtn.disabled = rivalService;
-        this.reopenBtn.textContent = service.closed
-            ? rivalService
-                ? 'Rival service'
-                : `Reopen · ${this.game?.charter?.services.reopenCost(service) || 1} lumen`
-            : 'Reopen';
+        this.hoursWrap.hidden = view.hours.hidden;
+        this.hoursSelect.value = view.hours.value;
+        this.vibeWrap.hidden = view.vibe.hidden;
+        this.vibeSelect.value = view.vibe.value;
+        this.vibeSelect.disabled = view.vibe.disabled;
+        this.accessWrap.hidden = view.access.hidden;
+        this.accessSelect.value = view.access.value;
+        this.accessSelect.disabled = view.access.disabled;
+        this.reopenBtn.hidden = view.reopen.hidden;
+        this.reopenBtn.disabled = view.reopen.disabled;
+        this.reopenBtn.textContent = view.reopen.text;
 
         this.container.style.display = 'flex';
         this.container.classList.add('is-open');
