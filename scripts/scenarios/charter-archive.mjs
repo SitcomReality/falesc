@@ -38,6 +38,8 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.pause(300);
     await screenshot('charter-archive.png');
     await page.click('[data-testid=charter-archive-clear]');
+    assert.equal(await page.text('[data-testid=charter-archive-clear]'), 'Really clear?');
+    await page.click('[data-testid=charter-archive-clear]');
     const afterClear = await page.text('[data-testid=charter-archive]');
     assert.ok(afterClear.includes('No charters have closed yet.'));
     await page.click('[data-testid=charter-archive-done]');

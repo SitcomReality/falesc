@@ -19,6 +19,7 @@ export default async function ({ page, assert, screenshot }) {
     assert.equal(await page.evaluate("document.querySelectorAll('.charter-archive__row').length"), 1);
     assert.equal(await page.text('[data-testid=charter-archive-clear]'), 'Clear Contest');
     await page.click('[data-testid=charter-archive-clear]');
+    await page.click('[data-testid=charter-archive-clear]');
     assert.ok((await page.text('[data-testid=charter-archive]')).includes('No charters'));
     assert.equal(await page.evaluate("JSON.parse(localStorage.getItem('falesc.charters.v1')).length"), 1);
     await page.click('[data-testid=archive-filter-all]');
