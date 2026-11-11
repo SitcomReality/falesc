@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 import { TILE_WIDTH, TILE_HEIGHT } from '../constants.js';
 import { generateShape } from './ShapeGenerator.js';
 import { drawSectorGraphics } from './SectorGraphics.js';
-import { projectGridToWorld, isPointInIsoGrid, getGridDiamond, worldToGrid } from './GridUtils.js';
+import { projectGridToWorld, isPointInIsoGrid, worldToGrid } from './GridUtils.js';
 
 /**
  * A Sector represents one island region on the map.
@@ -22,9 +22,6 @@ export class Sector {
         this.radius = baseRadius;
         
         this.connections = []; // Array of Sector IDs this connects to
-
-        // Precompute grid diamond for quick reference (centered at sector center)
-        this.gridPoly = getGridDiamond(this.centerX, this.centerY, this.gridSize, TILE_WIDTH, TILE_HEIGHT);
 
         // Generate the organic outline once. When the generator supplies a
         // local silhouette, translate it rather than consuming more RNG and

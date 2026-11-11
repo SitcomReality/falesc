@@ -116,6 +116,33 @@ export class BuildingManager {
         });
     }
     
+    /**
+     * Rebuild persisted structures from model data. Unknown sectors, cells and
+     * blueprints are skipped rather than corrupting the map.
+     */
+    restore(entries = []) {
+        if (!this.map || !Array.isArray(entries)) return 0;
+        let restored = 0;
+        for (const entry of entries) {
+            if (!entry || !BLUEPRINT_BY_ID[entry.blueprintId]) continue;
+            if (this.isCellOccupied(entry.sectorId, entry.u, entry.v)) continue;
+            const building = this.createBuilding(
+                entry.sectorId,
+                entry.u,
+                entry.v,
+                entry.name || BLUEPRINT_BY_ID[entry.blueprintId].name,
+                entry.blueprintId
+            );
+            if (!building) continue;
+            while (building.state !== entry.state && building.state !== 'ACTIVE') {
+                building.promote();
+            }
+            building.container.alpha = building.state === 'RESERVED' ? 0.72 : 1;
+            restored += 1;
+        }
+        return restored;
+    }
+
     clear() {
         this.buildings.forEach(b => b.destroy());
         this.buildings = [];

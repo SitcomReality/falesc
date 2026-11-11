@@ -17,6 +17,7 @@ import { BuildingManager } from './buildings/BuildingManager.js';
 import { BLUEPRINT_BY_ID, BEACON_ID, DEFAULT_BLUEPRINT_ID, effectiveCost } from './buildings/blueprints.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { Minimap } from './ui/Minimap.js';
+import { SaveManager } from './persistence/SaveManager.js';
 
 class GameApp {
     constructor() {
@@ -73,9 +74,10 @@ class GameApp {
 
         // Game State Manager
         this.stateManager = new GameStateManager(this.app);
+        this.saveManager = new SaveManager();
 
         // Initialize Screens
-        this.stateManager.registerScreen(GameState.MENU, new MenuScreen(this.stateManager));
+        this.stateManager.registerScreen(GameState.MENU, new MenuScreen(this.stateManager, this));
         this.stateManager.registerScreen(GameState.LOBBY, new LobbyScreen(this.stateManager));
         this.stateManager.registerScreen(GameState.PLAYING, new GameScreen(this.stateManager, this));
         this.stateManager.registerScreen(GameState.INTERSTITIAL, new InterstitialScreen(this.stateManager));
@@ -89,12 +91,15 @@ class GameApp {
             if (newState === GameState.MENU || newState === GameState.LOBBY || newState === GameState.END) {
                 this.stateManager.cancelPendingTurn();
             }
+            if (newState === GameState.END) this.saveManager.clear();
             originalSetState(newState);
         };
 
         // The state manager owns turn timing; App supplies the settlement
         // simulation step and the victory/defeat check.
         this.stateManager.onTideResolve = () => this.resolveTide();
+        this.stateManager.onTideStart = () => this.previewTide();
+        this.stateManager.onStateSettled = () => this.saveGame();
 
         // Camera System
         this.camera = new Camera(
@@ -127,9 +132,13 @@ class GameApp {
         // Listen for game start to generate world
         const originalStartGame = this.stateManager.startGame.bind(this.stateManager);
         this.stateManager.startGame = () => {
+            this.saveManager.clear();
             this.initializeWorld();
             originalStartGame();
+            this.saveGame();
         };
+
+        window.addEventListener('beforeunload', () => this.saveGame());
 
         // Start at menu
         this.stateManager.setState(GameState.MENU);
@@ -205,10 +214,70 @@ class GameApp {
                 };
             },
             selectBlueprint(id) {
-                game.selectBlueprint(id);
-                return game.stateManager.selectedBlueprint;
+                return game.selectBlueprint(id);
+            },
+            saveGame() {
+                return game.saveGame();
+            },
+            continueGame() {
+                return game.continueGame();
             }
         };
+    }
+
+    saveGame() {
+        if (!this.map) return false;
+        if (this.stateManager.state !== GameState.PLAYING) return false;
+        const camera = this.camera;
+        return this.saveManager.write({
+            settings: {
+                mapSeed: this.stateManager.settings.mapSeed,
+                mapSize: this.stateManager.settings.mapSize
+            },
+            turn: this.stateManager.currentTurn,
+            dayLimit: this.stateManager.dayLimit,
+            actionsRemaining: this.stateManager.actionsRemaining,
+            lumen: this.stateManager.lumen,
+            selectedBlueprint: this.stateManager.selectedBlueprint,
+            hintDismissed: this.stateManager.hintDismissed,
+            buildings: this.buildingManager.buildings.map((building) => ({
+                sectorId: building.sectorId,
+                u: building.u,
+                v: building.v,
+                name: building.name,
+                blueprintId: building.blueprintId,
+                state: building.state
+            })),
+            camera: {
+                x: camera.position.x,
+                y: camera.position.y,
+                zoom: camera.zoom
+            }
+        });
+    }
+
+    continueGame() {
+        const save = this.saveManager.read();
+        if (!save) return false;
+
+        this.stateManager.settings.mapSeed = save.settings.mapSeed;
+        this.stateManager.settings.mapSize = save.settings.mapSize;
+        this.initializeWorld();
+        this.buildingManager.restore(save.buildings || []);
+        this.stateManager.restoreRun(save);
+
+        if (this.map) {
+            this.camera.setBounds(this.map.bounds);
+            if (save.camera && Number.isFinite(save.camera.x) && Number.isFinite(save.camera.y)) {
+                this.camera.position.x = save.camera.x;
+                this.camera.position.y = save.camera.y;
+                this.camera.zoom = Math.max(this.camera.minZoom, Math.min(this.camera.maxZoom, save.camera.zoom || 0.5));
+            }
+            this.camera.updateTransform();
+        }
+        this.stateManager.activeScreen?.updateTurnDisplay?.(true);
+        this.saveGame();
+        return true;
     }
 
     selectBlueprint(id) {
@@ -265,6 +334,7 @@ class GameApp {
         // Keep the same blueprint armed for the next tide, but refresh the HUD
         // immediately so the cost, action count and affordability are correct.
         this.stateManager.activeScreen?.updateTurnDisplay?.(true);
+        this.saveGame();
         return { ok: true };
     }
 
@@ -298,6 +368,21 @@ class GameApp {
                 }
             }
         }
+    }
+
+    previewTide() {
+        const buildings = this.buildingManager.buildings;
+        const active = buildings.filter((building) => building.state === 'ACTIVE');
+        const underConstruction = buildings.filter((building) => building.state !== 'ACTIVE');
+        const income = active.reduce((total, building) => total + (BLUEPRINT_BY_ID[building.blueprintId]?.income || 0), 0);
+        return {
+            income,
+            active: active.length,
+            start: underConstruction.length,
+            message: underConstruction.length
+                ? 'The water moves. Something is taking shape.'
+                : 'The lamps are lit. The water is moving.'
+        };
     }
 
     resolveTide() {
@@ -373,10 +458,11 @@ class GameApp {
         // Add characters on map. Keep a reference to their home island so the
         // NPC controller can eventually stay on connected land.
         const numCharacters = 15;
+        const baseSeed = this.stateManager.settings.mapSeed;
         for (let i = 0; i < numCharacters; i++) {
             const sector = this.map.getRandomSector();
             const point = sector.getRandomPoint(entityRNG);
-            this.addCharacter(point.x, point.y, sector);
+            this.addCharacter(point.x, point.y, sector, new SeededRandom(baseSeed + 5000 + i * 131));
         }
 
         // Add minerals deterministically on map
@@ -397,7 +483,7 @@ class GameApp {
                 : ['CRYSTAL_BLUE', 'CRYSTAL_PURPLE', 'CRYSTAL_GREEN'];
             const paletteId = paletteIds[entityRNG.nextInt(0, paletteIds.length - 1)];
 
-            this.addMineral(point.x, point.y, type, paletteId);
+            this.addMineral(point.x, point.y, type, paletteId, new SeededRandom(baseSeed + 9000 + i * 197));
         }
 
         this.stateManager.activeScreen?.updateTurnDisplay?.(true);
@@ -423,8 +509,8 @@ class GameApp {
         this.shadowLayer.removeChildren();
     }
 
-    addMineral(x, y, type, paletteId) {
-        const mineral = new MineralStructure(x, y, type, paletteId);
+    addMineral(x, y, type, paletteId, rng = null) {
+        const mineral = new MineralStructure(x, y, type, paletteId, rng);
 
         this.minerals.push(mineral);
         this.characterLayer.addChild(mineral.container);
@@ -433,8 +519,8 @@ class GameApp {
         mineral.container.zIndex = mineral.groundY;
     }
 
-    addCharacter(x, y, sector = null) {
-        const char = new Character(x, y);
+    addCharacter(x, y, sector = null, rng = null) {
+        const char = new Character(x, y, rng);
         char.homeSector = sector;
 
         this.characters.push(char);

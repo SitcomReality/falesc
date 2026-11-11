@@ -1,6 +1,5 @@
 import * as PIXI from 'pixi.js';
 import { MINERAL_TYPES, MINERAL_PALETTES } from '../constants.js';
-import { SHAPES } from '../constants.js';
 import { RockRenderer } from './RockRenderer.js';
 import { CrystalRenderer } from './CrystalRenderer.js';
 import { drawShadowForStructure } from './MineralUtils.js';

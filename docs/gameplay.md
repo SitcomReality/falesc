@@ -1,86 +1,110 @@
 # Gameplay and controls
 
-FALESC is an isometric island construction sandbox. You have one build action
-per turn and can watch a small population and scattered minerals while you
-place buildings. There is no economy, objective, or victory condition yet.
+FALESC: The Prism Tide is an isometric island city-builder. You have one build
+action per tide, a small purse of lumen, and a deadline: raise the Aurora Beacon
+before the last tide.
 
 ## Controls
 
 | Input | Action |
 | --- | --- |
 | `W` `A` `S` `D` or arrow keys | Pan the camera |
-| Mouse wheel | Zoom toward the cursor (0.2×–4×) |
+| Mouse wheel | Zoom toward the cursor |
 | Middle-mouse drag | Pan |
 | One-finger drag (touch) | Pan |
 | Two-finger pinch (touch) | Zoom and pan |
-| Primary click/tap on an empty grid cell | Open the build prompt |
-| `Enter` in the build prompt | Reserve the building |
-| `Escape` in the build prompt | Cancel |
-| End Turn button | Finish the current turn |
-| End Game button | Go to the Game Over screen |
+| Click a blueprint card | Arm that structure |
+| Primary click/tap on an empty grid cell | Open the build dialog for the armed blueprint |
+| `Enter` in the build dialog | Reserve the plot |
+| `Escape` in the build dialog | Cancel |
+| `Enter` / `Escape` in the charter menu | Resume / close |
+| End Turn button | Resolve the tide |
+| Charter menu (☰) → Abandon charter | End the run |
 
-The build prompt only opens while the game is in `PLAYING`, at least one build
-action remains, and the clicked cell is inside a sector grid and unoccupied.
-The minimap at bottom-left shows the islands, existing buildings, and the
-current camera viewport.
+The build dialog only opens while the game is `PLAYING`, at least one build
+action remains, the selected blueprint is affordable, and the clicked cell is
+inside a sector grid and unoccupied. The survey chart at bottom-left shows the
+islands, buildings, and camera viewport; it turns red where the camera is
+looking.
 
-## Turn loop
+## The tide loop
 
-1. A new game starts on turn 1 with one build action.
-2. Place at most one building during the turn.
-3. Click **End Turn**. The game shows the “Turn N Complete” interstitial for
-   two seconds and returns to play on the next turn with one action again.
-4. Buildings advance one lifecycle phase per interstitial.
+1. A new charter starts on **Day 1** with **8 lumen** and one build action.
+2. Arm a blueprint and place at most one structure.
+3. Click **Let the tide turn**.
+4. The interstitial shows the tide, the income due, and the structures at work.
+   During resolution:
+   - active structures pay their income into the purse;
+   - every `PENDING` structure becomes `RESERVED`;
+   - every `RESERVED` structure becomes `ACTIVE`;
+   - the day advances and one build action returns.
+5. If the Aurora Beacon is `ACTIVE`, the charter is won. If the next day would
+   pass the tide limit, the charter is lost.
 
-There is no turn timer and no automatic end turn. The `turnDuration` setting
-exists in `GameStateManager` but is not used by the UI.
+A structure therefore takes two turns to finish: placed on Day 1, it is
+`RESERVED` on Day 2 and `ACTIVE` on Day 3. Income is collected from structures
+that were already active at the start of resolution, so a structure that becomes
+active this tide starts paying next tide.
 
-## Building lifecycle
+## Blueprints
 
-Buildings use three phases:
+| Blueprint | Cost | Income | Role |
+| --- | --- | --- | --- |
+| **Prism Rig** | 3 lumen | +2 / tide | Cheap, reliable opening economy. |
+| **Tide Garden** | 5 lumen | +3 / tide | Stronger economy, slower payback. |
+| **Lantern House** | 4 lumen | +1 / tide | Support. Each one reduces the Aurora Beacon's price by 3 (floor 6). |
+| **Aurora Beacon** | 12 lumen (dynamic) | — | Unique charter goal. Must become `ACTIVE` to win. |
 
-| Phase | When | Appearance |
-| --- | --- | --- |
-| `PENDING` | Immediately after reserving | Translucent blue, pulsing |
-| `RESERVED` | After the first end-turn interstitial | Blue ghost, partially transparent |
-| `ACTIVE` | After the second end-turn interstitial | Solid grey block |
+The Beacon's displayed price is dynamic: `max(6, 12 − 3 × Lantern Houses)`. An
+armed blueprint costs nothing until the build dialog is confirmed. If the plot
+creation fails, no lumen or action is spent.
 
-So a building placed on turn 1 is a ghost during turn 2 and solid from turn 3
-onward. The promotion is driven by a one-second timer inside the turn
-transition; see [known-issues.md](known-issues.md#4-turn-and-building-timing-is-not-state-driven).
+The build dock disables blueprints that are unaffordable, already unique, or
+blocked because the tide's build action is spent. Hovering a disabled card
+explains why in its tooltip.
 
-Placement is one building per grid cell. There is no cost, resource, ownership,
-terrain, or demolition rule, and minerals/characters do not block a cell.
+## Map and difficulty
 
-## Map
+| Map size | Islands | Minerals | Tide limit |
+| --- | --- | --- | --- |
+| Small | 4 | 30 | 12 days |
+| Medium | 6 | 50 | 14 days |
+| Large | 7 | 70 | 16 days |
 
-The world is generated from a numeric seed and a map size:
+Every map also spawns 15 Tidelanders. Islands are generated once from the seed,
+packed by their actual silhouette bounds, and placed in a world with open water
+around them. The seed determines island shapes, character palettes/proportions,
+mineral variations, and the starting NPC decisions.
 
-| Map size | Islands | Minerals |
-| --- | --- | --- |
-| Small | 4 | 30 |
-| Medium | 6 | 50 |
-| Large | 7 | 70 |
+## Victory and defeat
 
-Every map also spawns 15 characters. Islands are irregular isometric shapes with
-a buildable grid in the middle and scenery minerals around the edges. The map
-is nominally five times the viewport in each direction; use the minimap and zoom
-to navigate it.
+- **Victory:** the Aurora Beacon becomes `ACTIVE`. The end screen reports tides
+  weathered, active structures, and lumen remaining.
+- **Defeat:** the tide limit passes without an active Beacon.
+- **Abandon:** the charter menu closes the run early. The end screen records it
+  as a voluntary departure.
 
-Characters are ambient NPCs. They idle, bend to inspect the ground, and wander
-at walk or run speed. They do not interact with buildings, minerals, or each
-other, and they are not constrained to the islands.
+The end screen returns to the menu (where a save may still exist for an
+in-progress run) or opens the lobby for a new charter.
+
+## Persistence
+
+The game autosaves to `localStorage` under `falesc.save.v1` after each build and
+each completed tide, and before the page unloads. The save stores only model data
+(seed, map size, day, lumen, actions, selected blueprint, structures, camera).
+The world is regenerated from the seed on load.
+
+The menu shows **Continue charter** when a valid save exists. Ending or
+abandoning a run clears the save. The save is versioned; unknown versions are
+discarded rather than partially loaded.
 
 ## Current limitations
 
-- No save/load or persistence: reloading starts over.
-- No win/lose condition; **End Game** is a manual exit.
-- No resources, costs, income, or building effects.
-- Multiplayer is a placeholder alert.
-- No building demolition or upgrades.
-- No collision between characters and buildings/minerals.
-- The camera has no world-bound clamp, so it can be panned into empty space.
-- The world keeps animating behind the menu and end screens.
-
-See [known-issues.md](known-issues.md) for the technical details and suggested
-directions.
+- No demolition or upgrades.
+- No placement restrictions around minerals, characters, or ownership.
+- No audio.
+- No multiplayer; the menu labels it “soon”.
+- No keyboard build cursor: placement is pointer/touch only.
+- Characters avoid buildings and stay on their home island, but use steering, not
+  a full navigation graph.
+- Some open issues remain; see [known-issues.md](known-issues.md).

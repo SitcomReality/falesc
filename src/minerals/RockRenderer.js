@@ -1,42 +1,55 @@
 import * as PIXI from 'pixi.js';
 import { SHAPES } from '../constants.js';
 
+let RANDOM = Math.random;
+const rand = () => RANDOM();
+
 /**
  * Responsible for drawing chunkier flat "rock pieces" and composing them into a cluster.
  * Kept minimal and focused so MineralRenderer can delegate to it.
  */
 export class RockRenderer {
-    static buildRockCluster(container, variation, palette) {
+    static buildRockCluster(container, variation, palette, rng = null) {
+        const previous = RANDOM;
+        RANDOM = rng ? () => rng.next() : Math.random;
+        try {
+            RockRenderer._buildRockCluster(container, variation, palette);
+        } finally {
+            RANDOM = previous;
+        }
+    }
+
+    static _buildRockCluster(container, variation, palette) {
         const baseCount = Math.max(1, Math.floor(1 + variation.sizeMultiplier * 2));
-        const jitter = Math.random() < 0.35 ? 1 : 0;
+        const jitter = rand() < 0.35 ? 1 : 0;
         const pieceCount = Math.min(4, baseCount + jitter);
 
-        const spread = 10 * variation.sizeMultiplier * (0.6 + Math.random() * 0.8);
+        const spread = 10 * variation.sizeMultiplier * (0.6 + rand() * 0.8);
         const piecesData = [];
 
         for (let i = 0; i < pieceCount; i++) {
             const pieceVar = {
-                sizeMultiplier: variation.sizeMultiplier * (0.7 + Math.random() * 0.6),
-                edgeRoughness: variation.edgeRoughness * (0.8 + Math.random() * 0.6),
-                heightRatio: variation.heightRatio * (0.8 + Math.random() * 0.6)
+                sizeMultiplier: variation.sizeMultiplier * (0.7 + rand() * 0.6),
+                edgeRoughness: variation.edgeRoughness * (0.8 + rand() * 0.6),
+                heightRatio: variation.heightRatio * (0.8 + rand() * 0.6)
             };
             
             // Calculate position relative to cluster center
-            const angle = (i / pieceCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
+            const angle = (i / pieceCount) * Math.PI * 2 + (rand() - 0.5) * 0.6;
             // Make non-main pieces more likely to sit further from center horizontally
-            const radius = (i === 0) ? (spread * 0.25) : (spread * (0.35 + Math.random() * 0.85));
+            const radius = (i === 0) ? (spread * 0.25) : (spread * (0.35 + rand() * 0.85));
             // Base polar coords
             let px = Math.cos(angle) * radius;
-            let py = Math.sin(angle) * (radius * 0.35) + (Math.random() - 0.5) * 4;
+            let py = Math.sin(angle) * (radius * 0.35) + (rand() - 0.5) * 4;
             // Add extra horizontal jitter to widen clusters (scaled by spread and piece size)
-            const horizJitter = (Math.random() - 0.5) * spread * 0.6 * (i === 0 ? 0.35 : 1.0);
+            const horizJitter = (rand() - 0.5) * spread * 0.6 * (i === 0 ? 0.35 : 1.0);
             px += horizJitter;
 
             piecesData.push({
                 variation: pieceVar,
                 palette: palette,
                 px, py,
-                rotation: (Math.random() - 0.5) * 0.25,
+                rotation: (rand() - 0.5) * 0.25,
                 // Use sizeMultiplier as the metric for size comparison
                 size: pieceVar.sizeMultiplier
             });
@@ -151,26 +164,26 @@ export class RockRenderer {
     static drawRockPiece(g, v, p) {
         const s = v.sizeMultiplier || 1;
         const baseHeight = 24 * s;
-        const height = baseHeight * (0.6 + Math.random() * 0.6);
+        const height = baseHeight * (0.6 + rand() * 0.6);
         const baseWidth = 28 * s;
-        const width = baseWidth * (0.7 + Math.random() * 0.6);
+        const width = baseWidth * (0.7 + rand() * 0.6);
 
-        const leftFrac = 0.45 + (Math.random() - 0.5) * 0.15;
+        const leftFrac = 0.45 + (rand() - 0.5) * 0.15;
         const leftW = width * leftFrac;
         const rightW = width * (1 - leftFrac);
 
         const baseOutlineThickness = SHAPES.OUTLINE_THICKNESS * 0.5;
 
         const baseY = 0;
-        const baseCenterDrop = 2 + Math.random() * 3;
+        const baseCenterDrop = 2 + rand() * 3;
 
-        const leftBottom = { x: -leftW, y: baseY + (Math.random() - 0.5) * 2 };
-        const rightBottom = { x: rightW, y: baseY + (Math.random() - 0.5) * 2 };
-        const seamBottom = { x: (Math.random() - 0.5) * 4, y: baseCenterDrop + (Math.random() - 0.5) * 1.5, sharp: true };
+        const leftBottom = { x: -leftW, y: baseY + (rand() - 0.5) * 2 };
+        const rightBottom = { x: rightW, y: baseY + (rand() - 0.5) * 2 };
+        const seamBottom = { x: (rand() - 0.5) * 4, y: baseCenterDrop + (rand() - 0.5) * 1.5, sharp: true };
 
-        const shoulderBaseY = -height * (0.6 + Math.random() * 0.15);
-        const leftShoulder = { x: leftBottom.x + (-3 + Math.random() * 5), y: shoulderBaseY + (Math.random() - 0.5) * 4 };
-        const rightShoulder = { x: rightBottom.x + (-2 + Math.random() * 5), y: shoulderBaseY + (Math.random() - 0.5) * 4 };
+        const shoulderBaseY = -height * (0.6 + rand() * 0.15);
+        const leftShoulder = { x: leftBottom.x + (-3 + rand() * 5), y: shoulderBaseY + (rand() - 0.5) * 4 };
+        const rightShoulder = { x: rightBottom.x + (-2 + rand() * 5), y: shoulderBaseY + (rand() - 0.5) * 4 };
 
         // Ensure the top face (span between leftShoulder.x and rightShoulder.x) is not wider than
         // the bottom face (span between leftBottom.x and rightBottom.x). If it is, scale the
@@ -184,10 +197,10 @@ export class RockRenderer {
             rightShoulder.x = centerX + (rightShoulder.x - centerX) * scale;
         }
 
-        const seamTop = { x: seamBottom.x + (Math.random() - 0.5) * 6, y: shoulderBaseY + (2 + Math.random() * 4), sharp: true };
+        const seamTop = { x: seamBottom.x + (rand() - 0.5) * 6, y: shoulderBaseY + (2 + rand() * 4), sharp: true };
 
         const highestShoulderY = Math.min(leftShoulder.y, rightShoulder.y);
-        const apex = { x: (leftShoulder.x + rightShoulder.x) * 0.5 + (Math.random() - 0.5) * 4, y: highestShoulderY - (1 + Math.random() * 3) };
+        const apex = { x: (leftShoulder.x + rightShoulder.x) * 0.5 + (rand() - 0.5) * 4, y: highestShoulderY - (1 + rand() * 3) };
 
         // Global corner roundness: scale with rock size but keep modest so shapes stay crisp.
         const baseRadius = 4 * s;

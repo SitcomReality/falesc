@@ -34,6 +34,8 @@ export class GameStateManager {
         this.activeScreen = null;
         this.scheduler = new TurnScheduler();
         this.onTideResolve = null;
+        this.onTideStart = null;
+        this.onStateSettled = null;
 
         // Game settings (configured in the lobby).
         this.settings = {
@@ -77,11 +79,9 @@ export class GameStateManager {
         if (this.state !== GameState.PLAYING) return;
         if (this.scheduler.pending) return;
 
-        this.lastTideSummary = {
-            income: 0,
-            active: this.screens.get(GameState.PLAYING)?.game?.buildingManager?.buildings?.filter((b) => b.state === 'ACTIVE').length || 0,
-            message: 'The lamps are lit. The water is moving.'
-        };
+        this.lastTideSummary = typeof this.onTideStart === 'function'
+            ? this.onTideStart()
+            : { income: 0, active: 0, message: 'The lamps are lit. The water is moving.' };
         this.setState(GameState.INTERSTITIAL);
 
         this.scheduler.schedule(() => {
@@ -96,6 +96,7 @@ export class GameStateManager {
             }
 
             this.setState(GameState.PLAYING);
+            if (typeof this.onStateSettled === 'function') this.onStateSettled();
         }, 1900);
     }
 
@@ -119,6 +120,22 @@ export class GameStateManager {
             lumen: this.lumen
         };
         this.setState(GameState.END);
+    }
+
+    /** Restore a saved run after App has regenerated the seeded world. */
+    restoreRun(save) {
+        this.cancelPendingTurn();
+        this.settings.mapSeed = save.settings.mapSeed;
+        this.settings.mapSize = save.settings.mapSize;
+        this.currentTurn = save.turn || 1;
+        this.dayLimit = save.dayLimit || TIDE_LIMITS[save.settings.mapSize] || TIDE_LIMITS.medium;
+        this.actionsRemaining = Number.isInteger(save.actionsRemaining) ? save.actionsRemaining : 1;
+        this.lumen = Number.isFinite(save.lumen) ? save.lumen : STARTING_LUMEN;
+        this.selectedBlueprint = save.selectedBlueprint || DEFAULT_BLUEPRINT_ID;
+        this.hintDismissed = Boolean(save.hintDismissed);
+        this.endResult = null;
+        this.lastTideSummary = null;
+        this.setState(GameState.PLAYING);
     }
 
     cancelPendingTurn() {

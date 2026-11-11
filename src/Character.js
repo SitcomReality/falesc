@@ -5,10 +5,12 @@ import { CharacterRenderer } from './character/CharacterRenderer.js';
 import { ANIMATION_STATES } from './constants.js';
 
 export class Character {
-    constructor(x, y) {
+    constructor(x, y, rng = null) {
         // Core position
         this.x = x;
         this.y = y;
+        this.rng = rng;
+        const rand = () => (this.rng ? this.rng.next() : Math.random());
 
         // Visual properties
         this.scale = 1;
@@ -20,16 +22,16 @@ export class Character {
         this._state = ANIMATION_STATES.IDLE;
         this.stateTime = 0;
         
-        this.frame = Math.random() * 100; // Random start frame for variety
+        this.frame = rand() * 100; // Random start frame for variety
         this.speed = 0.1;
         this.bobOffset = 0;
         this.torsoTilt = 0; // Radians, rotation of torso around hip joint
 
         // Procedural Variation (slight differences in limb lengths)
         this.variations = {
-            armLength: 1 + (Math.random() * 0.4 - 0.2),
-            legLength: 1 + (Math.random() * 0.4 - 0.2),
-            bodyHeight: 1 + (Math.random() * 0.2 - 0.1)
+            armLength: 1 + (rand() * 0.4 - 0.2),
+            legLength: 1 + (rand() * 0.4 - 0.2),
+            bodyHeight: 1 + (rand() * 0.2 - 0.1)
         };
 
         // Limb Angles (radians)
@@ -81,7 +83,8 @@ export class Character {
     }
 
     getRandomPalette() {
-        const p = PALETTES[Math.floor(Math.random() * PALETTES.length)];
+        const rand = () => (this.rng ? this.rng.next() : Math.random());
+        const p = PALETTES[Math.floor(rand() * PALETTES.length)];
         // Clone to allow individual tweaking if needed later
         return { ...p };
     }

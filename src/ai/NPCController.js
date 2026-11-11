@@ -31,7 +31,9 @@ export class NPCController {
         this.game = game;
         
         this.timer = 0;
-        this.state = 'IDLE'; 
+        this.state = 'IDLE';
+        const rand = () => (character.rng ? character.rng.next() : Math.random());
+        this._rand = rand;
         
         // Initialize target to current facing so they don't snap immediately
         this.targetFacing = character.facing || 0;
@@ -75,13 +77,13 @@ export class NPCController {
             if (c.x > this.bounds.width - pad) c.x = this.bounds.width - pad;
             if (c.y < pad) c.y = pad;
             if (c.y > this.bounds.height - pad) c.y = this.bounds.height - pad;
-            this.targetFacing = Math.random() * Math.PI * 2;
+            this.targetFacing = this._rand() * Math.PI * 2;
             return;
         }
 
         const dx = this.homeSector.centerX - c.x;
         const dy = this.homeSector.centerY - c.y;
-        this.targetFacing = Math.atan2(dx, dy) + (Math.random() - 0.5) * 1.1;
+        this.targetFacing = Math.atan2(dx, dy) + (this._rand() - 0.5) * 1.1;
         this.currentTurnRate = 0;
         c.state = ANIMATION_STATES.WALK;
         c.speed = NPC_PARAMS.walkSpeed * 0.3;
@@ -106,19 +108,19 @@ export class NPCController {
 
     decideNextAction() {
         // Add a bit of noise so NPCs don't all sync perfectly
-        const roll = Math.random();
+        const roll = this._rand();
         if (roll < 0.25) {
             // Idle for a bit (longer, calmer)
-            const dur = NPC_PARAMS.idleDurationMin + Math.random() * (NPC_PARAMS.idleDurationMax - NPC_PARAMS.idleDurationMin);
-            this.changeState('IDLE', dur * (1 + (Math.random() - 0.5) * NPC_PARAMS.decisionNoise));
+            const dur = NPC_PARAMS.idleDurationMin + this._rand() * (NPC_PARAMS.idleDurationMax - NPC_PARAMS.idleDurationMin);
+            this.changeState('IDLE', dur * (1 + (this._rand() - 0.5) * NPC_PARAMS.decisionNoise));
         } else if (roll < 0.40) {
             // Inspect ground (bend)
-            const dur = NPC_PARAMS.bendDurationMin + Math.random() * (NPC_PARAMS.bendDurationMax - NPC_PARAMS.bendDurationMin);
-            this.changeState('BEND', dur * (1 + (Math.random() - 0.5) * NPC_PARAMS.decisionNoise));
+            const dur = NPC_PARAMS.bendDurationMin + this._rand() * (NPC_PARAMS.bendDurationMax - NPC_PARAMS.bendDurationMin);
+            this.changeState('BEND', dur * (1 + (this._rand() - 0.5) * NPC_PARAMS.decisionNoise));
         } else {
             // Wander somewhere
-            const dur = NPC_PARAMS.wanderDurationMin + Math.random() * (NPC_PARAMS.wanderDurationMax - NPC_PARAMS.wanderDurationMin);
-            this.changeState('WANDER', dur * (1 + (Math.random() - 0.5) * NPC_PARAMS.decisionNoise));
+            const dur = NPC_PARAMS.wanderDurationMin + this._rand() * (NPC_PARAMS.wanderDurationMax - NPC_PARAMS.wanderDurationMin);
+            this.changeState('WANDER', dur * (1 + (this._rand() - 0.5) * NPC_PARAMS.decisionNoise));
         }
     }
 
@@ -144,7 +146,7 @@ export class NPCController {
             c.stateTime = 0;
         } else if (newState === 'WANDER') {
             // Use configured run chance
-            const run = Math.random() < NPC_PARAMS.runChance;
+            const run = this._rand() < NPC_PARAMS.runChance;
             c.state = run ? ANIMATION_STATES.RUN : ANIMATION_STATES.WALK;
             
             // Map to configured speeds
@@ -152,11 +154,11 @@ export class NPCController {
             c.speed = run ? NPC_PARAMS.runSpeed * 0.1 : NPC_PARAMS.walkSpeed * 0.3; 
             
             // Pick a random target direction
-            this.targetFacing = Math.random() * Math.PI * 2;
+            this.targetFacing = this._rand() * Math.PI * 2;
 
             // Optional: Curved movement
-            if (Math.random() < NPC_PARAMS.wanderTurnChance) {
-                this.currentTurnRate = (Math.random() * 2 - 1) * NPC_PARAMS.wanderTurnMax;
+            if (this._rand() < NPC_PARAMS.wanderTurnChance) {
+                this.currentTurnRate = (this._rand() * 2 - 1) * NPC_PARAMS.wanderTurnMax;
             }
         }
     }

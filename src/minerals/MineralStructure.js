@@ -3,16 +3,18 @@ import { MineralRenderer } from './MineralRenderer.js';
 import { MINERAL_TYPES, MINERAL_PALETTES } from '../constants.js';
 
 export class MineralStructure {
-    constructor(x, y, type = MINERAL_TYPES.ROCK, paletteId) {
+    constructor(x, y, type = MINERAL_TYPES.ROCK, paletteId, rng = null) {
         this.x = x;
         this.y = y;
         this.type = type;
+        this.rng = rng;
+        const rand = () => (this.rng ? this.rng.next() : Math.random());
 
         // Auto-pick palette if missing
         if (!paletteId) {
             const filter = type === MINERAL_TYPES.ROCK ? 'ROCK' : 'CRYSTAL';
             const options = MINERAL_PALETTES.filter(p => p.id.includes(filter));
-            this.paletteId = options[Math.floor(Math.random() * options.length)].id;
+            this.paletteId = options[Math.floor(rand() * options.length)].id;
         } else {
             this.paletteId = paletteId;
         }
@@ -22,11 +24,11 @@ export class MineralStructure {
         
         // Procedural Variations
         this.variation = {
-            sizeMultiplier: 0.8 + Math.random() * 0.8,
-            peakCount: type === MINERAL_TYPES.CRYSTAL ? Math.floor(Math.random() * 3) + 2 : 1,
-            edgeRoughness: 0.1 + Math.random() * 0.2,
-            clusterDensity: 0.8 + Math.random() * 0.5,
-            heightRatio: 0.8 + Math.random() * 0.6
+            sizeMultiplier: 0.8 + rand() * 0.8,
+            peakCount: type === MINERAL_TYPES.CRYSTAL ? Math.floor(rand() * 3) + 2 : 1,
+            edgeRoughness: 0.1 + rand() * 0.2,
+            clusterDensity: 0.8 + rand() * 0.5,
+            heightRatio: 0.8 + rand() * 0.6
         };
 
         // Graphics Containers

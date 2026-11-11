@@ -1,6 +1,7 @@
 export class MenuScreen {
-    constructor(gameStateManager) {
+    constructor(gameStateManager, game = null) {
         this.gsm = gameStateManager;
+        this.game = game;
 
         this.container = document.createElement('div');
         this.container.className = 'screen screen--menu';
@@ -30,12 +31,18 @@ export class MenuScreen {
         }, 'btn btn--primary');
         startBtn.insertAdjacentHTML('beforeend', '<span class="btn__arrow" aria-hidden="true">→</span>');
 
+        const continueBtn = this.createButton('Continue charter', 'menu-continue', () => {
+            this.game?.continueGame();
+        }, 'btn btn--paper');
+        continueBtn.hidden = true;
+        this.continueBtn = continueBtn;
+
         const joinBtn = this.createButton('Multiplayer', 'menu-join', () => {}, 'btn btn--ghost');
         joinBtn.disabled = true;
         joinBtn.title = 'Multiplayer is not implemented yet';
         joinBtn.insertAdjacentHTML('beforeend', '<span class="kicker" style="margin-left:4px;opacity:.7">soon</span>');
 
-        actions.append(startBtn, joinBtn);
+        actions.append(startBtn, continueBtn, joinBtn);
         inner.append(eyebrow, title, tagline, actions);
 
         const aside = document.createElement('aside');
@@ -71,6 +78,8 @@ export class MenuScreen {
 
     show() {
         this.container.style.display = 'flex';
+        const canContinue = Boolean(this.game?.saveManager?.hasSave());
+        if (this.continueBtn) this.continueBtn.hidden = !canContinue;
         // Let the scene breathe before the first interaction.
         const first = this.container.querySelector('[data-testid=menu-start]');
         if (first) first.focus({ preventScroll: true });

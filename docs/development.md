@@ -63,23 +63,26 @@ remove `npm run check` because the harness has its own.
 
 ## 4. Dependencies and vendoring
 
-The game has exactly two runtime dependencies:
+The game has exactly one runtime dependency:
 
 | Specifier | Vendored file | Version |
 | --- | --- | --- |
 | `pixi.js` | `vendor/pixi.min.mjs` | 7.3.3 |
-| `lil-gui` | `vendor/lil-gui.esm.min.js` | 0.19.1 |
 
-`index.html` maps them:
+`index.html` maps it:
 
 ```json
 {
   "imports": {
-    "pixi.js": "./vendor/pixi.min.mjs",
-    "lil-gui": "./vendor/lil-gui.esm.min.js"
+    "pixi.js": "./vendor/pixi.min.mjs"
   }
 }
 ```
+
+Fonts are not npm dependencies. `assets/fonts/` contains the OFL-licensed
+Fraunces, Jost, and Space Mono woff2 files plus their license texts; they are
+loaded by `styles/main.css`. Add a new font there with its license, never from a
+CDN.
 
 Do **not** switch the import map back to a CDN. Runtime network access breaks
 offline development and fails the harness's `noExternalRequests` check.
@@ -94,9 +97,9 @@ offline development and fails the harness's `noExternalRequests` check.
 5. For a Pixi major version, update `src/App.js` and `src/Camera.js` for the
    new application/canvas API before anything else.
 
-`lil-gui` is currently only referenced by the unused `src/UI.js` sandbox
-controller (see [known-issues.md](known-issues.md#11-dead-code-and-an-unused-dependency-remain)). If you delete
-that file, remove `lil-gui` from the import map and `vendor/` as well.
+The old `src/UI.js` sandbox controller and `lil-gui` were removed during the
+Prism Tide overhaul. The blueprint palette in the HUD is the real build UI; do
+not reintroduce a hidden debug GUI without a test and a design reason.
 
 ## 5. Code conventions
 
@@ -104,10 +107,19 @@ that file, remove `lil-gui` from the import map and `vendor/` as well.
 - Four-space indentation and semicolons, matching the existing code.
 - One system per class/module under `src/<area>/`; no framework or state
   library.
-- DOM UI is created in screen/modal classes with inline styles. Pixi objects
-  handle world rendering.
+- DOM UI structure is created in screen/modal classes; the shared visual
+  language lives in `styles/main.css` (tokens, scene, chrome, screens). Prefer
+  classes over inline styles. `data-testid` hooks are the test contract.
+- Pixi objects handle world rendering. The main canvas is transparent over the
+  illustrated DOM backdrop; keep it that way.
 - Keep `window.__falesc` and `window.__APP_READY__` stable; the browser test
   depends on them.
+- Read [design-vision.md](design-vision.md) before changing colours, type,
+  spacing, or screen layout. In particular: no navy/gold default, no external
+  fonts, no generic glass cards.
+- Economy constants live in `src/buildings/blueprints.js`; turn timing lives in
+  `src/game/TurnScheduler.js`/`GameStateManager.js`. Do not add new
+  `setTimeout` calls for gameplay.
 - World units are pixels. Grid constants live in `src/constants.js`
   (`TILE_WIDTH = 512`, `TILE_HEIGHT = 256`).
 - Prefer small, focused changes. Do not reformat whole files or mix a feature
@@ -128,9 +140,22 @@ that file, remove `lil-gui` from the import map and `vendor/` as well.
 
 1. Add a `gridConfigs` entry in `src/map/MapGenerator.js`.
 2. Add a mineral count in `App.initializeWorld()` (`mineralCounts`).
-3. Add the option to the `<select>` in `src/screens/LobbyScreen.js`.
-4. Add a smoke assertion for the new size if the packing or counts are
-   important.
+3. Add the tide limit to `TIDE_LIMITS` in `src/GameStateManager.js` and the
+   `SIZE_DATA` entry/chart copy in `src/screens/LobbyScreen.js`.
+4. Add a card to the visible size picker and keep the hidden native `<select>`
+   in sync.
+5. Extend `scripts/scenarios/map-regression.mjs` to sample the new size.
+
+### Adding a blueprint
+
+1. Add an entry to `src/buildings/blueprints.js` (id, name, cost, income,
+   special rules, blurb, accent, testid).
+2. Add an icon to `src/ui/icons.js` and a `BuildingRenderer` branch so the
+   structure is visually distinct.
+3. The build dock and build dialog discover blueprints from the array; verify
+   affordability and uniqueness behaviour.
+4. Add a case to `scripts/scenarios/victory.mjs` if the blueprint is needed to
+   win, and assert the new state in the smoke test.
 
 ### Tweaking NPC behaviour
 
@@ -142,12 +167,12 @@ behaviour itself needs to change. The renderer/animation states are in
 
 ### Tweaking building art
 
-`src/buildings/BuildingRenderer.js` is a static draw function that receives the
-building's state. It draws the shadow parallelograms, right/left faces, and top
-face in that order. Coordinates are relative to the tile centre. Keep the
-building within one tile footprint unless you also update placement/occupancy.
-Building state transitions live in `src/buildings/Building.js` and
-`BuildingManager.processTurn()`.
+`src/buildings/BuildingRenderer.js` dispatches on `building.blueprintId` and
+draws a flat SE shadow, then the blueprint-specific structure. Under-construction
+states are ghosted by the container alpha and scaffolded. Coordinates are
+relative to the tile centre. Keep the footprint within the tile unless you also
+update placement/occupancy. Building state transitions live in
+`src/buildings/Building.js` and `BuildingManager.resolveTide()`.
 
 ### Opening a build prompt for testing
 
@@ -158,13 +183,17 @@ const cell = window.__falesc.findFreeCell();
 window.__falesc.app.onWorldTap(cell.x, cell.y);
 ```
 
-The normal path is a primary click/tap on the canvas. `findFreeCell()` is a
-test/debug helper; it does not place the building itself.
+The normal path is a primary click/tap on the canvas after arming a blueprint.
+`findFreeCell()` is a test/debug helper; it does not place the building itself.
+Use `window.__falesc.selectBlueprint('tide_garden')` to arm a blueprint through
+the real validation path, and `saveGame()`/`continueGame()` to exercise
+persistence.
 
 ## 6. Debugging
 
-- `window.__falesc.snapshot()` — compact state: mode, turn, actions, counts,
-  building states, modal state, camera.
+- `window.__falesc.snapshot()` — compact state: mode, day, actions, lumen,
+  income, selected blueprint, counts, building states/blueprints, modal state,
+  end result, camera.
 - `window.__falesc.app` — the whole app: `map`, `camera`, `characters`,
   `buildingManager`, `stateManager`, etc.
 - `window.__falesc.findFreeCell()` and `worldToScreen(x, y)` — placement and
@@ -183,9 +212,9 @@ test/debug helper; it does not place the building itself.
 // What is the game doing?
 window.__falesc.snapshot();
 
-// Jump the camera to the world centre at minimum zoom.
+// Jump the camera to the world centre at the fit zoom.
 const g = window.__falesc.app;
-g.camera.zoom = 0.2;
+g.camera.zoom = g.camera.minZoom;
 g.camera.position.x = g.MAP_WIDTH / 2;
 g.camera.position.y = g.MAP_HEIGHT / 2;
 g.camera.updateTransform();
@@ -234,19 +263,24 @@ webgame.config.json         browser smoke test
 scripts/
   dev-server.mjs            zero-dependency static server
   check.mjs                 dependency-free static checks
-vendor/                     pinned Pixi/lil-gui + licenses/provenance
+vendor/                     pinned Pixi + license/provenance
 src/
-  App.js                    bootstrap, layers, loop, debug API
-  GameStateManager.js       state machine
-  Camera.js                 world transform and pointer input
+  App.js                    bootstrap, layers, loop, save/load, debug API
+  GameStateManager.js       state machine, economy state, run restore
+  game/TurnScheduler.js     cancellable single turn timer
+  Camera.js                 world transform, clamp, pointer input
   constants.js              palettes, shapes, tile sizes
   controls/InputManager.js  key bindings and modal lock
-  screens/                  DOM screens
-  map/                      generation, sectors, grid math
-  buildings/                model, manager, renderer
+  screens/                  menu, lobby, HUD, interstitial, end
+  map/                      single-pass generation, packing, sectors, grid math
+  buildings/                blueprints, model, manager, illustrated renderer
   character/                procedural character rendering/animation
-  ai/                       crowd manager and NPC controller
-  minerals/                 static rock/crystal scenery
-  ui/                       build modal and minimap
-docs/                       architecture, development, testing, gameplay, issues
+  ai/                       crowd manager and land-aware NPC controller
+  minerals/                 seeded static rock/crystal scenery
+  ui/                       build dialog, icons, survey chart
+  persistence/              versioned localStorage save
+styles/main.css             design tokens, backdrop, all chrome
+assets/fonts/               OFL fonts and licenses
+scripts/scenarios/          browser regressions (victory, save, map, engine, mobile)
+docs/                       design vision, architecture, development, testing, gameplay, issues
 ```

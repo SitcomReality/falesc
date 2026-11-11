@@ -1,8 +1,8 @@
 # Known issues and technical debt
 
 This document records issues that are larger than a safe drive-by fix. It is a
-living list: when something is fixed, move it to “Fixed during setup” (or delete
-it) and update any tests/docs that referenced it.
+living list: when something is fixed, move it to “Fixed during the Prism Tide
+overhaul” and update any tests/docs that referenced it.
 
 Severity is about impact on the prototype, not effort:
 
@@ -15,322 +15,215 @@ Severity is about impact on the prototype, not effort:
 
 | # | Severity | Issue |
 | --- | --- | --- |
-| 1 | High | Island packing uses circles, final shapes are regenerated, and the cluster can exceed the world bounds |
-| 2 | High | NPCs ignore terrain and can walk across empty ocean / through buildings |
-| 3 | High | No save/load or persistence |
-| 4 | High | Turn and building timing is not state-driven |
-| 5 | High | No economy, objective, or multiplayer despite the UI |
-| 6 | Medium | Camera has no world-bound clamp |
-| 7 | Medium | Building placement rules are minimal |
-| 8 | Medium | Procedural content is only partly deterministic |
-| 9 | Medium | Screen/overlay lifecycle and modal focus are incomplete |
-| 10 | Medium | Single-character removal would leave a crowd controller behind |
-| 11 | Medium | Dead code and an unused dependency remain |
-| 12 | Medium | Keyboard/accessibility and narrow-screen support are incomplete |
-| 13 | Low | WebGL context loss is not handled |
-| 14 | Medium | Simulation and rendering continue behind menu/end overlays |
-| 15 | Low | Map generation creates each island three times |
-| 16 | Low | Minor teardown/cleanup gaps |
+| 1 | Medium | Building placement policy is still thin, and there is no demolition or upgrade path |
+| 2 | Medium | Screens are permanent and the HUD is not fully inert/accessible behind the build dialog |
+| 3 | Medium | Keyboard placement and small-screen interaction are incomplete |
+| 4 | Medium | NPC navigation is steering-only and can stall on awkward shorelines |
+| 5 | Low | WebGL context loss is not handled |
+| 6 | Low | Save schema has no migration, export or import |
+| 7 | Low | Multiplayer remains a disabled placeholder |
+| 8 | Low | Minor teardown/cleanup gaps remain |
+| 9 | Low | Visual regression is still not enabled |
 
-## High severity
+## Open issues
 
-### 1. Island packing and world bounds
+### 1. Building placement policy and demolition
 
 **Evidence**
 
-- `src/map/MapGenerator.js` treats each island as a circle of `radius`:
-  `d < radius + existing.radius + minSpacing`.
-- `src/map/Sector.js` derives that radius from half the grid width × 1.8, but
-  `src/map/ShapeGenerator.js` generates an irregular, vertically squashed
-  silhouette whose extent can reach **1.3 × radius** horizontally
-  (`maxRadiusFactor`/clamp) and roughly 0.65 × radius vertically (`aspect`).
-  A circle of `radius` is not a conservative bound for the drawn shape.
-- After packing, the cluster is centred and **every sector is rebuilt** at the
-  final position with the continued RNG. The shapes that are drawn were never
-  the shapes that were collision-tested.
-- A read-only simulation of the current algorithm over seeds `index * 7919`
-  found at least one intersecting island pair in 38/100 medium, 29/100 large,
-  and 6/100 small maps. For seed 123456 medium at 1280×720, final shape bounds
-  were approximately `x [-643, 6962]`, `y [-815, 4343]` against a nominal
-  `6400 × 3600` world.
-- The smoke test's `map-overview.png` (camera at zoom 0.2) shows islands cut
-  off at the top and bottom even at minimum zoom.
+- `BuildingManager.isCellOccupied()` checks only other buildings.
+- Placement does not check minerals, characters, terrain type, ownership, or
+  adjacency. Cost and uniqueness are enforced in `App.finalizeBuild()`, and the
+  dialog keeps an inline error, but the world itself does not explain a rejected
+  plot.
+- All buildings are one tile, cannot be removed, and cannot be upgraded.
+- Blueprints have a fixed cost/income; Lantern House's Beacon discount is the
+  only placement-adjacent decision.
 
 **Impact**
 
-Islands can overlap or merge visually, grid overlays can collide, and part of
-the map can sit outside the nominal world. At minimum zoom the whole map is not
-visible, and characters spawned outside the world bounds can be clamped or walk
-into empty space on their first movement.
+The map is a free grid rather than a place with rules. Players cannot fix a
+mistake, react to a bad opening, or specialise a district. Minerals and
+characters are scenery with no relationship to the town.
 
 **Suggested direction**
 
-- Generate each sector once, after packing, and pack against the actual final
-  shape bounds (polygon/AABB or a conservative shape-aware radius).
-- Scale/translate the finished cluster to fit a **fixed virtual world size**
-  rather than deriving the world from the window, or make the camera/minimap
-  adapt to the actual cluster bounds.
-- Add a regression test that samples many seeds and asserts no intersecting
-  island polygons and `cluster ⊆ world`.
-- This is tied to #6 (camera clamp) and #15 (allocation); treat it as one
-  layout pass rather than three unrelated tweaks.
+Add a `PlacementPolicy` returning `{ ok, reason, cost }` for terrain,
+occupancy, minerals, characters, and blueprint-specific constraints. Feed the
+same reason into the dialog and a short HUD toast. Add a `Demolish` action with a
+partial refund and a confirmation, then an upgrade path for at least one
+blueprint. Cover policy reasons and refunds with scenario assertions.
 
-### 2. NPCs ignore terrain
+### 2. Screen lifecycle and HUD inertness
 
 **Evidence**
 
-- `App.initializeWorld()` sets crowd bounds to the rectangular
-  `MAP_WIDTH × MAP_HEIGHT`.
-- `NPCController.move()` only reflects the character at the rectangle edges; it
-  never calls `Sector.containsPoint`, checks the grid, or tests buildings,
-  minerals, or other characters.
-- Characters spawn at `getRandomPointOnMap()` / `sector.getRandomPoint()`,
-  which can be outside the nominal world when the island cluster overflows it
-  (see #1).
+- All five screens are constructed once, appended permanently, and toggled with
+  `display`. They have no `destroy`, listener teardown, or focus manager.
+- `BuildModal` now has a scrim, `role="dialog"`, a focus trap, focus restore,
+  Escape/Enter handling, and an input-manager lock. The rest of the HUD is
+  visually blocked by the scrim but is still in the accessibility tree and can
+  be read by a screen reader.
+- Menu/Lobby/End transitions rely on the state wrapper to hide the HUD; there is
+  no shared overlay stack or `inert` manager.
 
 **Impact**
 
-NPCs walk across the dark ocean/void, through buildings, and through each
-other. On the first WANDER step, a character spawned outside the rectangle can
-teleport to the nearest bound. The population is ambient scenery rather than a
-simulation.
+The build dialog is usable with a keyboard, but a screen-reader user can still
+reach the HUD behind it. Future screens or nested overlays will need another
+one-off wrapper. Teardown remains impossible without leaks.
 
 **Suggested direction**
 
-- Add a land mask/navigation graph per sector (or a coarse grid) and restrict
-  WANDER targets to connected land cells.
-- Add spawn validation and a fallback to the sector centre.
-- Add separation/steering and simple obstacle avoidance for buildings, or
-  explicitly scope NPCs as decorative and keep them on their spawn island.
-- Cover it with a scenario that runs many NPC updates and asserts each NPC stays
-  inside a sector (or inside the world, if ocean walking is acceptable).
+Introduce an `OverlayManager`/focus scope that applies `inert` to the underlying
+screen, stacks dialogs, and restores focus centrally. Give screens an optional
+`destroy`, and route all show/hide through the manager. Keep the current
+`data-testid` hooks stable.
 
-### 3. No save/load or persistence
+### 3. Keyboard placement and small-screen interaction
 
 **Evidence**
 
-- `GameStateManager` settings, turn, and player data are plain memory.
-- `BuildingManager.buildings` is the only building store; there is no
-  serialization or storage code.
-- Reloading the page constructs a new `GameApp` and starts at `MENU` with a
-  fresh random seed.
+- Building placement requires a pointer/touch tap on the canvas. There is no
+  keyboard cell cursor, no keyboard confirmation of a target, and the canvas is
+  not exposed as a meaningful control to assistive tech.
+- Menu buttons have visible focus rings and `viewport` now allows zoom
+  (`maximum-scale=5`), and the HUD reflows at 860/620 px. The mobile scenario
+  captures 390×844 but does not run a full touch interaction suite.
+- The HUD still has small text at the 620 px breakpoint (9–10 px mono labels).
 
 **Impact**
 
-Every reload loses the game, and there is no way to reproduce a session beyond
-remembering the seed and replaying it. This blocks meaningful long sessions and
-most debugging of “what happened in this game?”.
+Keyboard-only players can build only by using the pointer. Touch controls are
+verified by the code path and screenshots, not automated gestures. Some labels
+are below comfortable mobile reading size.
 
 **Suggested direction**
 
-- Define a versioned save schema for settings, turn, buildings, camera, and (if
-  desired) characters/seed-derived state.
-- Autosave to `localStorage` on turn end and expose Export/Import JSON.
-- Keep save/load independent of the Pixi scene graph: serialize model data and
-  rebuild visuals through `initializeWorld()`/`BuildingManager`.
-- Add a smoke test that saves, reloads, and verifies turn/buildings survive.
+Add a keyboard cursor that moves a highlighted grid cell, opens the dialog with
+Enter, and uses arrow keys plus Escape. Announce selection with an `aria-live`
+region. Add a touch scenario for one-finger pan and tap-to-build. Raise mobile
+label sizes to at least 11 px where space allows.
 
-### 4. Turn and building timing is not state-driven
+### 4. NPC navigation is steering-only
 
 **Evidence**
 
-- `GameStateManager.endTurn()` uses an uncancelled `setTimeout(..., 2000)` to
-  advance the turn and reset `actionsRemaining = 1`.
-- `App` wraps `endTurn()` with a second uncancelled `setTimeout(..., 1000)` to
-  call `buildingManager.processTurn()`.
-- Neither timer is stored, cancelled, or tied to a turn id. The modal exploit
-  that could abuse this was fixed by closing the modal on state changes, but
-  the underlying pattern remains.
+- `NPCController.isWalkable()` tests the destination against the home sector and
+  occupied building cells. When blocked it applies separation and steers toward
+  the island centre.
+- There is no navigation graph, pathfinding, or spawn reservation. Two NPCs can
+  converge on the same narrow point; a building placed across a narrow neck can
+  trap a wanderer until it picks a new heading.
+- No NPCs currently path between islands or use buildings.
 
 **Impact**
 
-A future screen/transition that leaves `PLAYING` mid-interstitial can still be
-forced back to `PLAYING` by the pending timer, and a slow/backgrounded tab can
-desynchronize building phases from the turn counter. The two timers are hard to
-reason about and impossible to cancel cleanly.
+The crowd stays on land and out of buildings (verified over 3,600 updates), but
+movement is ambient rather than simulated. A future NPC job system should not be
+built on the current steering layer without a path plan.
 
 **Suggested direction**
 
-- Replace both timeouts with a single turn scheduler owned by the state
-  manager: `endTurn()` captures a turn token, schedules the transition, and
-  cancels on `endGame`/menu/restart.
-- Drive building phases from the turn number (e.g. `promote` on transition to
-  turn N) instead of a separate timer.
-- Add tests for “end turn, then leave the game before the timer fires” and
-  “restart during interstitial”.
+Add a coarse land grid or navigation graph per sector, mark occupied cells, and
+choose wander targets from connected cells. Use simple A* or flow fields for
+longer trips. Keep the current steering as local avoidance, not the whole plan.
 
-### 5. No economy, objective, or multiplayer despite the UI
+### 5. WebGL context loss is not handled
 
-**Evidence**
-
-- `GameStateManager.settings.initialResources` is never read; `turnDuration` is
-  never applied; `players` stays empty.
-- Buildings have no cost, income, or effect; `BuildingManager` only enforces
-  one building per cell.
-- `End Game` is a manual button; there is no win/lose condition.
-- `MenuScreen`'s “Join Multiplayer” button calls
-  `alert('Multiplayer not yet implemented')`.
-
-**Impact**
-
-The prototype is a construction sandbox, not yet a game loop. The lobby exposes
-settings that do not affect play, and the menu promises a mode that does not
-exist.
-
-**Suggested direction**
-
-This is a design decision, not a patch. Pick the smallest loop worth building
-(e.g. resources → building cost/income → turn goal), wire one setting at a time,
-and remove or disable UI that is not implemented. Keep the multiplayer button
-disabled/labelled “coming soon” until there is a real transport.
-
-## Medium severity
-
-### 6. Camera has no world-bound clamp
-
-`Camera` can pan arbitrarily far past the islands. The minimap shows where the
-camera is, but it is easy to lose the map at high zoom. Clamp the camera centre
-to the actual cluster/world bounds expanded by half the viewport at the current
-zoom (or a fixed margin), and recompute the clamp on resize/zoom.
-
-### 7. Building placement rules are minimal
-
-`BuildingManager.isCellOccupied()` checks only other buildings. Placement does
-not check minerals, characters, terrain, ownership, or cost; buildings are
-always one tile and cannot be removed or upgraded. A proper placement-policy
-layer (terrain, occupancy, resources, ownership) should return a reason so the
-modal/HUD can explain rejection. This pairs with #5.
-
-### 8. Procedural content is only partly deterministic
-
-The map seed controls sector placement and mineral positions, but
-`Character.getRandomPalette()`, limb variations, `MineralStructure` variations,
-`RockRenderer` shapes, and NPC decisions use `Math.random()`. The smoke test can
-assert seed, counts, and building states, but not visuals. This is why visual
-regression is not enabled. Inject a shared seeded RNG (with a test-only seed) if
-reproducible visuals or NPC runs are needed; see
-[testing.md](testing.md#7-visual-regression-not-enabled).
-
-### 9. Screen/overlay lifecycle and modal focus are incomplete
-
-All five screens are constructed once, appended permanently, and toggled with
-`display`. They have no `destroy`, listener teardown, or focus management. The
-build modal has `role="dialog"`, labels, Escape handling, and a cancel contract,
-but it is not a focus trap and has no full-screen backdrop; HUD buttons remain
-clickable and Tab can leave the dialog. The state wrapper now closes the modal
-when leaving `PLAYING`, so the worst exploit is fixed, but a real overlay/focus
-manager is still the right long-term structure.
-
-### 10. Single-character removal would leave a crowd controller behind
-
-`Character.destroy()` destroys graphics and nulls helpers but does not call
-`CrowdManager.unregister`. `App.clearWorld()` masks this by destroying every
-character and then clearing the whole crowd. Any future single-character
-removal (death, despawn, selection) would leave an `NPCController` updating a
-destroyed character. Give `Character` an owner callback or route removal through
-`CrowdManager`.
-
-### 11. Dead code and an unused dependency remain
-
-- `src/UI.js` (`SandboxUI`) is imported nowhere and would throw if constructed:
-  it references `game.settings`, `game.removeCharacters`, `game.clearAll`, and
-  `game.randomizeAllColors`, none of which exist on `GameApp`. It is the only
-  consumer of `lil-gui`.
-- `src/character/bodyRenderer.js`, `headRenderer.js`, `limbRenderer.js`, and
-  `shadowRenderer.js` are not imported; `CharacterRenderer` reimplements their
-  logic. The dead shadow helper also disagrees with the live one about leg
-  length.
-- `src/map/Sector.js` computes `gridPoly` but never uses it; `SectorGraphics`
-  imports `PIXI` without using it; `MineralRenderer` imports `SHAPES` without
-  using it.
-
-Delete the dead files/imports, or wire `SandboxUI` to the real game API and
-implement the missing methods. If `UI.js` goes, remove `lil-gui` from the import
-map and `vendor/`.
-
-### 12. Keyboard/accessibility and narrow-screen support are incomplete
-
-- `index.html` sets `user-scalable=no`, preventing browser zoom.
-- Building placement requires a pointer/touch tap on the canvas; there is no
-  keyboard cursor or accessible alternative.
-- The modal labels are now associated, but there is no focus trap or
-  `aria-live` turn announcement; focus can tab to the HUD behind it.
-- Buttons use hover transforms but no visible focus style.
-- Fixed HUD/minimap sizes are workable at 1280×720 but cramped on small phones;
-  the modal now has a `max-width`, but the rest of the UI is not responsive.
-
-### 14. Simulation and rendering continue behind menu/end overlays
-
-`App.update()` always updates the camera, crowd AI, characters, minerals,
-buildings, and minimap, regardless of state. `endGame()` only changes the DOM
-screen. On menu/end, the hidden world keeps animating and consuming CPU, and NPC
-state can drift before the next game. Consider pausing the crowd/buildings when
-not `PLAYING` (or when `document.hidden`) while keeping the camera/minimap
-available if desired.
-
-## Low severity
-
-### 13. WebGL context loss is not handled
-
-Headless Firefox occasionally logs “WebGL context was lost” from Pixi. The smoke
+Headless Firefox occasionally logs “WebGL context was lost” from Pixi. Smoke
 screenshots still render and the run passes, but there is no
 `webglcontextlost`/`webglcontextrestored` handling or fallback renderer. In a
 real browser this can leave a blank canvas until reload. Add a listener that
 surfaces a reload prompt, or recreate the renderer/application, and treat the
 headless warning as environment noise only when screenshots confirm rendering.
 
-### 15. Map generation creates each island three times
+### 6. Save schema migration, export and import
 
-`MapGenerator` creates a scratch `Sector` for the radius, a placed `Sector`, and
-a final rebuilt `Sector` after centring. The first two graphics objects are now
-destroyed, so the leak is fixed, but shape generation, Graphics allocation, and
-RNG consumption are wasted. A single-pass “pack extents, then build once”
-approach would fix this and help #1.
+`SaveManager` writes `falesc.save.v1` and discards unknown versions. There is no
+migration path, no export/import JSON, and no “clear save” command in the UI.
+A future schema change will intentionally reset saves rather than migrate them.
+Add explicit migrations when fields change, and expose Export/Import in the
+charter menu for debugging and backups.
 
-### 16. Minor teardown/cleanup gaps
+### 7. Multiplayer placeholder
 
-- `InputManager.destroy()` and `Camera` listener teardown exist only partially
-  (Camera has no `destroy`); both are singletons today, so this is only a
-  problem if the app ever supports teardown/hot reload.
+The menu keeps a disabled **Multiplayer — soon** button. There is no transport,
+lobby, or authority model, and `GameStateManager.players` stays empty. Keep the
+button disabled until there is a real implementation; do not make it open an
+alert.
+
+### 8. Minor teardown and cleanup
+
+- `InputManager.destroy()` exists but is never called; `Camera` has no destroy
+  for its window/document listeners. Both are singletons today.
 - For crystals, the initial empty `mainG` remains a child of the mineral
   container forever; it is empty and harmless.
-- `EndScreen` builds its stats with `innerHTML` from numeric values; safe today,
-  but prefer `textContent`/elements if user-provided text is ever added.
-- The minimap updates every third frame; that is fine for an orientation aid but
-  still more often than necessary.
+- The survey chart updates every third frame; that is fine for orientation but
+  more often than necessary.
+- `EndScreen` uses safe text nodes for numbers, but the layout is not tested
+  against long user-provided names.
+- There is no audio subsystem.
 
-## Fixed during setup
+### 9. Visual regression is still not enabled
 
-These were found and fixed during the local-development/testing pass:
+The world geometry, character palettes/proportions, mineral variation, and NPC
+decision seeds are deterministic per seed, but animation phase and NPC positions
+still depend on elapsed frame time. A full-viewport baseline would be flaky.
+`#minimap` or the build dock could be baselined once the visual flow is settled;
+see [testing.md](testing.md#8-visual-regression-not-enabled).
 
-- Vendored Pixi/lil-gui and added the static dev server, so the game runs
-  offline with no CDN and no install step.
-- Added readiness/debug hooks and the 2D minimap, with a browser smoke test.
-- The build modal now closes when leaving `PLAYING`; canvas taps are ignored
-  while it is open; a build action is spent only when creation succeeds.
-- Modal sizing, labels, Escape/Enter handling, cancel-vs-submit semantics, and
-  name trimming were corrected.
-- Character shadows now use the same clamped leg length as the drawn legs.
-- Removed the unused unbounded mineral-renderer cache.
-- Discarded map-sector graphics are destroyed; replaced sectors are cleaned up.
-- Camera taps no longer fire on pointer-leave/right-click; pointer releases
-  outside the canvas no longer leave middle-mouse panning stuck.
-- Held keys are cleared on window blur/visibility change.
-- Repeated `BEND` decisions restart their animation phase.
-- First-frame character z-index uses the current ground Y when available.
-- Seed `0` is preserved instead of being replaced by a random seed.
-- HUD text is only written when it changes; the minimap updates every third
-  frame.
-- New games recentre the camera and reset zoom; map dimensions are recomputed
-  from the current window at start.
-- Added a favicon (the earlier 404 is gone).
+## Fixed during the Prism Tide overhaul
+
+These were found and fixed during the design/engine overhaul:
+
+- **Map packing and world bounds.** Islands are generated once from local
+  silhouettes, packed by actual AABB bounds, never regenerated after packing, and
+  placed in a world rectangle derived from the cluster. A 72-map regression
+  checks non-overlap, containment, and determinism.
+- **NPCs and terrain.** Characters have a home sector, test the sector shape and
+  occupied building cells before moving, apply simple separation, and steer back
+  toward land. A 3,600-update scenario verifies they stay on land and out of
+  buildings.
+- **Save/load.** Versioned localStorage save of settings, day, lumen, actions,
+  buildings, selected blueprint, and camera; menu Continue; autosave after builds
+  and tides; save cleared on end. Persistence scenario covers reload/continue.
+- **Turn timing.** Both uncancelled timeouts were replaced by one
+  `TurnScheduler` owned by the state manager. A stale timer cannot return the
+  game to play after leaving. Engine scenario covers leaving mid-interstitial.
+- **Economy and objective.** Lumen, three blueprints, dynamic Beacon discount,
+  victory/defeat, a real end record, and a full victory scenario.
+- **Camera clamp.** `Camera.setBounds()` derives a fit zoom and clamps pan/zoom
+  to the cluster plus water margin; engine scenario verifies both extremes.
+- **Determinism.** Map shapes, character palettes/proportions, mineral
+  variations, and NPC decisions use seeded RNG streams. A reload-determinism
+  scenario compares generated content.
+- **Dead code and dependency.** Removed unused `src/UI.js`, the orphan character
+  renderer helpers, and the `lil-gui` import-map entry/vendor files.
+- **Pause behind overlays.** The crowd, character, mineral, and building
+  simulation only runs while `PLAYING` and the document is visible; the camera
+  and survey chart continue.
+- **Map allocation.** Each island is created once instead of three times.
+- **UI/UX overhaul.** Local OFL fonts, sunset scene, paper/ink/coral visual
+  system, illustrated HUD, blueprint dock, framed survey chart, themed menu,
+  lobby, interstitial, end screen, build dialog, mobile reflow, and visible focus
+  styles. See [design-vision.md](design-vision.md).
+- **Modal and focus.** Backdrop, focus trap, focus restore, Escape/Enter, input
+  manager lock, affordability/unique validation reasons.
+- **Keyboard/narrow-screen basics.** `maximum-scale=5`, focus-visible styles,
+  `aria-live` day/lumen, HUD reflow, and a mobile screenshot scenario.
+- **World presentation.** Foam, water shadow, cliffs, sand grade, warm grid,
+  procedural palms/grass/flowers/pebbles, four illustrated building silhouettes,
+  and a transparent canvas over the illustrated Glass Sea.
+- **Build packaging.** Zero-build architecture retained; no runtime network
+  requests; local font licenses and vendor file included.
 
 ## Updating this document
 
 When you fix something here:
 
-1. Move the entry to “Fixed during setup” (rename that section if the context
-   changes) or delete it if it is no longer relevant.
+1. Move the entry to “Fixed during the Prism Tide overhaul” (rename that section
+   if the context changes) or delete it if it is no longer relevant.
 2. Update the summary table and any cross-references in
    [architecture.md](architecture.md), [testing.md](testing.md), or
    [gameplay.md](gameplay.md).

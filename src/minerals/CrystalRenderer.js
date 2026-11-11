@@ -10,6 +10,7 @@ import { clamp } from './MineralUtils.js';
 export class CrystalRenderer {
     static buildCrystalCluster(struct, variation, palette) {
         const count = variation.peakCount;
+        const rand = () => (struct.rng ? struct.rng.next() : Math.random());
 
         const crystals = [];
         const baseSpread = 14 * variation.clusterDensity;
@@ -18,7 +19,7 @@ export class CrystalRenderer {
 
         for (let i = 0; i < count; i++) {
             const isMain = i === 0;
-            const scale = isMain ? 1.0 : (0.5 + Math.random() * 0.45);
+            const scale = isMain ? 1.0 : (0.5 + rand() * 0.45);
 
             let x = 0, y = 0;
             if (isMain) {
@@ -26,17 +27,17 @@ export class CrystalRenderer {
             } else {
                 if (count === 2) {
                     const side = i === 1 ? -1 : 1;
-                    x = side * baseSpread * 0.6 + (Math.random() - 0.5) * baseSpread * 0.05;
-                    y = (Math.random() - 0.5) * 6 * variation.clusterDensity;
+                    x = side * baseSpread * 0.6 + (rand() - 0.5) * baseSpread * 0.05;
+                    y = (rand() - 0.5) * 6 * variation.clusterDensity;
                 } else {
                     const t = (i - 1) / Math.max(1, count - 2);
                     const sideSpread = (t - 0.5) * 2;
-                    x = sideSpread * baseSpread * 0.5 + (Math.random() - 0.5) * baseSpread * 0.12;
-                    y = (Math.random() - 0.5) * 10 * variation.clusterDensity;
+                    x = sideSpread * baseSpread * 0.5 + (rand() - 0.5) * baseSpread * 0.12;
+                    y = (rand() - 0.5) * 10 * variation.clusterDensity;
                 }
             }
 
-            let tilt = (Math.random() - 0.5) * 0.08;
+            let tilt = (rand() - 0.5) * 0.08;
 
             if (!isMain) {
                 const normX = Math.max(-1, Math.min(1, x / (baseSpread || 1)));
@@ -55,10 +56,10 @@ export class CrystalRenderer {
             crystals.push({
                 scale: scale * variation.sizeMultiplier,
                 x, y,
-                height: (40 + Math.random() * 30) * variation.heightRatio,
+                height: (40 + rand() * 30) * variation.heightRatio,
                 tilt,
-                skew: (Math.random() - 0.5) * 1.5,
-                squish: 0.3 + Math.random() * 0.7
+                skew: (rand() - 0.5) * 1.5,
+                squish: 0.3 + rand() * 0.7
             });
         }
 

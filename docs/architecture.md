@@ -2,7 +2,7 @@
 
 This document describes how FALESC boots, updates, renders, and changes state.
 For setup and commands see [development.md](development.md); for tests see
-[testing.md](testing.md); for known risks see [known-issues.md](known-issues.md).
+[testing.md](testing.md); for the visual system see [design-vision.md](design-vision.md).
 
 ## 1. Runtime model
 
@@ -10,41 +10,51 @@ FALESC is a static site with no build step or server-side code:
 
 ```text
 index.html
-  ├─ <script type="importmap">      bare "pixi.js" / "lil-gui" → ./vendor/*
+  ├─ local font preloads + styles/main.css
+  ├─ illustrated Glass Sea backdrop (inline SVG, CSS grain/vignette)
+  ├─ <script type="importmap">      bare "pixi.js" → ./vendor/pixi.min.mjs
   └─ <script type="module" src="./src/App.js">
 ```
 
-`src/App.js` ends with `new GameApp()`. Relative imports between first-party
-modules use explicit `.js` extensions. The browser must load the page over HTTP
-(or HTTPS); `file://` URLs cannot load ES modules.
+Relative imports between first-party modules use explicit `.js` extensions. The
+browser must load the page over HTTP(S); `file://` URLs cannot load ES modules.
 
-There is no package install. `vendor/pixi.min.mjs` and
-`vendor/lil-gui.esm.min.js` are checked in and served as static files. The only
-runtime dependencies are those two libraries; everything else is DOM, Canvas2D,
-or Pixi drawing code.
+There is no package install. Pixi 7 is vendored and served as a static file. All
+fonts are OFL woff2 files under `assets/fonts/`; no CDN is used at runtime. Other
+visual assets are inline SVG or Pixi Graphics.
+
+The Pixi application is created with `backgroundAlpha: 0`, so the sunset sea is
+a DOM backdrop behind a transparent game canvas. The canvas is fixed at
+`z-index: 1`; DOM screens sit above it.
 
 ## 2. Boot sequence
 
-`GameApp`'s constructor (`src/App.js`) does the following, in order:
+`GameApp`'s constructor (`src/App.js`):
 
-1. Creates a Pixi `Application` with `resizeTo: window`, WebGL, antialiasing,
-   device-pixel-ratio resolution, and a dark background.
-2. Appends the Pixi canvas and creates the world layers inside
-   `worldContainer`: `mapLayer`, `shadowLayer`, `characterLayer`. Only
-   `characterLayer` has `sortableChildren` enabled.
-3. Creates `CrowdManager`, `InputManager`, `BuildingManager`, and `BuildModal`.
-4. Creates `GameStateManager`, registers the five DOM screens, and installs a
-   `setState` wrapper that closes the build modal when leaving `PLAYING`.
-5. Creates `Camera` (bindings, pointer/wheel listeners) and `Minimap` (a 2D
-   canvas overlay).
-6. Computes the world size as `window size × 5`, centres the camera, and hooks
-   `startGame`/`endTurn` to generate the world and advance buildings.
-7. Exposes `window.__falesc`, starts on `MENU`, and registers the ticker update.
-8. On the first completed ticker frame, sets `window.__APP_READY__ = true` and
-   dispatches `app-ready`. The browser smoke test waits for this.
+1. Creates the transparent Pixi `Application` (`resizeTo: window`, WebGL,
+   antialiasing, device-pixel-ratio resolution).
+2. Creates world layers inside `worldContainer`: `mapLayer`, `shadowLayer`,
+   `characterLayer`. Only `characterLayer` has `sortableChildren`.
+3. Creates `CrowdManager` (with a reference to the game for building/map
+   queries), `InputManager`, `BuildingManager`, and `BuildModal`.
+4. Creates `GameStateManager` and `SaveManager`.
+5. Registers five DOM screens: menu, lobby, HUD, interstitial, end. The HUD gets
+   the game instance so it can read the economy.
+6. Wraps `setState` to close the build modal on every non-`PLAYING` transition,
+   cancel pending turns when leaving to `MENU`/`LOBBY`/`END`, and clear the save
+   on `END`.
+7. Installs `onTideStart`, `onTideResolve`, and `onStateSettled` callbacks on the
+   state manager. These supply the economy preview, resolution/victory check, and
+   autosave.
+8. Creates the camera and the survey chart (2D minimap).
+9. Installs the `startGame` wrapper: clear save, generate the world, start the
+   run, then save. Installs a `beforeunload` autosave.
+10. Starts on `MENU` and exposes `window.__falesc`.
+11. On the first completed ticker frame, sets `window.__APP_READY__` and
+    dispatches `app-ready`.
 
-The game is single-page and singleton: `GameApp` is never destroyed or
-recreated. Reloading the page resets everything.
+The game is a singleton; reloading the page resets everything. Save/continue is
+the only cross-reload state.
 
 ## 3. State machine and screens
 
@@ -52,50 +62,53 @@ recreated. Reloading the page resets everything.
 
 | State | Meaning | Screen |
 | --- | --- | --- |
-| `MENU` | Title screen | `MenuScreen` |
-| `LOBBY` | Seed / map-size form | `LobbyScreen` |
+| `MENU` | Title over the sunset | `MenuScreen` |
+| `LOBBY` | Seed / map-size charter form | `LobbyScreen` |
 | `PLAYING` | Active world and HUD | `GameScreen` |
-| `INTERSTITIAL` | Turn processing overlay | `InterstitialScreen` |
-| `END` | Manual game over | `EndScreen` |
+| `INTERSTITIAL` | Tide resolution overlay | `InterstitialScreen` |
+| `END` | Victory / defeat / abandon record | `EndScreen` |
 
-`setState(newState)` hides the current screen, stores the new state, and shows
-the registered screen. It returns early when the state is unchanged and a screen
-is already active. Screens are ordinary fixed-position `<div>` overlays with
-their own z-index; they are created once and toggled with `display`.
+Screens are fixed-position DOM overlays created once and toggled with
+`display`. All visual styling lives in `styles/main.css`; JS adds classes and
+`data-testid` hooks. Menu/Lobby/End use z-index 1000, interstitial 500, HUD 100,
+and the build modal 2000.
 
-`MenuScreen`/`LobbyScreen`/`EndScreen` use z-index 1000,
-`InterstitialScreen` uses 500, and `GameScreen` uses 100. `BuildModal` uses
-2000, above every screen, which is why the modal must be closed explicitly on
-state transitions.
+The HUD is a full-screen container with `pointer-events: none`; individual
+panels re-enable pointer events. This keeps the canvas pannable while HUD panels
+sit on top.
 
 ### Turn flow
 
-`startGame()` sets `currentTurn = 1`, `actionsRemaining = 1`, and switches to
-`PLAYING`. `endTurn()`:
+`GameStateManager` owns the only turn timer, a `TurnScheduler` token. The flow:
 
-1. Refuses to run unless the state is `PLAYING`.
-2. Switches to `INTERSTITIAL`.
-3. After 2000 ms, increments the turn, resets `actionsRemaining = 1`, and
-   returns to `PLAYING`.
+1. `endTurn()` refuses unless the state is `PLAYING` and no turn is pending.
+2. It calls `onTideStart()` to produce the income preview for the interstitial,
+   switches to `INTERSTITIAL`, and schedules resolution in 1.9 s.
+3. The scheduler callback calls `onTideResolve()` (`App.resolveTide()`), which:
+   - asks `BuildingManager.resolveTide()` to collect income from active
+     structures and advance every structure one phase;
+   - adds income to the purse;
+   - returns `{ income, active, promoted, outcome, message }`, with `outcome`
+     set to `victory` when the Beacon is active or `defeat` when the next day
+     would pass the tide limit.
+4. The state manager increments the day, restores one action, and either calls
+   `endGame(outcome)` or returns to `PLAYING`. After returning to play it calls
+   `onStateSettled()` to autosave.
 
-`GameApp` wraps `endTurn` to also schedule `buildingManager.processTurn()` after
-1000 ms. That is how a building moves one phase per interstitial. The two
-timers are independent wall-clock timers, not part of the state machine; see
-[known-issues.md](known-issues.md).
+Cancelling the run, leaving to the menu/lobby, or ending the charter invalidates
+the scheduler token, so a stale timer can never force the game back to `PLAYING`.
+There are no other `setTimeout` calls in the game flow.
 
 ## 4. Coordinate systems and camera
 
-Three coordinate spaces are used:
-
-- **World pixels** — the scene graph, with the world origin in the top-left of
-  a nominal `MAP_WIDTH × MAP_HEIGHT` rectangle. The map is `5 ×` the initial
-  viewport.
+- **World pixels** — the scene graph. The world rectangle is derived from the
+  packed island cluster plus water margin; it is no longer `window size × 5`.
 - **Screen/CSS pixels** — pointer positions and DOM layout.
 - **Grid coordinates** — fractional `(u, v)` inside a sector's isometric grid,
   `0..gridSize`. A cell is `TILE_WIDTH = 512` by `TILE_HEIGHT = 256` world
   pixels before camera zoom.
 
-`Camera` (`src/Camera.js`) moves `worldContainer`:
+`Camera` moves `worldContainer`:
 
 ```text
 screen = center + (world - camera.position) * zoom
@@ -103,10 +116,13 @@ screen = center + (world - camera.position) * zoom
 ```
 
 It supports WASD/arrow panning, wheel zoom at the cursor, middle-mouse drag, and
-touch pan/pinch. Zoom is clamped to `0.2–4`. There is no camera/world clamp, so
-the player can pan into empty space; the minimap exists to help orientation.
+touch pan/pinch. `Camera.setBounds()` receives the generated cluster bounds,
+derives a minimum zoom that lets the player see the whole archipelago, and
+clamps the camera centre so the view stays within the cluster plus a water
+margin. Clamping is applied on every `updateTransform`, including pan, zoom, and
+resize.
 
-The isometric grid projection in `src/map/GridUtils.js` is:
+The isometric projection in `src/map/GridUtils.js`:
 
 ```text
 x = (u - gridSize/2 - (v - gridSize/2)) * TILE_WIDTH / 2 + sector.centerX
@@ -119,137 +135,166 @@ placing a building.
 
 ## 5. World generation
 
-`App.initializeWorld()` clears the previous world, recomputes the map size from
-the current window, and creates a `MapGenerator` with the lobby's seed and map
-size. It then adds 15 characters and a map-size-dependent number of minerals.
+`App.initializeWorld()` clears the previous world, creates a `MapGenerator` with
+the lobby seed and size, replaces `MAP_WIDTH`/`MAP_HEIGHT` with the generator's
+world rectangle, and points the camera at the home island.
 
-`src/map/MapGenerator.js` uses a seeded LCG (`SeededRandom`) and packs island
-sectors on an Archimedean spiral with a simple circle-collision test:
+`MapGenerator` (`src/map/MapGenerator.js`) is a single-pass pipeline:
 
-| Map size | Sector grids | Minerals |
-| --- | --- | --- |
-| `small` | 4 × `2×2` | 30 |
-| `medium` | 2 × `3×3` + 4 × `2×2` | 50 |
-| `large` | 1 × `4×4` + 2 × `3×3` + 4 × `2×2` | 70 |
+1. Build each local island silhouette once with a per-sector `SeededRandom` and
+   the configured grid size. Compute its actual axis-aligned bounds.
+2. Pack islands on an Archimedean spiral against those **actual shape bounds**
+   with a 110 px gap. AABB separation guarantees the irregular polygons cannot
+   intersect. Nothing is regenerated after packing.
+3. Translate the packed cluster into a world rectangle with 520 px of water on
+   every side. Store `worldWidth`, `worldHeight`, `bounds`, and `homeSector`
+   (largest/topmost island).
+4. Construct each `Sector` once at its final position from the prebuilt local
+   silhouette. The sector draws its own art via `SectorGraphics`.
 
-Each `Sector` (`src/map/Sector.js`) stores a centre, grid size, radius, organic
-outline (`ShapeGenerator`), and a Pixi `Graphics` object drawn by
-`SectorGraphics`. The outline is an isometric-ish island: a smoothed polygon
-with horizontal wobble and a vertical aspect of 0.5, plus a cliff/side face and
-the grid overlay.
+| Map size | Sector grids | Minerals | Tide limit |
+| --- | --- | --- | --- |
+| `small` | 4 × `2×2` | 30 | 12 |
+| `medium` | 2 × `3×3` + 4 × `2×2` | 50 | 14 |
+| `large` | 1 × `4×4` + 2 × `3×3` + 4 × `2×2` | 70 | 16 |
 
-After packing, the cluster is translated so its bounding box is centred on the
-map. The current implementation then **regenerates every sector at the final
-position** with the continued RNG, so the shapes that are drawn were not the
-shapes used for collision. This is a known map-layout risk; see
-[known-issues.md](known-issues.md#1-island-packing-and-world-bounds).
+`sector.shape` is an organic, vertically squashed polygon generated by
+`ShapeGenerator` (wobble, clamping, two Chaikin passes). `SectorGraphics` draws a
+foam halo, offset water shadow, plum cliff, sun-bleached sand top, warm ink grid,
+and procedural shore dressing (palms, grass, pebbles, flowers) outside the build
+grid.
 
-Characters spawn at random points inside island shapes
-(`MapGenerator.getRandomPointOnMap()`). Minerals spawn at random island points
-outside the build grid (`getRandomMineralPoint()`), so they act as scenery around
-the buildable area.
+Characters spawn on a random island using the entity RNG. Minerals spawn outside
+the build grid on a random island. Both use per-item seeded RNG streams.
 
-## 6. Buildings and the build flow
+## 6. Economy, blueprints, and the build flow
 
-`src/buildings/BuildingManager.js` owns `buildings[]`, checks occupancy
-(`sectorId + floored u + floored v`), and creates `Building` objects at the
-centre of a grid cell. Buildings are added to `characterLayer` so they share the
-Y-sorted draw order with characters and minerals. `Building.setPosition()` sets
-`container.zIndex` to the ground Y.
+`src/buildings/blueprints.js` owns the economy data:
 
-A building has three states:
+| Blueprint | Cost | Income | Special |
+| --- | --- | --- | --- |
+| `prism_rig` | 3 | 2 | Default armed blueprint |
+| `tide_garden` | 5 | 3 | Stronger economy |
+| `lantern_house` | 4 | 1 | `beaconDiscount: 3` |
+| `aurora_beacon` | 12 | 0 | `unique`, `goal`; price floor 6 |
 
-| State | Appearance | Entered |
-| --- | --- | --- |
-| `PENDING` | Pulsing translucent placeholder | Immediately on placement |
-| `RESERVED` | Blue ghost | After the first interstitial |
-| `ACTIVE` | Solid grey block | After the second interstitial |
-
-`processTurn()` advances each building one step. `Building.update()` drives the
-pulse for `PENDING`; `BuildingRenderer` draws the isometric top/left/right faces
-and two flat shadow parallelograms.
+`effectiveCost(blueprint, buildings)` computes the dynamic Beacon cost. Starting
+lumen is 8; one action per tide; active structures pay income at resolution.
 
 ### Build interaction
 
-1. A primary click/tap on an empty grid cell while `PLAYING`, with
-   `actionsRemaining > 0`, calls `App.onWorldTap()`.
-2. `onWorldTap()` stores `pendingBuildLocation` and calls
-   `buildModal.show()`.
-3. `BuildModal` focuses its name field and tells `InputManager` that a modal is
-   open, so camera key bindings are ignored.
-4. Reserve calls `App.finalizeBuild(name)`. It only proceeds if the state is
-   still `PLAYING`, an action remains, and `createBuilding()` returns a
-   building. It then spends one action.
-5. Cancel, Escape, or a state transition hides the modal and clears the pending
-   location.
-6. While the modal is open, `onWorldTap()` ignores further canvas taps.
+1. Clicking a blueprint card calls `GameApp.selectBlueprint(id)`, which rejects
+   the selection when the state/action/affordability/unique rules fail.
+2. A primary click/tap on an empty grid cell while `PLAYING`, with an action and
+   enough lumen, calls `GameApp.onWorldTap()`.
+3. `onWorldTap()` stores `pendingBuildLocation` and opens `BuildModal` with the
+   armed blueprint, current purse, and existing buildings.
+4. The modal is a real dialog: scrim, `role="dialog"`, labelled title, focus
+   trap, Escape cancels, Enter submits, focus is restored on close. It tells the
+   input manager to ignore camera keys while open.
+5. Confirm calls `GameApp.finalizeBuild(name)`, which validates state, action,
+   uniqueness, affordability, and cell occupancy. It creates the building, spends
+   lumen, spends the action, dismisses the hint, and autosaves.
+6. Cancel, Escape, a failed validation, or leaving `PLAYING` clears the pending
+   location. A failed validation keeps the dialog open with an inline reason.
 
-The modal is a centred fixed `<div>` with a `role="dialog"` and labels, but it is
-not a focus trap and has no full-screen backdrop. HUD buttons remain clickable;
-leaving `PLAYING` closes the modal safely.
+Buildings are added to `characterLayer` so they share Y-sorted draw order with
+characters and minerals. `BuildingRenderer` draws four distinct illustrated
+silhouettes; under-construction states are ghosted and scaffolded, and `PENDING`
+pulses.
 
 ## 7. Characters, animation, and AI
 
-`Character` (`src/Character.js`) owns:
+`Character` owns a Pixi `Container` at `(x, y)` with six child `Graphics` (legs,
+arms, body, head), a separate shadow in `shadowLayer`, an animation state, a
+palette, and procedural limb variations. It accepts an optional seeded RNG for
+palette, frame offset, and proportions.
 
-- a Pixi `Container` at `(x, y)` with six child `Graphics` (two legs, two arms,
-  body, head);
-- a separate shadow `Graphics` placed in `shadowLayer`;
-- an animation state, angle set, palette, and procedural limb-length variations;
-- `CharacterAnimation` and `CharacterRenderer` helpers.
+`CharacterAnimation` blends `IDLE`, `WALK`, `RUN`, and `BEND`. `CharacterRenderer`
+draws static geometry once and positions/rotates/scales limbs every frame,
+assigning facing-dependent z-indexes and a `groundY` for depth sorting.
 
-`CharacterAnimation` computes and blends `IDLE`, `WALK`, `RUN`, and `BEND`
-poses. `CharacterRenderer` draws the static geometry once (and again if the
-palette signature changes), then positions/rotates/scales limbs, torso, and head
-every frame. It assigns facing-dependent child z-indexes and computes
-`groundY` from the shadow offset for world sorting.
+`CrowdManager` maps each character to an `NPCController`, passing its home sector
+and the game reference. NPCs choose `IDLE`, `BEND`, or `WANDER` on seeded timers.
+`WANDER`:
 
-`CrowdManager` maps each character to an `NPCController`. NPCs randomly choose
-`IDLE`, `BEND`, or `WANDER` with randomized durations. `WANDER` chooses a
-facing, optionally curves it, rotates toward it, and moves forward at
-walk/run speed. Bounds are the rectangular map dimensions, with a 50 px padding
-and reflection on the edges. There is no terrain, building, or character
-collision, and no island-aware navigation. See
-[known-issues.md](known-issues.md#2-npcs-ignore-terrain).
+- chooses a heading and optionally curves it;
+- tests the destination against `homeSector.containsPoint()` and
+  `BuildingManager.isWorldBlocked()` before moving;
+- applies a small separation force from nearby Tidelanders;
+- steers back toward the island centre when a step is blocked.
 
-`App.clearWorld()` destroys every character and mineral, clears the crowd
-controllers, destroys buildings, destroys the map, and empties the layers.
-`Character.destroy()` does not unregister itself from `CrowdManager`; the
-current bulk-clear path masks that.
+The rectangular world bounds remain only as a fallback for characters without a
+home sector. Spawns use island points and are validated by the sector shape.
 
-## 8. Minerals
+`Character.destroy()` does not unregister from `CrowdManager`; `App.clearWorld()`
+destroys all characters then clears the crowd. A future single-character removal
+path must unregister explicitly (see [known-issues.md](known-issues.md)).
 
-`MineralStructure` owns a container, a separate shadow, a type
-(`ROCK`/`CRYSTAL`), a palette, and random procedural variations.
-`MineralRenderer.initStructure()` dispatches to:
+## 8. Minerals and determinism
 
-- `RockRenderer` — multiple chunky polygonal pieces with light/dark/top faces,
-  z-sorted inside a container;
-- `CrystalRenderer` — one container and `Graphics` per crystal shard, with
-  tilted light/dark/top faces.
+`MineralStructure` owns a container, a separate shadow, a type (`ROCK`/`CRYSTAL`),
+a palette, and seeded procedural variations. `MineralRenderer.initStructure()`
+dispatches to:
 
-Minerals are static scenery: `update()` only reapplies scale and recalculates
-`groundY`. `MineralRenderer` used to keep an unused static cache of containers;
-that leak was removed during setup.
+- `RockRenderer` — chunky polygonal pieces with light/dark/top faces, sorted
+  inside the container;
+- `CrystalRenderer` — one container and `Graphics` per shard.
+
+All random visual choices draw from per-item `SeededRandom` streams. The map,
+character palettes/proportions, mineral variations, and NPC decisions are
+deterministic for a seed. Animation phase and NPC positions still depend on
+elapsed frame time, which is why visual regression is not enabled yet.
 
 ## 9. Rendering and z-order
 
 Inside `worldContainer`:
 
-1. `mapLayer` — sector graphics (island top, cliffs, grid).
+1. `mapLayer` — sector graphics (foam, cliffs, sand, grid, shore props).
 2. `shadowLayer` — character and mineral shadows.
 3. `characterLayer` — characters, minerals, buildings; `sortableChildren` sorts
-   by `zIndex`, which is derived from each object's ground Y.
+   by `zIndex` derived from ground Y.
 
-The Pixi canvas is WebGL. A separate Canvas2D `#minimap` sits in the DOM at
-bottom-left, above the game canvas but below the menu/end screens. It draws
-island silhouettes, buildings, and the camera viewport, and updates every third
-frame.
+The Pixi canvas is WebGL and transparent. Behind it, `index.html` renders an
+inline SVG scene (gradient sky, sun, clouds, birds, distant islands, sea,
+reflection, waves, foreground fronds) plus CSS grain and a vignette. DOM screens
+and the build modal sit above the canvas and are not part of the Pixi scene graph.
 
-DOM screens and the build modal sit above the canvas. They are not part of the
-Pixi scene graph and do not receive world transforms.
+A separate Canvas2D `#minimap` sits in the survey chart at bottom-left, above the
+game canvas but below the menu/end screens. It draws a deep-water chart, island
+coastlines, buildings, the Beacon halo, and the camera viewport; it updates every
+third frame even before a world exists.
 
-## 10. Debug surface
+## 10. Persistence
+
+`src/persistence/SaveManager.js` stores a versioned JSON payload in
+`localStorage` under `falesc.save.v1`. Model data only:
+
+```json
+{
+  "version": 1,
+  "savedAt": 0,
+  "settings": { "mapSeed": 12345, "mapSize": "medium" },
+  "turn": 3,
+  "dayLimit": 14,
+  "actionsRemaining": 1,
+  "lumen": 4,
+  "selectedBlueprint": "prism_rig",
+  "hintDismissed": true,
+  "buildings": [{ "sectorId": 0, "u": 1, "v": 2, "name": "Rig", "blueprintId": "prism_rig", "state": "RESERVED" }],
+  "camera": { "x": 0, "y": 0, "zoom": 0.4 }
+}
+```
+
+`continueGame()` restores settings, regenerates the seeded world, restores
+buildings through `BuildingManager.restore()`, applies state fields through
+`GameStateManager.restoreRun()`, and restores/clamps the camera. Corrupt or
+unknown-version saves are discarded.
+
+Autosaves happen after builds, after resolved tides, and on `beforeunload`.
+`END` clears the save. There is no export/import yet.
+
+## 11. Debug surface
 
 `window.__falesc` is installed by `App.exposeDebugApi()`:
 
@@ -257,40 +302,50 @@ Pixi scene graph and do not receive world transforms.
 | --- | --- |
 | `app` | The full `GameApp` instance |
 | `ready` | Whether the first frame completed |
-| `snapshot()` | State, turn, actions, seed, counts, building states, modal state, camera |
+| `snapshot()` | State, day, actions, lumen, income, selected blueprint, seed, counts, building states/blueprints, modal state, end result, camera |
 | `findFreeCell()` | First unoccupied grid cell plus its world position |
 | `worldToScreen(x, y)` | Convert world coordinates to CSS pixels |
+| `selectBlueprint(id)` | Arm a blueprint through the real validation path |
+| `saveGame()` / `continueGame()` | Exercise persistence from a scenario |
 
-`window.__APP_READY__` is the harness readiness flag. These hooks are cheap and
-safe to use from the browser console or test scenarios.
+`window.__APP_READY__` is the harness readiness flag. Scenario files under
+`scripts/scenarios/` use these hooks plus DOM selectors.
 
-## 11. Lifecycle and reset
+## 12. Lifecycle and reset
 
-`initializeWorld()` is called on every `startGame`. It clears characters,
-minerals, buildings, the map, and all layers, then regenerates everything from
-the current lobby settings. It also resets the camera to the map centre at zoom
-1. The game state manager, screens, modal, minimap, and Pixi application are
-reused across games.
+`initializeWorld()` is called on every new game and on continue. It clears
+characters, minerals, buildings, the map, and all layers, then regenerates
+everything from the current lobby settings. It resets the selected blueprint and
+hint but not the state manager's turn/economy fields; `startGame` or
+`restoreRun` sets those.
 
 Not reset or persisted:
 
-- no save/load; a reload starts at `MENU` with a fresh random seed;
-- `players` is always empty;
-- `initialResources` and `turnDuration` settings are not applied;
-- the world keeps updating while `MENU`/`END` overlays are visible.
+- `players` is always empty (no multiplayer);
+- audio is absent;
+- `turnDuration` is unused (there is no turn timer);
+- NPC position/animation state is not part of the save and restarts from spawn
+  on continue.
 
-## 12. Extension points
+The game loop only simulates the crowd, characters, minerals, and buildings while
+`PLAYING` and `document.hidden` is false. Camera input and the survey chart keep
+working while overlays are visible.
+
+## 13. Extension points
 
 - **New screen**: add a state constant, a screen class with `show`/`hide`, and
-  register it in `App`; switch to it through `GameStateManager`.
-- **New map size**: add a `gridConfigs` entry and a mineral count in
-  `App.initializeWorld()`, and add the option in `LobbyScreen`.
-- **New building appearance**: extend `BuildingRenderer` and/or the building
-  state enum; keep `BuildingManager.processTurn()` in sync.
-- **New NPC behaviour**: extend `NPCController` and its parameters; the
-  animation states live in `constants.js`.
-- **New test step**: edit `webgame.config.json`; see
-  [testing.md](testing.md#6-extending-the-smoke-test).
+  register it in `App`; style it in `styles/main.css`.
+- **New blueprint**: add an entry in `src/buildings/blueprints.js`, an icon in
+  `src/ui/icons.js`, and a branch in `BuildingRenderer`; update the dock and
+  victory scenario expectations.
+- **New map size**: add a grid config in `MapGenerator`, a mineral count and tide
+  limit, and a card in `LobbyScreen`.
+- **New NPC behaviour**: extend `NPCController`; animation states live in
+  `constants.js`.
+- **New test step**: edit `webgame.config.json` or add a scenario in
+  `scripts/scenarios/`; see [testing.md](testing.md).
+- **New visual token or component**: add a custom property or component class in
+  `styles/main.css`; keep the guardrails in [design-vision.md](design-vision.md).
 
-For safe-change guidance see [development.md](development.md), and for the
-issues that need a design pass see [known-issues.md](known-issues.md).
+For safe-change guidance see [development.md](development.md), and for remaining
+issues see [known-issues.md](known-issues.md).
