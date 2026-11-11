@@ -111,6 +111,7 @@ export class FalescGame {
             game: this,
             onDemolish: (service) => this.dismantleService(service),
             onRepair: (service) => this.repairService(service),
+            onOpenResident: (residentId) => this.openResident(residentId),
             onReopen: (service) => this.reopenService(service),
             onRetrofit: (service) => this.openRetrofit(service),
             onHours: (service, hoursId) => this.setServiceHours(service, hoursId),

@@ -14,9 +14,10 @@ import { escapeHtml } from './html.js';
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, onRepair, overlays, game }) {
+    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, onRepair, onOpenResident, overlays, game }) {
         this.onDemolish = onDemolish;
         this.onRepair = onRepair;
+        this.onOpenResident = onOpenResident;
         this.onReopen = onReopen;
         this.onRetrofit = onRetrofit;
         this.onHours = onHours;
@@ -67,6 +68,7 @@ export class ServiceCardModal {
                     <select data-testid="service-access">${SERVICE_ACCESS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
                 </label>
             </div>
+            <div class="service-regulars" data-role="regulars" hidden></div>
             <p class="modal__note" data-role="note"></p>
             <p class="modal__error" data-role="error" aria-live="polite"></p>
             <div class="modal__actions">
@@ -85,6 +87,7 @@ export class ServiceCardModal {
         this.statsEl = this.panel.querySelector('[data-role=stats]');
         this.blurbEl = this.panel.querySelector('[data-role=blurb]');
         this.factsEl = this.panel.querySelector('[data-role=facts]');
+        this.regularsEl = this.panel.querySelector('[data-role=regulars]');
         this.hoursWrap = this.panel.querySelector('[data-role=hours-wrap]');
         this.hoursSelect = this.panel.querySelector('[data-testid=service-hours]');
         this.vibeWrap = this.panel.querySelector('[data-role=vibe-wrap]');
@@ -165,6 +168,16 @@ export class ServiceCardModal {
             : service.closed
                 ? `Closed after an upkeep shortfall. Reopening costs ${this.game?.charter?.services.reopenCost(service) || 1} lumen.`
                 : 'The door is open. The day report will tell you who came through it.';
+        const regulars = (this.game?.charter?.activeResidents || [])
+            .filter((resident) => resident.memory?.lastChoice?.serviceId === service.id)
+            .slice(0, 4);
+        this.regularsEl.hidden = regulars.length === 0;
+        this.regularsEl.innerHTML = regulars.length
+            ? `<span class="kicker">Last seen here</span>${regulars.map((resident) => `<button type="button" class="service-regulars__person" data-resident-id="${escapeHtml(resident.id)}">${escapeHtml(resident.name)}</button>`).join('')}`
+            : '';
+        this.regularsEl.querySelectorAll('[data-resident-id]').forEach((button) => {
+            button.addEventListener('click', () => this.onOpenResident?.(button.dataset.residentId));
+        });
         this.errorEl.textContent = '';
         const rivalService = service.chapterId && service.chapterId !== 'player';
         const refund = Math.max(1, Math.floor(finishCost(program, service.finish) / 2));

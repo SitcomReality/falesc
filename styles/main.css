@@ -4987,3 +4987,38 @@ html.is-high-contrast :focus-visible {
     outline-width: 3px;
     box-shadow: 0 0 0 2px var(--paper);
 }
+
+/* Service regulars -------------------------------------------------------- */
+.service-regulars {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    border: 1px solid rgba(33, 18, 37, 0.28);
+    border-radius: var(--radius);
+    background: rgba(89, 227, 194, 0.12);
+}
+
+.service-regulars .kicker {
+    width: 100%;
+    color: var(--wine);
+}
+
+.service-regulars__person {
+    min-height: 30px;
+    padding: 5px 10px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 9px;
+    cursor: pointer;
+}
+
+.service-regulars__person:hover,
+.service-regulars__person:focus-visible {
+    background: var(--mint);
+}
