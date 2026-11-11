@@ -65,6 +65,10 @@ export class CommonsModal {
             const policy = COMMONS_POLICY_BY_ID[commons.policy];
             const assembly = commons.assembly || { stage: 'nominations', nominations: {}, finalists: [] };
             const stage = policy ? 'resolved' : assembly.stage;
+            const petitionPolicy = COMMONS_POLICY_BY_ID[assembly.petition?.policyId];
+            const petitionNote = petitionPolicy && stage === 'nominations'
+                ? `<p class="commons-petition">Residents' petition: <strong>${escapeHtml(petitionPolicy.name)}</strong> · ${assembly.petition.signatures} signatures. It will join the ballot.</p>`
+                : '';
             const voteTally = policy && assembly.counts
                 ? `<h4 class="campaign-modal__label">The vote</h4><ul class="commons-contributors">${Object.entries(assembly.counts).map(([policyId, count]) => `<li><span>${escapeHtml(COMMONS_POLICY_BY_ID[policyId]?.name || policyId)}</span><strong>${count}</strong></li>`).join('')}</ul>`
                 : '';
@@ -78,10 +82,12 @@ export class CommonsModal {
                            const backers = Object.entries(assembly.nominations || {})
                                .filter(([, nominated]) => nominated === policyId)
                                .map(([chapterId]) => this.charter.chapterById(chapterId)?.name || chapterId);
+                           if (assembly.petition?.policyId === policyId) backers.push(`Residents' petition (${assembly.petition.signatures})`);
                            return `<li><span class="kicker">${escapeHtml(backers.join(' · ') || 'The commons')}</span><strong>${escapeHtml(entry.name)}</strong><span>${escapeHtml(entry.detail)}</span></li>`;
                        }).join('')}</ul>
                        <div class="modal__actions"><button type="button" class="btn btn--primary" data-testid="commons-call-vote">Call the vote</button></div>`
-                    : `<p class="commons-assembly-copy">The Beacon is lit. Each chapter nominates one shared policy; the residents then choose among the finalists.</p>
+                    : `<p class="commons-assembly-copy">The Beacon is lit. Each chapter nominates one shared policy; residents are also signing a petition. The residents then choose among the finalists.</p>
+                       ${petitionNote}
                        <div class="commons-policies">${COMMONS_POLICIES.map((entry) => `
                            <button type="button" class="commons-policy" data-testid="commons-policy-${entry.id}" data-policy="${entry.id}">
                                <span class="kicker">${escapeHtml(entry.kicker)}</span>

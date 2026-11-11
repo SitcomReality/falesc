@@ -34,7 +34,7 @@ Severity is about impact on the slice, not effort:
 | 12 | Low | Visual regression is not enabled and no baseline is committed |
 | 13 | Low | Minor teardown and cleanup gaps remain |
 | 14 | Low | Visitors have no card or return arc; overnight stays only through a full residency invite |
-| 15 | Low | The Commons Assembly is a single resident ballot, with no petitions or second reading |
+| 15 | Low | The Commons Assembly has petitions and one ballot, but no second reading or debate |
 
 ## Open issues
 
@@ -340,26 +340,27 @@ Add a visitor card, a small return/relationship track, and a trial-stay state
 before full residency. Consider solo visitors once the First Light economy is
 retuned.
 
-### 15. The Commons Assembly is a single resident ballot
+### 15. The Commons Assembly has petitions but no second reading
 
 **Evidence**
 
-- Each chapter nominates one policy; the player chooses the Home nomination and
-  the two rivals choose theirs.
-- Every resident then votes once among the finalists. The winner is applied
-  immediately and cannot be revisited.
-- There is no petition phase, no second reading and no debate event.
+- At the Beacon, residents sign a petition for one of the four policies. The
+  top petition joins the finalists automatically.
+- Each chapter nominates one policy; every resident then votes once. The winner
+  is applied immediately and cannot be revisited.
+- There is no separate petition debate, amendment or second reading.
 
 **Impact**
 
-The ballot is legible and gives residents the final say over the player's
-nomination, but it is still a single vote. It does not yet feel like a continuing
-assembly.
+The petition gives residents an agenda before the ballot and can add a policy
+the chapters did not nominate. The Assembly is still a single decision, not a
+continuing body.
 
 **Suggested fix**
 
-Add petitions before nominations and a second reading after the first vote, with
-the option to amend the policy once.
+Add a second reading after the first vote, with one amendment. Let a petition
+with enough signatures force a policy onto the ballot even when every chapter
+has nominated something else.
 
 ## Fixed in recent slices
 
@@ -390,7 +391,7 @@ These are no longer open:
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
 - **Service retrofit.** An active player service can install one of Sunroom, Atelier or Night Kitchen; the module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
-- **Commons Assembly ballot.** A lit Beacon lets each chapter nominate and all residents vote; existing and future services inherit the winner's capacity or comfort effect. Covered by `commons-assembly.mjs`.
+- **Commons Assembly ballot and petition.** A lit Beacon lets residents petition, each chapter nominate and all residents vote; existing and future services inherit the winner's capacity or comfort effect. Covered by `commons-assembly.mjs`.
 - **Day visitors.** 2–3 transient Contest visitors arrive each day, use services, pay visitor fees and leave before the next day unless invited to stay. Covered by `visitors.mjs` and `visitor-stay.mjs`.
 - **Shared Commons Beacon.** A reserved 2×2 shared civic project can be funded by the player and rivals; when lit it applies a nightly multi-need comfort and becomes a six-seat all-needs service. It is covered by `commons.mjs`.
 - **Contest full-season probe.** `contest-season.mjs` plays all 14 medium days, checks the campaign and Confluence, and records the economy/population trajectory for tuning.

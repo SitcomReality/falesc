@@ -150,10 +150,12 @@ this Beacon sits on the home shard.
 ## The first Commons Assembly
 
 When the Beacon is lit, the Commons HUD changes to **nominations**. Opening it
-calls the first **Commons Assembly**. Each chapter nominates one shared policy:
+calls the first **Commons Assembly**. Each chapter nominates one shared policy, and residents sign a petition for one
+policy of their own:
 
 - The player picks the Home Chapter's nomination from four policies.
 - The Gardener nominates **Commons Garden**; the Host nominates **Shared Table**.
+- The top petition policy joins the finalists even if no chapter nominated it.
 - Every resident then votes among the finalists; the policy with the most votes
   becomes the Assembly policy. The player does not cast a resident vote, only
 the chapter's nomination.

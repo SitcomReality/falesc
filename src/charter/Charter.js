@@ -5,7 +5,7 @@ import { ResidentFactory } from '../residents/ResidentFactory.js';
 import { VisitorFactory } from '../residents/VisitorFactory.js';
 import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService } from '../commons/CommonsPolicies.js';
-import { nominateForRival, resolveCommonsBallot } from '../commons/CommonsBallot.js';
+import { nominateForRival, petitionFor, resolveCommonsBallot } from '../commons/CommonsBallot.js';
 import { ServiceManager } from '../services/ServiceManager.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
@@ -79,6 +79,7 @@ export class Charter {
                 votes: [],
                 counts: {},
                 winnerId: null,
+                petition: null,
                 day: null
             }
         };
@@ -326,7 +327,8 @@ export class Charter {
         if (!policy) return { ok: false, reason: 'That is not a Commons policy.' };
         const nominations = { player: policy.id };
         for (const rival of this.rivals) nominations[rival.id] = nominateForRival(rival);
-        const finalists = [...new Set(Object.values(nominations))];
+        const petition = this.commons.assembly.petition || petitionFor(this.activeResidents);
+        const finalists = [...new Set([...Object.values(nominations), petition?.policyId].filter(Boolean))];
         this.commons.assembly = {
             stage: 'ballot',
             playerNomination: policy.id,
@@ -335,6 +337,7 @@ export class Charter {
             votes: [],
             counts: {},
             winnerId: null,
+            petition,
             day: this.day
         };
         return { ok: true, policy, nominations, finalists };
@@ -386,6 +389,7 @@ export class Charter {
         this.commons.active = true;
         this.commons.activatedDay = this.day;
         if (this.commons.assembly.stage === 'none') this.commons.assembly.stage = 'nominations';
+        if (!this.commons.assembly.petition) this.commons.assembly.petition = petitionFor(this.activeResidents);
         return true;
     }
 
@@ -965,7 +969,8 @@ export class Charter {
                     nominations: { ...(saved.commons.assembly.nominations || {}) },
                     finalists: [...(saved.commons.assembly.finalists || [])],
                     votes: [...(saved.commons.assembly.votes || [])],
-                    counts: { ...(saved.commons.assembly.counts || {}) }
+                    counts: { ...(saved.commons.assembly.counts || {}) },
+                    petition: saved.commons.assembly.petition || this.commons.assembly.petition
                 } : this.commons.assembly
             };
             if (this.commonsManager) this.commonsManager.restore(serviceEntries);

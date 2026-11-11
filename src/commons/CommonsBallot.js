@@ -33,6 +33,20 @@ export function resolveCommonsBallot(residents, finalistIds) {
     return { finalists, votes, counts, winnerId };
 }
 
+export function petitionFor(residents) {
+    const counts = Object.fromEntries(Object.keys(COMMONS_POLICY_BY_ID).map((id) => [id, 0]));
+    for (const resident of residents) {
+        let best = null;
+        for (const policyId of Object.keys(COMMONS_POLICY_BY_ID)) {
+            const score = residentPolicyScore(resident, policyId) + jitter(`${resident.id}:petition:${policyId}`);
+            if (!best || score > best.score + 0.001) best = { policyId, score };
+        }
+        if (best) counts[best.policyId] += 1;
+    }
+    const policyId = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+    return { policyId, signatures: policyId ? counts[policyId] : 0, counts };
+}
+
 export function nominateForRival(rival) {
     const programs = rival?.programs || [];
     if (rival?.id === 'gardener') return 'commons_garden';

@@ -3780,3 +3780,18 @@ body.has-modal > canvas {
     letter-spacing: 0.03em;
     text-transform: uppercase;
 }
+
+.commons-petition {
+    margin: 0 0 10px;
+    padding: 9px 11px;
+    background: rgba(255, 211, 110, 0.24);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.commons-petition strong {
+    font-family: var(--display);
+    font-size: 16px;
+}

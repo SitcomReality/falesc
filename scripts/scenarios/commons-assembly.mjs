@@ -35,12 +35,16 @@ export default async function ({ page, assert, log, screenshot }) {
     const lit = await page.evaluate("window.__falesc.snapshot()");
     assert.equal(lit.commons.active, true);
     assert.equal(lit.commons.assembly.stage, 'nominations');
+    assert.ok(lit.commons.assembly.petition?.policyId, 'residents should have a petition');
+    assert.ok(lit.commons.assembly.petition.signatures > 0);
+    assert.ok(await page.text('[data-testid=commons-modal]').then((text) => text.includes("Residents' petition")));
     await page.click('[data-testid=commons-policy-open_beds]');
     const ballot = await page.evaluate("window.__falesc.snapshot()");
     log(JSON.stringify({ ballot: ballot.commons.assembly }));
     assert.equal(ballot.commons.assembly.stage, 'ballot');
     assert.equal(ballot.commons.assembly.playerNomination, 'open_beds');
     assert.ok(ballot.commons.assembly.finalists.includes('open_beds'));
+    assert.ok(ballot.commons.assembly.finalists.includes(ballot.commons.assembly.petition.policyId));
     assert.ok(ballot.commons.assembly.finalists.length >= 2);
     assert.ok(await page.text('[data-testid=commons-modal]').then((text) => text.includes('Call the vote')));
     await screenshot('commons-assembly-ballot.png');

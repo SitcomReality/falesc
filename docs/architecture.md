@@ -337,8 +337,9 @@ as an ordinary resident.
 (3) after the home rest, and `servesNeed()` lets the six-seat Beacon answer any
 need as a shared visitable service. `CommonsModal` is the contribution and Assembly UI. `src/commons/CommonsPolicies.js`
 defines the four one-time policies (Shared Table, Open Beds, Commons Garden,
-Night Watch). `Charter.nominateCommonsPolicy()` records the player's nomination
-and the two rival nominations; `resolveCommonsAssembly()` runs the deterministic
+Night Watch). `CommonsBallot.petitionFor()` records residents' petition signatures.
+`Charter.nominateCommonsPolicy()` records the player's nomination and the two
+rival nominations, then adds the petition policy to the finalists; `resolveCommonsAssembly()` runs the deterministic
 resident ballot in `CommonsBallot.js`, then `Charter.chooseCommonsPolicy()`
 applies the winning capacity/comfort modifiers to every existing service and
 stores the policy. `Charter.build()` and `RivalAI` apply it to later builds. Night Watch is

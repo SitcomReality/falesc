@@ -179,8 +179,8 @@ after any behavioural change.
   also bring 2–3 transient visitors who use services, pay 1 lumen per visit and
   leave before the next day. A charmed visitor with a spare bed can be invited
   from the report and becomes an ordinary resident. Once the Beacon is lit, the
-  first Commons Assembly lets each chapter nominate; residents vote, and the
-  winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
+  first Commons Assembly lets residents petition, each chapter nominate and
+  residents vote; the winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
   `CommonsBallot.js`). An open player service can be retrofitted once for 6
   lumen; Sunroom, Atelier or Night Kitchen trade seats, quality and upkeep. The
   service record owns the action and the module is saved.

@@ -54,7 +54,7 @@ so any static file server works, but ES modules require `http://`, not `file://`
   then click a free plot on the home shard and name the place.
 - Fund the shared **Commons Beacon** from the HUD card; every chapter can give
   lumen; once lit it eases every resident's needs at night. Its first Assembly
-  lets each chapter nominate a policy and every resident vote.
+  lets residents petition, each chapter nominate and every resident vote.
 - On Contest days, watch for 2–3 **day visitors**. They use services and pay a
   small fee to the chapter whose door they choose. A visitor who likes your
   chapter and a spare bed can be invited to stay; they then join the resident
