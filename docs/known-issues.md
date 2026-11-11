@@ -22,7 +22,7 @@ Severity is about impact on the slice, not effort:
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Only the home shard and one Contest commons isle are buildable; there is no archipelago layer |
-| 3 | Medium | No building layers or player-set policy; one retrofit module choice exists |
+| 3 | Medium | No building layers or multi-slot modules; a single hours policy and one retrofit module exist |
 | 4 | Medium | The festival programme is scripted and stewardship is epilogue-only |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
@@ -99,15 +99,16 @@ lobby and HUD. The next step is the Phase 2 shared commons, not quietly enabling
 placement on scenery. Add further islands only with their own navigation, ownership and camera
 affordances. The commons isle is the first proof of cross-island transit.
 
-### 3. No building layers or player-set policy
+### 3. No building layers or multi-slot modules
 
 **Evidence**
 
 - The five buildable programs are fixed compositions. `ServiceBuilding` stores
   `finish`, `policy`, `level`, `retrofitId`, `qualityBonus` and `upkeepBonus`;
   one retrofit module changes them, and only to `grand`/level 2.
-- There are no shells, floors, multi-slot modules, adjacency resonance, district
-  identity or player-chosen service policies; the retrofit is a single module.
+- There are no shells, floors, multi-slot modules, adjacency resonance or
+  district identity. The player can choose service hours and one retrofit
+  module, but not an access policy or a module loadout.
 - Footprints are `1×1` except the Garden Dome's `2×2`; entrance validation is a
   single free door cell, not multi-cell entrance/queue design.
 - The service record can dismantle, reopen and apply one retrofit, but there is
@@ -121,10 +122,10 @@ when they are not.
 
 **Suggested direction**
 
-Add player-chosen service policies, then multi-slot module loadouts, then
-shells/floors. Keep the "no spreadsheet" test: every option must show up in a
-resident's choice or the report. The three retrofit modules are the first proof
-that the service record can carry a real trade-off.
+Add multi-slot module loadouts and access policies, then shells/floors. Keep the
+"no spreadsheet" test: every option must show up in a resident's choice or the
+report. Hours and retrofit are the first proofs that the service record can
+carry a real trade-off.
 
 ### 4. The festival programme is scripted and stewardship is epilogue-only
 
@@ -393,6 +394,7 @@ These are no longer open:
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
+- **Service hours.** Open services can choose As built, Round the clock, Daylight or Evening; the choice changes open phases, quality and upkeep and is saved.
 - **Service retrofit.** An active player service can install one of Sunroom, Atelier or Night Kitchen; the module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
 - **Outer commons isle.** A second buildable shard in the Contest, reached by reserved shuttle gates; player services on it earn cross-island visits. Covered by `commons-isle.mjs`.
 - **Commons Assembly ballot and petition.** A lit Beacon lets residents petition, each chapter nominate and all residents vote; existing and future services inherit the winner's capacity or comfort effect. Covered by `commons-assembly.mjs`.

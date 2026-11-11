@@ -54,6 +54,7 @@ webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 webgame_smoke --scenario scripts/scenarios/retrofit.mjs
+webgame_smoke --scenario scripts/scenarios/service-hours.mjs
 webgame_smoke --scenario scripts/scenarios/bathhouse.mjs
 webgame_smoke --scenario scripts/scenarios/commons-isle.mjs
 ```
@@ -190,7 +191,8 @@ after any behavioural change.
   residents vote; the winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
   `CommonsBallot.js`). An open player service can be retrofitted once for 6
   lumen; Sunroom, Atelier or Night Kitchen trade seats, quality and upkeep. The
-  service record owns the action and the module is saved. The five buildable
+  service record owns the action and the module is saved. Open services can also
+  choose As built, Round the clock, Daylight or Evening hours. The five buildable
   services include the 2×2 Bathhouse for Rest + Company. In Contest, a second
   commons isle is buildable and residents reach it through reserved shuttle gates.
   This is a first pass; shared ownership across a fuller commons archipelago,

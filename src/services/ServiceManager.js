@@ -1,4 +1,5 @@
 import { PROGRAM_BY_ID } from '../design/programs.js';
+import { serviceUpkeepModifier } from './ServicePolicies.js';
 import { evaluatePlacement, cellKey } from './PlacementPolicy.js';
 import { ServiceBuilding } from './ServiceBuilding.js';
 
@@ -175,7 +176,7 @@ export class ServiceManager {
     upkeepFor(service) {
         return service.closed || service.state !== 'ACTIVE'
             ? 0
-            : (service.program?.upkeep || 0) + (service.upkeepBonus || 0);
+            : (service.program?.upkeep || 0) + (service.upkeepBonus || 0) + serviceUpkeepModifier(service);
     }
 
     totalUpkeep() {

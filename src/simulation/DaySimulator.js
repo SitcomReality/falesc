@@ -1,6 +1,7 @@
 import { BALANCE, DAY_PHASES } from '../design/balance.js';
 import { NEEDS, NEED_BY_ID, mostUrgentNeed } from '../design/needs.js';
-import { servesNeed, isOpenAt } from '../design/programs.js';
+import { servesNeed } from '../design/programs.js';
+import { isServiceOpenAt, serviceQualityModifier } from '../services/ServicePolicies.js';
 import { rhythmRise, vibeFit, standardFit } from '../design/traits.js';
 import { SeededRandom } from '../map/SeededRandom.js';
 import { IslandNavigator } from '../navigation/IslandNavigator.js';
@@ -112,7 +113,7 @@ export class DaySimulator {
         if (!resident.active) return;
         const orderedNeeds = [...NEEDS].sort((a, b) => resident.needs[b.id] - resident.needs[a.id]);
         const available = this.charter.allServices
-            .filter((service) => service.state === 'ACTIVE' && !service.closed && service.entrance && service.program && isOpenAt(service.program, phase.id));
+            .filter((service) => service.state === 'ACTIVE' && !service.closed && service.entrance && service.program && isServiceOpenAt(service, phase.id));
         let choice = null;
         let blockedByQueue = null;
 
@@ -181,7 +182,7 @@ export class DaySimulator {
         const program = service.program;
         const isPrimary = program.need === need.id || program.id === 'commons_beacon';
         const match = isPrimary ? 1 : 0.46;
-        const quality = ((program.quality || 1) + (service.qualityBonus || 0))
+        const quality = ((program.quality || 1) + (service.qualityBonus || 0) + serviceQualityModifier(service))
             * (service.finish === 'grand' ? 1.1 : service.finish === 'humble' ? 0.9 : 1);
         const vibe = vibeFit(resident.traits.temperament, service.policy?.vibe || program.vibe);
         const standards = standardFit(resident.traits.standards, service.finish);
@@ -286,7 +287,7 @@ export class DaySimulator {
         const needValue = resident.needs[need.id];
         const isPrimary = service.program.need === need.id || service.program.id === 'commons_beacon';
         const effect = (isPrimary ? BALANCE.services.primaryEffect : BALANCE.services.secondaryEffect)
-            * ((service.program.quality || 1) + (service.qualityBonus || 0))
+            * ((service.program.quality || 1) + (service.qualityBonus || 0) + serviceQualityModifier(service))
             * standardFit(resident.traits.standards, service.finish);
         resident.adjustNeed(need.id, -effect);
         service.recordVisit(BALANCE.services.serviceHeart);
@@ -378,10 +379,10 @@ export class DaySimulator {
 
     missingServiceReason(resident, need, phase) {
         const all = this.charter.allServices.filter((service) => servesNeed(service.program, need.id));
-        const openNow = all.filter((service) => service.state === 'ACTIVE' && !service.closed && isOpenAt(service.program, phase.id));
+        const openNow = all.filter((service) => service.state === 'ACTIVE' && !service.closed && isServiceOpenAt(service, phase.id));
         const pending = all.filter((service) => service.state === 'PENDING');
         const closed = all.filter((service) => service.closed);
-        const later = all.filter((service) => service.state === 'ACTIVE' && !service.closed && !isOpenAt(service.program, phase.id));
+        const later = all.filter((service) => service.state === 'ACTIVE' && !service.closed && !isServiceOpenAt(service, phase.id));
         if (openNow.length > 0) return `${this.charter.serviceLabel(openNow[0])} was full when I needed ${need.short.toLowerCase()}.`;
         if (pending.length > 0) return `${this.charter.serviceLabel(pending[0])} opens tomorrow. I waited at the ${phase.name.toLowerCase()} window.`;
         if (closed.length > 0) return `${this.charter.serviceLabel(closed[0])} was closed when I needed ${need.short.toLowerCase()}.`;

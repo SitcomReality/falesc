@@ -4,6 +4,7 @@ import { PROGRAM_BY_ID, servesNeed, isOpenAt } from '../design/programs.js';
 import { ResidentFactory } from '../residents/ResidentFactory.js';
 import { VisitorFactory } from '../residents/VisitorFactory.js';
 import { RETROFIT_BY_ID } from '../services/RetrofitModules.js';
+import { SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService } from '../commons/CommonsPolicies.js';
 import { nominateForRival, petitionFor, resolveCommonsBallot } from '../commons/CommonsBallot.js';
 import { ServiceManager } from '../services/ServiceManager.js';
@@ -597,6 +598,23 @@ export class Charter {
         this.assignHomes();
         this.refreshDerived();
         return { ...result, cost: program.cost };
+    }
+
+    setServiceHours(service, hoursId) {
+        if (!service || (service.chapterId && service.chapterId !== 'player')) {
+            return { ok: false, error: "A rival chapter's hours cannot be changed." };
+        }
+        if (service.fixed || service.programId === 'housing') {
+            return { ok: false, error: 'Housing keeps the charter hours.' };
+        }
+        if (service.state !== 'ACTIVE' || service.closed) {
+            return { ok: false, error: 'Only an open service can change hours.' };
+        }
+        if (!SERVICE_HOURS_BY_ID[hoursId]) return { ok: false, error: 'Unknown service hours.' };
+        service.policy = { ...(service.policy || {}), hours: hoursId };
+        service.refreshGraphics();
+        this.refreshDerived();
+        return { ok: true, service, hours: hoursId };
     }
 
     upgradeService(service, moduleId = 'sunroom') {

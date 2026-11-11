@@ -96,6 +96,7 @@ src/
     ServiceBuilding.js       service model plus its Pixi container
     ServiceManager.js        placement, occupancy, housing, promotion, visits
     RetrofitModules.js       Sunroom, Atelier and Night Kitchen retrofit data
+    ServicePolicies.js       player-set hours, quality and upkeep modifiers
     PlacementPolicy.js       pure footprint/door/home-shard rules
   simulation/
     DaySimulator.js          deterministic day: drift, choice, queues, report

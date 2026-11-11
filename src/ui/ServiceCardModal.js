@@ -1,6 +1,7 @@
 import { programIcon } from './icons.js';
 import { NEED_BY_ID } from '../design/needs.js';
 import { RETROFIT_BY_ID, RETROFIT_MIN_COST } from '../services/RetrofitModules.js';
+import { SERVICE_HOURS, SERVICE_HOURS_BY_ID } from '../services/ServicePolicies.js';
 
 /**
  * Service record: the same card is used for inspection, reopening a closed
@@ -8,10 +9,11 @@ import { RETROFIT_BY_ID, RETROFIT_MIN_COST } from '../services/RetrofitModules.j
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, onRetrofit, overlays, game }) {
+    constructor({ onDemolish, onReopen, onRetrofit, onHours, overlays, game }) {
         this.onDemolish = onDemolish;
         this.onReopen = onReopen;
         this.onRetrofit = onRetrofit;
+        this.onHours = onHours;
         this.overlays = overlays;
         this.game = game;
         this.isOpen = false;
@@ -45,6 +47,9 @@ export class ServiceCardModal {
             </div>
             <p class="modal__blurb" data-role="blurb"></p>
             <dl class="service-facts" data-role="facts"></dl>
+            <label class="service-hours" data-role="hours-wrap" hidden>Hours
+                <select data-testid="service-hours">${SERVICE_HOURS.map((entry) => `<option value="${entry.id}">${escapeHtml(entry.name)}</option>`).join('')}</select>
+            </label>
             <p class="modal__note" data-role="note"></p>
             <p class="modal__error" data-role="error" aria-live="polite"></p>
             <div class="modal__actions">
@@ -61,6 +66,8 @@ export class ServiceCardModal {
         this.statsEl = this.panel.querySelector('[data-role=stats]');
         this.blurbEl = this.panel.querySelector('[data-role=blurb]');
         this.factsEl = this.panel.querySelector('[data-role=facts]');
+        this.hoursWrap = this.panel.querySelector('[data-role=hours-wrap]');
+        this.hoursSelect = this.panel.querySelector('[data-testid=service-hours]');
         this.noteEl = this.panel.querySelector('[data-role=note]');
         this.errorEl = this.panel.querySelector('[data-role=error]');
         this.demolishBtn = this.panel.querySelector('[data-testid=structure-demolish]');
@@ -80,6 +87,7 @@ export class ServiceCardModal {
         this.demolishBtn.addEventListener('click', () => this.demolish());
         this.reopenBtn.addEventListener('click', () => this.reopen());
         this.upgradeBtn.addEventListener('click', () => this.requestRetrofit());
+        this.hoursSelect.addEventListener('change', () => this.changeHours(this.hoursSelect.value));
         this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
     }
 
@@ -109,6 +117,7 @@ export class ServiceCardModal {
             <div><dt>Visits</dt><dd>${service.visits}</dd></div>
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
             <div><dt>Condition</dt><dd>${service.level >= 2 ? `Retrofitted · ${escapeHtml(RETROFIT_BY_ID[service.retrofitId]?.name || 'custom finish')}` : 'As built'}${service.qualityBonus ? ` · +${service.qualityBonus.toFixed(2)} quality` : ''}</dd></div>
+            <div><dt>Hours</dt><dd>${escapeHtml(SERVICE_HOURS_BY_ID[service.policy?.hours]?.name || 'As built')}</dd></div>
             <div><dt>Door</dt><dd>${service.entrance ? `cell ${service.entrance.u}, ${service.entrance.v}` : '—'}</dd></div>
         `;
         const lastChoice = this.game?.charter?.activeResidents
@@ -135,6 +144,9 @@ export class ServiceCardModal {
         this.upgradeBtn.disabled = !canUpgrade || (this.game?.charter?.lumen || 0) < RETROFIT_MIN_COST;
         this.upgradeBtn.textContent = 'Retrofit →';
         this.upgradeBtn.title = canUpgrade ? 'Add two seats, better finish and one upkeep.' : '';
+        const canSetHours = !rivalService && !service.fixed && service.programId !== 'housing' && working;
+        this.hoursWrap.hidden = !canSetHours;
+        this.hoursSelect.value = SERVICE_HOURS_BY_ID[service.policy?.hours] ? service.policy.hours : 'as_built';
         this.reopenBtn.hidden = !service.closed;
         this.reopenBtn.disabled = rivalService;
         this.reopenBtn.textContent = service.closed
@@ -160,6 +172,18 @@ export class ServiceCardModal {
             return;
         }
         this.hide(false);
+    }
+
+    changeHours(hoursId) {
+        if (!this.isOpen || !this.service) return;
+        const service = this.service;
+        const result = this.onHours(service, hoursId);
+        if (result?.ok === false) {
+            this.errorEl.textContent = result.error || 'Those hours cannot be set.';
+            return;
+        }
+        this.hide();
+        this.show(service);
     }
 
     requestRetrofit() {

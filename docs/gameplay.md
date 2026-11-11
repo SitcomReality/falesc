@@ -130,6 +130,19 @@ visitor's name opens a **visitor card** with traits, needs, wellbeing, affinity
 and their last door; the card can offer the trial stay. Visitors are a
 Contest feature for now; First Light remains resident-only.
 
+## Service hours
+
+Every open, player-built service except housing exposes an **Hours** choice in
+its service record:
+
+- **As built** — the program's normal hours.
+- **Round the clock** — open every phase; **+2 upkeep**, **+0.04 quality**.
+- **Daylight** — morning and afternoon only; **−1 upkeep**.
+- **Evening** — afternoon, evening and night; **+1 upkeep**.
+
+Changing hours is immediate, saved with the service, and changes both the visit
+window and the ledger. Fixed housing and rival services keep their own hours.
+
 ## The outer commons isle
 
 In the Contest, one second, smaller island is marked as the **outer commons

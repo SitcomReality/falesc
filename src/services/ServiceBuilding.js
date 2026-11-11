@@ -52,7 +52,7 @@ export class ServiceBuilding {
         this.fixed = Boolean(fixed);
         this.finish = finish || program?.finish || 'comfortable';
         this.modules = [...modules];
-        this.policy = policy || { access: 'open', hours: 'day', vibe: program?.vibe || 'cosy' };
+        this.policy = policy || { access: 'open', hours: 'as_built', vibe: program?.vibe || 'cosy' };
         this.capacity = capacityOverride ?? program?.capacity ?? 1;
         this.level = Number(level) || 1;
         this.retrofitId = retrofitId || null;

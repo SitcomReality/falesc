@@ -17,6 +17,7 @@ import { EndScreen } from './screens/EndScreen.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { ServiceCardModal } from './ui/ServiceCardModal.js';
 import { RetrofitModal } from './ui/RetrofitModal.js';
+import { SERVICE_HOURS_BY_ID } from './services/ServicePolicies.js';
 import { VisitorCardModal } from './ui/VisitorCardModal.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
@@ -81,6 +82,7 @@ export class FalescGame {
             onDemolish: (service) => this.dismantleService(service),
             onReopen: (service) => this.reopenService(service),
             onRetrofit: (service) => this.openRetrofit(service),
+            onHours: (service, hoursId) => this.setServiceHours(service, hoursId),
             overlays: this.overlays
         });
         this.visitorCard = new VisitorCardModal({
@@ -503,6 +505,16 @@ export class FalescGame {
         if (!this.charter) return false;
         this.retrofitModal.show(service);
         return true;
+    }
+
+    setServiceHours(service, hoursId) {
+        if (!this.charter) return { ok: false, error: 'No charter.' };
+        const result = this.charter.setServiceHours(service, hoursId);
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast(`${service.name} switches to ${SERVICE_HOURS_BY_ID[hoursId]?.name || hoursId}.`, 'mint', 2000);
+        return result;
     }
 
     upgradeService(service, moduleId) {
