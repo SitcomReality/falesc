@@ -52,8 +52,10 @@ data as the game and never changes a rule.
 
 Clicking a resident takes precedence over clicking the plot beneath them when
 the pointer is within about 60 px of a visible resident. Residents who are
-inside a service cannot be clicked. The survey chart at bottom-left shows the
-islands, services, residents and camera viewport; click it to move the camera.
+inside a service cannot be clicked. The resident card shows a colour-coded
+initial portrait, traits, needs, home, hearts, the last choice and the last four
+visits. The survey chart at bottom-left shows the islands, services, residents
+and camera viewport; click it to move the camera.
 
 ## The charter
 

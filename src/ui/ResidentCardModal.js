@@ -26,9 +26,12 @@ export class ResidentCardModal {
         this.panel.setAttribute('aria-labelledby', 'resident-name');
         this.panel.innerHTML = `
             <div class="modal__head">
-                <div>
-                    <p class="kicker" style="color:var(--wine)">Resident record</p>
-                    <h3 class="modal__title" id="resident-name" data-role="name">Mira</h3>
+                <div class="resident-card__identity">
+                    <span class="resident-card__avatar" data-role="avatar" aria-hidden="true">M</span>
+                    <div>
+                        <p class="kicker" style="color:var(--wine)">Resident record</p>
+                        <h3 class="modal__title" id="resident-name" data-role="name">Mira</h3>
+                    </div>
                 </div>
                 <button type="button" class="modal__close" data-testid="resident-close" aria-label="Close resident card">×</button>
             </div>
@@ -38,6 +41,7 @@ export class ResidentCardModal {
                 <div class="resident-card__meta" data-role="meta"></div>
             </div>
             <blockquote class="resident-card__why" data-role="why"></blockquote>
+            <div class="resident-card__history" data-role="history" data-testid="resident-history"></div>
             <div class="resident-card__nav">
                 <button type="button" class="btn btn--small btn--paper" data-testid="resident-prev">← Previous</button>
                 <span class="resident-card__count" data-role="count">1 / 6</span>
@@ -46,6 +50,8 @@ export class ResidentCardModal {
         `;
 
         this.nameEl = this.panel.querySelector('[data-role=name]');
+        this.avatarEl = this.panel.querySelector('[data-role=avatar]');
+        this.historyEl = this.panel.querySelector('[data-role=history]');
         this.traitsEl = this.panel.querySelector('[data-role=traits]');
         this.needsEl = this.panel.querySelector('[data-role=needs]');
         this.metaEl = this.panel.querySelector('[data-role=meta]');
@@ -100,6 +106,8 @@ export class ResidentCardModal {
     render(resident) {
         const charter = this.game.charter;
         this.nameEl.textContent = resident.name;
+        this.avatarEl.textContent = resident.name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+        this.avatarEl.style.background = this.game.charter.chapterById(resident.favouriteChapterId)?.colour || 'var(--mint)';
         const temperament = TEMPERAMENT_BY_ID[resident.traits.temperament];
         const standard = STANDARD_BY_ID[resident.traits.standards];
         const rhythm = RHYTHM_BY_ID[resident.traits.rhythm];
@@ -132,6 +140,10 @@ export class ResidentCardModal {
         this.whyEl.innerHTML = last
             ? `<span class="kicker">Last choice · Day ${last.day} · ${last.phase}</span><p>“${escapeHtml(last.reason)}”</p>`
             : `<span class="kicker">Last choice</span><p>No choice recorded yet. Open the day and watch where they go.</p>`;
+        const visits = (resident.memory.recentVisits || []).slice(-4).reverse();
+        this.historyEl.innerHTML = visits.length
+            ? `<span class="kicker">Recent visits</span><ol>${visits.map((visit) => `<li><span>Day ${visit.day}</span><strong>${escapeHtml(visit.serviceName || visit.serviceId)}</strong><small>${escapeHtml(visit.phase || '')} · ${escapeHtml(visit.reason || '')}</small></li>`).join('')}</ol>`
+            : `<span class="kicker">Recent visits</span><p>No doors yet.</p>`;
         this.countEl.textContent = `${this.index + 1} / ${this.residents.length}`;
     }
 

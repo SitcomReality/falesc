@@ -90,5 +90,7 @@ export default async function ({ page, assert, screenshot, log }) {
     const cardText = await page.text('[data-testid=resident-modal]');
     assert.ok(cardText.includes('Last choice'), 'resident card should show the last choice');
     assert.ok(cardText.includes('Test Canteen'), 'resident card should quote the why line');
+    assert.ok(cardText.includes('Recent visits'), 'resident card should show the visit log');
+    assert.ok(cardText.includes('Day 2'), 'the visit log should remember the day');
     await screenshot('resident-choice.png');
 }

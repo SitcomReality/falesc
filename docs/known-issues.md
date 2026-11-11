@@ -27,7 +27,7 @@ Severity is about impact on the slice, not effort:
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
 | 7 | Low | Save v1 is discarded and a mid-`DAY` reload loses the day; v2 has JSON export/import |
-| 8 | Low | The resident card stops at the last choice; no portrait or visit history |
+| 8 | Low | The resident card has an initial portrait and four-visit log, but no illustrated portrait or full lifetime history |
 | 9 | Low | Crowd movement has no local avoidance |
 | 10 | Low | Procedural audio exists, but the multiplayer button remains a disabled placeholder |
 | 11 | Low | WebGL context loss is not handled |
@@ -244,26 +244,26 @@ Keep the v2 clear-on-mismatch rule until the schema settles. If mid-playback
 reloads prove common, stage the report before `DAY` starts. Add Export/Import in
 the charter menu for debugging and backups when the format stabilises.
 
-### 8. The resident card stops at the last choice
+### 8. The resident card has no full lifetime history
 
 **Evidence**
 
-- `Resident.memory.recentVisits` keeps up to eight visits, but
-  `ResidentCardModal` renders only `memory.lastChoice`.
-- The card has needs, traits, home, Devotion, wellbeing and the why line; it has
-  no portrait, mood illustration or recent-history list.
+- `Resident.memory.recentVisits` keeps up to eight visits; the card renders the
+  last four with day, phase and reason.
+- The card has an initial portrait, needs, traits, home, Devotion, wellbeing and
+  the why line; there is no illustrated mood portrait or full history archive.
 - There is no per-resident relationship view with other residents or services.
 
 **Impact**
 
-The "why" is legible, but the person is still mostly a set of bars. The design's
-"little people are the game" pillar would benefit from a stronger face and a
-short history.
+The "why" and the last four doors are legible, but the person is still mostly a
+set of bars. The design's "little people are the game" pillar would benefit from
+a stronger face and a full history.
 
 **Suggested direction**
 
-Add a small current-mood portrait and a recent-visits list (the data is already
-saved). Keep the card scannable: one reason, one face, three recent doors.
+Add an illustrated current-mood portrait, a departure archive and a longer
+recent-visits list while keeping the card scannable.
 
 ### 9. Crowd movement has no local avoidance
 
