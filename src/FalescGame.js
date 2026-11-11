@@ -58,6 +58,7 @@ import * as ServiceActions from './app/ServiceActions.js';
 import * as SaveCommands from './app/SaveCommands.js';
 import * as CommonsSession from './app/CommonsSession.js';
 import * as CampaignSession from './app/CampaignSession.js';
+import * as CharterLifecycle from './app/CharterLifecycle.js';
 import { defaultProgramId } from './design/programs.js';
 import { BuildCursor } from './controls/BuildCursor.js';
 
@@ -241,129 +242,16 @@ export class FalescGame {
     /* ------------------------------------------------------------------ */
 
     startCharter() {
-        this.setWorldVisible(true);
-        const seed = Number.isInteger(this.settings.mapSeed) ? this.settings.mapSeed : 1;
-        const size = this.settings.mapSize || 'medium';
-        this.initializeWorld(seed, size);
-        const legacy = readLegacy();
-        const drift = readDriftRank();
-        this.charter = new Charter({
-            seed,
-            startingLumenBonus: drift.bonus,
-            startingBedBonus: drift.beds,
-            startingCommonsBonus: drift.commons,
-            mapSize: size,
-            mode: this.settings.mode || 'first-light',
-            chapterName: this.settings.chapterName || 'Home Chapter',
-            chapterMotto: this.settings.chapterMotto || '',
-            map: this.world.map,
-            parentContainer: this.world.objectLayer,
-            legacy
-        });
-        this.crowd.setCharter(this.charter);
-        this.patronageFlow.setCharter(this.charter);
-        this.transitGate.setCharter(this.charter);
-        this.districtOverlay.setCharter(this.charter);
-        this.gameScreen?.setPatronageState?.(false);
-        this.crowd.sync();
-        this.syncViews();
-        this.selectedProgramId = defaultProgramId();
-        this.hintDismissed = false;
-        this.endResult = null;
-        this.chatter.reseed(seed);
-        this.screenStateMachine.setState(GamePhase.PLAYING);
-        this.showBulletin();
-        this.saveGame();
-        return true;
+        return CharterLifecycle.startCharter(this);
     }
-
     continueCharter() {
-        this._archiveRecorded = false;
-        this.setWorldVisible(true);
-        const save = this.saveManager.read();
-        if (!save?.charter) return false;
-        this.settings.mapSeed = save.charter.seed;
-        this.settings.mapSize = save.charter.mapSize;
-        this.settings.mode = save.charter.mode || 'first-light';
-        this.initializeWorld(save.charter.seed, save.charter.mapSize);
-        this.charter = Charter.fromSave({
-            saved: save.charter,
-            map: this.world.map,
-            parentContainer: this.world.objectLayer
-        });
-        this.crowd.setCharter(this.charter);
-        this.patronageFlow.setCharter(this.charter);
-        this.transitGate.setCharter(this.charter);
-        this.districtOverlay.setCharter(this.charter);
-        this.gameScreen?.setPatronageState?.(false);
-        this.crowd.sync();
-        this.syncViews();
-        this.selectedProgramId = defaultProgramId();
-        this.chatter.reseed(this.charter.seed);
-        if (save.camera && Number.isFinite(save.camera.x) && Number.isFinite(save.camera.y)) {
-            this.world.camera.position.x = save.camera.x;
-            this.world.camera.position.y = save.camera.y;
-            this.world.camera.zoom = Math.max(0.15, Math.min(4, save.camera.zoom || 0.5));
-            this.world.camera.updateTransform();
-        }
-        const restorePhase = save.phase === GamePhase.REPORT && this.charter.lastReport
-            ? GamePhase.REPORT
-            : GamePhase.PLAYING;
-        this.screenStateMachine.setState(restorePhase);
-        if (restorePhase === GamePhase.PLAYING) {
-            this.gameScreen.toast('Charter restored. The day is yours.', 'mint');
-        }
-        this.saveGame();
-        return true;
+        return CharterLifecycle.continueCharter(this);
     }
-
     initializeWorld(seed, size) {
-        this.disposeCharter();
-        this.world.generate({ seed, size });
-        this.crowd.setCharter(null);
-        this.selectedProgramId = defaultProgramId();
-        this.pendingBuildLocation = null;
-        this.world.clearHover();
-        this.world.rebuildPaths([]);
+        return CharterLifecycle.initializeWorld(this, seed, size);
     }
-
     disposeCharter() {
-        this.playback = null;
-        this.crowd.clear();
-        if (this.charter) {
-            this.charter.services.clear();
-            this.charter.rivals.forEach((rival) => rival.services.clear());
-            this.charter.commonsManager?.clear();
-            this.charter = null;
-        }
-        this.patronageFlow.hide();
-        this.patronageFlow.setCharter(null);
-        this.transitGate.clear();
-        this.districtOverlay.clear();
-        this.clearKeyboardCursor();
-        this.visitorCard.hide();
-        this.gameScreen?.setPatronageState?.(false);
-        this.chatter?.clear();
-        this.buildModal.hide(false);
-        this.serviceCard.hide();
-        this.bulletinModal.hide();
-        this.residentCard.hide();
-        this.campaignModal.hide();
-        this.commonsModal.hide();
-        this.retrofitModal.hide();
-        this.floorPlan.hide();
-        this.fieldGuide.hide();
-        this.departureArchive.hide();
-        this.charterArchive.hide();
-        this.needSurvey.hide();
-        this.ledger.hide();
-        this.rivalDossier.hide();
-        this.journal.hide();
-        this.milestones.hide();
-        this.residentRoster.hide();
-        this.serviceRoster.hide();
-        this.gridSummary.hide();
-        this.visitorCard.hide();
+        return CharterLifecycle.disposeCharter(this);
     }
 
     buildableSectors() {
@@ -748,26 +636,13 @@ export class FalescGame {
     }
 
     archiveFinishedCharter() {
-        if (!this.charter || this._archiveRecorded) return;
-        recordMilestones(this.charter.milestones().filter((entry) => entry.done).map((entry) => entry.id));
-        this._archiveRecorded = true;
-        recordCharter(recordFromCharter(this.charter, this.endResult || this.charter.ending));
+        return CharterLifecycle.archiveFinishedCharter(this);
     }
-
     finishCharter() {
-        if (!this.charter) return;
-        this.endResult = this.charter.ending || { outcome: 'abandon' };
-        this.archiveFinishedCharter();
-        this.saveManager.clear();
-        this.screenStateMachine.setState(GamePhase.END);
+        return CharterLifecycle.finishCharter(this);
     }
-
     returnToMenu() {
-        if (!this.charter) return false;
-        this.saveGame();
-        this.setWorldVisible(false);
-        this.screenStateMachine.setState(GamePhase.MENU);
-        return true;
+        return CharterLifecycle.returnToMenu(this);
     }
 
     setWorldVisible(visible) {
@@ -775,22 +650,7 @@ export class FalescGame {
     }
 
     endCharter(outcome = 'abandon') {
-        if (!this.charter) {
-            this.screenStateMachine.setState(GamePhase.MENU);
-            return;
-        }
-        this.charter.ending = {
-            outcome,
-            day: this.charter.day,
-            title: outcome === 'abandon' ? 'You leave the lamps burning.' : 'The charter closes.',
-            message: outcome === 'abandon'
-                ? 'The charter is closed, but the chapter stands.'
-                : 'The charter closes before the commons finds its feet.'
-        };
-        this.endResult = this.charter.ending;
-        this.archiveFinishedCharter();
-        this.saveManager.clear();
-        this.screenStateMachine.setState(GamePhase.END);
+        return CharterLifecycle.endCharter(this, outcome);
     }
 
     /* ------------------------------------------------------------------ */
