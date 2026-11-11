@@ -30,6 +30,14 @@ export const COMMONS_POLICIES = [
         capacity: 2
     },
     {
+        id: 'common_workshop',
+        name: 'Common Workshop',
+        kicker: 'Purpose is shared',
+        detail: 'Workshops gain 2 seats. A bench and a tool wall belong to everyone.',
+        programs: ['workshop'],
+        capacity: 2
+    },
+    {
         id: 'repair_corps',
         name: 'Repair Corps',
         kicker: 'Maintenance is mutual',

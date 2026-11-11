@@ -68,6 +68,8 @@ function residentPolicyScore(resident, policyId) {
             return needs.rest * 0.5 + (resident.isHomeless ? 20 : 0) + (temperament === 'cosy' ? 6 : 0);
         case 'care_compact':
             return needs.rest * 0.3 + needs.sustenance * 0.3 + (resident.wellbeing < 40 ? 20 : 0) + (temperament === 'cosy' ? 4 : 0);
+        case 'common_workshop':
+            return (needs.purpose || 0) * 0.8 + (temperament === 'curious' ? 10 : 0);
         case 'repair_corps':
             return (100 - resident.wellbeing) * 0.3 + (standards === 'exacting' ? 12 : 0);
         case 'commons_garden':

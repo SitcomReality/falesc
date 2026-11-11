@@ -295,7 +295,7 @@ When the Beacon is lit, the Commons HUD changes to **nominations**. Opening it
 calls the first **Commons Assembly**. Each chapter nominates one shared policy, and residents sign a petition for one
 policy of their own:
 
-- The player picks the Home Chapter's nomination from six policies.
+- The player picks the Home Chapter's nomination from seven policies.
 - The Gardener nominates **Commons Garden**; the Host nominates **Shared Table**.
 - **Care Compact** gives Clinics and Bathhouses two more seats;
   residents can put it on the ballot by petition.
@@ -310,7 +310,7 @@ round nominates and votes; the winner replaces it, and existing services are
 reverted from the old policy before the new one applies. A charter gets at most
 one second reading.
 
-The six policies are:
+The seven policies are:
 
 - **Shared Table** — every Canteen and Tea House gains 2 seats.
 - **Open Beds** — every Welcome House gains 2 beds.
@@ -318,6 +318,7 @@ The six policies are:
 - **Night Watch** — the Beacon eases one more point of every need at night, and
   beds restore one more Rest.
 - **Care Compact** — Clinics and Bathhouses gain 2 seats.
+- **Common Workshop** — Workshops gain 2 seats.
 - **Repair Corps** — every repair costs 1 lumen instead of 3.
 
 The winning policy applies to existing services and to every service built
