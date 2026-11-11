@@ -91,7 +91,8 @@ export class FalescGame {
         });
         this.commonsModal = new CommonsModal({
             onContribute: (amount) => this.contributeCommons(amount),
-            onPolicy: (policyId) => this.chooseCommonsPolicy(policyId),
+            onNominate: (policyId) => this.nominateCommonsPolicy(policyId),
+            onVote: () => this.resolveCommonsAssembly(),
             overlays: this.overlays
         });
 
@@ -257,14 +258,24 @@ export class FalescGame {
         return result;
     }
 
-    chooseCommonsPolicy(policyId) {
+    nominateCommonsPolicy(policyId) {
         if (!this.charter) return { ok: false, reason: 'No charter.' };
-        const result = this.charter.chooseCommonsPolicy(policyId);
+        const result = this.charter.nominateCommonsPolicy(policyId);
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast(`${result.policy.name} is on the ballot.`, 'mint', 2200);
+        return result;
+    }
+
+    resolveCommonsAssembly() {
+        if (!this.charter) return { ok: false, reason: 'No charter.' };
+        const result = this.charter.resolveCommonsAssembly();
         if (!result.ok) return result;
         this.syncViews();
         this.gameScreen.updateHud(true);
         this.saveGame();
-        this.gameScreen.toast(`The Commons Assembly chooses ${result.policy.name}.`, 'mint', 2600);
+        this.gameScreen.toast(`${result.policy.name} wins the Commons Assembly.`, 'mint', 2600);
         return result;
     }
 

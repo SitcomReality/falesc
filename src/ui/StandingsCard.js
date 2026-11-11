@@ -66,10 +66,15 @@ export class StandingsCard {
         this.campaignRow.hidden = !campaignActive;
         this.commonsRow.hidden = !commons;
         if (commons) {
+            const stage = commons.assembly?.stage;
             this.commonsName.textContent = commons.active
-                ? `Beacon lit${commons.policy ? ` · ${COMMONS_POLICY_BY_ID[commons.policy]?.name || commons.policy}` : ' · assembly pending'}`
+                ? `Beacon lit${commons.policy
+                    ? ` · ${COMMONS_POLICY_BY_ID[commons.policy]?.name || commons.policy}`
+                    : stage === 'ballot' ? ' · ballot open' : ' · nominations'}`
                 : `Beacon ${commons.fund} / ${commons.target}`;
-            this.commonsButton.textContent = commons.active ? (commons.policy ? 'View' : 'Assemble') : 'Give';
+            this.commonsButton.textContent = commons.active
+                ? (commons.policy ? 'View' : stage === 'ballot' ? 'Vote' : 'Assemble')
+                : 'Give';
         }
         if (campaignActive) {
             this.campaignName.textContent = campaign.playerPledgeName || 'Choose a promise';
@@ -86,7 +91,7 @@ export class StandingsCard {
             campaignActive,
             campaign?.playerPledge || null,
             campaign?.eventFor?.(day)?.title || null,
-            commons ? [commons.active, commons.fund, commons.target, commons.policy] : null
+            commons ? [commons.active, commons.fund, commons.target, commons.policy, commons.assembly?.stage] : null
         ]);
         if (signature === this.signature) return;
         this.signature = signature;

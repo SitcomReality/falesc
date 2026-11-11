@@ -3686,3 +3686,41 @@ body.has-modal > canvas {
         grid-template-columns: 1fr;
     }
 }
+
+.commons-policy__action {
+    margin-top: 3px;
+    color: var(--wine);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.commons-finalists {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0 14px;
+    padding: 0;
+    list-style: none;
+}
+
+.commons-finalists li {
+    display: grid;
+    gap: 2px;
+    padding: 8px 10px;
+    background: var(--paper-deep);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+}
+
+.commons-finalists strong {
+    font-family: var(--display);
+    font-size: 18px;
+    line-height: 1.05;
+}
+
+.commons-finalists li > span:last-child {
+    color: var(--ink-soft);
+    font-size: 11px;
+    line-height: 1.35;
+}

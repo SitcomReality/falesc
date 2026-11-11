@@ -10,7 +10,7 @@
 > housing and a per-chapter economy, recovery/need-pressure builds, Devotion
 > standings, a patronage-flow overlay, a three-day festival campaign, a
 > pledge/vote Confluence, a stewardship epilogue and a fundable shared Commons
-> Beacon, a first Commons Assembly and transient day visitors. The full multi-round festival, a separate shared-commons island,
+> Beacon, a first Commons Assembly ballot and transient day visitors. The full multi-round festival, a separate shared-commons island,
 > auctions, systemic stewardship, building layers and multiplayer are **not**
 > implemented. This document and the component docs in `docs/design/`
 > describe the direction; where they conflict with the source, the source wins.

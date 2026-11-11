@@ -4,6 +4,7 @@ import { PROGRAM_BY_ID, servesNeed, isOpenAt } from '../design/programs.js';
 import { ResidentFactory } from '../residents/ResidentFactory.js';
 import { VisitorFactory } from '../residents/VisitorFactory.js';
 import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService } from '../commons/CommonsPolicies.js';
+import { nominateForRival, resolveCommonsBallot } from '../commons/CommonsBallot.js';
 import { ServiceManager } from '../services/ServiceManager.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
@@ -68,7 +69,17 @@ export class Charter {
             activatedDay: null,
             serviceId: null,
             policy: null,
-            chosenDay: null
+            chosenDay: null,
+            assembly: {
+                stage: 'none',
+                playerNomination: null,
+                nominations: {},
+                finalists: [],
+                votes: [],
+                counts: {},
+                winnerId: null,
+                day: null
+            }
         };
         this.rivals = [];
         this.lastRivalMoves = [];
@@ -306,6 +317,43 @@ export class Charter {
         return { ok: true, activated, fund: this.commons.fund, active: this.commons.active };
     }
 
+    nominateCommonsPolicy(policyId) {
+        if (!this.commons.active) return { ok: false, reason: 'Light the Beacon before calling an assembly.' };
+        if (this.commons.policy) return { ok: false, reason: 'The assembly has already chosen.' };
+        if (this.commons.assembly.stage !== 'nominations') return { ok: false, reason: 'Nominations are closed.' };
+        const policy = COMMONS_POLICY_BY_ID[policyId];
+        if (!policy) return { ok: false, reason: 'That is not a Commons policy.' };
+        const nominations = { player: policy.id };
+        for (const rival of this.rivals) nominations[rival.id] = nominateForRival(rival);
+        const finalists = [...new Set(Object.values(nominations))];
+        this.commons.assembly = {
+            stage: 'ballot',
+            playerNomination: policy.id,
+            nominations,
+            finalists,
+            votes: [],
+            counts: {},
+            winnerId: null,
+            day: this.day
+        };
+        return { ok: true, policy, nominations, finalists };
+    }
+
+    resolveCommonsAssembly() {
+        if (!this.commons.active) return { ok: false, reason: 'Light the Beacon first.' };
+        if (this.commons.policy) return { ok: false, reason: 'The assembly has already chosen.' };
+        if (this.commons.assembly.stage !== 'ballot') return { ok: false, reason: 'There is no ballot to call.' };
+        const result = resolveCommonsBallot(this.activeResidents, this.commons.assembly.finalists);
+        if (!result.winnerId) return { ok: false, reason: 'No one voted.' };
+        const chosen = this.chooseCommonsPolicy(result.winnerId);
+        if (!chosen.ok) return chosen;
+        this.commons.assembly.stage = 'resolved';
+        this.commons.assembly.votes = result.votes;
+        this.commons.assembly.counts = result.counts;
+        this.commons.assembly.winnerId = result.winnerId;
+        return { ok: true, policy: chosen.policy, result };
+    }
+
     chooseCommonsPolicy(policyId) {
         if (!this.commons.active) return { ok: false, reason: 'Light the Beacon before calling an assembly.' };
         if (this.commons.policy) return { ok: false, reason: 'The assembly has already chosen.' };
@@ -313,6 +361,10 @@ export class Charter {
         if (!policy) return { ok: false, reason: 'That is not a Commons policy.' };
         this.commons.policy = policy.id;
         this.commons.chosenDay = this.day;
+        if (this.commons.assembly.stage !== 'resolved') {
+            this.commons.assembly.stage = 'resolved';
+            this.commons.assembly.winnerId = policy.id;
+        }
         for (const chapter of this.chapters) {
             for (const service of chapter.services.services) {
                 applyCommonsPolicyToService(service, policy.id);
@@ -332,6 +384,7 @@ export class Charter {
         service.refreshGraphics();
         this.commons.active = true;
         this.commons.activatedDay = this.day;
+        if (this.commons.assembly.stage === 'none') this.commons.assembly.stage = 'nominations';
         return true;
     }
 
@@ -877,11 +930,22 @@ export class Charter {
                 activatedDay: saved.commons.activatedDay || null,
                 serviceId: saved.commons.serviceId || null,
                 policy: saved.commons.policy || null,
-                chosenDay: saved.commons.chosenDay || null
+                chosenDay: saved.commons.chosenDay || null,
+                assembly: saved.commons.assembly ? {
+                    ...this.commons.assembly,
+                    ...saved.commons.assembly,
+                    nominations: { ...(saved.commons.assembly.nominations || {}) },
+                    finalists: [...(saved.commons.assembly.finalists || [])],
+                    votes: [...(saved.commons.assembly.votes || [])],
+                    counts: { ...(saved.commons.assembly.counts || {}) }
+                } : this.commons.assembly
             };
             if (this.commonsManager) this.commonsManager.restore(serviceEntries);
         } else if (this.contest) {
             this.setupCommons();
+        }
+        if (this.commons.active && !this.commons.policy && this.commons.assembly.stage === 'none') {
+            this.commons.assembly.stage = 'nominations';
         }
         this.commonsCell = this.findCommonsCell(this.homeSector);
         this.assignHomes();

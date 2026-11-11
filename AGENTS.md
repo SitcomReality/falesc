@@ -178,7 +178,9 @@ after any behavioural change.
   also bring 2–3 transient visitors who use services, pay 1 lumen per visit and
   leave before the next day. A charmed visitor with a spare bed can be invited
   from the report and becomes an ordinary resident. Once the Beacon is lit, the
-  first Commons Assembly chooses one shared policy (`src/commons/CommonsPolicies.js`).
+  first Commons Assembly lets each chapter nominate; residents vote, and the
+  winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
+  `CommonsBallot.js`).
   This is a first pass; a separate shared-commons island,
   a larger multi-round festival, auctions and systemic stewardship effects are
   still missing.

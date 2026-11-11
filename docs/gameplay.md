@@ -137,9 +137,16 @@ this Beacon sits on the home shard.
 
 ## The first Commons Assembly
 
-When the Beacon is lit, the Commons HUD changes to **assembly pending**. Opening
-it calls the first **Commons Assembly**, a one-time choice of shared policy for
-every chapter:
+When the Beacon is lit, the Commons HUD changes to **nominations**. Opening it
+calls the first **Commons Assembly**. Each chapter nominates one shared policy:
+
+- The player picks the Home Chapter's nomination from four policies.
+- The Gardener nominates **Commons Garden**; the Host nominates **Shared Table**.
+- Every resident then votes among the finalists; the policy with the most votes
+  becomes the Assembly policy. The player does not cast a resident vote, only
+the chapter's nomination.
+
+The four policies are:
 
 - **Shared Table** — every Canteen and Tea House gains 2 seats.
 - **Open Beds** — every Welcome House gains 2 beds.
@@ -147,9 +154,9 @@ every chapter:
 - **Night Watch** — the Beacon eases one more point of every need at night, and
   beds restore one more Rest.
 
-The policy applies to existing services and to every service built afterwards
-by the player or a rival. It is saved with the charter. The assembly is called
-by the player; a resident vote and petitions are still future work.
+The winning policy applies to existing services and to every service built
+afterwards by the player or a rival. It is saved with the charter. The ballot is
+one-time and there is no petition phase or second reading.
 
 ## Planning
 
