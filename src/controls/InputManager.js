@@ -10,6 +10,7 @@ export class InputManager {
 
         // Modal flag: when true, keyboard input should be ignored (e.g. typing into UI)
         this.modalOpen = false;
+        this.suppressCamera = false;
 
         // Default keybindings (can be reconfigured later)
         this._initDefaultBindings();
@@ -42,12 +43,21 @@ export class InputManager {
 
     _onKeyDown(e) {
         if (this.modalOpen) return; // Ignore global key handling while modal/text entry is active
+        if (this.suppressCamera && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) return;
         this.keyStates.set(e.code, true);
     }
 
     _onKeyUp(e) {
         if (this.modalOpen) return;
+        if (this.suppressCamera && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) return;
         this.keyStates.set(e.code, false);
+    }
+
+    setCameraSuppressed(suppressed) {
+        this.suppressCamera = Boolean(suppressed);
+        if (suppressed) {
+            for (const code of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) this.keyStates.delete(code);
+        }
     }
 
     _initDefaultBindings() {

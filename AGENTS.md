@@ -38,6 +38,7 @@ Browser verification from this workspace (shared harness):
 
 ```bash
 webgame_smoke
+webgame_smoke --scenario scripts/scenarios/keyboard-cursor.mjs
 webgame_smoke --scenario scripts/scenarios/resident-day.mjs
 webgame_smoke --scenario scripts/scenarios/economy.mjs
 webgame_smoke --scenario scripts/scenarios/persistence.mjs

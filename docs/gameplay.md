@@ -22,10 +22,15 @@ limit.
 | Middle-mouse drag | Pan |
 | One-finger drag (touch) | Pan |
 | Two-finger pinch (touch) | Zoom and pan |
-| `1` `2` `3` `4` | Arm Housing / Canteen / Tea House / Garden Dome |
+| `1`–`5` | Arm Housing / Canteen / Tea House / Garden Dome / Bathhouse |
 | Click/tap a dock card | Arm that service |
 | Primary click/tap a free plot | Open the build dialog for the armed service |
 | Primary click/tap a service | Open its service record |
+| `C` | Toggle the keyboard build cursor |
+| Arrow keys while the cursor is active | Move the footprint |
+| `G` while the cursor is active | Switch between the home shard and the commons isle |
+| `Enter` while the cursor is active | Open the service record or build dialog at the cursor |
+| `Esc` while the cursor is active | Leave the cursor |
 | Primary click/tap a resident | Open their resident card |
 | `E` | Open the day (end planning) |
 | `B` | Open the morning bulletin |
@@ -512,8 +517,6 @@ yet.
   festival or auctions.
 - **No auctions or multiplayer.** The Multiplayer button is a disabled placeholder.
 - **No audio.**
-- **No keyboard build cursor.** The dock and dialogs are keyboard-friendly, but
-  choosing a plot requires a pointer or touch.
 - **The resident card stops at the last choice.** It has needs, traits, home,
   Devotion, wellbeing and the latest "why"; it has no portrait and no full
   recent-history list, even though the model keeps recent visits.

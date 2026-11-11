@@ -65,6 +65,8 @@ export class FalescGame {
 
         this.selectedProgramId = defaultProgramId();
         this.pendingBuildLocation = null;
+        this.keyboardCursor = null;
+        this.keyboardCursorActive = false;
         this.hintDismissed = false;
         this.frameCount = 0;
         this.tideMood = -1;
@@ -236,6 +238,7 @@ export class FalescGame {
         this.patronageFlow.hide();
         this.patronageFlow.setCharter(null);
         this.transitGate.clear();
+        this.clearKeyboardCursor();
         this.visitorCard.hide();
         this.gameScreen?.setPatronageState?.(false);
         this.chatter?.clear();
@@ -383,6 +386,7 @@ export class FalescGame {
         this.selectedProgramId = programId;
         this.pendingBuildLocation = null;
         this.world.clearHover();
+        if (this.keyboardCursorActive) this.renderKeyboardCursor();
         this.gameScreen.updateHud(true);
         return true;
     }
@@ -392,7 +396,7 @@ export class FalescGame {
             this.world.clearHover();
             return;
         }
-        if (this.hasBlockingModal()) {
+        if (this.hasBlockingModal() || this.keyboardCursorActive) {
             this.world.clearHover();
             return;
         }
@@ -406,6 +410,10 @@ export class FalescGame {
             this.world.clearHover();
             return;
         }
+        this.paintPlacementPreview(target, program);
+    }
+
+    paintPlacementPreview(target, program) {
         const check = this.charter.services.canPlace(program.id, target.sector.id, target.u, target.v);
         const key = `${target.sector.id}:${target.u}:${target.v}:${program.id}:${check.ok}`;
         if (key === this.world.hoverCellKey) return;
@@ -464,9 +472,122 @@ export class FalescGame {
         return null;
     }
 
+
+    toggleKeyboardCursor() {
+        if (!this.charter || this.screenStateMachine.state !== GamePhase.PLAYING || this.hasBlockingModal()) return false;
+        if (this.keyboardCursorActive) {
+            this.clearKeyboardCursor();
+            return false;
+        }
+        const home = this.world.homeSector;
+        const program = PROGRAM_BY_ID[this.selectedProgramId];
+        const maxU = Math.max(0, home.gridSize - (program?.footprint?.w || 1));
+        const maxV = Math.max(0, home.gridSize - (program?.footprint?.h || 1));
+        this.keyboardCursor = {
+            sectorId: home.id,
+            u: Math.min(maxU, Math.floor(home.gridSize / 2)),
+            v: Math.min(maxV, Math.floor(home.gridSize / 2))
+        };
+        this.keyboardCursorActive = true;
+        this.world.input.setCameraSuppressed(true);
+        this.renderKeyboardCursor();
+        this.gameScreen.toast('Build cursor: arrows move, G switches isle, Enter opens, Esc leaves.', 'mint', 3200);
+        return true;
+    }
+
+    moveKeyboardCursor(dx, dy) {
+        if (!this.keyboardCursorActive || !this.keyboardCursor) return false;
+        const sectors = [this.world.homeSector, this.charter?.commonsSector].filter(Boolean);
+        const sector = sectors.find((entry) => entry.id === this.keyboardCursor.sectorId) || sectors[0];
+        const program = PROGRAM_BY_ID[this.selectedProgramId];
+        const maxU = Math.max(0, sector.gridSize - (program?.footprint?.w || 1));
+        const maxV = Math.max(0, sector.gridSize - (program?.footprint?.h || 1));
+        this.keyboardCursor.u = Math.max(0, Math.min(maxU, this.keyboardCursor.u + dx));
+        this.keyboardCursor.v = Math.max(0, Math.min(maxV, this.keyboardCursor.v + dy));
+        this.renderKeyboardCursor();
+        return true;
+    }
+
+    switchKeyboardSector() {
+        if (!this.keyboardCursorActive || !this.keyboardCursor) return false;
+        const sectors = [this.world.homeSector, this.charter?.commonsSector].filter(Boolean);
+        if (sectors.length < 2) return false;
+        const current = this.keyboardCursor.sectorId;
+        const next = sectors.find((sector) => sector.id !== current) || sectors[0];
+        const program = PROGRAM_BY_ID[this.selectedProgramId];
+        this.keyboardCursor = {
+            sectorId: next.id,
+            u: Math.max(0, Math.min(next.gridSize - (program?.footprint?.w || 1), Math.floor(next.gridSize / 2))),
+            v: Math.max(0, Math.min(next.gridSize - (program?.footprint?.h || 1), Math.floor(next.gridSize / 2)))
+        };
+        this.renderKeyboardCursor();
+        return true;
+    }
+
+    renderKeyboardCursor() {
+        if (!this.keyboardCursorActive || !this.keyboardCursor || !this.charter) {
+            this.world.clearHover();
+            return;
+        }
+        const sector = [this.world.homeSector, this.charter?.commonsSector].find((entry) => entry?.id === this.keyboardCursor.sectorId);
+        if (!sector) {
+            this.clearKeyboardCursor();
+            return;
+        }
+        const program = PROGRAM_BY_ID[this.selectedProgramId];
+        if (!program) {
+            this.world.clearHover();
+            return;
+        }
+        this.paintPlacementPreview({ sector, u: this.keyboardCursor.u, v: this.keyboardCursor.v }, program);
+    }
+
+    confirmKeyboardCursor() {
+        if (!this.keyboardCursorActive || !this.keyboardCursor || !this.charter) return false;
+        const sector = [this.world.homeSector, this.charter?.commonsSector].find((entry) => entry?.id === this.keyboardCursor.sectorId);
+        if (!sector) return false;
+        const u = this.keyboardCursor.u;
+        const v = this.keyboardCursor.v;
+        const existing = this.charter.services.serviceAt(sector.id, u, v);
+        this.clearKeyboardCursor();
+        if (existing) {
+            if (existing.isTransit) {
+                this.gameScreen.toast('The shuttle docks here. Build on the outer isle from the same dock.', 'mint', 2200);
+            } else if (existing.id === this.charter.commons.serviceId) {
+                this.showCommons();
+            } else {
+                this.serviceCard.show(existing);
+            }
+            return true;
+        }
+        const program = PROGRAM_BY_ID[this.selectedProgramId];
+        if (!program) return false;
+        const check = this.charter.services.canPlace(program.id, sector.id, u, v);
+        if (!check.ok) {
+            this.gameScreen.toast(check.reason, 'coral');
+            return false;
+        }
+        const affordable = this.charter.canBuild(program.id);
+        if (!affordable.ok) {
+            this.gameScreen.toast(affordable.reason, 'coral');
+            return false;
+        }
+        this.pendingBuildLocation = { sectorId: sector.id, u, v };
+        this.buildModal.show(program, { lumen: this.charter.lumen, works: this.charter.works });
+        return true;
+    }
+
+    clearKeyboardCursor() {
+        this.keyboardCursorActive = false;
+        this.keyboardCursor = null;
+        this.world.input.setCameraSuppressed(false);
+        this.world.clearHover();
+    }
+
     onWorldTap(x, y) {
         if (!this.charter || this.screenStateMachine.state !== GamePhase.PLAYING) return;
         if (this.hasBlockingModal()) return;
+        if (this.keyboardCursorActive) this.clearKeyboardCursor();
 
         const resident = this.crowd.nearestResident(x, y, 62);
         if (resident) {
@@ -579,6 +700,7 @@ export class FalescGame {
 
     openDay() {
         if (!this.charter || this.screenStateMachine.state !== GamePhase.PLAYING) return false;
+        this.clearKeyboardCursor();
         if (this.hasBlockingModal()) return false;
         this.world.clearHover();
         this.buildModal.hide(false);

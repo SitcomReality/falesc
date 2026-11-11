@@ -255,6 +255,35 @@ export class GameScreen {
             if (this.gsm.state !== 'PLAYING') return;
             if (this.game.hasBlockingModal?.()) return;
             if (this.pausePanel && !this.pausePanel.hidden && event.key !== 'Escape') return;
+            if (this.game.keyboardCursorActive) {
+                if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    const dx = event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowRight' ? 1 : 0;
+                    const dy = event.key === 'ArrowUp' ? -1 : event.key === 'ArrowDown' ? 1 : 0;
+                    this.game.moveKeyboardCursor(dx, dy);
+                    return;
+                }
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    this.game.confirmKeyboardCursor();
+                    return;
+                }
+                if (event.key === 'g' || event.key === 'G') {
+                    event.preventDefault();
+                    this.game.switchKeyboardSector();
+                    return;
+                }
+                if (event.key === 'Escape' || event.key === 'c' || event.key === 'C') {
+                    event.preventDefault();
+                    this.game.clearKeyboardCursor();
+                    return;
+                }
+            }
+            if (event.key === 'c' || event.key === 'C') {
+                event.preventDefault();
+                this.game.toggleKeyboardCursor();
+                return;
+            }
             if (event.key === 'Escape') {
                 event.preventDefault();
                 this.pausePanel.hidden ? this.menuButton.click() : this._setPauseOpen(false);
