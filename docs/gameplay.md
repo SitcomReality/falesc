@@ -171,8 +171,9 @@ least **45** joins the roster; otherwise they leave. A resident keeps their name
 and memory and can vote in the Confluence. A charmed visitor who is
 not offered a bed may return on a later day (up to two at a time), keeping their
 name, memory and affinity; the report marks them **returning**. Clicking a
-visitor's name opens a **visitor card** with traits, needs, wellbeing, affinity
-and their last door; the card can offer the trial stay. Visitors are a
+visitor's name opens a **visitor card** with an initial portrait, traits, needs,
+wellbeing, affinity, their last door and the last three visits; the card can
+offer the trial stay. Visitors are a
 Contest feature for now; First Light remains resident-only.
 
 ## Service hours

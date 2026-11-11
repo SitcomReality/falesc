@@ -33,7 +33,7 @@ Severity is about impact on the slice, not effort:
 | 11 | Low | WebGL context loss is not handled |
 | 12 | Low | Visual regression is not enabled and no baseline is committed |
 | 13 | Low | Minor teardown and cleanup gaps remain |
-| 14 | Low | Visitors have a card, return arc and trial stay, but no portrait |
+| 14 | Low | Visitors have an initial portrait, visit log, return arc and trial stay, but no illustrated portrait |
 | 15 | Low | The Commons Assembly has petitions and one ballot, but no second reading or debate |
 
 ## Open issues
