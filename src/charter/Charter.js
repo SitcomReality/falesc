@@ -24,6 +24,7 @@ import { chooseCampaignPledge, createRivalChapters, planRivalDay } from '../chap
 import { Campaign } from '../confluence/Campaign.js';
 import { PLEDGE_BY_ID } from '../confluence/Pledges.js';
 import { ConfluenceVote } from '../confluence/ConfluenceVote.js';
+import { milestones as charterMilestones, careWatch as charterCareWatch, needSurvey as charterNeedSurvey, standings as charterStandings, historyEntry as charterHistoryEntry, stats as charterStats } from './CharterProjections.js';
 
 /**
  * A charter is the whole run: day, lumen, works, cast, services and the report
@@ -687,69 +688,19 @@ export class Charter {
     }
 
     milestones() {
-        const services = this.allServices;
-        const open = services.filter((service) => service.state === 'ACTIVE' && !service.closed);
-        const needIds = NEEDS.map((need) => need.id);
-        return [
-            { id: 'first_build', label: 'Raise a service', done: this.services.services.some((service) => !service.fixed) },
-            { id: 'all_needs', label: 'Serve every need', done: needIds.every((needId) => open.some((service) => servesNeed(service.program, needId))) },
-            { id: 'six_housed', label: 'House six Tidelanders', done: this.housedPopulation >= 6 },
-            { id: 'full_house', label: 'House twelve Tidelanders', done: this.housedPopulation >= 12 },
-            { id: 'flourishing', label: 'Reach a flourishing of 62', done: this.flourishing >= BALANCE.end.comfortableFlourishing },
-            { id: 'district', label: 'Form a named district', done: (this.districtGroups || []).length > 0 },
-            { id: 'floor', label: 'Add an upper floor', done: services.some((service) => (service.floorPlans || []).length > 0) },
-            { id: 'module', label: 'Install a retrofit module', done: services.some((service) => (service.retrofits || []).length > 0) },
-            { id: 'beacon', label: 'Light the Commons Beacon', done: Boolean(this.commons?.active) },
-            { id: 'assembly', label: 'Hold a Commons Assembly', done: Boolean(this.commons?.policy) },
-            { id: 'annex', label: 'Add a Beacon annex', done: (this.commons?.level || 1) > 1 },
-            { id: 'visitor', label: 'Welcome a trial guest', done: this.roster.some((resident) => resident.memory?.trialStartDay) },
-            { id: 'garden', label: 'Build on the garden isle', done: services.some((service) => service.sector?.garden) }
-        ];
+        return charterMilestones(this);
     }
 
     careWatch() {
-        const residents = this.activeResidents.filter((resident) => {
-            const urgent = NEEDS.some((need) => (resident.needs[need.id] || 0) >= 85);
-            return urgent || resident.wellbeing < 30 || (resident.memory?.homelessDays || 0) > 0;
-        });
-        return { count: residents.length, residents };
+        return charterCareWatch(this);
     }
 
     needSurvey() {
-        const residents = this.activeResidents;
-        return NEEDS.map((need) => {
-            const total = residents.reduce((sum, resident) => sum + (resident.needs[need.id] || 0), 0);
-            const urgent = residents.filter((resident) => (resident.needs[need.id] || 0) >= 65).length;
-            const services = this.allServices.filter((service) => service.state === 'ACTIVE' && !service.closed && servesNeed(service.program, need.id));
-            return {
-                id: need.id,
-                name: need.name,
-                colour: need.color,
-                average: residents.length ? total / residents.length : 0,
-                urgent,
-                services: services.length,
-                capacity: services.reduce((sum, service) => sum + service.totalCapacity, 0)
-            };
-        });
+        return charterNeedSurvey(this);
     }
 
     standings() {
-        const devotion = this.devotionByChapter;
-        const patronage = this.lastReport?.patronageByChapter || {};
-        return this.chapters.map((chapter) => ({
-            id: chapter.id,
-            name: chapter.name,
-            colour: chapter.colour,
-            isPlayer: Boolean(chapter.isPlayer),
-            devotion: devotion[chapter.id] || 0,
-            visits: patronage[chapter.id] || 0,
-            residents: this.activeResidents.filter((resident) => resident.homeChapterId === chapter.id).length,
-            lumen: chapter.lumen,
-            upkeep: chapter.services.totalUpkeep(),
-            plan: chapter.plan
-                ? { ...chapter.plan, saving: chapter.lumen < (chapter.plan.cost || 0) }
-                : null
-        }));
+        return charterStandings(this);
     }
 
     foundWelcomePost() {
@@ -1501,48 +1452,11 @@ export class Charter {
     }
 
     historyEntry(report) {
-        return {
-            day: this.day,
-            population: this.population,
-            housed: this.housedPopulation,
-            flourishing: Math.round(this.flourishing),
-            lumen: this.lumen,
-            net: report?.net || 0,
-            visits: report?.visits || 0,
-            visitors: report?.visitors || 0,
-            closures: report?.closures?.length || 0
-        };
+        return charterHistoryEntry(this, report);
     }
 
     stats() {
-        const history = this.history || [];
-        const peakPopulation = Math.max(this.population, ...history.map((entry) => entry.population || 0));
-        const peakFlourishing = Math.max(Math.round(this.flourishing), ...history.map((entry) => entry.flourishing || 0));
-        const totalVisits = history.reduce((sum, entry) => sum + (entry.visits || 0), 0);
-        return {
-            day: this.day,
-            dayLimit: this.dayLimit,
-            population: this.population,
-            housedPopulation: this.housedPopulation,
-            housingCapacity: this.housingCapacity,
-            lumen: this.lumen,
-            works: this.works,
-            devotion: this.devotion,
-            flourishing: this.flourishing,
-            peakPopulation,
-            peakFlourishing,
-            totalVisits,
-            services: this.services.services.length,
-            activeServices: this.services.activeServices.length,
-            mode: this.mode,
-            confluenceReady: this.confluenceReady,
-            campaign: this.campaign?.toJSON() || null,
-            commons: { ...this.commons },
-            visitors: this.visitors.length,
-            totalSpareBeds: this.totalSpareBeds,
-            rivals: this.rivals.length,
-            devotionByChapter: this.devotionByChapter
-        };
+        return charterStats(this);
     }
 }
 
