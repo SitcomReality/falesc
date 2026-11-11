@@ -289,6 +289,10 @@ ballot and the single second reading are the whole Assembly cycle.
 
 ## Planning
 
+The pause menu's **Need survey** shows the average urgency of each need, how
+many residents are already urgent (65+), and how many open seats serve it.
+It is a snapshot for choosing the next door, not a forecast of the next day.
+
 Planning is paused. Each day gives **two works**. Building a service spends one
 work and the program's lumen cost immediately, and places the service as
 `PENDING`. At the start of the next planning day it becomes `ACTIVE` and starts

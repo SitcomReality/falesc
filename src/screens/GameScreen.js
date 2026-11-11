@@ -72,6 +72,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-bulletin">Morning bulletin</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-residents">Residents</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-field-guide">Field guide</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="open-need-survey">Need survey</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-departures" hidden>Past residents</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="sound-toggle" aria-pressed="false">Sound: off</button>
                 <button type="button" class="btn btn--small btn--ghost charter-menu__abandon" data-testid="end-game">Abandon charter</button>
@@ -238,6 +239,10 @@ export class GameScreen {
         this.pausePanel.querySelector('[data-testid=open-field-guide]').addEventListener('click', () => {
             this._setPauseOpen(false);
             this.game.openFieldGuide();
+        });
+        this.pausePanel.querySelector('[data-testid=open-need-survey]').addEventListener('click', () => {
+            this._setPauseOpen(false);
+            this.game.openNeedSurvey();
         });
         this.departuresButton = this.pausePanel.querySelector('[data-testid=open-departures]');
         this.departuresButton.addEventListener('click', () => {

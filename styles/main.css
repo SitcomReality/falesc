@@ -4259,3 +4259,71 @@ body.has-modal > canvas {
     gap: 4px 8px;
     text-align: right;
 }
+
+/* Need survey ------------------------------------------------------------- */
+.need-survey__rows {
+    display: grid;
+    gap: 7px;
+    margin: 14px 0;
+}
+
+.need-survey__row {
+    display: grid;
+    grid-template-columns: 100px 1fr 32px;
+    grid-template-areas:
+        'name track value'
+        'name meta meta';
+    align-items: center;
+    gap: 3px 9px;
+    padding: 7px 8px;
+    background: rgba(255, 211, 110, 0.18);
+    border: 1.5px solid rgba(33, 18, 37, 0.25);
+    border-radius: var(--radius);
+}
+
+.need-survey__name {
+    grid-area: name;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.need-survey__name i {
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+}
+
+.need-survey__track {
+    grid-area: track;
+    height: 8px;
+    overflow: hidden;
+    background: var(--paper-deep);
+    border: 1px solid var(--ink);
+    border-radius: 99px;
+}
+
+.need-survey__track i {
+    display: block;
+    height: 100%;
+}
+
+.need-survey__row strong {
+    grid-area: value;
+    font-family: var(--display);
+    font-size: 17px;
+    text-align: right;
+}
+
+.need-survey__meta {
+    grid-area: meta;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}

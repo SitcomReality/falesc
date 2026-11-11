@@ -583,6 +583,24 @@ export class Charter {
             : `${service.chapter.name}'s ${service.name}`;
     }
 
+    needSurvey() {
+        const residents = this.activeResidents;
+        return NEEDS.map((need) => {
+            const total = residents.reduce((sum, resident) => sum + (resident.needs[need.id] || 0), 0);
+            const urgent = residents.filter((resident) => (resident.needs[need.id] || 0) >= 65).length;
+            const services = this.allServices.filter((service) => service.state === 'ACTIVE' && !service.closed && servesNeed(service.program, need.id));
+            return {
+                id: need.id,
+                name: need.name,
+                colour: need.color,
+                average: residents.length ? total / residents.length : 0,
+                urgent,
+                services: services.length,
+                capacity: services.reduce((sum, service) => sum + service.capacity, 0)
+            };
+        });
+    }
+
     standings() {
         const devotion = this.devotionByChapter;
         const patronage = this.lastReport?.patronageByChapter || {};
