@@ -65,6 +65,11 @@ export class Campaign {
         return this.events.find((event) => event.day === day) || null;
     }
 
+    qualityBonusFor(chapterId, needId) {
+        const pledge = this.pledgeFor(chapterId);
+        return pledge && pledge.need === needId ? 0.05 : 0;
+    }
+
     appealFor(chapterId, day) {
         const pledge = this.pledgeFor(chapterId);
         if (!pledge) return 1;

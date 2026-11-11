@@ -133,7 +133,9 @@ or **saving for** followed by the service name.
 On the **last three days** of a Contest the campaign begins. Each day has a
 **first bell** and a **second bell** event, so the three-day festival carries six
 events. A promise that matches one bell on a day gives a smaller appeal bonus;
-matching both gives the full **1.12**. Before choosing a promise, the player can
+matching both gives the full **1.12**. A chapter's pledge also gives all of its
+matching services **+0.05 quality** during the campaign, so the promise is felt
+at the doors, not only at the ballot. Before choosing a promise, the player can
 sponsor **one extra bell** for **5 lumen** in a chosen need; it joins the current
 day's programme and can carry a matching promise to a higher appeal. Only one
 sponsored bell is allowed per charter. A promise dialog

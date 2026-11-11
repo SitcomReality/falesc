@@ -44,6 +44,7 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.pause(200);
     const chosen = await page.evaluate("window.__falesc.snapshot()");
     assert.equal(chosen.campaign.playerPledge, firstNeed);
+    assert.equal(await page.evaluate(`window.__falesc.app.charter.campaign.qualityBonusFor('player', ${JSON.stringify(firstNeed)})`), 0.05);
     await page.evaluate("window.__falesc.app.bulletinModal.hide()");
     const campaignLabel = await page.evaluate("document.querySelector('[data-role=campaign-name]').textContent");
     assert.ok(campaignLabel.length > 0, 'the HUD should show the chosen promise');

@@ -32,7 +32,7 @@ export class CampaignModal {
                 </div>
                 <button type="button" class="modal__close" data-testid="campaign-close" aria-label="Close campaign">×</button>
             </div>
-            <p class="modal__blurb">The rivals have published their promises. Choose what your chapter will be known for when the archipelago votes.</p>
+            <p class="modal__blurb">The rivals have published their promises. Choose what your chapter will be known for when the archipelago votes. Every chapter's matching services gain +0.05 quality during the festival.</p>
             <div class="campaign-sponsor" data-role="sponsor"></div>
             <h4 class="campaign-modal__label">Festival programme</h4>
             <ul class="campaign-events" data-role="events" data-testid="campaign-events"></ul>
