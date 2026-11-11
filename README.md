@@ -154,6 +154,7 @@ webgame_smoke --scenario scripts/scenarios/housing-residents.mjs
 webgame_smoke --scenario scripts/scenarios/service-rename.mjs
 webgame_smoke --scenario scripts/scenarios/service-regulars.mjs
 webgame_smoke --scenario scripts/scenarios/repair-all.mjs
+webgame_smoke --scenario scripts/scenarios/report-worn.mjs
 webgame_smoke --scenario scripts/scenarios/service-condition.mjs
 webgame_smoke --scenario scripts/scenarios/service-focus.mjs
 webgame_smoke --scenario scripts/scenarios/service-access.mjs

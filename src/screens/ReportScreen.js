@@ -65,6 +65,12 @@ export class ReportScreen {
         const closures = report.closures?.length
             ? `<p class="report__warning">Closed at dusk: ${report.closures.map((closure) => escapeHtml(closure.name)).join(', ')}. The upkeep ran short.</p>`
             : '';
+        const worn = (this.game.charter?.services?.services || [])
+            .filter((service) => service.condition < 60)
+            .slice(0, 4);
+        const wornNote = worn.length
+            ? `<p class="report__warning">Worn: ${worn.map((service) => `${escapeHtml(service.name)} (${Math.round(service.condition)}%)`).join(', ')}. Repair from the pause menu or a service record.</p>`
+            : '';
         const festival = report.campaignEvent
             ? `<p class="report__warning">Festival programme: <strong>${escapeHtml(report.campaignEvent.title)}</strong> — ${escapeHtml(report.campaignEvent.blurb)}</p>`
             : '';
@@ -126,6 +132,7 @@ export class ReportScreen {
                 ${commonsNote}
                 ${purseNote}
                 ${closures}
+            ${wornNote}
                 <div class="report__columns">
                     <section>
                         <h2>Needs at dusk</h2>
