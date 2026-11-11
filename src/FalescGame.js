@@ -31,6 +31,7 @@ import { RivalDossierModal } from './ui/RivalDossierModal.js';
 import { CharterJournalModal } from './ui/CharterJournalModal.js';
 import { MilestonesModal } from './ui/MilestonesModal.js';
 import { recordCharter, recordFromCharter } from './persistence/CharterArchive.js';
+import { recordMilestones } from './persistence/MilestoneArchive.js';
 import { readMotion, writeMotion, applyMotion } from './settings/MotionPreference.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
@@ -1005,6 +1006,7 @@ export class FalescGame {
 
     archiveFinishedCharter() {
         if (!this.charter || this._archiveRecorded) return;
+        recordMilestones(this.charter.milestones().filter((entry) => entry.done).map((entry) => entry.id));
         this._archiveRecorded = true;
         recordCharter(recordFromCharter(this.charter, this.endResult || this.charter.ending));
     }

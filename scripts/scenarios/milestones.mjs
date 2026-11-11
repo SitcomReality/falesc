@@ -3,7 +3,7 @@
  * are available from the pause menu.
  */
 export default async function ({ page, assert, screenshot }) {
-    await page.evaluate("localStorage.removeItem('falesc.save.v2')");
+    await page.evaluate("localStorage.removeItem('falesc.save.v2'); localStorage.setItem('falesc.milestones.v1', JSON.stringify(['full_house']))");
     await page.reload();
     await page.evaluate("window.__falesc.startCharter(12345, 'medium', 'first-light')");
     await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
@@ -26,8 +26,10 @@ export default async function ({ page, assert, screenshot }) {
     assert.ok(text.includes('Firsts and foundations'));
     assert.ok(text.includes('Raise a service'));
     assert.ok(text.includes('House twelve Tidelanders'));
+    assert.ok(text.includes('earned'));
     const done = await page.evaluate("document.querySelectorAll('.milestones__list li.is-done').length");
     assert.ok(done >= 1);
+    assert.ok(await page.visible('.milestones__list li.is-earned'));
     await page.pause(300);
     await screenshot('milestones.png');
     await page.click('[data-testid=milestones-done]');

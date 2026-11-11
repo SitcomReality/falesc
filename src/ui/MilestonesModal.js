@@ -2,6 +2,8 @@
  * A short checklist of firsts and civic milestones. It is guidance and a record,
  * not a second objective system or a source of rewards.
  */
+import { readMilestones } from '../persistence/MilestoneArchive.js';
+
 export class MilestonesModal {
     constructor({ game, overlays }) {
         this.game = game;
@@ -41,17 +43,21 @@ export class MilestonesModal {
     render() {
         const entries = this.game?.charter?.milestones() || [];
         const done = entries.filter((entry) => entry.done).length;
+        const earned = new Set(readMilestones());
         this.panel.innerHTML = `
             <div class="modal__head">
                 <div>
-                    <p class="kicker" style="color:var(--wine)">Charter milestones · ${done} / ${entries.length}</p>
+                    <p class="kicker" style="color:var(--wine)">Charter milestones · ${done} / ${entries.length} this charter · ${earned.size} earned</p>
                     <h3 class="modal__title" id="milestones-title">Firsts and foundations</h3>
                 </div>
                 <button type="button" class="modal__close" data-testid="milestones-close" aria-label="Close milestones">×</button>
             </div>
             <p class="modal__blurb">Optional landmarks for a charter. They grant no lumen; they are a way to see how far the chapter has come.</p>
             <ol class="milestones__list">
-                ${entries.map((entry) => `<li class="${entry.done ? 'is-done' : ''}"><span aria-hidden="true">${entry.done ? '✓' : '○'}</span><strong>${escapeHtml(entry.label)}</strong></li>`).join('')}
+                ${entries.map((entry) => {
+                    const isEarned = earned.has(entry.id);
+                    return `<li class="${entry.done ? 'is-done' : ''}${isEarned ? ' is-earned' : ''}"><span aria-hidden="true">${entry.done ? '✓' : isEarned ? '★' : '○'}</span><strong>${escapeHtml(entry.label)}</strong>${isEarned && !entry.done ? '<small>earned</small>' : ''}</li>`;
+                }).join('')}
             </ol>
             <div class="modal__actions">
                 <button type="button" class="btn btn--paper" data-testid="milestones-done">Back to planning</button>

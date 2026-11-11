@@ -320,7 +320,9 @@ signal, not a separate warning system.
 The pause menu's **Milestones** is a read-only checklist of firsts: first
 service, all four needs, six and twelve housed, flourishing 62, a district, an
 upper floor, a retrofit, the Beacon, an Assembly, an annex, a trial guest and a
-garden-isle build. Milestones grant no lumen.
+garden-isle build. Milestones grant no lumen. Completing one in any charter stores it in
+`falesc.milestones.v1`; later charters show it with a star and an **earned**
+marker even when the current run has not reached it yet.
 
 ## Charter journal
 
