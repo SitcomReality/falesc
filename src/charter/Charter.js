@@ -802,6 +802,20 @@ export class Charter {
         return { u: center, v: center };
     }
 
+    reconcileStaff() {
+        for (const resident of this.roster) {
+            if (!resident.workServiceId) continue;
+            const service = this.allServices.find((entry) => entry.id === resident.workServiceId);
+            if (!service || service.closed || service.state !== 'ACTIVE') {
+                if (service) service.staffId = null;
+                resident.workServiceId = null;
+            }
+        }
+        for (const service of this.allServices) {
+            if (service.staffId && !this.roster.some((resident) => resident.id === service.staffId)) service.staffId = null;
+        }
+    }
+
     assignStaff(service, residentId = null) {
         if (!service || service.chapterId !== 'player' || service.state !== 'ACTIVE' || service.closed) {
             return { ok: false, reason: 'Open one of your own services first.' };

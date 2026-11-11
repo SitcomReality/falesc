@@ -53,7 +53,7 @@ export class ServiceRosterModal {
         const rows = services.map((service) => `
             <div class="service-roster__row" data-service-id="${escapeHtml(service.id)}" role="button" tabindex="0">
                 <span class="service-roster__name">${escapeHtml(service.name)}</span>
-                <span class="service-roster__meta">${escapeHtml(service.program?.name || service.programId)} · ${escapeHtml(service.chapterName || service.chapterId)} · ${escapeHtml(service.state.toLowerCase())}${service.closed ? ' · closed' : ''}</span>
+                <span class="service-roster__meta">${escapeHtml(service.program?.name || service.programId)} · ${escapeHtml(service.chapterName || service.chapterId)} · ${escapeHtml(service.state.toLowerCase())}${service.closed ? ' · closed' : ''}${service.staffId ? ` · staff ${escapeHtml((this.game?.charter?.roster || []).find((resident) => resident.id === service.staffId)?.name || 'resident')}` : ''}</span>
                 <span class="service-roster__numbers">${service.capacity} capacity · ${service.visits} visits</span>
                 <span class="service-roster__wear${service.condition < 50 ? ' is-worn' : ''}">${Math.round(service.condition ?? 100)}% wear</span>
                 ${service.chapterId === 'player' && service.condition < 100 ? `<button type="button" class="service-roster__repair" data-repair-id="${escapeHtml(service.id)}">Repair · ${this.game?.charter?.repairCost?.(service) || 3}</button>` : ''}

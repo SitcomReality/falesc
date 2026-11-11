@@ -79,6 +79,7 @@ export class DaySimulator {
 
         const report = this.buildReport(needBefore);
         LumenLedger.resolveDay(charter, report, this.visitorFees);
+        charter.reconcileStaff?.();
 
         for (const service of charter.allServices) {
             service.resetDaily();

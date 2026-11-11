@@ -172,10 +172,12 @@ export class ServiceCardModal {
             <span>${shared ? 'shared · purse-funded' : service.chapterId !== 'player' ? 'rival budget' : `${upkeep} upkeep / day`}</span>
         `;
         this.blurbEl.textContent = program?.blurb || '';
+        const staff = service.staffId ? (this.game?.charter?.roster || []).find((resident) => resident.id === service.staffId) : null;
         this.factsEl.innerHTML = `
             <div><dt>Chapter</dt><dd>${escapeHtml(service.chapterName || 'Home Chapter')}</dd></div>
             ${service.builderChapterId ? `<div><dt>Built by</dt><dd>${escapeHtml(this.game?.charter?.chapterById(service.builderChapterId)?.name || 'A chapter')}</dd></div>` : ''}
             <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}${secondary ? ` · ${secondary.glyph} ${secondary.name}` : ''}</dd></div>
+            ${staff ? `<div><dt>Staff</dt><dd>${escapeHtml(staff.name)}</dd></div>` : ''}
             <div><dt>Visits</dt><dd>${service.visits}</dd></div>
             <div><dt>Hearts</dt><dd>${service.hearts.toFixed(1)}</dd></div>
             <div><dt>Finish</dt><dd>${escapeHtml(service.finish || 'comfortable')}</dd></div>

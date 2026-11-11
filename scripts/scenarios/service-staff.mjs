@@ -28,7 +28,9 @@ export default async function ({ page, assert, screenshot }) {
     assert.equal(saved, setup.resident);
     await page.pause(300);
     await screenshot('service-staff.png');
-    await page.evaluate("window.__falesc.app.serviceInterior.hide(); window.__falesc.app.serviceCard.hide()");
+    await page.click('[data-testid=service-interior-done]');
+    assert.ok((await page.text('[data-testid=structure-modal]')).includes('Staff'));
+    await page.evaluate("window.__falesc.app.serviceCard.hide()");
     await page.evaluate("window.__falesc.openDay()");
     await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
     await page.evaluate("window.__falesc.skipDay()");
