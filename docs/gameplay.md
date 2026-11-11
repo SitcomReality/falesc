@@ -313,6 +313,13 @@ line with the count. Click it to open the need survey. The survey lists the resi
 a reason; clicking a name opens their resident card. It is a live planning
 signal, not a separate warning system.
 
+## Charter journal
+
+The pause menu's **Journal** records short milestones: ground-breaking, the
+Beacon lighting, annexes, Assembly decisions, campaign promises, trial stays and
+trial outcomes. It is a narrative log, separate from the daily ledger, and is
+saved with the charter (up to 120 entries).
+
 ## Charter ledger
 
 The pause menu's **Ledger** lists every finished day: population, housed,

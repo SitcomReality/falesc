@@ -124,6 +124,7 @@ export class Charter {
         this.campaign = null;
         this.bulletin = null;
         this.history = [];
+        this.journal = [];
         this.commonsCell = null;
         this.pendingArrivals = [];
 
@@ -347,6 +348,7 @@ export class Charter {
         if (!this.campaign?.active) return { ok: false, reason: 'The campaign has not started.' };
         if (!PLEDGE_BY_ID[pledgeId]) return { ok: false, reason: 'That is not a campaign promise.' };
         this.campaign.setPlayerPledge(pledgeId);
+        this.log('campaign', `Campaign promise: ${this.campaign.playerPledgeName}.`);
         return { ok: true, campaign: this.campaign };
     }
 
@@ -508,6 +510,7 @@ export class Charter {
         this.commons.assembly.votes = result.votes;
         this.commons.assembly.counts = result.counts;
         this.commons.assembly.winnerId = result.winnerId;
+        this.log('commons', `The Commons Assembly chose ${chosen.policy.name}.`);
         return { ok: true, policy: chosen.policy, result };
     }
 
@@ -548,6 +551,7 @@ export class Charter {
         service.capacity += BALANCE.commons.annexCapacity;
         service.refreshGraphics();
         this.refreshDerived();
+        this.log('commons', `The Beacon gained annex ${this.commons.level}.`);
         return { ok: true, level: this.commons.level, capacity: service.capacity, cost: BALANCE.commons.annexCost };
     }
 
@@ -562,6 +566,7 @@ export class Charter {
         this.commons.activatedDay = this.day;
         if (this.commons.assembly.stage === 'none') this.commons.assembly.stage = 'nominations';
         if (!this.commons.assembly.petition) this.commons.assembly.petition = petitionFor(this.activeResidents);
+        this.log('commons', 'The Commons Beacon was lit.');
         return true;
     }
 
@@ -850,6 +855,7 @@ export class Charter {
         this.refreshAdjacency();
         this.assignHomes();
         this.refreshDerived();
+        this.log('build', `${resolvedName} broke ground${shared ? ' on the commons' : sector?.garden ? ' on the garden isle' : ''}.`);
         return { ...result, cost, funded };
     }
 
@@ -1082,6 +1088,7 @@ export class Charter {
         if (!visitor.homeServiceId) return { ok: false, reason: 'The bed could not be assigned.' };
         this.trialVisitors.push(visitor);
         this.refreshDerived();
+        this.log('visitor', `${visitor.name} began a trial stay.`);
         return { ok: true, trial: visitor };
     }
 
@@ -1099,6 +1106,7 @@ export class Charter {
                 visitor.state = 'idle';
                 this.roster.push(visitor);
                 results.push({ name: visitor.name, outcome: 'stayed', wellbeing: visitor.wellbeing });
+                this.log('visitor', `${visitor.name} passed the trial and stayed.`);
             } else {
                 visitor.trial = false;
                 visitor.visitor = false;
@@ -1106,6 +1114,7 @@ export class Charter {
                 visitor.homeServiceId = null;
                 visitor.homeChapterId = 'visitor';
                 results.push({ name: visitor.name, outcome: 'left', wellbeing: visitor.wellbeing });
+                this.log('visitor', `${visitor.name} left after the trial.`);
             }
         }
         this.trialVisitors = pending;
@@ -1443,6 +1452,7 @@ export class Charter {
             pendingArrivals: this.pendingArrivals,
             lastReport: summarizeReport(this.lastReport),
             history: this.history.slice(-60),
+            journal: this.journal.slice(-120),
             residents: this.roster.map((resident) => resident.toJSON()),
             services: this.services.serialize(),
             rivals: this.rivals.map((rival) => rival.toJSON())
@@ -1531,7 +1541,13 @@ export class Charter {
         this.report = null;
         this.lastReport = saved.lastReport || null;
         this.history = Array.isArray(saved.history) ? saved.history.slice(-60) : [];
+        this.journal = Array.isArray(saved.journal) ? saved.journal.slice(-120) : [];
         this.bulletin = this.buildBulletin(this.pendingArrivals, this.lastRivalMoves);
+    }
+
+    log(type, text) {
+        this.journal.push({ day: this.day, type, text });
+        if (this.journal.length > 120) this.journal.shift();
     }
 
     historyEntry(report) {

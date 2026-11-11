@@ -4666,3 +4666,49 @@ html.is-reduced-motion *::after {
     font-size: 9px;
     text-transform: uppercase;
 }
+
+/* Charter journal --------------------------------------------------------- */
+.charter-journal {
+    width: min(620px, calc(100vw - 32px));
+}
+
+.charter-journal__list {
+    display: grid;
+    gap: 5px;
+    max-height: 460px;
+    overflow-y: auto;
+    margin: 14px 0;
+    padding: 0 4px 0 0;
+    list-style: none;
+}
+
+.charter-journal__entry {
+    display: grid;
+    grid-template-columns: 46px 64px 1fr;
+    align-items: baseline;
+    gap: 2px 8px;
+    padding: 6px 8px;
+    background: rgba(255, 211, 110, 0.16);
+    border-left: 4px solid var(--mint);
+    border-radius: var(--radius);
+}
+
+.charter-journal__entry--build { border-left-color: var(--coral); }
+.charter-journal__entry--commons { border-left-color: var(--sun); }
+.charter-journal__entry--campaign { border-left-color: var(--wine); }
+.charter-journal__entry--visitor { border-left-color: var(--lavender); }
+
+.charter-journal__entry span,
+.charter-journal__entry small {
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.charter-journal__entry strong {
+    font-family: var(--display);
+    font-size: 14px;
+    line-height: 1.2;
+}

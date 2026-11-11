@@ -28,6 +28,7 @@ import { CharterArchiveModal } from './ui/CharterArchiveModal.js';
 import { NeedSurveyModal } from './ui/NeedSurveyModal.js';
 import { CharterLedgerModal } from './ui/CharterLedgerModal.js';
 import { RivalDossierModal } from './ui/RivalDossierModal.js';
+import { CharterJournalModal } from './ui/CharterJournalModal.js';
 import { recordCharter, recordFromCharter } from './persistence/CharterArchive.js';
 import { readMotion, writeMotion, applyMotion } from './settings/MotionPreference.js';
 import { BulletinModal } from './ui/BulletinModal.js';
@@ -127,6 +128,7 @@ export class FalescGame {
         });
         this.ledger = new CharterLedgerModal({ game: this, overlays: this.overlays });
         this.rivalDossier = new RivalDossierModal({ game: this, overlays: this.overlays });
+        this.journal = new CharterJournalModal({ game: this, overlays: this.overlays });
         this.charterArchive = new CharterArchiveModal({
             overlays: this.overlays,
             onClear: () => this.menuScreen?.show()
@@ -309,6 +311,7 @@ export class FalescGame {
         this.needSurvey.hide();
         this.ledger.hide();
         this.rivalDossier.hide();
+        this.journal.hide();
         this.visitorCard.hide();
     }
 
@@ -770,6 +773,11 @@ export class FalescGame {
         const chapter = this.charter?.rivals.find((entry) => entry.id === chapterId);
         if (!chapter) return false;
         this.rivalDossier.show(chapter);
+        return true;
+    }
+
+    openJournal() {
+        this.journal.show();
         return true;
     }
 

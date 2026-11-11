@@ -74,6 +74,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-field-guide">Field guide</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-need-survey">Need survey</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-ledger">Ledger</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="open-journal">Journal</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-commons-menu" hidden>The commons</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="save-return-menu">Save &amp; menu</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-departures" hidden>Past residents</button>
@@ -257,6 +258,10 @@ export class GameScreen {
         this.pausePanel.querySelector('[data-testid=open-ledger]').addEventListener('click', () => {
             this._setPauseOpen(false);
             this.game.openLedger();
+        });
+        this.pausePanel.querySelector('[data-testid=open-journal]').addEventListener('click', () => {
+            this._setPauseOpen(false);
+            this.game.openJournal();
         });
         this.pausePanel.querySelector('[data-testid=open-commons-menu]').addEventListener('click', () => {
             this._setPauseOpen(false);
