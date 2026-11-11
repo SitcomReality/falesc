@@ -2,20 +2,20 @@ import * as PIXI from 'pixi.js';
 import { SeededRandom } from '../map/SeededRandom.js';
 
 const LINES = [
-    'The crystals are humming again.',
-    'Lovely tide, isn\'t it?',
-    'I found a shell shaped like the Beacon.',
-    'Do you think it will be tall enough?',
-    'Mind the edge — the sea is deep.',
-    'I could use a cup of something warm.',
+    'I could use a hot meal.',
+    'The garden is humming again.',
+    'Is the tea house open late?',
+    'I heard someone new arrived.',
+    'The lamps are lovely from here.',
+    'I have not had a quiet hour all day.',
+    'That queue moved faster than I feared.',
+    'Somebody should paint this.',
+    'I think I am going to stay.',
     'The light is doing the thing again.',
-    'We are going to need more lanterns.',
-    'I\'m not scared. You\'re scared.',
-    'Another tide, another shard.',
-    'The palms lean toward the sunset.',
-    'Someone should paint this.',
-    'I heard the Beacon sings at night.',
-    'Just one more stone. Then sleep.'
+    'A bath would fix most of this.',
+    'Do you think there will be music?',
+    'I miss the old sky. This one is better.',
+    'We are going to need more beds.'
 ];
 
 /**
@@ -27,7 +27,7 @@ export class ChatterManager {
     constructor(layer, game) {
         this.layer = layer;
         this.game = game;
-        this.rng = new SeededRandom((game.stateManager?.settings?.mapSeed || 1) + 13000);
+        this.rng = new SeededRandom((game.settings?.mapSeed || 1) + 13000);
         this.timer = 18 + this.rng.next() * 12;
         this.bubbles = [];
     }
@@ -38,7 +38,7 @@ export class ChatterManager {
     }
 
     update(dt) {
-        if (!this.game || this.game.stateManager.state !== 'PLAYING') return;
+        if (!this.game || this.game.screenStateMachine.state !== 'PLAYING') return;
 
         this.timer -= dt;
         if (this.timer <= 0) {
@@ -46,8 +46,8 @@ export class ChatterManager {
             this.timer = 22 + this.rng.next() * 18;
         }
 
-        for (let i = this.bubbles.length - 1; i >= 0; i--) {
-            const bubble = this.bubbles[i];
+        for (let index = this.bubbles.length - 1; index >= 0; index--) {
+            const bubble = this.bubbles[index];
             bubble.life -= dt;
             bubble.age += dt;
             const character = bubble.character;
@@ -60,13 +60,16 @@ export class ChatterManager {
             bubble.container.alpha = fadeIn * fadeOut;
             if (bubble.life <= 0 || !character.graphics || !character.graphics.parent) {
                 bubble.container.destroy({ children: true });
-                this.bubbles.splice(i, 1);
+                this.bubbles.splice(index, 1);
             }
         }
     }
 
     spawn() {
-        const characters = this.game?.characters?.filter((character) => character.graphics?.parent) || [];
+        if (!this.game?.crowd) return;
+        const characters = [...this.game.crowd.agents.values()]
+            .filter((agent) => !agent.hidden && agent.character.graphics?.parent)
+            .map((agent) => agent.character);
         if (characters.length === 0 || this.bubbles.length >= 2) return;
 
         const character = characters[this.rng.nextInt(0, characters.length - 1)];
@@ -74,13 +77,13 @@ export class ChatterManager {
 
         const text = new PIXI.Text(line, {
             fontFamily: 'Jost, sans-serif',
-            fontSize: 28,
+            fontSize: 26,
             fontWeight: '600',
             fill: 0x211225,
             align: 'center',
             wordWrap: true,
             wordWrapWidth: 300,
-            lineHeight: 32
+            lineHeight: 30
         });
         text.resolution = 2;
 
@@ -88,7 +91,6 @@ export class ChatterManager {
         const padY = 10;
         const width = Math.ceil(text.width + padX * 2);
         const height = Math.ceil(text.height + padY * 2);
-
         text.position.set(-width / 2 + padX, -height + padY);
 
         const card = new PIXI.Graphics();

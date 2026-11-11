@@ -1,50 +1,63 @@
 /**
- * Persistence scenario: play one turn, reload the page, and continue the saved
- * charter from the menu. Run with:
- *   webgame_smoke --scenario scripts/scenarios/persistence.mjs
+ * Save v2: day, lumen, works, services, residents, needs, affinity and the last
+ * choice survive a reload. Continuing rebuilds the seeded world and the views.
  */
 export default async function ({ page, assert, screenshot, log }) {
-    await page.evaluate("localStorage.removeItem('falesc.save.v1')");
+    await page.evaluate("localStorage.removeItem('falesc.save.v2')");
     await page.reload();
-    await page.click('[data-testid=menu-start]');
-    await page.waitFor("document.querySelector('[data-testid=lobby-screen]') !== null");
-    await page.evaluate("(() => { const i = document.querySelector('[data-testid=lobby-seed]'); i.value='424242'; i.dispatchEvent(new Event('change',{bubbles:true})); return i.value; })()");
-    await page.click('[data-testid=lobby-start]');
-    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING' && window.__falesc.snapshot().sectors > 0");
+    await page.evaluate("window.__falesc.startCharter(424242, 'medium')");
+    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+    await page.evaluate("window.__falesc.app.bulletinModal.hide()");
 
-    await page.evaluate("(() => { const c = window.__falesc.findFreeCell(); window.__falesc.app.onWorldTap(c.x,c.y); return c; })()");
-    await page.click('[data-testid=build-submit]');
-    await page.pause(250);
-    await page.click('[data-testid=end-turn]');
-    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING' && window.__falesc.snapshot().turn === 2", 6000);
-
-    const before = await page.evaluate(`(() => {
-        const s = window.__falesc.snapshot();
-        const save = JSON.parse(localStorage.getItem('falesc.save.v1'));
-        return { turn: s.turn, lumen: s.lumen, buildings: s.buildings, states: s.buildingStates, seed: s.seed, saveTurn: save && save.turn, saveBuildings: save && save.buildings.length };
+    await page.evaluate(`(() => {
+        const app = window.__falesc.app;
+        app.selectProgram('canteen');
+        const cell = window.__falesc.findFreeCell('canteen');
+        app.onWorldTap(cell.x, cell.y);
+        app.finalizeBuild('Persisted Canteen');
+        app.buildModal.hide(false);
+        return true;
     })()`);
-    log(JSON.stringify(before));
-    assert.equal(before.turn, 2);
-    assert.equal(before.buildings, 1);
-    assert.equal(before.saveTurn, 2);
-    assert.equal(before.saveBuildings, 1);
+
+    for (let day = 1; day <= 2; day++) {
+        await page.evaluate("window.__falesc.openDay()");
+        await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
+        await page.evaluate("window.__falesc.skipDay()");
+        await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
+        await page.evaluate("window.__falesc.beginNextDay()");
+        await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+        await page.evaluate("window.__falesc.app.bulletinModal.hide()");
+    }
+
+    const before = await page.evaluate("window.__falesc.snapshot()");
+    const save = await page.evaluate("(() => { const raw = localStorage.getItem('falesc.save.v2'); return raw ? JSON.parse(raw) : null; })()");
+    log(JSON.stringify({ before: { day: before.day, lumen: before.lumen, works: before.works, services: before.services.length, residents: before.residents.length, needs: before.residents[0].needs, lastChoice: before.residents.find((resident) => resident.lastChoice)?.lastChoice }, saveVersion: save?.version, saveDay: save?.charter?.day }));
+    assert.equal(before.day, 3);
+    assert.equal(save?.version, 2, 'save should use the v2 schema');
+    assert.equal(save?.charter?.day, 3);
+    assert.equal(save?.charter?.services.length, before.services.length);
+    assert.equal(save?.charter?.residents.filter((resident) => resident.active).length, before.residents.length);
+    assert.ok(before.residents.some((resident) => resident.lastChoice), 'at least one resident should have chosen a service');
 
     await page.reload();
     await page.waitFor("window.__falesc.snapshot().state === 'MENU'");
     assert.ok(await page.visible('[data-testid=menu-continue]'), 'Continue should be visible after a reload with a save');
     await page.click('[data-testid=menu-continue]');
     await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+    await page.pause(500);
 
-    const after = await page.evaluate(`(() => {
-        const s = window.__falesc.snapshot();
-        return { turn: s.turn, lumen: s.lumen, buildings: s.buildings, states: s.buildingStates, seed: s.seed, dayLimit: s.dayLimit };
-    })()`);
-    log(JSON.stringify(after));
-    assert.equal(after.turn, 2);
+    const after = await page.evaluate("window.__falesc.snapshot()");
+    log(JSON.stringify({ after: { day: after.day, lumen: after.lumen, works: after.works, population: after.population, services: after.services.length, residents: after.residents.length, needs: after.residents[0].needs, lastChoice: after.residents.find((resident) => resident.lastChoice)?.lastChoice } }));
+    assert.equal(after.day, before.day);
     assert.equal(after.lumen, before.lumen);
-    assert.equal(after.buildings, 1);
-    assert.equal(after.states[0], 'RESERVED');
-    assert.equal(after.seed, 424242);
+    assert.equal(after.works, before.works);
+    assert.equal(after.population, before.population);
+    assert.equal(after.services.length, before.services.length);
+    assert.equal(after.residents[0].needs.sustenance, before.residents[0].needs.sustenance);
+    assert.equal(after.residents[0].needs.rest, before.residents[0].needs.rest);
+    assert.equal(JSON.stringify(after.residents.find((resident) => resident.lastChoice)?.lastChoice), JSON.stringify(before.residents.find((resident) => resident.lastChoice)?.lastChoice));
+    assert.equal(after.services.find((service) => service.programId === 'canteen')?.state, 'ACTIVE');
 
-    await screenshot('continued.png');
+    await page.evaluate("window.__falesc.app.bulletinModal.hide()");
+    await screenshot('persisted.png');
 }

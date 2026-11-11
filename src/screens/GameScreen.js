@@ -1,73 +1,104 @@
-import { BLUEPRINTS, BLUEPRINT_BY_ID, BEACON_ID, effectiveCost } from '../buildings/blueprints.js';
-import { blueprintIcon, ICONS } from '../ui/icons.js';
+import { BUILDABLE_PROGRAMS, PROGRAM_BY_ID } from '../design/programs.js';
+import { NEED_BY_ID } from '../design/needs.js';
+import { BALANCE } from '../design/balance.js';
+import { programIcon, ICONS } from '../ui/icons.js';
 
+/**
+ * The planning HUD: a civic bulletin strip, First Light progress, the survey
+ * chart and the service dock. It reads the charter; it never owns it.
+ */
 export class GameScreen {
-    constructor(gameStateManager, game) {
-        this.gsm = gameStateManager;
+    constructor(screenStateMachine, game) {
+        this.gsm = screenStateMachine;
         this.game = game;
         this._cache = {};
+        this._toastTimer = null;
 
         this.container = document.createElement('div');
         this.container.className = 'screen screen--hud';
         this.container.dataset.testid = 'game-hud';
 
-        // Top bar ----------------------------------------------------------
         const top = document.createElement('div');
         top.className = 'hud__top';
         top.innerHTML = `
-            <div class="brand" aria-label="FALESC — Prism Tide">
+            <div class="brand" aria-label="FALESC — The Confluence">
                 <span class="brand__mark" aria-hidden="true">◇</span>
                 <span>
                     <span class="brand__name">FALESC</span>
-                    <span class="brand__sub">Prism Tide</span>
+                    <span class="brand__sub">The Confluence</span>
                 </span>
             </div>
             <div class="tide-card">
-                <span class="kicker">Tide</span>
+                <span class="kicker">Day</span>
                 <span class="tide-card__day" data-testid="turn-display" aria-live="polite">Day 01</span>
                 <span class="tide-card__limit" data-role="day-limit">/ 14</span>
             </div>
             <div class="resources">
-                <div class="resource" title="Lumen — the currency of the Glass Sea">
+                <div class="resource" title="Lumen — civic energy held in common">
                     <span class="resource__icon" aria-hidden="true">${ICONS.lumen}</span>
                     <span class="resource__meta">
                         <span class="resource__label">Lumen</span>
-                        <span class="resource__income" data-role="income">+0 / tide</span>
+                        <span class="resource__income" data-role="projection">+0 / day</span>
                     </span>
                     <span class="resource__value" data-role="lumen" aria-live="polite">0</span>
+                </div>
+                <div class="resource resource--compact" title="Works — build actions left today">
+                    <span class="resource__icon" aria-hidden="true">${ICONS.works}</span>
+                    <span class="resource__meta">
+                        <span class="resource__label">Works</span>
+                    </span>
+                    <span class="resource__value" data-role="works">2</span>
+                </div>
+                <div class="resource resource--compact" title="Population — Tidelanders living in the chapter">
+                    <span class="resource__icon" aria-hidden="true">${ICONS.population}</span>
+                    <span class="resource__meta">
+                        <span class="resource__label">People</span>
+                    </span>
+                    <span class="resource__value" data-role="population">6</span>
+                </div>
+                <div class="resource resource--compact" title="Devotion — accumulated love">
+                    <span class="resource__icon" aria-hidden="true">${ICONS.devotion}</span>
+                    <span class="resource__meta">
+                        <span class="resource__label">Devotion</span>
+                    </span>
+                    <span class="resource__value" data-role="devotion">0.0</span>
                 </div>
                 <button type="button" class="hud__menu" data-testid="hud-menu" aria-label="Open charter menu" title="Charter menu" aria-expanded="false" aria-controls="charter-menu">☰</button>
             </div>
             <div class="charter-menu" id="charter-menu" data-testid="charter-menu" hidden>
                 <p class="kicker">Charter menu</p>
-                <button type="button" class="btn btn--small btn--paper" data-testid="resume-game">Return to the tide</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="resume-game">Return to planning</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="open-bulletin">Morning bulletin</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="open-residents">Residents</button>
                 <button type="button" class="btn btn--small btn--ghost charter-menu__abandon" data-testid="end-game">Abandon charter</button>
             </div>
         `;
 
-        // Objective --------------------------------------------------------
         const objective = document.createElement('aside');
         objective.className = 'objective-card';
         objective.innerHTML = `
             <div class="objective-card__head">
-                <span class="kicker">Charter</span>
+                <span class="kicker">First Light</span>
                 <span class="objective-card__days" data-role="days-left">14 days left</span>
             </div>
-            <p class="objective-card__name">Raise the Aurora Beacon</p>
-            <div class="objective-card__track" role="progressbar" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-label="Aurora Beacon progress">
-                <div class="objective-card__fill" data-role="objective-fill"></div>
+            <p class="objective-card__name">House twelve Tidelanders</p>
+            <div class="objective-card__track" role="progressbar" aria-valuemin="0" aria-valuemax="12" aria-valuenow="6" aria-label="Residents housed">
+                <div class="objective-card__fill" data-role="population-fill"></div>
             </div>
             <div class="objective-card__foot">
-                <span data-role="objective-meta">0 / 1 beacon</span>
-                <span data-role="beacon-cost">12 lumen</span>
+                <span data-role="population-progress">6 / 12 residents</span>
+                <span data-role="flourishing-label">Flourishing 62</span>
             </div>
+            <div class="objective-card__track objective-card__track--flourishing" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62" aria-label="Flourishing">
+                <div class="objective-card__fill objective-card__fill--mint" data-role="flourishing-fill"></div>
+            </div>
+            <p class="objective-card__goal" data-role="goal-copy">and reach a flourishing of ${BALANCE.end.comfortableFlourishing}.</p>
         `;
 
-        // Hint -------------------------------------------------------------
         const hint = document.createElement('div');
         hint.className = 'hud__hint';
         hint.dataset.role = 'hint';
-        hint.textContent = 'Pick a blueprint, then tap a free plot to raise it.';
+        hint.textContent = 'Build a Canteen, then open the day and watch where people go.';
 
         const toast = document.createElement('div');
         toast.className = 'hud-toast';
@@ -76,7 +107,6 @@ export class GameScreen {
         toast.setAttribute('aria-live', 'polite');
         toast.textContent = '';
 
-        // Bottom -----------------------------------------------------------
         const bottom = document.createElement('div');
         bottom.className = 'hud__bottom';
 
@@ -88,103 +118,104 @@ export class GameScreen {
         dock.className = 'build-dock';
         dock.innerHTML = `
             <div class="build-dock__head">
-                <span class="kicker">Blueprints</span>
-                <span class="build-dock__note" data-role="actions-note">1 build / tide</span>
+                <span class="kicker">Services</span>
+                <span class="build-dock__note" data-role="works-note">2 works / day</span>
             </div>
-            <div class="blueprints" role="group" aria-label="Blueprint palette"></div>
+            <div class="blueprints" role="group" aria-label="Service palette"></div>
             <div class="build-dock__foot">
+                <span class="build-dock__cost" data-role="dock-note">One door at a time.</span>
                 <button type="button" class="btn btn--primary" data-testid="end-turn">
-                    Let the tide turn <span class="btn__arrow" aria-hidden="true">→</span>
+                    Open the day <span class="btn__arrow" aria-hidden="true">→</span>
                 </button>
             </div>
         `;
-
         const blueprintList = dock.querySelector('.blueprints');
-        this.blueprintButtons = new Map();
-        for (const blueprint of BLUEPRINTS) {
+        this.programButtons = new Map();
+        for (const program of BUILDABLE_PROGRAMS) {
+            const need = program.need ? NEED_BY_ID[program.need] : null;
             const button = document.createElement('button');
             button.type = 'button';
-            button.className = `blueprint${blueprint.goal ? ' blueprint--goal' : ''}`;
-            button.dataset.blueprint = blueprint.id;
-            button.dataset.testid = blueprint.testid;
+            button.className = 'blueprint';
+            button.dataset.program = program.id;
+            button.dataset.testid = program.testid;
             button.setAttribute('aria-pressed', 'false');
-            button.setAttribute('aria-keyshortcuts', String(BLUEPRINTS.indexOf(blueprint) + 1));
-            button.title = `${blueprint.name} — ${blueprint.blurb}`;
+            button.setAttribute('aria-keyshortcuts', String(BUILDABLE_PROGRAMS.indexOf(program) + 1));
+            button.title = `${program.name} — ${program.blurb}`;
             button.innerHTML = `
-                <span class="blueprint__icon" aria-hidden="true">${blueprintIcon(blueprint.id)}</span>
-                <span class="blueprint__name">${blueprint.name}</span>
+                <span class="blueprint__icon" aria-hidden="true">${programIcon(program.id)}</span>
+                <span class="blueprint__name">${program.name}</span>
+                <span class="blueprint__need">${need ? `${need.glyph} ${need.name}` : 'civic'} · ${program.durationText}</span>
                 <span class="blueprint__meta">
-                    <span class="blueprint__cost" data-role="cost">${blueprint.cost} lumen</span>
-                    <span data-role="yield">${blueprint.income ? `+${blueprint.income} / tide` : blueprint.goal ? 'the charter' : ''}</span>
+                    <span class="blueprint__cost" data-role="cost">${program.cost} lumen</span>
+                    <span data-role="upkeep">${program.upkeep} upkeep</span>
                 </span>
             `;
             button.addEventListener('click', () => {
                 if (button.disabled) return;
-                this.game.selectBlueprint(blueprint.id);
-                this.updateTurnDisplay(true);
+                if (this.game.selectProgram(program.id)) {
+                    this.updateHud(true);
+                }
             });
-            this.blueprintButtons.set(blueprint.id, button);
+            this.programButtons.set(program.id, button);
             blueprintList.appendChild(button);
         }
 
-        const endTurnBtn = dock.querySelector('[data-testid=end-turn]');
-        endTurnBtn.setAttribute('aria-keyshortcuts', 'E');
-        endTurnBtn.addEventListener('click', () => this.gsm.endTurn());
-
+        const endDayBtn = dock.querySelector('[data-testid=end-turn]');
+        endDayBtn.setAttribute('aria-keyshortcuts', 'E');
+        endDayBtn.addEventListener('click', () => this.game.openDay());
         bottom.append(chartSlot, dock);
-
-        // Charter menu: deliberately quiet, and the only place the destructive
-        // action lives.
-        this.pausePanel = top.querySelector('[data-testid=charter-menu]');
-        this.menuButton = top.querySelector('[data-testid=hud-menu]');
-        const setPauseOpen = (open) => {
-            this.pausePanel.hidden = !open;
-            this.menuButton.setAttribute('aria-expanded', String(open));
-            if (open) {
-                this.pausePanel.querySelector('[data-testid=resume-game]').focus({ preventScroll: true });
-            } else {
-                this.menuButton.focus({ preventScroll: true });
-            }
-        };
-        this._setPauseOpen = setPauseOpen;
-        this.menuButton.addEventListener('click', () => setPauseOpen(this.pausePanel.hidden));
-        this.pausePanel.querySelector('[data-testid=resume-game]').addEventListener('click', () => setPauseOpen(false));
-        this.pausePanel.querySelector('[data-testid=end-game]').addEventListener('click', () => {
-            this.pausePanel.hidden = true;
-            this.gsm.endGame('abandon');
-        });
-        this._onPauseKey = (event) => {
-            if (event.key === 'Escape' && !this.pausePanel.hidden) {
-                event.preventDefault();
-                setPauseOpen(false);
-            }
-        };
-        document.addEventListener('keydown', this._onPauseKey);
 
         this.container.append(top, objective, hint, toast, bottom);
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
 
         this.turnDisplay = top.querySelector('[data-testid=turn-display]');
-        this.dayLimit = top.querySelector('[data-role=day-limit]');
+        this.dayLimitEl = top.querySelector('[data-role=day-limit]');
         this.lumenEl = top.querySelector('[data-role=lumen]');
-        this.incomeEl = top.querySelector('[data-role=income]');
+        this.worksEl = top.querySelector('[data-role=works]');
+        this.populationEl = top.querySelector('[data-role=population]');
+        this.devotionEl = top.querySelector('[data-role=devotion]');
+        this.projectionEl = top.querySelector('[data-role=projection]');
         this.daysLeftEl = objective.querySelector('[data-role=days-left]');
-        this.objectiveFill = objective.querySelector('[data-role=objective-fill]');
-        this.objectiveMeta = objective.querySelector('[data-role=objective-meta]');
-        this.beaconCostEl = objective.querySelector('[data-role=beacon-cost]');
-        this.objectiveTrack = objective.querySelector('[role=progressbar]');
+        this.populationFill = objective.querySelector('[data-role=population-fill]');
+        this.populationProgress = objective.querySelector('[data-role=population-progress]');
+        this.flourishingLabel = objective.querySelector('[data-role=flourishing-label]');
+        this.flourishingFill = objective.querySelector('[data-role=flourishing-fill]');
+        this.populationTrack = objective.querySelector('[role=progressbar]');
+        this.flourishingTrack = objective.querySelectorAll('[role=progressbar]')[1];
+        this.goalCopy = objective.querySelector('[data-role=goal-copy]');
         this.hintEl = hint;
         this.toastEl = toast;
-        this._toastTimer = null;
-        this.actionsNote = dock.querySelector('[data-role=actions-note]');
-        this.dock = dock;
+        this.worksNote = dock.querySelector('[data-role=works-note]');
+        this.dockNote = dock.querySelector('[data-role=dock-note]');
 
-        // Number keys arm a blueprint; E ends the tide; Escape opens/closes the
-        // charter menu. These shortcuts are inert while a text dialog is open.
-        this._onShortcut = (event) => {
+        this.pausePanel = top.querySelector('[data-testid=charter-menu]');
+        this.menuButton = top.querySelector('[data-testid=hud-menu]');
+        this._setPauseOpen = (open) => {
+            this.pausePanel.hidden = !open;
+            this.menuButton.setAttribute('aria-expanded', String(open));
+            if (open) this.pausePanel.querySelector('[data-testid=resume-game]').focus({ preventScroll: true });
+            else this.menuButton.focus({ preventScroll: true });
+        };
+        this.menuButton.addEventListener('click', () => this._setPauseOpen(this.pausePanel.hidden));
+        this.pausePanel.querySelector('[data-testid=resume-game]').addEventListener('click', () => this._setPauseOpen(false));
+        this.pausePanel.querySelector('[data-testid=open-bulletin]').addEventListener('click', () => {
+            this._setPauseOpen(false);
+            this.game.showBulletin();
+        });
+        this.pausePanel.querySelector('[data-testid=open-residents]').addEventListener('click', () => {
+            this._setPauseOpen(false);
+            this.game.showResidentRoster();
+        });
+        this.pausePanel.querySelector('[data-testid=end-game]').addEventListener('click', () => {
+            this.pausePanel.hidden = true;
+            this.game.endCharter('abandon');
+        });
+
+        this._onKey = (event) => {
             if (event.ctrlKey || event.metaKey || event.altKey) return;
-            if (this.gsm.state !== 'PLAYING' || this.game.buildModal.isOpen || this.game.structureModal?.isOpen) return;
+            if (this.gsm.state !== 'PLAYING') return;
+            if (this.game.hasBlockingModal?.()) return;
             if (this.pausePanel && !this.pausePanel.hidden && event.key !== 'Escape') return;
             if (event.key === 'Escape') {
                 event.preventDefault();
@@ -193,24 +224,32 @@ export class GameScreen {
             }
             if (event.key === 'e' || event.key === 'E') {
                 event.preventDefault();
-                this.gsm.endTurn();
+                this.game.openDay();
+                return;
+            }
+            if (event.key === 'b' || event.key === 'B') {
+                event.preventDefault();
+                this.game.showBulletin();
+                return;
+            }
+            if (event.key === 'r' || event.key === 'R') {
+                event.preventDefault();
+                this.game.showResidentRoster();
                 return;
             }
             const slot = Number(event.key);
-            if (Number.isInteger(slot) && slot >= 1 && slot <= BLUEPRINTS.length) {
-                const blueprint = BLUEPRINTS[slot - 1];
+            if (Number.isInteger(slot) && slot >= 1 && slot <= BUILDABLE_PROGRAMS.length) {
+                const program = BUILDABLE_PROGRAMS[slot - 1];
                 event.preventDefault();
-                if (this.game.selectBlueprint(blueprint.id)) {
-                    this.toast(`${blueprint.name} armed — click a free plot.`, 'mint', 1600);
-                }
+                if (this.game.selectProgram(program.id)) this.toast(`${program.name} armed — choose a plot.`, 'mint', 1600);
             }
         };
-        document.addEventListener('keydown', this._onShortcut);
+        document.addEventListener('keydown', this._onKey);
     }
 
     show() {
         this.container.style.display = 'block';
-        this.updateTurnDisplay(true);
+        this.updateHud(true);
     }
 
     hide() {
@@ -243,83 +282,83 @@ export class GameScreen {
         element.textContent = value;
     }
 
-    updateTurnDisplay(force = false) {
-        if (!this.game || !this.gsm) return;
-        const state = this.gsm;
-        const buildings = this.game.buildingManager ? this.game.buildingManager.buildings : [];
-        const dayLimit = state.dayLimit || 14;
-        const beacon = buildings.find((building) => building.blueprintId === BEACON_ID);
-        const lumen = state.lumen || 0;
-        const income = buildings.reduce((total, building) => {
-            if (building.state !== 'ACTIVE') return total;
-            return total + (building.income ?? (BLUEPRINT_BY_ID[building.blueprintId]?.income || 0));
-        }, 0);
-        const daysLeft = Math.max(0, dayLimit - state.currentTurn);
-        const actions = state.actionsRemaining;
+    updateHud(force = false) {
+        const charter = this.game?.charter;
+        if (!charter) return;
+        const dayLimit = charter.dayLimit || 14;
+        const day = charter.day || 1;
+        const daysLeft = Math.max(0, dayLimit - day + 1);
+        const populationGoal = BALANCE.end.firstLightPopulation;
+        const flourishingGoal = BALANCE.end.comfortableFlourishing;
 
-        this._setText(this.turnDisplay, 'day', `Day ${String(state.currentTurn).padStart(2, '0')}`);
-        this._setText(this.dayLimit, 'dayLimit', `/ ${dayLimit}`);
-        this._setText(this.lumenEl, 'lumen', String(lumen));
-        this._setText(this.incomeEl, 'income', `+${income} / tide`);
-        this._setText(this.daysLeftEl, 'daysLeft', daysLeft === 1 ? '1 day left' : `${daysLeft} days left`);
-        const beaconActive = beacon?.state === 'ACTIVE';
-        this._setText(
-            this.objectiveMeta,
-            'objectiveMeta',
-            beaconActive ? 'Beacon alight' : beacon ? 'Beacon rising' : '0 / 1 beacon'
-        );
-        this._setText(this.beaconCostEl, 'beaconCost', `${effectiveCost(BLUEPRINT_BY_ID[BEACON_ID], buildings)} lumen`);
+        this._setText(this.turnDisplay, 'day', `Day ${String(day).padStart(2, '0')}`);
+        this._setText(this.dayLimitEl, 'dayLimit', `/ ${dayLimit}`);
+        this._setText(this.lumenEl, 'lumen', String(charter.lumen));
+        this._setText(this.worksEl, 'works', String(charter.works));
+        this._setText(this.populationEl, 'population', String(charter.population));
+        this._setText(this.devotionEl, 'devotion', charter.devotion.toFixed(1));
+        const net = charter.projectedNet;
+        const projection = `${net >= 0 ? '+' : '−'}${Math.abs(net)} lumen / day`;
+        this._setText(this.projectionEl, 'projection', projection);
+        this._setText(this.daysLeftEl, 'daysLeft', daysLeft === 1 ? 'Last day' : `${daysLeft} days left`);
 
-        const progress = beaconActive ? 100 : beacon ? 55 : 0;
-        if (this._cache.progress !== progress) {
-            this._cache.progress = progress;
-            this.objectiveFill.style.width = `${progress}%`;
-            this.objectiveTrack.setAttribute('aria-valuenow', beaconActive ? '1' : beacon ? '0.55' : '0');
+        const populationPercent = Math.min(100, (charter.population / populationGoal) * 100);
+        if (force || this._cache.populationPercent !== populationPercent) {
+            this._cache.populationPercent = populationPercent;
+            this.populationFill.style.width = `${populationPercent}%`;
+            this.populationTrack?.setAttribute('aria-valuenow', String(charter.population));
         }
+        const flourishingPercent = Math.max(0, Math.min(100, charter.flourishing));
+        if (force || this._cache.flourishingPercent !== flourishingPercent) {
+            this._cache.flourishingPercent = flourishingPercent;
+            this.flourishingFill.style.width = `${flourishingPercent}%`;
+            this.flourishingTrack?.setAttribute('aria-valuenow', String(Math.round(charter.flourishing)));
+        }
+        this._setText(this.populationProgress, 'populationProgress', `${charter.population} / ${populationGoal} residents`);
+        this._setText(this.flourishingLabel, 'flourishingLabel', `Flourishing ${Math.round(charter.flourishing)}`);
+        const goalsMet = charter.goalsMet;
+        this._setText(this.goalCopy, 'goalCopy', goalsMet
+            ? 'Both goals are met. Keep the commons alive until the last day.'
+            : `and reach a flourishing of ${flourishingGoal}.`);
+        this.container.classList.toggle('is-goals-met', goalsMet);
 
-        // Blueprint affordances.
-        const beaconBuilt = Boolean(beacon);
-        for (const blueprint of BLUEPRINTS) {
-            const button = this.blueprintButtons.get(blueprint.id);
+        for (const program of BUILDABLE_PROGRAMS) {
+            const button = this.programButtons.get(program.id);
             if (!button) continue;
-            const uniqueBlocked = blueprint.unique && beaconBuilt;
-            const cost = effectiveCost(blueprint, buildings);
-            const unaffordable = cost > lumen;
-            const blocked = actions <= 0 || uniqueBlocked || unaffordable;
-            if (button.disabled !== blocked) button.disabled = blocked;
-            if (blueprint.unique) {
-                const costEl = button.querySelector('[data-role=cost]');
-                if (costEl) this._setText(costEl, `cost-${blueprint.id}`, `${cost} lumen`);
-            }
-            const selected = state.selectedBlueprint === blueprint.id;
+            const unaffordable = program.cost > charter.lumen;
+            const noWorks = charter.works <= 0;
+            const disabled = unaffordable || noWorks;
+            if (button.disabled !== disabled) button.disabled = disabled;
+            const selected = this.game.selectedProgramId === program.id;
             if (button.getAttribute('aria-pressed') !== String(selected)) {
                 button.setAttribute('aria-pressed', String(selected));
             }
             let reason = '';
-            if (actions <= 0) reason = 'No builds left this tide';
-            else if (uniqueBlocked) reason = 'The Beacon is already standing';
-            else if (unaffordable) reason = `Need ${cost - lumen} more lumen`;
-            button.title = reason || `${blueprint.name} — ${blueprint.blurb}`;
+            if (noWorks) reason = 'No works left today';
+            else if (unaffordable) reason = `Need ${program.cost - charter.lumen} more lumen`;
+            button.title = reason || `${program.name} — ${program.blurb}`;
         }
 
-        // Hint: present until the first structure is raised.
-        const showHint = buildings.length === 0 && actions > 0 && !state.hintDismissed;
+        const selectedName = PROGRAM_BY_ID[this.game.selectedProgramId]?.name || 'Service';
+        this._setText(this.worksNote, 'worksNote', `${charter.works} ${charter.works === 1 ? 'work' : 'works'} left · ${charter.spareBeds} spare ${charter.spareBeds === 1 ? 'bed' : 'beds'}`);
+        this._setText(this.dockNote, 'dockNote', charter.works > 0
+            ? `${selectedName} armed${this.game.selectedProgramId ? ' · choose a plot' : ''}`
+            : 'No works left. Open the day.');
+        this.container.classList.toggle('is-out-of-actions', charter.works <= 0);
+
+        const showHint = !charter.services.activeServices.some((service) => service.programId === 'canteen')
+            && charter.works > 0
+            && !this.game.hintDismissed;
         this.hintEl.classList.toggle('is-hidden', !showHint);
         if (showHint) {
-            const copy = state.selectedBlueprint
-                ? `Tap a free plot to raise the ${BLUEPRINT_BY_ID[state.selectedBlueprint]?.name || 'structure'}.`
-                : 'Pick a blueprint, then tap a free plot to raise it.';
-            this._setText(this.hintEl, 'hint', copy);
+            this._setText(this.hintEl, 'hint', this.game.selectedProgramId
+                ? `Tap a free plot to raise the ${selectedName}.`
+                : 'Build a Canteen, then open the day and watch where people go.');
         }
-
-        const selectedName = BLUEPRINT_BY_ID[state.selectedBlueprint]?.name || 'Prism Rig';
-        this._setText(
-            this.actionsNote,
-            'actions',
-            actions > 0 ? `${selectedName} armed · 1 build / tide` : 'No builds left this tide'
-        );
-
-        this.container.classList.toggle('is-out-of-actions', actions <= 0);
         this._cache.force = force;
+    }
+
+    updateTurnDisplay(force = false) {
+        this.updateHud(force);
     }
 }

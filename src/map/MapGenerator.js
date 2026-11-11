@@ -22,9 +22,9 @@ export class MapGenerator {
         this.homeSector = null;
 
         const gridConfigs = {
-            small: [2, 2, 2, 2],
-            medium: [3, 3, 2, 2, 2, 2],
-            large: [4, 3, 3, 2, 2, 2, 2]
+            small: [4, 2, 2, 2],
+            medium: [4, 3, 3, 2, 2, 2],
+            large: [5, 3, 3, 2, 2, 2, 2]
         };
 
         this.gridSizes = (gridConfigs[mapSize] || gridConfigs.medium)

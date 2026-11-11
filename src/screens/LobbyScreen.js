@@ -1,7 +1,7 @@
 const SIZE_DATA = {
-    small: { islands: 4, minerals: 30, days: 12, label: 'A quiet shelf', note: 'Four islets, a short run.' },
-    medium: { islands: 6, minerals: 50, days: 14, label: 'A working archipelago', note: 'Six islets, room to breathe.' },
-    large: { islands: 7, minerals: 70, days: 16, label: 'A wide prism field', note: 'Seven islets, a longer tide.' }
+    small: { islands: 4, shards: 46, days: 12, label: 'A quiet shard', note: 'Four islets, a short charter.' },
+    medium: { islands: 6, shards: 64, days: 14, label: 'A working archipelago', note: 'Six islets, room for a commons.' },
+    large: { islands: 7, shards: 82, days: 16, label: 'A wide drift', note: 'Seven islets, a longer light.' }
 };
 
 const ISLAND_PATHS = [
@@ -15,9 +15,9 @@ const ISLAND_PATHS = [
 ];
 
 export class LobbyScreen {
-    constructor(gameStateManager) {
-        this.gsm = gameStateManager;
-        this.fieldCounter = 0;
+    constructor(screenStateMachine, game) {
+        this.gsm = screenStateMachine;
+        this.game = game;
 
         this.container = document.createElement('div');
         this.container.className = 'screen screen--lobby';
@@ -30,18 +30,17 @@ export class LobbyScreen {
         sheet.className = 'lobby__sheet paper';
         sheet.innerHTML = `
             <p class="eyebrow" style="color:var(--wine)">Charter office · sheet no. 03</p>
-            <h2 class="lobby__title">Choose your tide.</h2>
-            <p class="lobby__lede">Every charter begins with a seed, a shore, and one stubborn lamp. Pick the shape of your archipelago.</p>
+            <h2 class="lobby__title">Choose your drift.</h2>
+            <p class="lobby__lede">A charter begins with a seed, a shard, and one stubborn lamp. Pick the shape of your archipelago. The other islands are scenery for now; the home shard is yours to care for.</p>
         `;
 
         const form = document.createElement('form');
         form.className = 'lobby__form';
         form.addEventListener('submit', (event) => {
             event.preventDefault();
-            this.gsm.startGame();
+            this.game.startCharter();
         });
 
-        // Seed -------------------------------------------------------------
         const seedField = document.createElement('div');
         seedField.className = 'field';
 
@@ -58,7 +57,7 @@ export class LobbyScreen {
         this.seedInput.id = 'lobby-seed-field';
         this.seedInput.type = 'number';
         this.seedInput.inputMode = 'numeric';
-        this.seedInput.value = this.gsm.settings.mapSeed;
+        this.seedInput.value = this.game.settings.mapSeed;
         this.seedInput.dataset.testid = 'lobby-seed';
 
         const randomBtn = document.createElement('button');
@@ -72,30 +71,26 @@ export class LobbyScreen {
 
         const seedHint = document.createElement('span');
         seedHint.className = 'field__hint';
-        seedHint.textContent = 'The same seed always raises the same islands.';
+        seedHint.textContent = 'The same seed always raises the same islands — and the same fifteen Tidelanders.';
 
         seedField.append(seedLabel, seedRow, seedHint);
 
-        const setSeed = (value, fromInput = false) => {
+        const setSeed = (value) => {
             const parsed = Number.parseInt(value, 10);
             if (!Number.isInteger(parsed)) return;
-            this.gsm.settings.mapSeed = parsed;
+            this.game.settings.mapSeed = parsed;
             this.seedInput.value = parsed;
             this._updateChart();
         };
         this.seedInput.addEventListener('change', (event) => setSeed(event.target.value));
-        this.seedInput.addEventListener('input', (event) => {
-            if (!fromInput) setSeed(event.target.value, true);
-        });
         randomBtn.addEventListener('click', () => {
             const next = Math.floor(Math.random() * 1000000);
-            this.gsm.settings.mapSeed = next;
+            this.game.settings.mapSeed = next;
             this.seedInput.value = next;
             this._updateChart();
             this.seedInput.focus();
         });
 
-        // Map size ---------------------------------------------------------
         const sizeField = document.createElement('fieldset');
         sizeField.className = 'size-picker';
         const legend = document.createElement('legend');
@@ -122,8 +117,6 @@ export class LobbyScreen {
             sizeField.appendChild(card);
         }
 
-        // A native select remains in the DOM for automation and assistive tech
-        // that prefers a plain control. The cards are the visible control.
         this.sizeSelect = document.createElement('select');
         this.sizeSelect.className = 'visually-hidden';
         this.sizeSelect.dataset.testid = 'lobby-size';
@@ -137,7 +130,6 @@ export class LobbyScreen {
         this.sizeSelect.addEventListener('change', (event) => this._setSize(event.target.value));
         sizeField.appendChild(this.sizeSelect);
 
-        // Actions ---------------------------------------------------------
         const actions = document.createElement('div');
         actions.className = 'lobby__actions';
 
@@ -152,7 +144,7 @@ export class LobbyScreen {
         backBtn.className = 'btn btn--ghost';
         backBtn.style.color = 'var(--ink)';
         backBtn.dataset.testid = 'lobby-back';
-        backBtn.textContent = 'Back to the water';
+        backBtn.textContent = 'Back to the drift';
 
         actions.append(startBtn, backBtn);
         backBtn.addEventListener('click', () => this.gsm.setState('MENU'));
@@ -160,7 +152,6 @@ export class LobbyScreen {
         form.append(seedField, sizeField, actions);
         sheet.appendChild(form);
 
-        // Chart ------------------------------------------------------------
         const chart = document.createElement('aside');
         chart.className = 'lobby__chart';
         chart.setAttribute('aria-hidden', 'true');
@@ -175,8 +166,8 @@ export class LobbyScreen {
             <div class="chart-illustration"></div>
             <dl class="chart-readout">
                 <div><dt>Islets</dt><dd data-chart="islands">6</dd></div>
-                <div><dt>Minerals</dt><dd data-chart="minerals">50</dd></div>
-                <div><dt>Tide limit</dt><dd data-chart="days">14</dd></div>
+                <div><dt>Shards</dt><dd data-chart="shards">64</dd></div>
+                <div><dt>Day limit</dt><dd data-chart="days">14</dd></div>
                 <div><dt>Seed</dt><dd data-chart="seed" style="font-family:var(--mono);font-size:16px">—</dd></div>
             </dl>
             <div class="chart-compass" aria-hidden="true">N</div>
@@ -188,33 +179,27 @@ export class LobbyScreen {
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
 
-        this._setSize(this.gsm.settings.mapSize, false);
+        this._setSize(this.game.settings.mapSize, false);
     }
 
-    _setSize(value, dispatch = true) {
+    _setSize(value) {
         const data = SIZE_DATA[value] || SIZE_DATA.medium;
-        this.gsm.settings.mapSize = value;
+        this.game.settings.mapSize = value;
         if (this.sizeInputs) {
             for (const [key, input] of this.sizeInputs) input.checked = key === value;
         }
-        if (this.sizeSelect && this.sizeSelect.value !== value) this.sizeSelect.value = value;
+        if (this.sizeSelect) this.sizeSelect.value = value;
         this._updateChart();
-        if (dispatch) {
-            // Keep the native select's value in sync for automation that reads
-            // it back after choosing a card.
-            this.sizeSelect.value = value;
-        }
         return data;
     }
 
     _updateChart() {
-        const data = SIZE_DATA[this.gsm.settings.mapSize] || SIZE_DATA.medium;
-        const seed = this.gsm.settings.mapSeed;
-
+        const data = SIZE_DATA[this.game.settings.mapSize] || SIZE_DATA.medium;
+        const seed = this.game.settings.mapSeed;
         const count = data.islands;
         const paths = ISLAND_PATHS.slice(0, count).map((path, index) => {
             const fill = index % 3 === 0 ? '#59E3C2' : index % 3 === 1 ? '#FFA07A' : '#C9B6FF';
-            return `<path d="${path}" fill="${fill}" fill-opacity=".28" stroke="${fill}" stroke-width="1.5"/>`;
+            return `<path d="${path}" fill="${fill}" fill-opacity=".2" stroke="${fill}" stroke-width="1.5"/>`;
         }).join('');
 
         this.chartIllustration.innerHTML = `
@@ -231,8 +216,8 @@ export class LobbyScreen {
                 ${paths}
                 <path d="M250 150l38-38" stroke="#FF6B5E" stroke-width="1.5" stroke-dasharray="2 4"/>
                 <circle cx="250" cy="150" r="4" fill="#FFD36E"/>
-                <text x="264" y="142" fill="#FFF2D8" fill-opacity=".55" font-family="monospace" font-size="9">HOME TIDE</text>
-                <text x="22" y="280" fill="#FFF2D8" fill-opacity=".4" font-family="monospace" font-size="9">LAT 18.46° S · NODE-05</text>
+                <text x="264" y="142" fill="#FFF2D8" fill-opacity=".55" font-family="monospace" font-size="9">HOME SHARD</text>
+                <text x="22" y="280" fill="#FFF2D8" fill-opacity=".4" font-family="monospace" font-size="9">DRIFT 18.46° S · NODE-05</text>
                 <text x="472" y="34" fill="#FFF2D8" fill-opacity=".4" font-family="monospace" font-size="9" text-anchor="end">SHEET 03</text>
             </svg>
         `;
@@ -241,15 +226,15 @@ export class LobbyScreen {
             const key = el.dataset.chart;
             if (key === 'seed') el.textContent = Number.isInteger(seed) ? String(seed) : '—';
             else if (key === 'islands') el.textContent = String(data.islands);
-            else if (key === 'minerals') el.textContent = String(data.minerals);
+            else if (key === 'shards') el.textContent = String(data.shards);
             else if (key === 'days') el.textContent = String(data.days);
         }
     }
 
     show() {
         this.container.style.display = 'flex';
-        this.seedInput.value = this.gsm.settings.mapSeed;
-        this._setSize(this.gsm.settings.mapSize);
+        this.seedInput.value = this.game.settings.mapSeed;
+        this._setSize(this.game.settings.mapSize);
     }
 
     hide() {

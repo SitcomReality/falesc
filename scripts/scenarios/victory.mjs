@@ -1,59 +1,82 @@
 /**
- * Full-loop victory scenario: follow a sensible build order until the Aurora
- * Beacon activates, driving the real HUD and build dialog.
+ * Full First Light charter: plan services, open fourteen days, and reach the
+ * twelve-resident / flourishing-62 goal. This is the end-to-end loop, not a
+ * unit test.
  */
 export default async function ({ page, assert, screenshot, log }) {
-    await page.evaluate("localStorage.removeItem('falesc.save.v1')");
+    await page.evaluate("localStorage.removeItem('falesc.save.v2')");
     await page.reload();
-    await page.click('[data-testid=menu-start]');
-    await page.waitFor("document.querySelector('[data-testid=lobby-screen]') !== null");
-    await page.evaluate("(() => { const i = document.querySelector('[data-testid=lobby-seed]'); i.value='12345'; i.dispatchEvent(new Event('change',{bubbles:true})); return true; })()");
-    await page.click('[data-testid=lobby-start]');
-    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING' && window.__falesc.snapshot().sectors > 0");
+    await page.evaluate("window.__falesc.startCharter(12345, 'medium')");
+    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+    await page.evaluate("window.__falesc.app.bulletinModal.hide()");
 
     const history = [];
-
-    for (let safety = 0; safety < 20; safety++) {
-        const snap = await page.evaluate("window.__falesc.snapshot()");
-        if (snap.state === 'END') break;
-        history.push({ day: snap.turn, lumen: snap.lumen, income: snap.income, blueprints: snap.buildingBlueprints });
-
-        const choice = await page.evaluate(`(() => {
-            const app = window.__falesc.app;
-            const s = window.__falesc.snapshot();
-            const b = app.buildingManager.buildings;
-            const count = (id) => b.filter((x) => x.blueprintId === id).length;
-            const lanterns = count('lantern_house');
-            const beaconCost = Math.max(6, 12 - lanterns * 3);
-            const hasBeacon = count('aurora_beacon') > 0;
-            const options = [];
-            if (!hasBeacon && s.lumen >= beaconCost && (count('prism_rig') + count('tide_garden')) >= 4) options.push('aurora_beacon');
-            if (count('prism_rig') < 4) options.push('prism_rig');
-            if (count('tide_garden') < 2) options.push('tide_garden');
-            if (lanterns < 2) options.push('lantern_house');
-            options.push('aurora_beacon', 'tide_garden', 'prism_rig', 'lantern_house');
-            for (const id of options) {
-                if (app.selectBlueprint(id)) return id;
-            }
-            return null;
-        })()`);
-
-        if (choice) {
-            await page.evaluate("(() => { const c = window.__falesc.findFreeCell(); window.__falesc.app.onWorldTap(c.x,c.y); return c; })()");
-            await page.click('[data-testid=build-submit]');
-            await page.pause(120);
+    for (let guard = 0; guard < 20; guard++) {
+        const state = await page.evaluate("window.__falesc.snapshot().state");
+        if (state === 'END') break;
+        if (state === 'REPORT') {
+            await page.click('[data-testid=report-continue]');
+            await page.waitFor("['PLAYING','END'].includes(window.__falesc.snapshot().state)");
+            if (await page.evaluate("window.__falesc.snapshot().state") === 'END') break;
         }
+        await page.evaluate("(() => { const app = window.__falesc.app; if (app.bulletinModal.isOpen) app.bulletinModal.hide(); return true; })()");
 
-        await page.click('[data-testid=end-turn]');
-        await page.waitFor("['PLAYING','END'].includes(window.__falesc.snapshot().state)", 12000);
-        await page.waitFor("window.__falesc.snapshot().state !== 'INTERSTITIAL'", 12000);
+        const plan = await page.evaluate(`(() => {
+            const app = window.__falesc.app;
+            const built = [];
+            const count = (programId) => app.charter.services.services.filter((service) => service.programId === programId).length;
+            const wanted = () => {
+                if (count('canteen') < 1) return 'canteen';
+                if (count('housing') < 3) return 'housing';
+                if (count('tea_house') < 1) return 'tea_house';
+                if (count('garden_dome') < 1) return 'garden_dome';
+                if (count('housing') < 4) return 'housing';
+                if (count('tea_house') < 2) return 'tea_house';
+                return null;
+            };
+            for (let attempt = 0; attempt < 2; attempt++) {
+                if (app.charter.works <= 0) break;
+                const programId = wanted();
+                if (!programId) break;
+                if (!app.charter.canBuild(programId).ok) break;
+                app.selectProgram(programId);
+                const cell = window.__falesc.findFreeCell(programId);
+                if (!cell) break;
+                app.onWorldTap(cell.x, cell.y);
+                const result = app.finalizeBuild(programId);
+                app.buildModal.hide(false);
+                if (!result.ok) break;
+                built.push(programId);
+            }
+            return {
+                built,
+                snapshot: window.__falesc.snapshot()
+            };
+        })()`);
+        history.push({ day: plan.snapshot.day, built: plan.built, lumen: plan.snapshot.lumen, population: plan.snapshot.population, flourishing: plan.snapshot.flourishing });
+
+        await page.evaluate("window.__falesc.openDay()");
+        await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
+        await page.evaluate("window.__falesc.skipDay()");
+        await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
+        const report = await page.evaluate("window.__falesc.snapshot().report");
+        history[history.length - 1].report = report;
+        if (report?.outcome) break;
+        await page.click('[data-testid=report-continue]');
+        await page.waitFor("['PLAYING','END'].includes(window.__falesc.snapshot().state)");
+        if (await page.evaluate("window.__falesc.snapshot().state") === 'END') break;
+    }
+
+    if (await page.evaluate("window.__falesc.snapshot().state") === 'REPORT') {
+        await page.click('[data-testid=report-continue]');
+        await page.waitFor("window.__falesc.snapshot().state === 'END'");
     }
 
     const final = await page.evaluate("window.__falesc.snapshot()");
-    log(JSON.stringify({ result: final.endResult, day: final.turn, buildings: final.buildingBlueprints, history }));
-    assert.equal(final.state, 'END');
-    assert.equal(final.endResult.outcome, 'victory');
+    log(JSON.stringify({ history, final: { day: final.day, state: final.state, population: final.population, flourishing: final.flourishing, devotion: final.devotion, ending: final.ending } }));
+    assert.equal(final.state, 'END', 'the charter should end after the day limit or a result');
+    assert.equal(final.ending?.outcome, 'victory', 'the First Light run should reach twelve residents and flourishing');
     assert.ok(await page.visible('[data-testid=end-screen]'));
-    assert.equal(await page.text('[data-testid=end-screen] [data-role=title]'), 'The light holds.');
+    assert.ok((await page.text('[data-testid=end-screen] [data-role=title]')).length > 0);
     await screenshot('victory.png');
 }

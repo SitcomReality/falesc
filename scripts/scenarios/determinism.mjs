@@ -1,35 +1,53 @@
 /**
- * Determinism check: the same seed must generate the same islands, character
- * palettes/proportions, mineral variations, and spawn points across reloads.
+ * Deterministic day: same seed, same actions and same day number must produce
+ * the same report, resident needs and choice lines across reloads.
  */
 export default async function ({ page, assert, log }) {
-    async function loadWorld(seed) {
-        await page.evaluate("localStorage.removeItem('falesc.save.v1')");
+    async function run(seed) {
+        await page.evaluate("localStorage.removeItem('falesc.save.v2')");
         await page.reload();
-        await page.click('[data-testid=menu-start]');
-        await page.waitFor("document.querySelector('[data-testid=lobby-screen]') !== null");
-        await page.evaluate(`(() => { const i = document.querySelector('[data-testid=lobby-seed]'); i.value='${seed}'; i.dispatchEvent(new Event('change',{bubbles:true})); return true; })()`);
-        await page.click('[data-testid=lobby-start]');
-        await page.waitFor("window.__falesc.snapshot().state === 'PLAYING' && window.__falesc.snapshot().sectors > 0");
+        await page.evaluate(`window.__falesc.startCharter(${seed}, 'medium')`);
+        await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+        await page.evaluate("window.__falesc.app.bulletinModal.hide()");
+        await page.evaluate(`(() => {
+            const app = window.__falesc.app;
+            app.selectProgram('canteen');
+            const cell = window.__falesc.findFreeCell('canteen');
+            app.onWorldTap(cell.x, cell.y);
+            app.finalizeBuild('Deterministic Canteen');
+            app.buildModal.hide(false);
+            return true;
+        })()`);
+        for (let day = 1; day <= 2; day++) {
+            await page.evaluate("window.__falesc.openDay()");
+            await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
+            await page.evaluate("window.__falesc.skipDay()");
+            await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
+            await page.evaluate("window.__falesc.beginNextDay()");
+            await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+            await page.evaluate("window.__falesc.app.bulletinModal.hide()");
+        }
         return page.evaluate(`(() => {
-            const g = window.__falesc.app;
+            const s = window.__falesc.snapshot();
             return {
-                sectors: g.map.sectors.map((s) => ({ x: s.centerX, y: s.centerY, size: s.gridSize, shape: s.shape.map((p) => [p.x.toFixed(2), p.y.toFixed(2)]) })),
-                characters: g.characters.map((c) => ({ palette: c.colors.name, variations: c.variations })),
-                minerals: g.minerals.map((m) => ({ x: m.x.toFixed(2), y: m.y.toFixed(2), palette: m.paletteId, variation: m.variation }))
+                day: s.day,
+                report: s.report,
+                residents: s.residents,
+                services: s.services.map((service) => ({ programId: service.programId, visits: service.visits, hearts: service.hearts })),
+                quotes: s.report?.quotes
             };
         })()`);
     }
 
-    const first = await loadWorld(777123);
-    const second = await loadWorld(777123);
+    const first = await run(777123);
+    const second = await run(777123);
     const a = JSON.stringify(first);
     const b = JSON.stringify(second);
-    log(`generated ${first.sectors.length} sectors, ${first.characters.length} characters, ${first.minerals.length} minerals twice`);
+    log(`compared ${first.residents.length} residents and a ${first.report?.visits ?? 0}-visit report`);
     if (a !== b) {
         let index = 0;
         while (index < a.length && a[index] === b[index]) index++;
-        log(`first difference at ${index}: ...${a.slice(Math.max(0, index - 80), index + 120)}... vs ...${b.slice(Math.max(0, index - 80), index + 120)}...`);
+        log(`first difference at ${index}: ...${a.slice(Math.max(0, index - 100), index + 140)}... vs ...${b.slice(Math.max(0, index - 100), index + 140)}...`);
     }
-    assert.equal(a, b, 'same seed must produce the same generated world');
+    assert.equal(a, b, 'same seed + actions + day must produce the same result');
 }

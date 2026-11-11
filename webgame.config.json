@@ -29,7 +29,7 @@
     },
     {
       "name": "first frame",
-      "assert": "(() => { const g = window.__falesc; if (!g || !g.ready || g.snapshot().frame < 1) return false; const gl = g.app.app.renderer.gl; return !gl || !gl.isContextLost || !gl.isContextLost(); })()",
+      "assert": "(() => { const g = window.__falesc; if (!g || !g.ready || g.snapshot().frame < 1) return false; const gl = g.app.world.app.renderer.gl; return !gl || !gl.isContextLost || !gl.isContextLost(); })()",
       "message": "Pixi should render a first frame without a lost WebGL context"
     },
     {
@@ -49,7 +49,7 @@
       "eval": "(() => { const input = document.querySelector('[data-testid=lobby-seed]'); input.value = '12345'; input.dispatchEvent(new Event('change', { bubbles: true })); return input.value; })()"
     },
     {
-      "name": "start game",
+      "name": "start charter",
       "click": "[data-testid=lobby-start]"
     },
     {
@@ -57,27 +57,35 @@
       "waitFor": "window.__falesc && window.__falesc.snapshot().state === 'PLAYING' && window.__falesc.snapshot().sectors > 0"
     },
     {
-      "name": "world contents",
-      "assert": "(() => { const s = window.__falesc.snapshot(); return s.seed === 12345 && s.characters === 15 && s.minerals > 0 && s.actionsRemaining === 1 && s.lumen === 8 && s.dayLimit === 14 && s.selectedBlueprint === 'prism_rig'; })()",
-      "message": "expected seeded world with 15 characters, minerals, one build action, and the starting economy"
+      "name": "morning bulletin is visible",
+      "assertVisible": "[data-testid=bulletin-modal]"
     },
     {
-      "name": "arm Tide Garden with the keyboard",
+      "name": "dismiss morning bulletin",
+      "click": "[data-testid=bulletin-continue]"
+    },
+    {
+      "name": "founding charter state",
+      "assert": "(() => { const s = window.__falesc.snapshot(); return s.seed === 12345 && s.day === 1 && s.dayLimit === 14 && s.characters === 6 && s.population === 6 && s.works === 2 && s.lumen === 10 && s.services.length === 1 && s.selectedProgram === 'canteen' && s.housingCapacity === 6; })()",
+      "message": "expected the First Light founding state: six residents, one Welcome Post, ten lumen, two works"
+    },
+    {
+      "name": "arm Tea House with the keyboard",
+      "press": "Digit3"
+    },
+    {
+      "name": "keyboard shorthand arms Tea House",
+      "assert": "window.__falesc.snapshot().selectedProgram === 'tea_house'",
+      "message": "Digit3 should arm the Tea House"
+    },
+    {
+      "name": "re-arm Canteen with the keyboard",
       "press": "Digit2"
     },
     {
-      "name": "keyboard shorthand arms the blueprint",
-      "assert": "window.__falesc.snapshot().selectedBlueprint === 'tide_garden'",
-      "message": "Digit2 should arm Tide Garden"
-    },
-    {
-      "name": "re-arm Prism Rig with the keyboard",
-      "press": "Digit1"
-    },
-    {
-      "name": "keyboard shorthand restores Prism Rig",
-      "assert": "window.__falesc.snapshot().selectedBlueprint === 'prism_rig'",
-      "message": "Digit1 should arm Prism Rig"
+      "name": "keyboard shorthand restores Canteen",
+      "assert": "window.__falesc.snapshot().selectedProgram === 'canteen'",
+      "message": "Digit2 should arm the Canteen"
     },
     {
       "name": "playing screenshot",
@@ -85,72 +93,154 @@
     },
     {
       "name": "hover a free plot",
-      "eval": "(() => { const g = window.__falesc.app; const cell = window.__falesc.findFreeCell(); const p = window.__falesc.worldToScreen(cell.x, cell.y); const canvas = document.querySelector('body > canvas'); canvas.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: p.x, clientY: p.y, pointerType: 'mouse', pointerId: 9 })); window.__hoverWasVisible = g.hoverGhost.visible; canvas.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'mouse', pointerId: 9 })); return { shown: window.__hoverWasVisible, cleared: g.hoverCellKey === null }; })()"
+      "eval": "(() => { const g = window.__falesc.app; const cell = window.__falesc.findFreeCell('canteen'); const p = window.__falesc.worldToScreen(cell.x, cell.y); const canvas = document.querySelector('body > canvas'); canvas.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: p.x, clientY: p.y, pointerType: 'mouse', pointerId: 9 })); window.__hoverWasVisible = g.world.hoverGhost.visible; canvas.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true, pointerType: 'mouse', pointerId: 9 })); return { shown: window.__hoverWasVisible, cleared: g.world.hoverCellKey === null }; })()"
     },
     {
       "name": "hover preview shown and cleared",
-      "assert": "window.__hoverWasVisible === true && window.__falesc.app.hoverCellKey === null",
+      "assert": "window.__hoverWasVisible === true && window.__falesc.app.world.hoverCellKey === null",
       "message": "expected a ghost preview while hovering a free plot and a cleared highlight after leaving"
     },
     {
-      "name": "open build modal on a free cell",
-      "eval": "(() => { const cell = window.__falesc.findFreeCell(); window.__falesc.app.onWorldTap(cell.x, cell.y); return cell; })()"
+      "name": "open canteen build modal on a free cell",
+      "eval": "(() => { const cell = window.__falesc.findFreeCell('canteen'); window.__falesc.app.onWorldTap(cell.x, cell.y); return cell; })()"
     },
     {
       "name": "build modal is visible",
       "assertVisible": "[data-testid=build-modal]"
     },
     {
-      "name": "type building name",
-      "type": "Test Hall",
+      "name": "type canteen name",
+      "type": "Test Canteen",
       "selector": "[data-testid=build-name]"
     },
     {
-      "name": "reserve building",
+      "name": "break ground",
       "click": "[data-testid=build-submit]"
     },
     {
-      "name": "building is pending",
-      "assert": "(() => { const s = window.__falesc.snapshot(); return s.buildings === 1 && s.buildingStates[0] === 'PENDING' && s.actionsRemaining === 0 && s.lumen === 5; })()",
-      "message": "expected one PENDING building, no actions left, and the blueprint cost paid"
+      "name": "canteen is pending",
+      "assert": "(() => { const s = window.__falesc.snapshot(); const c = s.services.find((service) => service.programId === 'canteen'); return s.services.length === 2 && c && c.state === 'PENDING' && s.works === 1 && s.lumen === 6; })()",
+      "message": "expected one PENDING Canteen, one work left, and the cost paid"
     },
     {
       "name": "pending screenshot",
       "screenshot": "building-pending.png"
     },
     {
-      "name": "end turn 1",
+      "name": "open day 1",
       "click": "[data-testid=end-turn]"
     },
     {
-      "name": "interstitial shown",
-      "assert": "window.__falesc.snapshot().state === 'INTERSTITIAL'"
+      "name": "day playback begins",
+      "assert": "window.__falesc.snapshot().state === 'DAY'"
     },
     {
-      "name": "wait for turn 2",
-      "sleep": 2500
+      "name": "playback screenshot",
+      "screenshot": "day-playback.png"
     },
     {
-      "name": "turn 2 and ghost building",
-      "assert": "(() => { const s = window.__falesc.snapshot(); return s.state === 'PLAYING' && s.turn === 2 && s.buildingStates[0] === 'RESERVED'; })()",
-      "message": "expected turn 2 in PLAYING with a RESERVED building"
+      "name": "set 4x speed",
+      "click": "[data-testid=day-speed-4]"
     },
     {
-      "name": "end turn 2",
+      "name": "4x speed is active",
+      "assert": "window.__falesc.snapshot().playback.speed === 4"
+    },
+    {
+      "name": "skip day 1",
+      "click": "[data-testid=day-skip]"
+    },
+    {
+      "name": "day 1 report",
+      "waitFor": "window.__falesc.snapshot().state === 'REPORT'"
+    },
+    {
+      "name": "report screen is visible",
+      "assertVisible": "[data-testid=report-screen]"
+    },
+    {
+      "name": "report has economy and needs",
+      "assert": "(() => { const r = window.__falesc.snapshot().report; return r && r.day === 1 && typeof r.contributions === 'number' && typeof r.upkeep === 'number' && r.contributions >= r.upkeep; })()",
+      "message": "the evening report should carry contributions and upkeep"
+    },
+    {
+      "name": "report screenshot",
+      "screenshot": "day-report.png"
+    },
+    {
+      "name": "begin day 2",
+      "click": "[data-testid=report-continue]"
+    },
+    {
+      "name": "day 2 is planning",
+      "waitFor": "window.__falesc.snapshot().state === 'PLAYING' && window.__falesc.snapshot().day === 2"
+    },
+    {
+      "name": "canteen opened overnight",
+      "assert": "(() => { const c = window.__falesc.snapshot().services.find((service) => service.programId === 'canteen'); return c && c.state === 'ACTIVE' && window.__falesc.snapshot().works === 2; })()",
+      "message": "construction should resolve at the start of the next day"
+    },
+    {
+      "name": "dismiss day 2 bulletin",
+      "eval": "(() => { const app = window.__falesc.app; if (app.bulletinModal.isOpen) app.bulletinModal.hide(); return !app.bulletinModal.isOpen; })()"
+    },
+    {
+      "name": "open the resident roster",
+      "eval": "window.__falesc.showResidents()"
+    },
+    {
+      "name": "resident card is visible",
+      "assertVisible": "[data-testid=resident-modal]"
+    },
+    {
+      "name": "resident card explains a person",
+      "assert": "(() => { const text = document.querySelector('[data-testid=resident-modal]').textContent; return text.includes('Devotion') && text.includes('Home') && text.includes('Last choice'); })()",
+      "message": "the resident card should show needs, home, devotion and last choice"
+    },
+    {
+      "name": "resident card screenshot",
+      "screenshot": "resident-card.png"
+    },
+    {
+      "name": "close resident card",
+      "click": "[data-testid=resident-close]"
+    },
+    {
+      "name": "open day 2",
       "click": "[data-testid=end-turn]"
     },
     {
-      "name": "wait for turn 3",
-      "sleep": 2500
+      "name": "day 2 playback begins",
+      "waitFor": "window.__falesc.snapshot().state === 'DAY'"
     },
     {
-      "name": "turn 3 and active building",
-      "assert": "(() => { const s = window.__falesc.snapshot(); return s.state === 'PLAYING' && s.turn === 3 && s.buildingStates[0] === 'ACTIVE' && s.income === 2; })()",
-      "message": "expected turn 3 in PLAYING with an ACTIVE Prism Rig producing income"
+      "name": "skip day 2",
+      "click": "[data-testid=day-skip]"
     },
     {
-      "name": "active screenshot",
-      "screenshot": "building-active.png"
+      "name": "day 2 report",
+      "waitFor": "window.__falesc.snapshot().state === 'REPORT'"
+    },
+    {
+      "name": "residents visited the canteen",
+      "assert": "(() => { const s = window.__falesc.snapshot(); const c = s.services.find((service) => service.programId === 'canteen'); return s.report.visits > 0 && c.visits > 0 && s.residents.some((resident) => resident.lastChoice && resident.lastChoice.reason.includes('Canteen')); })()",
+      "message": "a resident should choose the Canteen, enter it, and leave a why line"
+    },
+    {
+      "name": "report screenshot",
+      "screenshot": "resident-report.png"
+    },
+    {
+      "name": "begin day 3",
+      "click": "[data-testid=report-continue]"
+    },
+    {
+      "name": "day 3 is planning",
+      "waitFor": "window.__falesc.snapshot().state === 'PLAYING' && window.__falesc.snapshot().day === 3"
+    },
+    {
+      "name": "dismiss day 3 bulletin",
+      "eval": "(() => { const app = window.__falesc.app; if (app.bulletinModal.isOpen) app.bulletinModal.hide(); return !app.bulletinModal.isOpen; })()"
     },
     {
       "name": "open charter menu",
@@ -166,11 +256,11 @@
     },
     {
       "name": "charter menu is closed",
-      "assert": "window.__falesc.app.stateManager.activeScreen.pausePanel.hidden === true"
+      "assert": "window.__falesc.app.gameScreen.pausePanel.hidden === true"
     },
     {
       "name": "zoom out to map overview",
-      "eval": "(() => { const g = window.__falesc; g.app.camera.zoom = g.app.camera.minZoom; g.app.camera.position.x = g.app.MAP_WIDTH / 2; g.app.camera.position.y = g.app.MAP_HEIGHT / 2; g.app.camera.updateTransform(); return { zoom: g.app.camera.zoom }; })()"
+      "eval": "(() => { const g = window.__falesc; const w = g.app.world; w.camera.zoom = w.camera.minZoom; w.camera.position.x = w.MAP_WIDTH / 2; w.camera.position.y = w.MAP_HEIGHT / 2; w.camera.updateTransform(); return { zoom: w.camera.zoom }; })()"
     },
     {
       "name": "let zoom render",
@@ -182,24 +272,24 @@
     },
     {
       "name": "restore camera",
-      "eval": "(() => { const g = window.__falesc; g.app.camera.zoom = 1; g.app.camera.position.x = g.app.MAP_WIDTH / 2; g.app.camera.position.y = g.app.MAP_HEIGHT / 2; g.app.camera.updateTransform(); return true; })()"
+      "eval": "(() => { const g = window.__falesc; const w = g.app.world; const home = w.homeSector; w.camera.zoom = 1; w.camera.position.x = home.centerX; w.camera.position.y = home.centerY; w.camera.updateTransform(); return true; })()"
     },
     {
       "name": "open build modal again",
-      "eval": "(() => { const cell = window.__falesc.findFreeCell(); window.__falesc.app.onWorldTap(cell.x, cell.y); return cell; })()"
+      "eval": "(() => { const cell = window.__falesc.findFreeCell('tea_house'); window.__falesc.app.onWorldTap(cell.x, cell.y); return cell; })()"
     },
     {
       "name": "modal is open before ending",
       "assert": "window.__falesc.snapshot().buildModalOpen === true"
     },
     {
-      "name": "end game closes modal",
-      "eval": "(() => { window.__falesc.app.stateManager.endGame('abandon'); return window.__falesc.snapshot().state; })()"
+      "name": "end charter closes modal",
+      "eval": "(() => { window.__falesc.app.endCharter('abandon'); return window.__falesc.snapshot().state; })()"
     },
     {
       "name": "modal is closed after ending",
       "assert": "(() => { const s = window.__falesc.snapshot(); return s.state === 'END' && s.buildModalOpen === false; })()",
-      "message": "ending the game must dismiss an open build prompt"
+      "message": "ending the charter must dismiss an open build prompt"
     },
     {
       "name": "end screen shown",

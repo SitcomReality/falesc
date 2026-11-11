@@ -1,6 +1,10 @@
+/**
+ * End of charter. Victory, defeat and abandonment are distinct compositions on
+ * the same paper, with the run's people and numbers in the record.
+ */
 export class EndScreen {
-    constructor(gameStateManager, game) {
-        this.gsm = gameStateManager;
+    constructor(screenStateMachine, game) {
+        this.gsm = screenStateMachine;
         this.game = game;
 
         this.container = document.createElement('div');
@@ -14,10 +18,11 @@ export class EndScreen {
         main.className = 'end__main';
         main.innerHTML = `
             <p class="eyebrow" style="color:var(--wine)">Charter record</p>
-            <h1 class="end__title" data-role="title">The light holds.</h1>
+            <h1 class="end__title" data-role="title">The commons holds.</h1>
             <p class="end__copy" data-role="copy"></p>
+            <blockquote class="end__quote" data-role="quote"></blockquote>
             <div class="end__actions">
-                <button type="button" class="btn btn--primary" data-testid="end-menu">Return to the water</button>
+                <button type="button" class="btn btn--primary" data-testid="end-menu">Return to the drift</button>
                 <button type="button" class="btn btn--paper" data-testid="end-retry">New charter</button>
             </div>
         `;
@@ -26,10 +31,12 @@ export class EndScreen {
         aside.className = 'end__aside';
         aside.innerHTML = `
             <div>
-                <p class="kicker">The settlement</p>
+                <p class="kicker">The chapter</p>
                 <dl class="end__stats">
-                    <div class="end__stat"><dt>Tides weathered</dt><dd data-role="days">1</dd></div>
-                    <div class="end__stat"><dt>Structures</dt><dd data-role="structures">0</dd></div>
+                    <div class="end__stat"><dt>Days weathered</dt><dd data-role="days">1</dd></div>
+                    <div class="end__stat"><dt>Residents</dt><dd data-role="population">0</dd></div>
+                    <div class="end__stat"><dt>Devotion</dt><dd data-role="devotion">0</dd></div>
+                    <div class="end__stat"><dt>Flourishing</dt><dd data-role="flourishing">0</dd></div>
                     <div class="end__stat"><dt>Lumen in hand</dt><dd data-role="lumen">0</dd></div>
                 </dl>
             </div>
@@ -43,47 +50,47 @@ export class EndScreen {
 
         this.titleEl = main.querySelector('[data-role=title]');
         this.copyEl = main.querySelector('[data-role=copy]');
+        this.quoteEl = main.querySelector('[data-role=quote]');
         this.daysEl = aside.querySelector('[data-role=days]');
-        this.structuresEl = aside.querySelector('[data-role=structures]');
+        this.populationEl = aside.querySelector('[data-role=population]');
+        this.devotionEl = aside.querySelector('[data-role=devotion]');
+        this.flourishingEl = aside.querySelector('[data-role=flourishing]');
         this.lumenEl = aside.querySelector('[data-role=lumen]');
         this.medalEl = aside.querySelector('[data-role=medal]');
 
-        main.querySelector('[data-testid=end-menu]').addEventListener('click', () => {
-            this.gsm.setState('MENU');
-        });
-        main.querySelector('[data-testid=end-retry]').addEventListener('click', () => {
-            this.gsm.setState('LOBBY');
-        });
+        main.querySelector('[data-testid=end-menu]').addEventListener('click', () => this.gsm.setState('MENU'));
+        main.querySelector('[data-testid=end-retry]').addEventListener('click', () => this.gsm.setState('LOBBY'));
     }
 
     show() {
-        const result = this.gsm.endResult || { outcome: 'abandon' };
-        const outcome = result.outcome || 'abandon';
-        const victory = outcome === 'victory';
-        const defeat = outcome === 'defeat';
-        const buildings = this.game?.buildingManager?.buildings || [];
-        const active = buildings.filter((building) => building.state === 'ACTIVE');
-
+        const charter = this.game.charter;
+        const ending = charter?.ending || this.game.endResult || { outcome: 'abandon' };
+        const outcome = ending.outcome || 'abandon';
+        const stats = charter?.stats() || {};
         this.container.classList.remove('end--victory', 'end--defeat', 'end--abandon');
         this.container.classList.add(`end--${outcome}`);
 
-        if (victory) {
-            this.titleEl.textContent = 'The light holds.';
-            this.copyEl.textContent = 'The Aurora Beacon is burning, the tide has turned, and for one more night the Glass Sea has a town on it. Your charter is complete.';
+        if (outcome === 'victory') {
+            this.titleEl.textContent = 'The commons holds.';
+            this.copyEl.textContent = ending.message || 'Twelve Tidelanders, a full larder, and a flourishing worth celebrating. The Confluence has done its work.';
             this.medalEl.textContent = '✦';
-        } else if (defeat) {
-            this.titleEl.textContent = 'The tide took the light.';
-            this.copyEl.textContent = `The water rose before the Beacon did. Day ${this.gsm.currentTurn} is the last entry in this charter — but the crystals will be back.`;
+        } else if (outcome === 'defeat') {
+            this.titleEl.textContent = 'The lights go out.';
+            this.copyEl.textContent = ending.message || 'The charter closed before the chapter found its rhythm. The islands will be here when you try again.';
             this.medalEl.textContent = '≈';
         } else {
-            this.titleEl.textContent = 'You leave the lamp burning.';
-            this.copyEl.textContent = 'The charter is closed, but the settlement stands. Somewhere beyond the horizon, another Prism Tide is gathering.';
+            this.titleEl.textContent = 'You leave the lamps burning.';
+            this.copyEl.textContent = 'The charter is closed, but the chapter stands. Somewhere in the drift, another light is gathering.';
             this.medalEl.textContent = '◇';
         }
 
-        this.daysEl.textContent = String(this.gsm.currentTurn || 1);
-        this.structuresEl.textContent = `${active.length} / ${buildings.length}`;
-        this.lumenEl.textContent = String(this.gsm.lumen || 0);
+        const quote = charter?.lastReport?.quotes?.[0];
+        this.quoteEl.textContent = quote ? `“${quote.text}” — ${quote.resident}` : '“Somebody put the kettle on.” — the square';
+        this.daysEl.textContent = String(stats.day || charter?.day || 1);
+        this.populationEl.textContent = String(stats.population ?? charter?.population ?? 0);
+        this.devotionEl.textContent = (stats.devotion ?? charter?.devotion ?? 0).toFixed(1);
+        this.flourishingEl.textContent = String(Math.round(stats.flourishing ?? charter?.flourishing ?? 0));
+        this.lumenEl.textContent = String(stats.lumen ?? charter?.lumen ?? 0);
         this.container.style.display = 'flex';
     }
 

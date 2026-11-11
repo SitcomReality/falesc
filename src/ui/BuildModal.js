@@ -1,11 +1,9 @@
-import { blueprintIcon } from './icons.js';
-import { effectiveCost } from '../buildings/blueprints.js';
+import { programIcon } from './icons.js';
+import { NEED_BY_ID } from '../design/needs.js';
 
 /**
- * Themed build prompt with a focus trap and a real backdrop.
- *
- * `onBuild(name)` returns `{ ok: true }` or `{ ok: false, error }`; the modal
- * only closes on success.
+ * Build dialog for a service. Shares the paper-card language and the focus trap
+ * contract of the rest of the overlays. `onBuild(name)` returns `{ok}`.
  */
 export class BuildModal {
     constructor({ onBuild, onCancel, inputManager }) {
@@ -14,7 +12,7 @@ export class BuildModal {
         this.inputManager = inputManager;
         this.isOpen = false;
         this.lastFocused = null;
-        this.blueprint = null;
+        this.program = null;
         this.inertHud = null;
 
         this.container = document.createElement('div');
@@ -31,25 +29,26 @@ export class BuildModal {
         this.panel.innerHTML = `
             <div class="modal__head">
                 <div>
-                    <p class="kicker" style="color:var(--wine)">Build · one per tide</p>
-                    <h3 class="modal__title" id="build-modal-title">Raise a structure</h3>
+                    <p class="kicker" style="color:var(--wine)">Capital works · one work</p>
+                    <h3 class="modal__title" id="build-modal-title">Raise a service</h3>
                 </div>
                 <button type="button" class="modal__close" data-testid="build-close" aria-label="Close build dialog">×</button>
             </div>
             <div class="blueprint-summary">
                 <span class="blueprint-summary__icon" data-role="icon" aria-hidden="true"></span>
                 <span class="blueprint-summary__body">
-                    <span class="blueprint-summary__name" data-role="name">Prism Rig</span>
+                    <span class="blueprint-summary__name" data-role="name">Canteen</span>
                     <span class="blueprint-summary__stats" data-role="stats"></span>
                 </span>
             </div>
             <p class="modal__blurb" data-role="blurb"></p>
-            <label class="modal__label" for="build-name-input">Name this structure</label>
+            <dl class="service-facts" data-role="facts"></dl>
+            <label class="modal__label" for="build-name-input">Name this place</label>
             <input class="modal__input" id="build-name-input" data-testid="build-name" type="text" maxlength="40" autocomplete="off" spellcheck="false">
             <p class="modal__error" data-role="error" aria-live="polite"></p>
             <div class="modal__actions">
                 <button type="button" class="btn btn--paper" data-testid="build-cancel">Cancel</button>
-                <button type="button" class="btn btn--primary" data-testid="build-submit">Reserve</button>
+                <button type="button" class="btn btn--primary" data-testid="build-submit">Break ground</button>
             </div>
         `;
 
@@ -57,6 +56,7 @@ export class BuildModal {
         this.nameEl = this.panel.querySelector('[data-role=name]');
         this.statsEl = this.panel.querySelector('[data-role=stats]');
         this.blurbEl = this.panel.querySelector('[data-role=blurb]');
+        this.factsEl = this.panel.querySelector('[data-role=facts]');
         this.input = this.panel.querySelector('[data-testid=build-name]');
         this.errorEl = this.panel.querySelector('[data-role=error]');
         this.submitBtn = this.panel.querySelector('[data-testid=build-submit]');
@@ -71,11 +71,9 @@ export class BuildModal {
         this.container.addEventListener('click', (event) => {
             if (event.target === this.container) this.hide();
         });
-
         this.closeBtn.addEventListener('click', () => this.hide());
         this.cancelBtn.addEventListener('click', () => this.hide());
         this.submitBtn.addEventListener('click', () => this.submit());
-
         this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
         this.input.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
@@ -85,66 +83,57 @@ export class BuildModal {
         });
     }
 
-    show(blueprint, lumen, buildings = [], bonusIncome = 0) {
+    show(program, { lumen = 0, works = 0 } = {}) {
         if (this.isOpen) return;
         this.isOpen = true;
-        this.blueprint = blueprint;
-        this.buildings = buildings;
-        this.bonusIncome = bonusIncome;
+        this.program = program;
         this.lumen = lumen;
+        this.works = works;
         this.lastFocused = document.activeElement;
 
-        const cost = effectiveCost(blueprint, buildings);
-        this.iconEl.innerHTML = blueprintIcon(blueprint.id);
-        this.nameEl.textContent = blueprint.name;
+        const need = NEED_BY_ID[program.need];
+        this.iconEl.innerHTML = programIcon(program.id);
+        this.nameEl.textContent = program.name;
         this.statsEl.innerHTML = `
-            <span><strong>${cost} lumen</strong></span>
-            ${blueprint.income ? `<span>+${blueprint.income} lumen / tide</span>` : ''}
-            ${blueprint.beaconDiscount ? `<span>Beacon −${blueprint.beaconDiscount}</span>` : ''}
-            ${bonusIncome > 0 ? `<span><strong>Crystal +${bonusIncome} / tide</strong></span>` : ''}
-            ${blueprint.unique ? '<span>Charter structure</span>' : ''}
+            <span><strong>${program.cost} lumen</strong></span>
+            <span>${program.upkeep} upkeep / day</span>
+            <span>1 work</span>
         `;
-        this.blurbEl.textContent = blueprint.blurb;
+        this.blurbEl.textContent = program.blurb;
+        this.factsEl.innerHTML = `
+            <div><dt>Serves</dt><dd>${need ? `${need.glyph} ${need.name}` : 'civic'}</dd></div>
+            <div><dt>Capacity</dt><dd>${program.capacity} at a time · ${program.durationText}</dd></div>
+            <div><dt>Hours</dt><dd>${program.open.length ? program.open.join(' · ') : 'always'}</dd></div>
+            <div><dt>Footprint</dt><dd>${program.footprint.w}×${program.footprint.h} cells</dd></div>
+        `;
         this.input.value = '';
-        this.input.placeholder = `Name your ${blueprint.name}`;
+        this.input.placeholder = `Name your ${program.name}`;
         this.errorEl.textContent = '';
-        this.submitBtn.disabled = Number(lumen) < cost;
-        this.submitBtn.textContent = this.submitBtn.disabled ? 'Not enough lumen' : 'Reserve plot';
+        const error = works <= 0
+            ? 'No works left today.'
+            : lumen < program.cost
+                ? `Need ${program.cost - lumen} more lumen.`
+                : '';
+        this.submitBtn.disabled = Boolean(error);
+        this.submitBtn.textContent = error ? 'Not yet' : 'Break ground';
 
         this.container.style.display = 'flex';
         this.container.classList.add('is-open');
         this.container.setAttribute('aria-hidden', 'false');
         document.body.classList.add('has-modal');
-
-        // Keep assistive technology inside the dialog. The scrim blocks the
-        // pointer, but `inert` also removes the HUD from the tab/reading order.
         this.inertHud = document.querySelector('[data-testid=game-hud]');
         if (this.inertHud) this.inertHud.setAttribute('inert', '');
+        if (this.inputManager?.setModalOpen) this.inputManager.setModalOpen(true);
 
-        if (this.inputManager && typeof this.inputManager.setModalOpen === 'function') {
-            this.inputManager.setModalOpen(true);
-        }
-
-        // Defer focus until the scrim is painted; helps Safari and avoids a
-        // scroll jump on some mobile browsers.
         requestAnimationFrame(() => {
             if (this.isOpen) this.input.focus({ preventScroll: true });
         });
     }
 
-    updateAffordability(lumen) {
-        if (!this.isOpen || !this.blueprint) return;
-        this.lumen = lumen;
-        const cost = effectiveCost(this.blueprint, this.buildings || []);
-        this.submitBtn.disabled = Number(lumen) < cost;
-        this.submitBtn.textContent = this.submitBtn.disabled ? 'Not enough lumen' : 'Reserve plot';
-    }
-
     submit() {
-        if (!this.isOpen) return;
-        if (this.submitBtn.disabled) return;
+        if (!this.isOpen || this.submitBtn.disabled) return;
         const raw = this.input.value.trim();
-        const name = raw || this.blueprint?.name || 'Untitled';
+        const name = raw || this.program?.name || 'Untitled';
         const result = this.onBuild(name);
         if (result && result.ok === false) {
             this.errorEl.textContent = result.error || 'That plot cannot be built on.';
@@ -187,16 +176,9 @@ export class BuildModal {
             this.inertHud.removeAttribute('inert');
             this.inertHud = null;
         }
-
-        if (this.inputManager && typeof this.inputManager.setModalOpen === 'function') {
-            this.inputManager.setModalOpen(false);
-        }
-
-        if (this.lastFocused && typeof this.lastFocused.focus === 'function') {
-            this.lastFocused.focus({ preventScroll: true });
-        }
+        if (this.inputManager?.setModalOpen) this.inputManager.setModalOpen(false);
+        if (this.lastFocused?.focus) this.lastFocused.focus({ preventScroll: true });
         this.lastFocused = null;
-
         if (cancelled && this.onCancel) this.onCancel();
     }
 }

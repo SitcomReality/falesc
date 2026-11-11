@@ -1,0 +1,190 @@
+import { NEEDS } from '../design/needs.js';
+import { TEMPERAMENT_BY_ID, STANDARD_BY_ID, RHYTHM_BY_ID } from '../design/traits.js';
+import { needIcon } from './icons.js';
+
+/**
+ * The resident card is the player's window into a person: traits, needs, home,
+ * devotion, and the last choice with the one-line "why".
+ */
+export class ResidentCardModal {
+    constructor({ onClose, inputManager, game }) {
+        this.onClose = onClose;
+        this.inputManager = inputManager;
+        this.game = game;
+        this.isOpen = false;
+        this.lastFocused = null;
+        this.inertHud = null;
+        this.index = 0;
+
+        this.container = document.createElement('div');
+        this.container.className = 'modal-scrim';
+        this.container.dataset.testid = 'resident-modal-scrim';
+
+        this.panel = document.createElement('section');
+        this.panel.className = 'modal resident-card';
+        this.panel.dataset.testid = 'resident-modal';
+        this.panel.setAttribute('role', 'dialog');
+        this.panel.setAttribute('aria-modal', 'true');
+        this.panel.setAttribute('aria-labelledby', 'resident-name');
+        this.panel.innerHTML = `
+            <div class="modal__head">
+                <div>
+                    <p class="kicker" style="color:var(--wine)">Resident record</p>
+                    <h3 class="modal__title" id="resident-name" data-role="name">Mira</h3>
+                </div>
+                <button type="button" class="modal__close" data-testid="resident-close" aria-label="Close resident card">×</button>
+            </div>
+            <p class="resident-card__traits" data-role="traits"></p>
+            <div class="resident-card__body">
+                <div class="resident-card__needs" data-role="needs"></div>
+                <div class="resident-card__meta" data-role="meta"></div>
+            </div>
+            <blockquote class="resident-card__why" data-role="why"></blockquote>
+            <div class="resident-card__nav">
+                <button type="button" class="btn btn--small btn--paper" data-testid="resident-prev">← Previous</button>
+                <span class="resident-card__count" data-role="count">1 / 6</span>
+                <button type="button" class="btn btn--small btn--paper" data-testid="resident-next">Next →</button>
+            </div>
+        `;
+
+        this.nameEl = this.panel.querySelector('[data-role=name]');
+        this.traitsEl = this.panel.querySelector('[data-role=traits]');
+        this.needsEl = this.panel.querySelector('[data-role=needs]');
+        this.metaEl = this.panel.querySelector('[data-role=meta]');
+        this.whyEl = this.panel.querySelector('[data-role=why]');
+        this.countEl = this.panel.querySelector('[data-role=count]');
+
+        this.container.appendChild(this.panel);
+        document.body.appendChild(this.container);
+        this.container.style.display = 'none';
+        this.container.addEventListener('pointerdown', (event) => event.stopPropagation());
+        this.container.addEventListener('click', (event) => {
+            if (event.target === this.container) this.hide();
+        });
+        this.panel.querySelector('[data-testid=resident-close]').addEventListener('click', () => this.hide());
+        this.panel.querySelector('[data-testid=resident-prev]').addEventListener('click', () => this.step(-1));
+        this.panel.querySelector('[data-testid=resident-next]').addEventListener('click', () => this.step(1));
+        this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
+    }
+
+    get residents() {
+        return this.game?.charter?.activeResidents || [];
+    }
+
+    show(resident, index = 0) {
+        if (this.residents.length === 0) return;
+        if (!this.isOpen) {
+            this.isOpen = true;
+            this.lastFocused = document.activeElement;
+            this.container.style.display = 'flex';
+            this.container.classList.add('is-open');
+            document.body.classList.add('has-modal');
+            this.inertHud = document.querySelector('[data-testid=game-hud]');
+            if (this.inertHud) this.inertHud.setAttribute('inert', '');
+            if (this.inputManager?.setModalOpen) this.inputManager.setModalOpen(true);
+        }
+        this.index = Math.max(0, Math.min(this.residents.length - 1, index));
+        const target = resident || this.residents[this.index];
+        const actualIndex = Math.max(0, this.residents.findIndex((entry) => entry.id === target.id));
+        this.index = actualIndex >= 0 ? actualIndex : this.index;
+        this.render(this.residents[this.index]);
+        requestAnimationFrame(() => {
+            if (this.isOpen) this.panel.querySelector('[data-testid=resident-close]')?.focus({ preventScroll: true });
+        });
+    }
+
+    step(direction) {
+        const total = this.residents.length;
+        if (total === 0) return;
+        this.index = (this.index + direction + total) % total;
+        this.render(this.residents[this.index]);
+    }
+
+    render(resident) {
+        const charter = this.game.charter;
+        this.nameEl.textContent = resident.name;
+        const temperament = TEMPERAMENT_BY_ID[resident.traits.temperament];
+        const standard = STANDARD_BY_ID[resident.traits.standards];
+        const rhythm = RHYTHM_BY_ID[resident.traits.rhythm];
+        this.traitsEl.textContent = `${temperament?.name} · ${standard?.name} · ${rhythm?.name}`;
+        this.needsEl.innerHTML = NEEDS.map((need) => {
+            const value = Math.round(resident.needs[need.id]);
+            const urgent = resident.favouriteNeed?.id === need.id;
+            return `
+                <div class="need-row${urgent ? ' is-urgent' : ''}">
+                    <span class="need-row__icon" aria-hidden="true">${needIcon(need.id)}</span>
+                    <span class="need-row__label">${need.name}</span>
+                    <span class="need-row__track"><i style="width:${value}%;background:${need.color}"></i></span>
+                    <span class="need-row__value">${value}</span>
+                </div>
+            `;
+        }).join('');
+        const home = charter.services.housingFor(resident);
+        const homeName = home ? home.name : 'No bed — homeless';
+        this.metaEl.innerHTML = `
+            <p><span class="kicker">Home</span><strong>${escapeHtml(homeName)}</strong></p>
+            <p><span class="kicker">Devotion</span><strong>${resident.affinity.player.toFixed(1)} ♥</strong></p>
+            <p><span class="kicker">Wellbeing</span><strong>${Math.round(resident.wellbeing)}</strong></p>
+            <p class="resident-card__blurb">${escapeHtml(temperament?.blurb || '')} ${escapeHtml(standard?.blurb || '')} ${escapeHtml(rhythm?.blurb || '')}</p>
+        `;
+        const last = resident.memory.lastChoice;
+        this.whyEl.innerHTML = last
+            ? `<span class="kicker">Last choice · Day ${last.day} · ${last.phase}</span><p>“${escapeHtml(last.reason)}”</p>`
+            : `<span class="kicker">Last choice</span><p>No choice recorded yet. Open the day and watch where they go.</p>`;
+        this.countEl.textContent = `${this.index + 1} / ${this.residents.length}`;
+    }
+
+    hide() {
+        if (!this.isOpen) return;
+        this.isOpen = false;
+        this.container.style.display = 'none';
+        this.container.classList.remove('is-open');
+        document.body.classList.remove('has-modal');
+        if (this.inertHud) {
+            this.inertHud.removeAttribute('inert');
+            this.inertHud = null;
+        }
+        if (this.inputManager?.setModalOpen) this.inputManager.setModalOpen(false);
+        if (this.lastFocused?.focus) this.lastFocused.focus({ preventScroll: true });
+        this.lastFocused = null;
+        if (this.onClose) this.onClose();
+    }
+
+    onKeyDown(event) {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            this.hide();
+            return;
+        }
+        if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            this.step(-1);
+            return;
+        }
+        if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            this.step(1);
+            return;
+        }
+        if (event.key !== 'Tab') return;
+        const focusable = Array.from(this.panel.querySelectorAll('button:not(:disabled)'));
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
+}

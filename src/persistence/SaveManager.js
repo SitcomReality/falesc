@@ -1,10 +1,11 @@
-const SAVE_KEY = 'falesc.save.v1';
-const SAVE_VERSION = 1;
+const SAVE_KEY = 'falesc.save.v2';
+const SAVE_VERSION = 2;
+const LEGACY_KEYS = ['falesc.save.v1'];
 
 /**
- * Versioned localStorage persistence. Saves model data only: the world is
- * rebuildable from its seed, so a save is small and cannot pin stale Pixi
- * objects. Corrupt or old saves are discarded rather than half-loaded.
+ * Versioned localStorage persistence. Saves model data only: the seeded world
+ * is rebuilt, while residents, services, needs, affinity and the day are stored.
+ * Old Prism Tide saves are discarded rather than half-loaded.
  */
 export class SaveManager {
     constructor(storage = null) {
@@ -22,6 +23,7 @@ export class SaveManager {
     read() {
         if (!this.storage) return null;
         try {
+            for (const key of LEGACY_KEYS) this.storage.removeItem(key);
             const raw = this.storage.getItem(SAVE_KEY);
             if (!raw) return null;
             const data = JSON.parse(raw);
@@ -29,7 +31,7 @@ export class SaveManager {
                 this.clear();
                 return null;
             }
-            if (!data.settings || !Number.isInteger(data.settings.mapSeed)) return null;
+            if (!data.charter || !Number.isInteger(data.charter.seed)) return null;
             return data;
         } catch {
             return null;
@@ -54,8 +56,9 @@ export class SaveManager {
         if (!this.storage) return;
         try {
             this.storage.removeItem(SAVE_KEY);
+            for (const key of LEGACY_KEYS) this.storage.removeItem(key);
         } catch {
-            // Storage can be disabled or full; a failed clear is not fatal.
+            // Storage may be disabled or full; a failed clear is not fatal.
         }
     }
 }

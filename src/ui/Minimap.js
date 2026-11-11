@@ -49,20 +49,28 @@ export class Minimap {
 
     update() {
         const ctx = this.ctx;
-        const map = this.game.map;
+        const map = this.game.world?.map;
         const width = this.resolution;
         const height = this.resolution;
         const scale = width / this.size;
         ctx.setTransform(scale, 0, 0, scale, 0, 0);
         ctx.clearRect(0, 0, this.size, this.size);
 
-        // Deep water.
-        const water = ctx.createLinearGradient(0, 0, 0, this.size);
-        water.addColorStop(0, '#3a163c');
-        water.addColorStop(0.55, '#561a49');
-        water.addColorStop(1, '#2a1034');
-        ctx.fillStyle = water;
+        // Warm void, not water.
+        const voidGradient = ctx.createRadialGradient(this.size * 0.62, this.size * 0.42, 8, this.size * 0.5, this.size * 0.5, this.size * 0.8);
+        voidGradient.addColorStop(0, '#4f1a49');
+        voidGradient.addColorStop(0.55, '#341436');
+        voidGradient.addColorStop(1, '#1c0d24');
+        ctx.fillStyle = voidGradient;
         ctx.fillRect(0, 0, this.size, this.size);
+
+        // Stars.
+        ctx.fillStyle = 'rgba(255, 242, 216, 0.42)';
+        for (let index = 0; index < 34; index++) {
+            const x = (index * 73) % this.size;
+            const y = (index * 41 + 13) % this.size;
+            ctx.fillRect(x, y, 0.8, 0.8);
+        }
 
         // Chart graticule.
         ctx.strokeStyle = 'rgba(255, 242, 216, 0.09)';
@@ -98,8 +106,8 @@ export class Minimap {
             return;
         }
 
-        if (this.seedEl && this.lastSeed !== this.game.stateManager?.settings?.mapSeed) {
-            this.lastSeed = this.game.stateManager?.settings?.mapSeed;
+        if (this.seedEl && this.lastSeed !== this.game.settings?.mapSeed) {
+            this.lastSeed = this.game.settings?.mapSeed;
             this.seedEl.textContent = `SEED ${this.lastSeed}`;
         }
 
@@ -127,7 +135,7 @@ export class Minimap {
         this.projection = { scale: fit, offsetX, offsetY };
         const project = (x, y) => ({ x: x * fit + offsetX, y: y * fit + offsetY });
 
-        // Islands: a tinted fill, an ink coast and a second highlight stroke.
+        // Islands: a dusty fill, an ink coast and a second highlight stroke.
         for (const sector of map.sectors) {
             if (!sector.shape.length) continue;
             ctx.beginPath();
@@ -138,7 +146,7 @@ export class Minimap {
                 ctx.lineTo(point.x, point.y);
             }
             ctx.closePath();
-            ctx.fillStyle = 'rgba(89, 227, 194, 0.22)';
+            ctx.fillStyle = sector === map.homeSector ? 'rgba(255, 160, 122, 0.36)' : 'rgba(201, 182, 255, 0.2)';
             ctx.fill();
             ctx.strokeStyle = 'rgba(255, 242, 216, 0.75)';
             ctx.lineWidth = 1;
@@ -151,11 +159,12 @@ export class Minimap {
             ctx.restore();
         }
 
-        // Buildings.
-        for (const building of this.game.buildingManager.buildings) {
-            const position = project(building.container.x, building.container.y);
-            if (building.state === 'ACTIVE') {
-                ctx.fillStyle = '#ffd36e';
+        // Services.
+        const services = this.game.charter?.services.services || [];
+        for (const service of services) {
+            const position = project(service.container.x, service.container.y);
+            if (service.state === 'ACTIVE' && !service.closed) {
+                ctx.fillStyle = service.programId === 'housing' ? '#ffa07a' : '#ffd36e';
                 ctx.fillRect(position.x - 2, position.y - 2, 4, 4);
                 ctx.strokeStyle = 'rgba(33, 18, 37, 0.85)';
                 ctx.lineWidth = 0.7;
@@ -167,20 +176,19 @@ export class Minimap {
             }
         }
 
-        // The Beacon gets a little halo.
-        const beacon = this.game.buildingManager.buildings.find((building) => building.blueprintId === 'aurora_beacon');
-        if (beacon) {
-            const p = project(beacon.container.x, beacon.container.y);
-            ctx.strokeStyle = 'rgba(201, 182, 255, 0.9)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
-            ctx.stroke();
+        // Residents as tiny warm dots.
+        if (this.game.crowd) {
+            ctx.fillStyle = 'rgba(255, 79, 154, 0.85)';
+            for (const agent of this.game.crowd.agents.values()) {
+                if (agent.hidden) continue;
+                const position = project(agent.character.x, agent.character.y);
+                ctx.fillRect(position.x - 1, position.y - 1, 2, 2);
+            }
         }
 
         // Camera viewport.
-        const camera = this.game.camera;
-        const screen = this.game.app.screen;
+        const camera = this.game.world.camera;
+        const screen = this.game.world.app.screen;
         const topLeft = camera.screenToWorld(0, 0);
         const bottomRight = camera.screenToWorld(screen.width, screen.height);
         const viewTopLeft = project(topLeft.x, topLeft.y);
@@ -198,14 +206,14 @@ export class Minimap {
     }
 
     onClick(event) {
-        if (!this.projection || !this.game.map) return;
+        if (!this.projection || !this.game.world?.map) return;
         const rect = this.canvas.getBoundingClientRect();
         const x = ((event.clientX - rect.left) / rect.width) * this.size;
         const y = ((event.clientY - rect.top) / rect.height) * this.size;
         const worldX = (x - this.projection.offsetX) / this.projection.scale;
         const worldY = (y - this.projection.offsetY) / this.projection.scale;
-        this.game.camera.position.x = worldX;
-        this.game.camera.position.y = worldY;
-        this.game.camera.updateTransform();
+        this.game.world.camera.position.x = worldX;
+        this.game.world.camera.position.y = worldY;
+        this.game.world.camera.updateTransform();
     }
 }
