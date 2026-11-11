@@ -147,8 +147,13 @@ export class FalescGame {
             this.world.camera.zoom = Math.max(0.15, Math.min(4, save.camera.zoom || 0.5));
             this.world.camera.updateTransform();
         }
-        this.screenStateMachine.setState(GamePhase.PLAYING);
-        this.gameScreen.toast('Charter restored. The day is yours.', 'mint');
+        const restorePhase = save.phase === GamePhase.REPORT && this.charter.lastReport
+            ? GamePhase.REPORT
+            : GamePhase.PLAYING;
+        this.screenStateMachine.setState(restorePhase);
+        if (restorePhase === GamePhase.PLAYING) {
+            this.gameScreen.toast('Charter restored. The day is yours.', 'mint');
+        }
         this.saveGame();
         return true;
     }
@@ -366,6 +371,8 @@ export class FalescGame {
         this.pendingBuildLocation = null;
         this.chatter.clear();
         const simulation = this.charter.openDay();
+        // Anyone who left at dusk no longer has an agent on the shard.
+        this.crowd.sync();
         const duration = DAY_PHASES.length * BALANCE.playback.phaseSeconds;
         this.playback = {
             clock: 0,
@@ -399,6 +406,7 @@ export class FalescGame {
         this.playback = null;
         this.crowd.resetToPlanningPositions();
         this.screenStateMachine.setState(GamePhase.REPORT);
+        this.saveGame();
     }
 
     beginNextDay() {
@@ -506,8 +514,9 @@ export class FalescGame {
 
     saveGame() {
         if (!this.charter) return false;
-        if (this.screenStateMachine.state !== GamePhase.PLAYING) return false;
+        if (![GamePhase.PLAYING, GamePhase.REPORT].includes(this.screenStateMachine.state)) return false;
         return this.saveManager.write({
+            phase: this.screenStateMachine.state,
             settings: { ...this.settings },
             charter: this.charter.serialize(),
             camera: {
@@ -659,6 +668,9 @@ export class FalescGame {
                         lumenAfter: report.lumenAfter,
                         flourishing: report.flourishing,
                         complaints: report.complaints?.length || 0,
+                        arrivals: report.arrivals || [],
+                        departures: report.departures || [],
+                        population: report.population,
                         quotes: report.quotes,
                         outcome: report.outcome || null
                     } : null,

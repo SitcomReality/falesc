@@ -41,8 +41,9 @@ no sea, beach or open-air planting. `npm run check` and the smoke test pass.
 
 - **Tune the balance.** The current economy is generous and the goal is
   reachable several days early; the budget does not yet force hard care choices.
-- **Implement actual departures.** Residents currently talk about leaving after
-  several unmet days but never leave, so the population defeat is unreachable.
+- **Departures are implemented.** Homelessness and chronic 92+ needs remove a
+  resident after the threshold, and the population defeat is reachable. More
+  social/word-of-mouth departure paths remain a later layer.
 - **Run the acceptance playtest.** `resident-day.mjs` proves the mechanics; the
   fun of watching a choice and reading the "why" still needs a human pass.
 - Decide after that pass whether the four services need more differentiation

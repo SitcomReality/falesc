@@ -36,6 +36,8 @@ export class Resident {
             recentVisits: [],
             complaints: 0,
             unmetDays: {},
+            homelessDays: 0,
+            departure: null,
             ...(memory || {})
         };
         this.paletteSeed = paletteSeed;
@@ -85,6 +87,22 @@ export class Resident {
                 }
             ].slice(-8);
         }
+    }
+
+    recordHomelessNight() {
+        this.memory.homelessDays = (this.memory.homelessDays || 0) + 1;
+        return this.memory.homelessDays;
+    }
+
+    resetHomelessDays() {
+        this.memory.homelessDays = 0;
+    }
+
+    depart(reason, day) {
+        this.active = false;
+        this.homeServiceId = null;
+        this.state = 'departed';
+        this.memory.departure = { day, reason };
     }
 
     recordGiveUp(choice) {

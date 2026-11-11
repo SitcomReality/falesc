@@ -16,10 +16,10 @@ and an import map points at the vendored Pixi build. Fonts and art are local;
 the game makes no network requests at runtime.
 
 > **Status:** the First Light slice is playable end to end: plan, build, watch
-> the day, read the report, repeat. Balance is generous and not yet tuned;
-> residents talk about leaving but do not actually depart; only the home shard
-> is playable. Rivals, building layers, auctions and multiplayer are not
-> implemented. See [docs/known-issues.md](docs/known-issues.md).
+> the day, read the report, repeat. Residents arrive, leave when a need or a bed
+> goes unmet for days, and can empty the chapter. Balance is generous and not yet
+> tuned; only the home shard is playable. Rivals, building layers, auctions and
+> multiplayer are not implemented. See [docs/known-issues.md](docs/known-issues.md).
 
 ## Run it locally
 
@@ -74,6 +74,8 @@ webgame_smoke
 webgame_smoke --scenario scripts/scenarios/resident-day.mjs
 webgame_smoke --scenario scripts/scenarios/economy.mjs
 webgame_smoke --scenario scripts/scenarios/persistence.mjs
+webgame_smoke --scenario scripts/scenarios/departure.mjs
+webgame_smoke --scenario scripts/scenarios/report-save.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```
 

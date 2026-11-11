@@ -28,8 +28,8 @@ export default async function ({ page, assert, screenshot, log }) {
             const wanted = () => {
                 if (count('canteen') < 1) return 'canteen';
                 if (count('housing') < 3) return 'housing';
-                if (count('tea_house') < 1) return 'tea_house';
                 if (count('garden_dome') < 1) return 'garden_dome';
+                if (count('tea_house') < 1) return 'tea_house';
                 if (count('housing') < 4) return 'housing';
                 if (count('tea_house') < 2) return 'tea_house';
                 return null;

@@ -60,6 +60,8 @@ export default async function ({ page, assert, screenshot, log }) {
     await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
     const reportTwo = await page.evaluate("window.__falesc.snapshot().report");
     log(JSON.stringify({ reportTwo }));
+    assert.equal(reportTwo.arrivals.length, 2, 'the day report should announce the two arrivals');
+    assert.equal(reportTwo.population, 8, 'the report population should include the new arrivals');
     assert.ok(reportTwo.upkeep >= 4, 'Welcome Post, Canteen and new housing should draw upkeep');
     assert.equal(reportTwo.net, reportTwo.contributions - reportTwo.upkeep);
     assert.equal(reportTwo.lumenAfter, dayOne.lumenAfter + reportTwo.net);

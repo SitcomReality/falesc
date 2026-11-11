@@ -21,20 +21,19 @@ Severity is about impact on the slice, not effort:
 | # | Severity | Issue |
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
-| 2 | Medium | Residents talk about leaving but never depart; the population defeat is unreachable |
-| 3 | Medium | Only the home shard is playable; there is no archipelago layer |
-| 4 | Medium | No building layers, retrofit, modules, finishes or player-set policy |
-| 5 | Medium | No rivals, standings, patronage flow or Confluence vote |
-| 6 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
-| 7 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
-| 8 | Low | Save v1 is discarded, saves exist only during planning, and there is no export/import |
-| 9 | Low | The resident card stops at the last choice; no portrait or visit history |
-| 10 | Low | Overlay/focus management is still per-modal rather than a shared stack |
-| 11 | Low | Crowd movement has no local avoidance |
-| 12 | Low | No audio, and the multiplayer button remains a disabled placeholder |
-| 13 | Low | WebGL context loss is not handled |
-| 14 | Low | Visual regression is not enabled and no baseline is committed |
-| 15 | Low | Minor teardown and cleanup gaps remain |
+| 2 | Medium | Only the home shard is playable; there is no archipelago layer |
+| 3 | Medium | No building layers, retrofit, modules, finishes or player-set policy |
+| 4 | Medium | No rivals, standings, patronage flow or Confluence vote |
+| 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
+| 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
+| 7 | Low | Save v1 is discarded, a mid-`DAY` reload loses the day, and there is no export/import |
+| 8 | Low | The resident card stops at the last choice; no portrait or visit history |
+| 9 | Low | Overlay/focus management is still per-modal rather than a shared stack |
+| 10 | Low | Crowd movement has no local avoidance |
+| 11 | Low | No audio, and the multiplayer button remains a disabled placeholder |
+| 12 | Low | WebGL context loss is not handled |
+| 13 | Low | Visual regression is not enabled and no baseline is committed |
+| 14 | Low | Minor teardown and cleanup gaps remain |
 
 ## Open issues
 
@@ -64,32 +63,7 @@ decide whether the goal should be checked earlier than the limit. Remove or wire
 the unused affinity knobs. Keep `victory.mjs` as the end-to-end guard, and add a
 tighter "close run" scenario when the curve is chosen.
 
-### 2. Residents talk about leaving but never depart
-
-**Evidence**
-
-- `DaySimulator.maybeLeave()` adds a complaint when a need has been unmet for
-  `BALANCE.needs.leaveAfterUnmetDays`, but never sets `resident.active = false`
-  or removes the agent.
-- `Charter.evaluateEnding()` has a population-below-four defeat, but nothing in
-  the normal loop reduces population.
-- The report has `departures: []` and the end screen never sees an arrival/
-  departure story.
-
-**Impact**
-
-The "people can leave" promise is visible as text only. The population defeat is
-effectively unreachable, and the chapter cannot actually empty. This is the
-largest gap between the First Light fiction and its systems.
-
-**Suggested direction**
-
-Implement departures as a model event with a bulletin line, an agent removal,
-a housing/capacity update, and report/end-screen text. Add a scenario that
-pushes a need to 95+ for several days and asserts the departure and its
-consequences. Decide whether departure should also lower Devotion or Flourishing.
-
-### 3. Only the home shard is playable
+### 2. Only the home shard is playable
 
 **Evidence**
 
@@ -112,7 +86,7 @@ lobby and HUD. The next step is the Phase 2 shared commons, not quietly enabling
 placement on scenery. Add a second buildable sector only with its own
 navigation, ownership and camera affordances.
 
-### 4. No building layers, retrofit, modules, finishes or player-set policy
+### 3. No building layers, retrofit, modules, finishes or player-set policy
 
 **Evidence**
 
@@ -138,7 +112,7 @@ no new geometry), then modules, then shells/retrofit. Keep the "no spreadsheet"
 test: every option must show up in a resident's choice or the report. Extend
 `ServiceCardModal` and the placement preview before adding more programs.
 
-### 5. No rivals, standings, patronage flow or Confluence vote
+### 4. No rivals, standings, patronage flow or Confluence vote
 
 **Evidence**
 
@@ -163,7 +137,7 @@ Follow [design/roadmap.md](design/roadmap.md): one shared central island with tw
 AI chapters, shared residents, a standings card and one rival bulletin item
 before any vote. Do not add auctions or human multiplayer early.
 
-### 6. No keyboard build cursor
+### 5. No keyboard build cursor
 
 **Evidence**
 
@@ -185,7 +159,7 @@ the build dialog, and an `aria-live` cell description. Keep the canvas out of th
 tab order until that exists; route focus through a real grid control. Add a
 keyboard-only scenario once implemented.
 
-### 7. Day playback is a replay of an already-resolved day
+### 6. Day playback is a replay of an already-resolved day
 
 **Evidence**
 
@@ -209,31 +183,30 @@ the day strip and docs. If playtests want pressure, add a pause/inspect moment o
 a next-day consequence, not a real-time simulation. Revisit D2 only with
 evidence.
 
-### 8. Save v1 is discarded; saves exist only during planning
+### 7. Save v1 is discarded; a mid-day reload loses the day
 
 **Evidence**
 
 - `SaveManager` uses `falesc.save.v2`, removes `falesc.save.v1` on read, and
   clears unknown versions instead of migrating.
-- `FalescGame.saveGame()` refuses unless the phase is `PLAYING`, so a reload
-  during `DAY` or `REPORT` returns to the last planning save and loses that
-  day's result.
+- `FalescGame.saveGame()` writes in `PLAYING` and `REPORT`, so reloading on the
+  report restores it. Reloading during `DAY` returns to the last planning save
+  and loses that day's result.
 - There is no export/import, backup or UI "clear save" action.
 
 **Impact**
 
-The reset is intentional and documented, but a mid-day reload can lose the day
-the player just watched. Save migrations will remain manual until a schema is
-stable.
+The reset is intentional and documented, but a mid-playback reload can lose the
+day the player just watched. Save migrations will remain manual until a schema
+is stable.
 
 **Suggested direction**
 
-Keep the v2 clear-on-mismatch rule until the schema settles. Consider autosaving
-at the end of `REPORT` (and marking the save phase) so a reload restores the
-report rather than the previous morning. Add Export/Import in the charter menu
-for debugging and backups when the format stabilises.
+Keep the v2 clear-on-mismatch rule until the schema settles. If mid-playback
+reloads prove common, stage the report before `DAY` starts. Add Export/Import in
+the charter menu for debugging and backups when the format stabilises.
 
-### 9. The resident card stops at the last choice
+### 8. The resident card stops at the last choice
 
 **Evidence**
 
@@ -254,7 +227,7 @@ short history.
 Add a small current-mood portrait and a recent-visits list (the data is already
 saved). Keep the card scannable: one reason, one face, three recent doors.
 
-### 10. Overlay/focus management is per-modal
+### 9. Overlay/focus management is per-modal
 
 **Evidence**
 
@@ -277,7 +250,7 @@ Introduce a small `OverlayManager`/focus scope that owns the active dialog,
 applies `inert`, stacks modals and restores focus. Give screens an optional
 `destroy`. Keep the current `data-testid` hooks stable.
 
-### 11. Crowd movement has no local avoidance
+### 10. Crowd movement has no local avoidance
 
 **Evidence**
 
@@ -300,7 +273,7 @@ Keep model queues authoritative. If visual crowding becomes a problem, add
 simple local avoidance or queue-slot positions in `ResidentAgent`; do not add a
 second physical simulation that disagrees with the report.
 
-### 12. No audio; multiplayer is a placeholder
+### 11. No audio; multiplayer is a placeholder
 
 - There is no audio subsystem, music or SFX.
 - The menu keeps a disabled **Multiplayer — later** button. There is no
@@ -309,7 +282,7 @@ second physical simulation that disagrees with the report.
 
 Keep the button disabled until it is real; do not make it open an alert.
 
-### 13. WebGL context loss is not handled
+### 12. WebGL context loss is not handled
 
 Headless Firefox occasionally logs "WebGL context was lost" from Pixi. Smoke
 screenshots still render and the run passes, but there is no
@@ -318,7 +291,7 @@ real browser this can leave a blank canvas until reload. Add a listener that
 surfaces a reload prompt, or recreate the renderer/application, and treat the
 headless warning as environment noise only when screenshots confirm rendering.
 
-### 14. Visual regression is not enabled
+### 13. Visual regression is not enabled
 
 The world geometry, roster, traits and mineral variation are seeded, and the day
 simulation is deterministic, but character animation phase, ambient chatter and
@@ -327,7 +300,7 @@ be flaky, and none is committed. `#minimap` or the service dock could be
 baselined once the ambient flow is settled; see
 [testing.md](testing.md#8-visual-regression).
 
-### 15. Minor teardown and cleanup
+### 14. Minor teardown and cleanup
 
 - `InputManager.destroy()` exists but is never called; `Camera` has no destroy
   for its window/document listeners. Both are singletons today.
@@ -339,7 +312,7 @@ baselined once the ambient flow is settled; see
   names are not layout-tested.
 - Some `BALANCE` values are unused (see issue 1).
 - Services are created with `finish`/`policy` fields that no UI can change yet
-  (see issue 4).
+  (see issue 3).
 
 ## Fixed in recent slices
 
@@ -365,8 +338,9 @@ These are no longer open:
   the story.
 - **Save v2.** Residents, services, needs, affinity, last choice, door state and
   closure survive a reload; v1 is intentionally discarded.
-- **Save round-trip hardening.** Resident affinity and service ids restore
-  correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
+- **Departures and returns.** Homeless nights and chronic high needs now remove residents from the model and the shard; the next bulletin and the report announce arrivals/departures, and the population defeat is reachable.
+- **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
+- **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Safer destructive actions.** Abandoning a charter is a two-step confirmation
   and the save is cleared only after the confirmation.
 - **Truthful choice feedback.** "I come here often" is per resident, "open late"

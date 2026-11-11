@@ -47,6 +47,12 @@ export class ReportScreen {
         const quotes = report.quotes?.length
             ? report.quotes.map((quote) => `<blockquote>“${escapeHtml(quote.text)}”<cite>${escapeHtml(quote.resident)}</cite></blockquote>`).join('')
             : '<blockquote>“A quiet day.”<cite>The square</cite></blockquote>';
+        const arrivals = report.arrivals?.length
+            ? `<h2>Arrivals</h2><ul class="report__list report__list--services">${report.arrivals.map((arrival) => `<li><span>${escapeHtml(arrival.name)}</span><span>new bed</span></li>`).join('')}</ul>`
+            : '';
+        const departures = report.departures?.length
+            ? `<h2>Departures</h2><ul class="report__list">${report.departures.map((departure) => `<li><strong>${escapeHtml(departure.name)}</strong> — ${escapeHtml(departure.reason)}</li>`).join('')}</ul>`
+            : '';
         const closures = report.closures?.length
             ? `<p class="report__warning">Closed at dusk: ${report.closures.map((closure) => escapeHtml(closure.name)).join(', ')}. The upkeep ran short.</p>`
             : '';
@@ -79,6 +85,8 @@ export class ReportScreen {
                     <section>
                         <h2>Word of mouth</h2>
                         <div class="report__quotes">${quotes}</div>
+                        ${arrivals}
+                        ${departures}
                         <h2>Complaints</h2>
                         ${complaints}
                     </section>

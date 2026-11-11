@@ -143,17 +143,20 @@ legible: the resident records a one-line **why**, such as
 `Canteen — I was hungry, there was no queue, I come here often.`
 
 A service holds `capacity` people at once and up to three more in its queue.
-Residents over that limit give up with a complaint and a small loss of
-affinity. A resident with no open service for a need of 62 or more complains;
-complaints feed the bulletin and the evening report. Needs of 85 or more are
-tracked as unmet days. After three consecutive unmet days the resident starts
-**talking about leaving** — currently that produces a complaint, not a
-departure.
+If a service is full, the resident re-evaluates the next candidate; if every
+option is full, they give up with a visible reason, a complaint and a small loss
+of affinity. A resident with no open service for a need of 62 or more complains;
+complaints feed the bulletin and the evening report. A need of 92 or more is
+tracked as an unmet day. After three consecutive unmet days, or two nights
+without a bed, the resident leaves. Departures are
+announced in the next bulletin and the evening report, remove the agent from the
+shard, and reduce the chapter's population and Devotion. If fewer than four
+residents remain, the charter is defeated.
 
 ## The day loop
 
 1. **Morning bulletin** — planning is paused. Three items: the most pressing
-   need, an arrival or the latest complaint, and a line of word of mouth.
+   need, an arrival/departure or the latest complaint, and a line of word of mouth.
 2. **Plan** — read the room, arm a service, place one or two works, inspect
    residents and services, decide who gets the last lumen.
 3. **Open the day** — `DaySimulator` resolves the entire day immediately:
@@ -227,9 +230,7 @@ The end screen shows days weathered, residents, Devotion, Flourishing and lumen,
 plus the outcome and a quote. It offers **Return to the drift** (menu) or **New
 charter** (lobby). Ending a run clears the save.
 
-Because residents do not actually depart yet, the population-below-four defeat
-is effectively unreachable in normal play today; the goal-at-the-limit defeat is
-the real one. This is listed in [known-issues.md](known-issues.md).
+Departures make the population-below-four defeat reachable: demolish or fail to build housing and the chapter can empty. The goal-at-the-limit defeat remains the other path.
 
 ## Map sizes
 
@@ -250,10 +251,11 @@ camera fit the whole generated cluster; the camera starts on the home shard.
 
 ## Save v2
 
-The game autosaves to `localStorage` under **`falesc.save.v2`** during planning
+The game autosaves to `localStorage` under **`falesc.save.v2`** while planning
 — after starting a charter, after a build, dismantle or reopen, after beginning
-the next day, and on `beforeunload` while `PLAYING`. It does not save during
-`DAY`, `REPORT` or `END`.
+the next day, and on `beforeunload` while `PLAYING` — and again when the evening
+report opens. Reloading on the report restores that report (there is no replay
+of the day). It does not save during `DAY` or `END`.
 
 The payload is model data only:
 
@@ -272,6 +274,8 @@ The payload is model data only:
     "flourishing": 63.5,
     "devotion": 8.3,
     "ending": null,
+    "pendingArrivals": [],
+    "lastReport": null,
     "residents": [],
     "services": []
   },
@@ -279,9 +283,11 @@ The payload is model data only:
 }
 ```
 
-`residents` store identity, traits, needs, active state, home service, affinity
-and memory (including the last choice); `services` store program, footprint,
-state, door, capacity, finish/policy defaults, visits, hearts and closure state.
+`residents` store identity, traits, needs, active/departed state, home service,
+affinity and memory (including the last choice and homeless nights); `services`
+store program, footprint, state, door, capacity, finish/policy defaults, visits,
+hearts and closure state. `lastReport` is the save-safe summary used by the
+report screen, bulletin and end quote.
 The world is regenerated from the seed on continue, and the camera is restored
 and clamped.
 
@@ -294,8 +300,9 @@ yet.
 
 - **Balance is generous and untuned.** A careful run can bank a large lumen
   surplus; the interesting pressure is not yet there.
-- **Residents threaten to leave but never do.** The departure path is not
-  implemented, so the population defeat is theoretical.
+- **Population pressure is real but sparse.** Departures only trigger after two
+  homeless nights or three days at 92+ need; there is no broader wellbeing or
+  word-of-mouth departure yet.
 - **Only the home shard is playable.** Other islands are scenery; there is no
   transit, archipelago layer or rival chapter.
 - **No building layers, modules, finishes, policies or retrofit.** The model

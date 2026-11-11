@@ -5,6 +5,7 @@ import { ResidentFactory } from '../residents/ResidentFactory.js';
 import { ServiceManager } from '../services/ServiceManager.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
+import { summarizeReport } from '../simulation/ReportSummary.js';
 
 /**
  * A charter is the whole run: day, lumen, works, cast, services and the report
@@ -31,6 +32,7 @@ export class Charter {
         this.bulletin = null;
         this.history = [];
         this.commonsCell = null;
+        this.pendingArrivals = [];
 
         if (saved) {
             this.restore(saved);
@@ -236,6 +238,7 @@ export class Charter {
         this.lastReport = simulation.report;
         this.report = simulation.report;
         this.history.push(simulation.report);
+        this.pendingArrivals = [];
         this.refreshDerived();
         return simulation;
     }
@@ -248,6 +251,7 @@ export class Charter {
         for (const service of this.services.services) service.resetDaily();
         this.assignHomes();
         const arrivals = this.addArrivals();
+        this.pendingArrivals = arrivals;
         this.report = null;
         this.bulletin = this.buildBulletin(arrivals);
         this.refreshDerived();
@@ -258,7 +262,7 @@ export class Charter {
         if (this.flourishing < BALANCE.arrivals.minFlourishing) return [];
         const spare = this.services.spareHousing(this.roster);
         if (spare <= 0) return [];
-        const waiting = this.roster.filter((resident) => !resident.active);
+        const waiting = this.roster.filter((resident) => !resident.active && !resident.memory.departure);
         const count = Math.min(BALANCE.arrivals.perDay, spare, waiting.length);
         const arrivals = [];
         for (let index = 0; index < count; index++) {
@@ -341,7 +345,20 @@ export class Charter {
                 : 'No one is urgent yet. The day is yours.'
         });
 
-        if (arrivals.length > 0) {
+        if (this.lastReport?.departures?.length && arrivals.length > 0) {
+            items.push({
+                kicker: 'People',
+                title: `${arrivals.length} arrive, ${this.lastReport.departures.length} leave`,
+                text: `${arrivals.map((arrival) => arrival.name).join(', ')} find beds; ${this.lastReport.departures.map((departure) => departure.name).join(', ')} leave.`
+            });
+        } else if (this.lastReport?.departures?.length) {
+            const departure = this.lastReport.departures[0];
+            items.push({
+                kicker: 'Departure',
+                title: this.lastReport.departures.length === 1 ? `${departure.name} left` : `${this.lastReport.departures.length} Tidelanders left`,
+                text: departure.reason
+            });
+        } else if (arrivals.length > 0) {
             items.push({
                 kicker: 'Arrivals',
                 title: arrivals.length === 1 ? `${arrivals[0].name} arrives` : `${arrivals.length} Tidelanders arrive`,
@@ -389,6 +406,8 @@ export class Charter {
             flourishing: this.flourishing,
             devotion: this.devotion,
             ending: this.ending,
+            pendingArrivals: this.pendingArrivals,
+            lastReport: summarizeReport(this.lastReport),
             residents: this.roster.map((resident) => resident.toJSON()),
             services: this.services.serialize()
         };
@@ -400,6 +419,7 @@ export class Charter {
         this.lumen = Number.isFinite(saved.lumen) ? saved.lumen : BALANCE.startingLumen;
         this.works = Number.isFinite(saved.works) ? saved.works : BALANCE.worksPerDay;
         this.ending = saved.ending || null;
+        this.pendingArrivals = Array.isArray(saved.pendingArrivals) ? saved.pendingArrivals : [];
         this.roster = ResidentFactory.fromSave(saved.residents || []);
         if (this.roster.length === 0) this.roster = ResidentFactory.createRoster(this.seed, BALANCE.rosterSize);
         this.services.restore(saved.services || []);
@@ -407,9 +427,9 @@ export class Charter {
         this.assignHomes();
         this.refreshDerived();
         this.report = null;
-        this.lastReport = null;
+        this.lastReport = saved.lastReport || null;
         this.history = [];
-        this.bulletin = this.buildBulletin([]);
+        this.bulletin = this.buildBulletin(this.pendingArrivals);
     }
 
     stats() {

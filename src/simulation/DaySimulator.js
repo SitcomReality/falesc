@@ -27,6 +27,8 @@ export class DaySimulator {
         this.serviceVisits = new Map();
         this.phaseLoad = new Map();
         this.affinityBefore = new Map();
+        this.pendingArrivals = [...(charter.pendingArrivals || [])];
+        this.departures = [];
     }
 
     run() {
@@ -50,8 +52,14 @@ export class DaySimulator {
         for (const resident of charter.activeResidents) {
             this.applyNightRest(resident);
             this.recordDailyUnmet(resident);
-            this.maybeLeave(resident);
+            const departure = this.maybeLeave(resident);
+            if (departure) this.departures.push(departure);
         }
+
+        for (const departure of this.departures) {
+            departure.resident.depart(departure.reason, charter.day);
+        }
+        if (this.departures.length > 0) charter.refreshDerived();
 
         const report = this.buildReport(needBefore);
         LumenLedger.resolveDay(charter, report);
@@ -77,8 +85,10 @@ export class DaySimulator {
             resident.adjustNeed('rest', -BALANCE.housing.restRecovery);
             resident.addAffinity(BALANCE.housing.housedAffinity);
             resident.clearUnmetDay('rest');
+            resident.resetHomelessDays();
         } else {
             resident.adjustNeed('rest', BALANCE.housing.homelessRestPenalty);
+            resident.recordHomelessNight();
             this.complain(resident, NEED_BY_ID.rest, `I need a bed. The ${this.charter.name} has no room for me.`);
         }
     }
@@ -86,14 +96,16 @@ export class DaySimulator {
     chooseAndSchedule(resident, phase, needBefore, loads) {
         if (!resident.active) return;
         const orderedNeeds = [...NEEDS].sort((a, b) => resident.needs[b.id] - resident.needs[a.id]);
-        const available = this.charter.services.activeServices.filter((service) => isOpenAt(service.program, phase.id));
+        const available = this.charter.services.activeServices
+            .filter((service) => service.entrance && service.program && isOpenAt(service.program, phase.id));
         let choice = null;
+        let blockedByQueue = null;
 
         for (const need of orderedNeeds) {
             const urgency = resident.needs[need.id];
             if (urgency < 20) continue;
-            // Rest is a night-time, at-home need. Do not send people to a
-            // housing queue in the morning or complain that a bed is "closed".
+            // Rest is a night-time, at-home need. Do not send people to a housing
+            // queue in the morning or complain that a bed is "closed".
             if (need.id === 'rest' && phase.id !== 'night') continue;
             const candidates = available.filter((service) => servesNeed(service.program, need.id));
             if (candidates.length === 0) continue;
@@ -101,17 +113,27 @@ export class DaySimulator {
             const scored = candidates.map((service) => ({
                 service,
                 score: this.scoreService(resident, service, need, urgency, phase)
-            })).sort((a, b) => b.score - a.score);
+            })).filter((entry) => entry.score > 0).sort((a, b) => b.score - a.score);
 
-            if (scored[0] && scored[0].score > 0) {
-                choice = { ...scored[0], need };
+            for (const entry of scored) {
+                const load = loads.get(`${entry.service.id}:${phase.id}`) || 0;
+                if (load >= entry.service.capacity + BALANCE.services.maxQueue) {
+                    blockedByQueue = blockedByQueue || { ...entry, need };
+                    continue;
+                }
+                choice = { ...entry, need };
                 break;
             }
+            if (choice) break;
         }
 
         if (!choice) {
-            const urgent = mostUrgentNeed(resident.needs);
-            if (urgent && urgent.value >= BALANCE.needs.complaintThreshold && urgent.id !== 'rest') {
+            if (blockedByQueue) {
+                this.giveUp(resident, blockedByQueue.service, blockedByQueue.need, phase);
+                return;
+            }
+            const urgent = mostUrgentNeed({ ...resident.needs, rest: 0 });
+            if (urgent && urgent.value >= BALANCE.needs.complaintThreshold) {
                 this.complain(resident, urgent, this.missingServiceReason(resident, urgent, phase));
             }
             return;
@@ -120,9 +142,22 @@ export class DaySimulator {
         const { service, need } = choice;
         const loadKey = `${service.id}:${phase.id}`;
         const load = loads.get(loadKey) || 0;
-        const queueIndex = load;
         loads.set(loadKey, load + 1);
-        this.scheduleVisit(resident, service, need, phase, queueIndex, needBefore);
+        this.scheduleVisit(resident, service, need, phase, load, needBefore);
+    }
+
+    giveUp(resident, service, need, phase) {
+        const reason = `${service.name} — the queue was too long, so I gave up.`;
+        resident.recordGiveUp({
+            day: this.charter.day,
+            phase: phase.id,
+            serviceId: service.id,
+            serviceName: service.name,
+            needId: need.id,
+            reason
+        });
+        this.complain(resident, need, reason);
+        resident.addAffinity(-0.03);
     }
 
     scoreService(resident, service, need, urgency, phase) {
@@ -304,23 +339,36 @@ export class DaySimulator {
     }
 
     recordDailyUnmet(resident) {
-        const unmet = NEEDS.filter((need) => resident.needs[need.id] >= 85).map((need) => need.id);
+        const unmet = NEEDS
+            .filter((need) => resident.needs[need.id] >= BALANCE.needs.departureNeed)
+            .map((need) => need.id);
         resident.updateUnmetDays(unmet);
     }
 
     maybeLeave(resident) {
-        if (!resident.memory.unmetDays) return;
+        const homelessDays = resident.memory.homelessDays || 0;
+        if (homelessDays >= BALANCE.housing.homelessNightsBeforeLeaving) {
+            return {
+                resident,
+                id: resident.id,
+                name: resident.name,
+                reason: `No bed for ${homelessDays} nights.`,
+                needId: 'rest'
+            };
+        }
+        const unmet = resident.memory.unmetDays || {};
         for (const need of NEEDS) {
-            if ((resident.memory.unmetDays[need.id] || 0) >= BALANCE.needs.leaveAfterUnmetDays) {
-                this.complaints.push({
-                    residentId: resident.id,
-                    residentName: resident.name,
-                    needId: need.id,
-                    needName: need.name,
-                    text: `${resident.name} is talking about leaving. ${need.name} has gone unmet for days.`
-                });
+            if ((unmet[need.id] || 0) >= BALANCE.needs.leaveAfterUnmetDays) {
+                return {
+                    resident,
+                    id: resident.id,
+                    name: resident.name,
+                    reason: `${need.name} went unmet for ${unmet[need.id]} days.`,
+                    needId: need.id
+                };
             }
         }
+        return null;
     }
 
     buildReport(needBefore) {
@@ -340,7 +388,8 @@ export class DaySimulator {
         const visits = this.events.length;
         const hearts = Math.round(residents.reduce((sum, resident) => sum + (resident.affinity.player || 0), 0) * 10) / 10;
         const heartsGained = Math.round(residents.reduce((sum, resident) => sum + Math.max(0, (resident.affinity.player || 0) - (this.affinityBefore.get(resident.id) || 0)), 0) * 10) / 10;
-        const heartsLost = Math.round(residents.reduce((sum, resident) => sum + Math.max(0, (this.affinityBefore.get(resident.id) || 0) - (resident.affinity.player || 0)), 0) * 10) / 10;
+        const departedAffinity = this.departures.reduce((sum, departure) => sum + (this.affinityBefore.get(departure.id) || 0), 0);
+        const heartsLost = Math.round((residents.reduce((sum, resident) => sum + Math.max(0, (this.affinityBefore.get(resident.id) || 0) - (resident.affinity.player || 0)), 0) + departedAffinity) * 10) / 10;
         const serviceVisits = {};
         for (const [serviceId, count] of this.serviceVisits) serviceVisits[serviceId] = count;
 
@@ -369,8 +418,8 @@ export class DaySimulator {
             lumenAfter: charter.lumen,
             closures: [],
             complaints: this.complaints,
-            arrivals: [],
-            departures: [],
+            arrivals: this.pendingArrivals.map((arrival) => ({ ...arrival })),
+            departures: this.departures.map((departure) => ({ id: departure.id, name: departure.name, reason: departure.reason, needId: departure.needId })),
             quotes,
             serviceVisits,
             events: this.events,
@@ -380,6 +429,11 @@ export class DaySimulator {
             at: charter.day
         };
 
+        if (this.departures.length > 0) {
+            report.message = this.departures.length === 1
+                ? `${this.departures[0].name} left the chapter.`
+                : `${this.departures.length} Tidelanders left the chapter.`;
+        }
         return report;
     }
 

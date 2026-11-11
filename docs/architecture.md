@@ -233,11 +233,12 @@ Key commands:
 - `dismantle()` / `reopen()` — half-cost refund / shortfall recovery.
 - `openDay()` — run `DaySimulator`, store report, refresh derived values.
 - `beginNextDay()` — increment day, reset works, promote construction, reset
-  daily service state, assign homes, add arrivals, build the next bulletin.
+  daily service state, assign homes, add arrivals, remember `pendingArrivals`,
+  build the next bulletin.
 - `addArrivals()` — if flourishing ≥ 20 and beds are spare, activate up to two
-  waiting residents.
-- `evaluateEnding(report)` — population < 4, or day-limit goal check; writes
-  `report.outcome`/`message`.
+  waiting residents. Residents who already departed are never re-admitted.
+- `evaluateEnding(report)` — population < 4 (including departures), or the
+  day-limit goal check; writes `report.outcome`/`message`.
 - `serialize()` / `restore()` — save v2 model data.
 
 The charter does not own DOM or the Pixi scene. `ServiceManager` creates
@@ -259,12 +260,15 @@ reads wall-clock time. Same seed + same actions + same day = same report.
    - otherwise choose and schedule one visit per resident.
 3. At night: housed residents recover Rest and gain a little affinity; homeless
    residents take a Rest penalty and complain.
-4. Record daily unmet needs (85+), and turn three consecutive unmet days into a
-   "talking about leaving" complaint. No departure occurs.
-5. Build the report (needs at dusk, wellbeing, visits, hearts, service visits,
-   quotes, complaints).
+4. Record daily unmet needs (92+) and homeless nights. A resident leaves after
+   three consecutive unmet days or two nights without a bed; `depart()` marks
+   them inactive, frees the bed and records the reason. The report and next
+   bulletin announce departures.
+5. Build the report (needs at dusk, wellbeing, visits, hearts gained/lost,
+   arrivals, departures, service visits, quotes, complaints).
 6. `LumenLedger.resolveDay()` applies contributions, upkeep, closures, and
-   writes the economy fields onto the report.
+   writes the economy fields onto the report. Contributions use the residents
+   still present after departures.
 7. Reset daily service counters, call `charter.evaluateEnding(report)`, and
    return `{ report, events, navigator }`.
 
@@ -280,11 +284,12 @@ urgency × need match × quality × vibe fit × standards fit × proximity
         × availability/queue × familiarity × small seeded novelty × rhythm
 ```
 
-The best positive score wins. A service-phase load at or above `capacity + 3`
-makes the resident give up with a complaint and a small affinity loss.
-Otherwise the simulator schedules an event inside the five-second phase window: depart,
-travel, queue, enter, use, exit, return. Travel is scaled by the A* path length
-and the whole visit is compressed to fit its phase.
+The best positive score wins. If a service-phase load is at or above
+`capacity + 3`, the resident re-evaluates the next candidate; if every option
+is full, they give up with a visible reason, a complaint and a small affinity
+loss. Otherwise the simulator schedules an event inside the five-second phase
+window: depart, travel, queue, enter, use, exit, return. Travel is scaled by the
+A* path length and the whole visit is compressed to fit its phase.
 
 ### Effects
 
@@ -322,14 +327,17 @@ id, name, traits { temperament, standards, rhythm }
 needs { sustenance, rest, company, wonder }   // 0 satisfied .. 100 urgent
 active, homeServiceId
 affinity { player }                           // 0..5, starts at 0.8
-memory { lastChoice, recentVisits, complaints, unmetDays, lastComplaint }
+memory { lastChoice, recentVisits, complaints, unmetDays, lastComplaint,
+         homelessDays, departure }
 paletteSeed, state, position
 ```
 
 Derived: `wellbeing` (`100 − average urgency`), `favouriteNeed`, `traitSummary`,
 `isHomeless`. `recordChoice()` keeps the last choice and up to eight recent
 visits (the card currently shows only the last); `addAffinity()` clamps to 0–5;
-`updateUnmetDays()` is called once at dusk.
+`updateUnmetDays()` is called once at dusk; `recordHomelessNight()` and
+`resetHomelessDays()` track bedlessness; `depart(reason, day)` removes the
+resident from the active roster while preserving them in the saved cast.
 
 `ResidentFactory.createRoster(seed, 15)` shuffles the name pool with a seeded
 RNG, cycles temperament/standards/rhythm for a deliberate mix, seeds a rotating
@@ -450,13 +458,15 @@ price per visit, no stock, and no passive harvest income.
 
 - key `falesc.save.v2`, version `2`;
 - `read()` removes the legacy `falesc.save.v1` key, parses the payload, rejects
-  a non-v2 version by clearing, requires `charter.seed` to be an integer;
+  a non-v2 version by clearing, and validates the charter's seed, resident
+  array/shape, service array/shape (including a door cell) before returning it;
 - `write(payload)` adds `version` and `savedAt`;
 - `clear()` removes both v2 and legacy v1.
 
-`FalescGame.saveGame()` writes only when a charter exists **and** the phase is
-`PLAYING`: after starting/continuing, after build/dismantle/reopen, after
-beginning the next day, and on `beforeunload`. It stores:
+`FalescGame.saveGame()` writes when a charter exists and the phase is `PLAYING`
+or `REPORT`: after starting/continuing, after build/dismantle/reopen, after
+beginning the next day, when the evening report opens, and on `beforeunload`.
+It stores:
 
 ```json
 {
@@ -466,18 +476,22 @@ beginning the next day, and on `beforeunload`. It stores:
   "charter": {
     "seed": 12345, "mapSize": "medium", "day": 3, "dayLimit": 14,
     "lumen": 12, "works": 2, "flourishing": 63.5, "devotion": 8.3,
-    "ending": null, "residents": [], "services": []
+    "ending": null, "pendingArrivals": [], "lastReport": {},
+    "residents": [], "services": []
   },
   "camera": { "x": 0, "y": 0, "zoom": 0.5 }
 }
 ```
 
 The world is regenerated from the seed. Residents restore traits, needs,
-activity, home, affinity and memory; services restore program, cells, state,
-door, capacity, visits, hearts and closure. Unknown or corrupt saves are
-discarded, not partially loaded. Save v1 is intentionally abandoned. There is no
-export/import. Reloading during `DAY` or `REPORT` returns to the last planning
-save, because saves are not written in those phases.
+activity, home, affinity and memory (including departure and homeless-day
+state); services restore program, cells, state, door, capacity, visits, hearts
+and closure. `pendingArrivals` keeps the current morning's new residents for
+the next report; `lastReport` is a compact summary (no playback events) shown on
+the restored report screen. Unknown or structurally invalid saves are cleared,
+not partially loaded. Save v1 is intentionally abandoned. There is no
+export/import. Reloading during `DAY` returns to the last planning save; reloading on `REPORT`
+restores the report and does not replay the day.
 
 ## 10. World generation
 

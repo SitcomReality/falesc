@@ -14,8 +14,9 @@ export const BALANCE = {
         complaintThreshold: 62,
         // The world report calls out the most urgent need above this.
         bulletinThreshold: 55,
-        // A resident leaves after this many consecutive days with an unmet 95+ need.
-        leaveAfterUnmetDays: 3
+        // A resident leaves after this many consecutive days at/above departureNeed.
+        leaveAfterUnmetDays: 3,
+        departureNeed: 92
     },
 
     services: {
@@ -31,6 +32,7 @@ export const BALANCE = {
     housing: {
         restRecovery: 38,
         homelessRestPenalty: 12,
+        homelessNightsBeforeLeaving: 2,
         housedAffinity: 0.04
     },
 

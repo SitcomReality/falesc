@@ -10,8 +10,9 @@
 > buildings, rivals or art will save the game.
 >
 > **Status note (2026-11-11):** First Light implements four needs, three trait
-> axes, deterministic choice with a "why", queues, enter/exit, the resident card
-> and Devotion. Care/Purpose, relationships, portraits and the fuller schedule
+> axes, deterministic choice with a "why", queues/alternatives, enter/exit,
+> arrivals, departures (homelessness or chronic 92+ needs), the resident card and
+> Devotion. Care/Purpose, relationships, portraits and the fuller schedule
 > remain target. The "current prototype" comparisons below are historical.
 
 ---
