@@ -73,6 +73,30 @@ export class LobbyScreen {
         nameHint.textContent = 'The name the other chapters will read in the standings.';
         nameField.append(nameLabel, this.chapterInput, nameHint);
 
+        const mottoField = document.createElement('div');
+        mottoField.className = 'field';
+        const mottoLabel = document.createElement('label');
+        mottoLabel.className = 'field__label';
+        mottoLabel.htmlFor = 'lobby-chapter-motto-field';
+        mottoLabel.textContent = 'Motto';
+        this.mottoInput = document.createElement('input');
+        this.mottoInput.className = 'input';
+        this.mottoInput.id = 'lobby-chapter-motto-field';
+        this.mottoInput.type = 'text';
+        this.mottoInput.maxLength = 60;
+        this.mottoInput.placeholder = 'A line the chapter lives by';
+        this.mottoInput.dataset.testid = 'lobby-chapter-motto';
+        this.mottoInput.value = this.game.settings.chapterMotto || '';
+        this.mottoInput.addEventListener('change', () => {
+            const next = this.mottoInput.value.replace(/\s+/g, ' ').trim().slice(0, 60);
+            this.game.settings.chapterMotto = next;
+            this.mottoInput.value = next;
+        });
+        const mottoHint = document.createElement('span');
+        mottoHint.className = 'field__hint';
+        mottoHint.textContent = 'Optional. Appears in the charter record.';
+        mottoField.append(mottoLabel, this.mottoInput, mottoHint);
+
         const seedField = document.createElement('div');
         seedField.className = 'field';
 
@@ -92,6 +116,7 @@ export class LobbyScreen {
         this.seedInput.placeholder = 'e.g. 40421';
         this.seedInput.value = this.game.settings.mapSeed;
         this.chapterInput.value = this.game.settings.chapterName || 'Home Chapter';
+        this.mottoInput.value = this.game.settings.chapterMotto || '';
         this.seedInput.dataset.testid = 'lobby-seed';
 
         const randomBtn = document.createElement('button');
@@ -222,7 +247,7 @@ export class LobbyScreen {
         actions.append(startBtn, backBtn);
         backBtn.addEventListener('click', () => this.gsm.setState('MENU'));
 
-        form.append(nameField, seedField, sizeField, modeField, actions);
+        form.append(nameField, mottoField, seedField, sizeField, modeField, actions);
         sheet.appendChild(form);
 
         const chart = document.createElement('aside');
@@ -316,6 +341,7 @@ export class LobbyScreen {
         this.container.style.display = 'flex';
         this.seedInput.value = this.game.settings.mapSeed;
         this.chapterInput.value = this.game.settings.chapterName || 'Home Chapter';
+        this.mottoInput.value = this.game.settings.chapterMotto || '';
         this._setSize(this.game.settings.mapSize);
         this._setMode(this.game.settings.mode || 'first-light');
     }

@@ -32,6 +32,7 @@ export class EndScreen {
         aside.innerHTML = `
             <div>
                 <p class="kicker">The chapter</p>
+                <p class="end__motto" data-role="motto"></p>
                 <dl class="end__stats">
                     <div class="end__stat"><dt>Days weathered</dt><dd data-role="days">1</dd></div>
                     <div class="end__stat"><dt>Peak residents</dt><dd data-role="peak-population">0</dd></div>
@@ -68,6 +69,7 @@ export class EndScreen {
         this.commonsStat = aside.querySelector('[data-role=commons-stat]');
         this.commonsEl = aside.querySelector('[data-role=commons]');
         this.medalEl = aside.querySelector('[data-role=medal]');
+        this.mottoEl = aside.querySelector('[data-role=motto]');
 
         main.querySelector('[data-testid=end-menu]').addEventListener('click', () => this.gsm.setState('MENU'));
         main.querySelector('[data-testid=end-retry]').addEventListener('click', () => this.gsm.setState('LOBBY'));
@@ -78,6 +80,8 @@ export class EndScreen {
         const ending = charter?.ending || this.game.endResult || { outcome: 'abandon' };
         const outcome = ending.outcome || 'abandon';
         const stats = charter?.stats() || {};
+        this.mottoEl.textContent = charter?.motto || '';
+        this.mottoEl.hidden = !charter?.motto;
         const commons = charter?.commons || null;
         this.commonsStat.hidden = !commons;
         if (commons) {

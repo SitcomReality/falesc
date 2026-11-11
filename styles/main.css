@@ -5238,3 +5238,16 @@ body.is-photo-mode .care-watch {
     font-size: 8px;
     box-shadow: 2px 2px 0 var(--btn-shadow);
 }
+
+.end__motto {
+    margin: -2px 0 10px;
+    font-family: var(--display);
+    font-size: 17px;
+    font-style: italic;
+    line-height: 1.15;
+    color: var(--wine);
+}
+
+.end__motto[hidden] {
+    display: none;
+}

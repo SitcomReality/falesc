@@ -10,6 +10,9 @@ export default async function ({ page, assert, screenshot }) {
         const input = document.querySelector('[data-testid=lobby-chapter-name]');
         input.value = 'The Long Table';
         input.dispatchEvent(new Event('change', { bubbles: true }));
+        const motto = document.querySelector('[data-testid=lobby-chapter-motto]');
+        motto.value = 'Every door open.';
+        motto.dispatchEvent(new Event('change', { bubbles: true }));
         return input.value;
     })()`);
     await page.pause(300);
@@ -19,6 +22,7 @@ export default async function ({ page, assert, screenshot }) {
     await page.evaluate("window.__falesc.app.bulletinModal.hide()");
     const named = await page.evaluate("window.__falesc.snapshot().chapters.find((chapter) => chapter.isPlayer).name");
     assert.equal(named, 'The Long Table');
+    assert.equal(await page.evaluate("window.__falesc.app.charter.motto"), 'Every door open.');
     await page.evaluate("window.__falesc.app.saveGame()");
     await page.reload();
     await page.waitFor("window.__falesc.snapshot().state === 'MENU'");
@@ -26,4 +30,5 @@ export default async function ({ page, assert, screenshot }) {
     await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
     const restored = await page.evaluate("window.__falesc.snapshot().chapters.find((chapter) => chapter.isPlayer).name");
     assert.equal(restored, 'The Long Table');
+    assert.equal(await page.evaluate("window.__falesc.app.charter.motto"), 'Every door open.');
 }

@@ -31,7 +31,7 @@ import { ConfluenceVote } from '../confluence/ConfluenceVote.js';
  * layer listens; it never owns the rules.
  */
 export class Charter {
-    constructor({ seed, mapSize = 'medium', mode = 'first-light', chapterName = null, map = null, parentContainer = null, saved = null, legacy = null }) {
+    constructor({ seed, mapSize = 'medium', mode = 'first-light', chapterName = null, chapterMotto = null, map = null, parentContainer = null, saved = null, legacy = null }) {
         this.legacy = legacy || saved?.legacy || null;
         this.legacyNote = null;
         this.legacyBonus = this.legacy?.policyId === 'open_table'
@@ -45,6 +45,7 @@ export class Charter {
         this.map = map;
         this.homeSector = map?.homeSector || null;
         this.name = cleanChapterName(chapterName || saved?.chapterName);
+        this.motto = cleanMotto(chapterMotto || saved?.chapterMotto);
         this.occupancy = new Map();
         const playerLumen = mode === 'contest' ? BALANCE.contest.startingLumen : BALANCE.startingLumen;
         this.player = {
@@ -1476,6 +1477,10 @@ export class Charter {
             devotionByChapter: this.devotionByChapter
         };
     }
+}
+
+function cleanMotto(value) {
+    return String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, 60);
 }
 
 function cleanChapterName(value) {

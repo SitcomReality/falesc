@@ -73,7 +73,8 @@ export class FalescGame {
             mapSeed: Math.floor(Math.random() * 1000000),
             mapSize: 'medium',
             mode: 'first-light',
-            chapterName: 'Home Chapter'
+            chapterName: 'Home Chapter',
+            chapterMotto: ''
         };
         const chartParams = readChartParams();
         if (chartParams.seed !== null) this.settings.mapSeed = chartParams.seed;
@@ -241,6 +242,7 @@ export class FalescGame {
             mapSize: size,
             mode: this.settings.mode || 'first-light',
             chapterName: this.settings.chapterName || 'Home Chapter',
+            chapterMotto: this.settings.chapterMotto || '',
             map: this.world.map,
             parentContainer: this.world.objectLayer,
             legacy
