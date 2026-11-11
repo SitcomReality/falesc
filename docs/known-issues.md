@@ -22,7 +22,7 @@ Severity is about impact on the slice, not effort:
 | --- | --- | --- |
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Only the home shard is playable; there is no archipelago layer |
-| 3 | Medium | No building layers, retrofit, modules, finishes or player-set policy |
+| 3 | Medium | No building layers, modules, finish choice or player-set policy; one fixed retrofit exists |
 | 4 | Medium | The festival programme is scripted and stewardship is epilogue-only |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
@@ -97,18 +97,19 @@ lobby and HUD. The next step is the Phase 2 shared commons, not quietly enabling
 placement on scenery. Add a second buildable sector only with its own
 navigation, ownership and camera affordances.
 
-### 3. No building layers, retrofit, modules, finishes or player-set policy
+### 3. No building layers, modules, finish choice or player-set policy
 
 **Evidence**
 
 - The four buildable programs are fixed compositions. `ServiceBuilding` stores
-  `finish` and `policy`, but the player never chooses them; they come from
-  program defaults and are only used by scoring.
+  `finish`, `policy`, `level`, `qualityBonus` and `upkeepBonus`; only the fixed
+  retrofit changes them, and only to `grand`/level 2.
 - There are no shells, floors, modules, adjacency resonance, district identity
-  or retrofit UI.
+  or player-chosen finishes/policies.
 - Footprints are `1×1` except the Garden Dome's `2×2`; entrance validation is a
   single free door cell, not multi-cell entrance/queue design.
-- The service record can dismantle and reopen, but not upgrade or remodel.
+- The service record can dismantle, reopen and apply one retrofit, but there is
+  no remodel or module loadout.
 
 **Impact**
 
@@ -118,10 +119,10 @@ when they are not.
 
 **Suggested direction**
 
-Add player-facing finish and policy first (they already affect scoring and need
-no new geometry), then modules, then shells/retrofit. Keep the "no spreadsheet"
-test: every option must show up in a resident's choice or the report. Extend
-`ServiceCardModal` and the placement preview before adding more programs.
+Add player-facing finish and policy choices, then module loadouts, then
+shells/floors. Keep the "no spreadsheet" test: every option must show up in a
+resident's choice or the report. The retrofit is the first proof that the
+service record can carry an upgrade.
 
 ### 4. The festival programme is scripted and stewardship is epilogue-only
 
@@ -388,6 +389,7 @@ These are no longer open:
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
+- **Service retrofit.** An active player service can be upgraded once for 6 lumen: +2 capacity, +0.12 quality, +1 upkeep, `grand` finish. Covered by `retrofit.mjs`.
 - **Commons Assembly ballot.** A lit Beacon lets each chapter nominate and all residents vote; existing and future services inherit the winner's capacity or comfort effect. Covered by `commons-assembly.mjs`.
 - **Day visitors.** 2–3 transient Contest visitors arrive each day, use services, pay visitor fees and leave before the next day unless invited to stay. Covered by `visitors.mjs` and `visitor-stay.mjs`.
 - **Shared Commons Beacon.** A reserved 2×2 shared civic project can be funded by the player and rivals; when lit it applies a nightly multi-need comfort and becomes a six-seat all-needs service. It is covered by `commons.mjs`.

@@ -23,7 +23,7 @@ with two AI rivals, a shared lumen economy, shared residents, rival housing,
 recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
 a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
 a fundable shared Commons Beacon that becomes a six-seat all-needs civic service,
-and transient day visitors who pay for service visits. The full multi-round festival, auctions, systemic stewardship, deeper rival
+transient day visitors who pay for service visits, and a one-step service retrofit. The full multi-round festival, auctions, systemic stewardship, deeper rival
 strategy, layers and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
@@ -52,6 +52,7 @@ webgame_smoke --scenario scripts/scenarios/commons.mjs
 webgame_smoke --scenario scripts/scenarios/visitors.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
+webgame_smoke --scenario scripts/scenarios/retrofit.mjs
 ```
 
 The CLI equivalents and the full scenario list are in
@@ -180,7 +181,8 @@ after any behavioural change.
   from the report and becomes an ordinary resident. Once the Beacon is lit, the
   first Commons Assembly lets each chapter nominate; residents vote, and the
   winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
-  `CommonsBallot.js`).
+  `CommonsBallot.js`). An open player service can be retrofitted once for 6
+  lumen, adding capacity, quality and upkeep; the service record owns the action.
   This is a first pass; a separate shared-commons island,
   a larger multi-round festival, auctions and systemic stewardship effects are
   still missing.

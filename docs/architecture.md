@@ -269,7 +269,10 @@ Key commands:
 
 The charter does not own DOM or the Pixi scene. `ServiceManager` creates
 `ServiceBuilding` objects, which do own their Pixi containers; the crowd and
-screens are attached by `FalescGame`.
+screens are attached by `FalescGame`. A service carries `level`, `qualityBonus`
+and `upkeepBonus` in addition to capacity; `Charter.upgradeService()` adds the
+one fixed retrofit (`BALANCE.upgrades`) and `ServiceManager.upkeepFor()` charges
+its extra upkeep.
 
 ### Contest preview
 

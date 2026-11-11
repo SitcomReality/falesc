@@ -173,7 +173,9 @@ export class ServiceManager {
     }
 
     upkeepFor(service) {
-        return service.closed || service.state !== 'ACTIVE' ? 0 : service.program?.upkeep || 0;
+        return service.closed || service.state !== 'ACTIVE'
+            ? 0
+            : (service.program?.upkeep || 0) + (service.upkeepBonus || 0);
     }
 
     totalUpkeep() {
@@ -227,6 +229,9 @@ export class ServiceManager {
                 state: entry.state || 'ACTIVE',
                 entrance: entry.entrance,
                 capacityOverride: entry.capacity,
+                level: entry.level,
+                qualityBonus: entry.qualityBonus,
+                upkeepBonus: entry.upkeepBonus,
                 fixed: entry.fixed,
                 finish: entry.finish,
                 modules: entry.modules,

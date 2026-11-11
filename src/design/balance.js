@@ -8,6 +8,12 @@ export const BALANCE = {
     campaign: {
         days: 3
     },
+    upgrades: {
+        cost: 6,
+        capacity: 2,
+        quality: 0.12,
+        upkeep: 1
+    },
     visitors: {
         min: 2,
         max: 3,

@@ -123,6 +123,13 @@ invited to stay from the evening report; they join the resident roster, keep
 their name and memory, and can vote in the Confluence. Visitors are a Contest
 feature for now; First Light remains resident-only.
 
+## Retrofit
+
+An open player service can be retrofitted once from its service record for
+**6 lumen**. A retrofit adds **2 capacity**, **+0.12 quality**, **+1 upkeep** and
+a **grand** finish. It applies to the service immediately and is saved with the
+charter; rivals do not retrofit. Policy capacity and retrofit capacity stack.
+
 ## The Commons Beacon
 
 Every Contest starts with a reserved **Commons Beacon** site and a shared fund

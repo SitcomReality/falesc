@@ -176,7 +176,8 @@ export class DaySimulator {
         const program = service.program;
         const isPrimary = program.need === need.id || program.id === 'commons_beacon';
         const match = isPrimary ? 1 : 0.46;
-        const quality = (program.quality || 1) * (service.finish === 'grand' ? 1.1 : service.finish === 'humble' ? 0.9 : 1);
+        const quality = ((program.quality || 1) + (service.qualityBonus || 0))
+            * (service.finish === 'grand' ? 1.1 : service.finish === 'humble' ? 0.9 : 1);
         const vibe = vibeFit(resident.traits.temperament, service.policy?.vibe || program.vibe);
         const standards = standardFit(resident.traits.standards, service.finish);
         const distance = this.distanceToService(resident, service);
@@ -247,7 +248,7 @@ export class DaySimulator {
         const needValue = resident.needs[need.id];
         const isPrimary = service.program.need === need.id || service.program.id === 'commons_beacon';
         const effect = (isPrimary ? BALANCE.services.primaryEffect : BALANCE.services.secondaryEffect)
-            * (service.program.quality || 1)
+            * ((service.program.quality || 1) + (service.qualityBonus || 0))
             * standardFit(resident.traits.standards, service.finish);
         resident.adjustNeed(need.id, -effect);
         service.recordVisit(BALANCE.services.serviceHeart);

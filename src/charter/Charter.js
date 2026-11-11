@@ -548,6 +548,30 @@ export class Charter {
         return { ...result, cost: program.cost };
     }
 
+    upgradeService(service) {
+        if (!service || service.chapterId && service.chapterId !== 'player') {
+            return { ok: false, error: "A rival chapter's service cannot be retrofitted." };
+        }
+        if (service.fixed) return { ok: false, error: 'The Welcome Post is already part of the charter.' };
+        if (service.state !== 'ACTIVE' || service.closed) {
+            return { ok: false, error: 'Only an open, working service can be retrofitted.' };
+        }
+        if (service.level >= 2) return { ok: false, error: 'This service is already retrofitted.' };
+        if (this.lumen < BALANCE.upgrades.cost) {
+            return { ok: false, error: `A retrofit costs ${BALANCE.upgrades.cost} lumen.` };
+        }
+        this.lumen -= BALANCE.upgrades.cost;
+        service.level = 2;
+        service.capacity += BALANCE.upgrades.capacity;
+        service.qualityBonus = (service.qualityBonus || 0) + BALANCE.upgrades.quality;
+        service.upkeepBonus = (service.upkeepBonus || 0) + BALANCE.upgrades.upkeep;
+        service.finish = 'grand';
+        service.modules = [...(service.modules || []), 'retrofit'];
+        service.refreshGraphics();
+        this.refreshDerived();
+        return { ok: true, service, cost: BALANCE.upgrades.cost };
+    }
+
     dismantle(service) {
         if (!service) return { ok: false, reason: 'That service is already gone.' };
         if (service.chapterId && service.chapterId !== 'player') {

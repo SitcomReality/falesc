@@ -76,6 +76,7 @@ export class FalescGame {
             game: this,
             onDemolish: (service) => this.dismantleService(service),
             onReopen: (service) => this.reopenService(service),
+            onUpgrade: (service) => this.upgradeService(service),
             overlays: this.overlays
         });
         this.bulletinModal = new BulletinModal({
@@ -460,6 +461,17 @@ export class FalescGame {
         this.gameScreen.toast(`${result.service.name} breaks ground — opens tomorrow.`, 'mint');
         this.saveGame();
         return { ok: true };
+    }
+
+    upgradeService(service) {
+        if (!this.charter) return { ok: false, error: 'No charter.' };
+        const result = this.charter.upgradeService(service);
+        if (!result.ok) return result;
+        this.syncViews();
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast(`${service.name} reopens with a grander finish.`, 'mint', 2200);
+        return result;
     }
 
     dismantleService(service) {
