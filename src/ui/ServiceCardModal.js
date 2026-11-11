@@ -15,10 +15,11 @@ import { escapeHtml } from './html.js';
  * capacity, visits, hearts, upkeep and the last choice made here.
  */
 export class ServiceCardModal {
-    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, onFocus, onRepair, onOpenResident, overlays, game }) {
+    constructor({ onDemolish, onReopen, onRetrofit, onHours, onFloor, onVibe, onAccess, onFocus, onRepair, onOpenResident, onRename, overlays, game }) {
         this.onDemolish = onDemolish;
         this.onRepair = onRepair;
         this.onOpenResident = onOpenResident;
+        this.onRename = onRename;
         this.onReopen = onReopen;
         this.onRetrofit = onRetrofit;
         this.onHours = onHours;
@@ -46,9 +47,17 @@ export class ServiceCardModal {
             <div class="modal__head">
                 <div>
                     <p class="kicker" style="color:var(--wine)">Service record</p>
-                    <h3 class="modal__title" id="structure-modal-title" data-role="name">Canteen</h3>
+                    <div class="service-card__title-row">
+                        <h3 class="modal__title" id="structure-modal-title" data-role="name">Canteen</h3>
+                        <button type="button" class="service-card__rename" data-testid="service-rename">Rename</button>
+                    </div>
                 </div>
                 <button type="button" class="modal__close" data-testid="structure-close" aria-label="Close service record">×</button>
+            </div>
+            <div class="service-rename" data-role="rename-row" hidden>
+                <input class="modal__input" data-testid="service-name-input" maxlength="32" aria-label="Service name">
+                <button type="button" class="btn btn--small btn--mint" data-testid="service-name-save">Save name</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="service-name-cancel">Cancel</button>
             </div>
             <div class="blueprint-summary">
                 <span class="blueprint-summary__icon" data-role="icon" aria-hidden="true"></span>
@@ -88,6 +97,8 @@ export class ServiceCardModal {
         `;
 
         this.nameEl = this.panel.querySelector('[data-role=name]');
+        this.renameRow = this.panel.querySelector('[data-role=rename-row]');
+        this.renameInput = this.panel.querySelector('[data-testid=service-name-input]');
         this.iconEl = this.panel.querySelector('[data-role=icon]');
         this.programEl = this.panel.querySelector('[data-role=program]');
         this.statsEl = this.panel.querySelector('[data-role=stats]');
@@ -130,6 +141,9 @@ export class ServiceCardModal {
         this.vibeSelect.addEventListener('change', () => this.changeVibe(this.vibeSelect.value));
         this.accessSelect.addEventListener('change', () => this.changeAccess(this.accessSelect.value));
         this.focusSelect.addEventListener('change', () => this.changeFocus(this.focusSelect.value));
+        this.panel.querySelector('[data-testid=service-rename]').addEventListener('click', () => this.startRename());
+        this.panel.querySelector('[data-testid=service-name-save]').addEventListener('click', () => this.saveRename());
+        this.panel.querySelector('[data-testid=service-name-cancel]').addEventListener('click', () => this.cancelRename());
         this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
     }
 
@@ -144,6 +158,7 @@ export class ServiceCardModal {
         const working = service.state === 'ACTIVE' && !service.closed;
         const upkeep = this.game?.charter?.services.upkeepFor(service) ?? program?.upkeep ?? 0;
         this.nameEl.textContent = service.name;
+        this.renameRow.hidden = true;
         this.iconEl.innerHTML = programIcon(service.programId);
         this.programEl.textContent = program?.name || 'Service';
         const shared = service.chapterId === 'commons';
@@ -296,6 +311,31 @@ export class ServiceCardModal {
         const result = this.onHours(service, hoursId);
         if (result?.ok === false) {
             this.errorEl.textContent = result.error || 'Those hours cannot be set.';
+            return;
+        }
+        this.hide();
+        this.show(service);
+    }
+
+    startRename() {
+        if (!this.isOpen || !this.service) return;
+        this.renameRow.hidden = false;
+        this.renameInput.value = this.service.name;
+        this.renameInput.focus({ preventScroll: true });
+        this.renameInput.select();
+    }
+
+    cancelRename() {
+        if (!this.isOpen) return;
+        this.renameRow.hidden = true;
+    }
+
+    saveRename() {
+        if (!this.isOpen || !this.service) return;
+        const service = this.service;
+        const result = this.onRename(service, this.renameInput.value);
+        if (result?.ok === false) {
+            this.errorEl.textContent = result.error || 'That name cannot be saved.';
             return;
         }
         this.hide();

@@ -5125,3 +5125,34 @@ body.is-photo-mode .care-watch {
 .blueprint__count[hidden] {
     display: none;
 }
+
+.service-card__title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.service-card__rename {
+    padding: 2px 6px;
+    border: 1px solid rgba(33, 18, 37, 0.35);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.service-rename {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 6px;
+    margin: 6px 0 10px;
+}
+
+.service-rename[hidden] {
+    display: none;
+}

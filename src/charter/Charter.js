@@ -903,6 +903,18 @@ export class Charter {
         return { ...result, cost, funded };
     }
 
+    renameService(service, name) {
+        if (!service || (service.chapterId && service.chapterId !== 'player')) {
+            return { ok: false, error: "A rival chapter's service cannot be renamed." };
+        }
+        const cleaned = String(name ?? '').replace(/\s+/g, ' ').trim().slice(0, 32);
+        if (!cleaned) return { ok: false, error: 'Give the service a name first.' };
+        service.name = cleaned;
+        service.refreshGraphics();
+        this.refreshDerived();
+        return { ok: true, name: cleaned };
+    }
+
     repairService(service) {
         if (!service || (service.chapterId && service.chapterId !== 'player')) {
             return { ok: false, error: "A rival chapter's service cannot be repaired." };

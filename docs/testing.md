@@ -199,6 +199,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `service-adjacency.mjs` | Builds a player canteen beside a rival service, checks the mixed-neighbour quality bonus, the service record and save/reload. |
 | `service-floors.mjs` | Builds a Canteen, opens the interior stack, adds Dormer and Roof Garden floors, checks capacity/upkeep/quality and reload persistence. | Adds a Dormer and a Roof Garden to an active canteen, checks floor plans, capacity/quality/upkeep/lumen, the floor button hiding at three floors, the world stack and save/reload. |
 | `housing-residents.mjs` | Opens the Welcome Post record, checks Residents here, a six-bed ground floor and opens a resident. |
+| `service-rename.mjs` | Renames a Canteen to The Long Table, checks the title and confirms the name saves. |
 | `service-regulars.mjs` | Visits a Canteen for a day, opens its record, checks the Last seen here names and opens a resident from the list. |
 | `service-condition.mjs` | Wears a Canteen to 42%, checks the wear row and repair button, repairs it for 3 lumen and confirms the condition saves. |
 | `service-focus.mjs` | Builds a Clinic, sets Focus to Rest first, checks the policy and confirms it saves. |

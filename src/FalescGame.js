@@ -113,6 +113,7 @@ export class FalescGame {
             onDemolish: (service) => this.dismantleService(service),
             onRepair: (service) => this.repairService(service),
             onOpenResident: (residentId) => this.openResident(residentId),
+            onRename: (service, name) => this.renameService(service, name),
             onReopen: (service) => this.reopenService(service),
             onRetrofit: (service) => this.openRetrofit(service),
             onHours: (service, hoursId) => this.setServiceHours(service, hoursId),
@@ -659,6 +660,15 @@ export class FalescGame {
         this.gameScreen?.updateHud?.(true);
         this.gameScreen?.toast?.(this.motion === 'reduced' ? 'Reduced motion on.' : 'Reduced motion off.', 'mint', 1800);
         return this.motion;
+    }
+
+    renameService(service, name) {
+        if (!this.charter) return { ok: false, error: 'No charter.' };
+        const result = this.charter.renameService(service, name);
+        if (!result.ok) return result;
+        this.saveGame();
+        this.gameScreen.toast(`${result.name} it is.`, 'mint', 1600);
+        return result;
     }
 
     repairService(service) {
