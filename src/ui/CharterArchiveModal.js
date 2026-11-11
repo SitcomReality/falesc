@@ -9,6 +9,7 @@ export class CharterArchiveModal {
         this.overlays = overlays;
         this.onClear = onClear;
         this.isOpen = false;
+        this.filter = 'all';
         this.container = document.createElement('div');
         this.container.className = 'modal-scrim';
         this.container.dataset.testid = 'charter-archive-scrim';
@@ -26,6 +27,12 @@ export class CharterArchiveModal {
             if (event.target === this.container) this.hide();
         });
         this.container.addEventListener('keydown', (event) => this.onKeyDown(event));
+        this.panel.addEventListener('click', (event) => {
+            const filter = event.target.closest('[data-testid^=archive-filter-]');
+            if (!filter) return;
+            this.filter = filter.dataset.testid.replace('archive-filter-', '');
+            this.render();
+        });
     }
 
     show() {
@@ -41,7 +48,8 @@ export class CharterArchiveModal {
     }
 
     render() {
-        const records = readArchive();
+        const allRecords = readArchive();
+        const records = this.filter === 'all' ? allRecords : allRecords.filter((record) => (record.mode || 'first-light') === this.filter);
         const bestPopulation = records.length ? Math.max(...records.map((record) => record.population || 0)) : 0;
         const bestFlourishing = records.length ? Math.max(...records.map((record) => record.flourishing || 0)) : 0;
         const bestVisits = records.length ? Math.max(...records.map((record) => record.visits || 0)) : 0;
@@ -69,6 +77,11 @@ export class CharterArchiveModal {
                 <button type="button" class="modal__close" data-testid="charter-archive-close" aria-label="Close charter archive">×</button>
             </div>
             <p class="modal__blurb">The last ${records.length || 0} charter${records.length === 1 ? '' : 's'}, newest first. A victory records its stewardship; a defeat records what the chapter reached.</p>
+            <div class="charter-archive__filters" role="group" aria-label="Filter charters">
+                <button type="button" class="btn btn--small ${this.filter === 'all' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-filter-all">All</button>
+                <button type="button" class="btn btn--small ${this.filter === 'first-light' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-filter-first-light">First Light</button>
+                <button type="button" class="btn btn--small ${this.filter === 'contest' ? 'btn--mint' : 'btn--paper'}" data-testid="archive-filter-contest">Contest</button>
+            </div>
             ${records.length ? `<p class="charter-archive__best">Best so far: <strong>${bestPopulation} residents</strong> · <strong>${bestFlourishing} flourishing</strong> · <strong>${bestVisits} visits</strong>.</p>` : ''}
             ${rows ? `<ol class="charter-archive__list">${rows}</ol>` : '<p class="modal__note">No charters have closed yet.</p>'}
             <div class="modal__actions">
@@ -98,6 +111,7 @@ export class CharterArchiveModal {
     hide() {
         if (!this.isOpen) return;
         this.isOpen = false;
+        this.filter = 'all';
         this.container.style.display = 'none';
         this.container.classList.remove('is-open');
         this.container.setAttribute('aria-hidden', 'true');

@@ -765,4 +765,4 @@ Each service card carries a small count of how many of that program the
 player has already built.
 
 
-The charter archive also summarises the best population, flourishing and visits across recorded runs.
+The charter archive can be filtered to All, First Light or Contest charters, and summarises the best population, flourishing and visits across recorded runs.

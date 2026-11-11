@@ -5413,3 +5413,9 @@ body.is-photo-mode .care-watch {
     opacity: 0.25;
     cursor: default;
 }
+
+.charter-archive__filters {
+    display: flex;
+    gap: 6px;
+    margin: 0 0 10px;
+}
