@@ -915,6 +915,22 @@ export class Charter {
         return { ok: true, name: cleaned };
     }
 
+    repairAllServices() {
+        let count = 0;
+        let spent = 0;
+        for (const service of this.services.services) {
+            if (service.condition >= 100) continue;
+            if (this.lumen < 3) break;
+            this.lumen -= 3;
+            spent += 3;
+            count += 1;
+            service.condition = 100;
+            service.refreshGraphics();
+        }
+        if (count > 0) this.refreshDerived();
+        return { ok: count > 0, count, spent };
+    }
+
     repairService(service) {
         if (!service || (service.chapterId && service.chapterId !== 'player')) {
             return { ok: false, error: "A rival chapter's service cannot be repaired." };

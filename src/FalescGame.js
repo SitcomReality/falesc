@@ -676,6 +676,16 @@ export class FalescGame {
         return result;
     }
 
+    repairAllServices() {
+        if (!this.charter) return { ok: false, error: 'No charter.' };
+        const result = this.charter.repairAllServices();
+        if (!result.ok) return { ok: false, error: 'Every service is already in good repair.' };
+        this.saveGame();
+        this.gameScreen.updateHud(true);
+        this.gameScreen.toast(`${result.count} service${result.count === 1 ? '' : 's'} repaired for ${result.spent} lumen.`, 'mint', 2200);
+        return result;
+    }
+
     repairService(service) {
         if (!this.charter) return { ok: false, error: 'No charter.' };
         const result = this.charter.repairService(service);

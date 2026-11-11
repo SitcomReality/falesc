@@ -451,7 +451,9 @@ line from a resident. From there:
 All nine buildable services cost one work and finish overnight. Active services
 wear with use: every day with visits lowers **wear** by up to 8 points. Lower
 wear reduces quality (down to 85% at zero). A working player service at under
-100% can be repaired for **3 lumen**, restoring it to full. The Commons
+100% can be repaired for **3 lumen**, restoring it to full. The pause menu's
+**Repair all** fixes every worn player service in one pass, stopping if the
+chapter runs out of lumen. The Commons
 Beacon is a shared funded project, not a buildable program; once lit it is a
 six-seat all-needs shared service.
 

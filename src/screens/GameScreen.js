@@ -84,6 +84,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="sound-toggle" aria-pressed="false">Sound: off</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="motion-toggle" aria-pressed="false">Motion: full</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="contrast-toggle" aria-pressed="false">Contrast: normal</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="repair-all">Repair all</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="photo-mode">Photo mode</button>
                 <button type="button" class="btn btn--small btn--ghost charter-menu__abandon" data-testid="end-game">Abandon charter</button>
                 <div class="charter-menu__confirm" data-role="abandon-confirm" hidden>
@@ -309,6 +310,7 @@ export class GameScreen {
         this.contrastButton = this.pausePanel.querySelector('[data-testid=contrast-toggle]');
         this.contrastButton.addEventListener('click', () => this.game.toggleContrast());
         this.pausePanel.querySelector('[data-testid=photo-mode]').addEventListener('click', () => this.game.togglePhotoMode());
+        this.pausePanel.querySelector('[data-testid=repair-all]').addEventListener('click', () => this.game.repairAllServices());
         this.abandonBtn = this.pausePanel.querySelector('[data-testid=end-game]');
         this.abandonConfirm = this.pausePanel.querySelector('[data-role=abandon-confirm]');
         this.abandonBtn.addEventListener('click', () => {
