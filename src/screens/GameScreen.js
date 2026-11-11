@@ -107,6 +107,7 @@ export class GameScreen {
                 <div class="objective-card__fill objective-card__fill--mint" data-role="flourishing-fill"></div>
             </div>
             <p class="objective-card__goal" data-role="goal-copy">and reach a flourishing of ${BALANCE.end.comfortableFlourishing}.</p>
+            <button type="button" class="care-watch" data-role="care-watch" data-testid="care-watch" hidden></button>
         `;
 
         const hint = document.createElement('div');
@@ -207,6 +208,8 @@ export class GameScreen {
         this.populationTrack = objective.querySelector('[role=progressbar]');
         this.flourishingTrack = objective.querySelectorAll('[role=progressbar]')[1];
         this.goalCopy = objective.querySelector('[data-role=goal-copy]');
+        this.careWatch = objective.querySelector('[data-role=care-watch]');
+        this.careWatch.addEventListener('click', () => this.game.openNeedSurvey());
         this.hintEl = hint;
         this.hintCopy = hint.querySelector('[data-role=hint-copy]');
         hint.querySelector('[data-role=hint-dismiss]').addEventListener('click', () => {
@@ -454,6 +457,9 @@ export class GameScreen {
         this._setText(this.populationProgress, 'populationProgress', `${charter.housedPopulation} / ${populationGoal} residents`);
         this._setText(this.flourishingLabel, 'flourishingLabel', `Flourishing ${Math.round(charter.flourishing)}`);
         const goalsMet = openCharter ? false : charter.goalsMet;
+        const watch = charter.careWatch();
+        this.careWatch.hidden = watch.count === 0 || openCharter;
+        this.careWatch.textContent = watch.count ? `${watch.count} resident${watch.count === 1 ? '' : 's'} need care · survey` : '';
         this._setText(this.goalCopy, 'goalCopy', openCharter
             ? 'No deadline. Keep building; abandon from the charter menu when you are done.'
             : goalsMet

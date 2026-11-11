@@ -586,6 +586,14 @@ export class Charter {
             : `${service.chapter.name}'s ${service.name}`;
     }
 
+    careWatch() {
+        const residents = this.activeResidents.filter((resident) => {
+            const urgent = NEEDS.some((need) => (resident.needs[need.id] || 0) >= 85);
+            return urgent || resident.wellbeing < 30 || (resident.memory?.homelessDays || 0) > 0;
+        });
+        return { count: residents.length, residents };
+    }
+
     needSurvey() {
         const residents = this.activeResidents;
         return NEEDS.map((need) => {

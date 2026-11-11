@@ -303,6 +303,13 @@ The winning policy applies to existing services and to every service built
 afterwards by the player or a rival. It is saved with the charter. The first
 ballot and the single second reading are the whole Assembly cycle.
 
+## Care watch
+
+When an active resident is in crisis — any need at **85+**, wellbeing below
+**30**, or a night without a bed — the objective card shows a red **Care watch**
+line with the count. Click it to open the need survey. It is a live planning
+signal, not a separate warning system.
+
 ## Charter ledger
 
 The pause menu's **Ledger** lists every finished day: population, housed,

@@ -162,6 +162,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `return-menu.mjs` | Builds a Canteen, uses Save & menu, checks Continue/Export and returns to the same pending build and day. |
 | `mobile-hud.mjs` | Runs the HUD at 390×844, checks no horizontal overflow, opens the charter menu and need survey, and captures the phone layout. |
 | `reduced-motion.mjs` | Toggles reduced motion from the pause menu, checks the document class and storage, reloads and toggles it back. |
+| `care-watch.mjs` | Pushes a resident into crisis, checks the Care watch count, opens the need survey from it and closes it. |
 | `charter-ledger.mjs` | Plays two days, checks the daily rows and sparkline, then reloads and confirms the history persists. |
 | `need-survey.mjs` | Opens the need survey after a day, checks all four rows, urgency/capacity text and closes it. |
 | `field-guide.mjs` | Opens the almanac from the menu and the pause menu, checks the service/policy/control sections, and closes it. |
