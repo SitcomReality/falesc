@@ -6,10 +6,15 @@ export const MOTION_KEY = 'falesc.motion.v1';
 
 export function readMotion() {
     try {
-        return localStorage.getItem(MOTION_KEY) === 'reduced' ? 'reduced' : 'full';
+        const stored = localStorage.getItem(MOTION_KEY);
+        if (stored === 'reduced' || stored === 'full') return stored;
     } catch {
-        return 'full';
+        // Fall through to the operating-system preference.
     }
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
+        return 'reduced';
+    }
+    return 'full';
 }
 
 export function writeMotion(mode) {

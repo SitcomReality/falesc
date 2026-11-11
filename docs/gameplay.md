@@ -323,7 +323,9 @@ active residents.
 
 The pause menu offers **Motion: full/reduced** and **Contrast: normal/high**.
 High contrast strengthens ink and paper, doubles key panel borders and keeps the
-coral/mint identity; both preferences persist between sessions.
+coral/mint identity; both preferences persist between sessions. On a first visit
+with no saved preference, the browser's `prefers-reduced-motion` setting selects
+reduced motion automatically.
 
 ## Grid summary
 
