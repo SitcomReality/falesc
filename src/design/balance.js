@@ -15,6 +15,7 @@ export const BALANCE = {
         stayAffinity: 0.15,
         returnAffinity: 0.15,
         maxReturning: 2,
+        referralAffinity: 0.25,
         trialWellbeing: 45
     },
     commons: {

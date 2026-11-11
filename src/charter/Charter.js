@@ -83,6 +83,8 @@ export class Charter {
             : null;
         this.visitors = [];
         this.returningVisitors = [];
+        this.referrals = 0;
+        this.lastReferralVisitors = 0;
         this.trialVisitors = [];
         this.lastTrialResults = [];
         this.visitorCell = null;
@@ -1075,7 +1077,9 @@ export class Charter {
         }
         const returning = this.returningVisitors.splice(0, this.returningVisitors.length);
         for (const visitor of returning) visitor.returned = true;
-        const count = VisitorFactory.countFor(this.seed, this.day);
+        this.lastReferralVisitors = this.referrals;
+        const count = VisitorFactory.countFor(this.seed, this.day) + this.referrals;
+        this.referrals = 0;
         this.visitors = [...returning, ...VisitorFactory.create(this.seed, this.day, count)];
         this.visitorCell = this.commonsCell || null;
         return this.visitors;
@@ -1087,6 +1091,11 @@ export class Charter {
             .sort((a, b) => b.getAffinity('player') - a.getAffinity('player'))
             .slice(0, BALANCE.visitors.maxReturning);
         this.returningVisitors = candidates;
+        const charmed = this.visitors.filter((visitor) => visitor.getAffinity('player') >= BALANCE.visitors.referralAffinity).length;
+        if (charmed > 0) {
+            this.referrals = Math.min(1, (this.referrals || 0) + 1);
+            this.log('visitor', `${charmed} charmed visitor${charmed === 1 ? '' : 's'} will recommend the chapter.`);
+        }
     }
 
     clearVisitors() {
@@ -1476,6 +1485,7 @@ export class Charter {
                 service: this.commonsManager?.serialize() || []
             },
             pendingArrivals: this.pendingArrivals,
+            referrals: this.referrals,
             lastReport: summarizeReport(this.lastReport),
             history: this.history.slice(-60),
             journal: this.journal.slice(-120),
@@ -1496,6 +1506,7 @@ export class Charter {
         this.confluenceReady = Boolean(saved.confluenceReady);
         this.campaign = Campaign.fromJSON(saved.campaign, this.seed);
         this.pendingArrivals = Array.isArray(saved.pendingArrivals) ? saved.pendingArrivals : [];
+        this.referrals = Math.max(0, Math.min(1, Number(saved.referrals) || 0));
         this.roster = ResidentFactory.fromSave(saved.residents || []);
         if (this.roster.length === 0) this.roster = ResidentFactory.createRoster(this.seed, BALANCE.rosterSize);
         this.services.restore(saved.services || []);

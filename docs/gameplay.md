@@ -175,8 +175,9 @@ not offered a bed may return on a later day (up to two at a time), keeping their
 name, memory and affinity; the report marks them **returning**. Clicking a
 visitor's name opens a **visitor card** with an initial portrait, traits, needs,
 wellbeing, affinity, their last door and the last three visits; the card can
-offer the trial stay. Visitors are a
-Contest feature for now; First Light remains resident-only.
+offer the trial stay. Charmed visitors who leave without a trial also recommend the chapter: one
+extra visitor joins the next day's arrivals. Visitors are a Contest feature for
+now; First Light remains resident-only.
 
 ## Service hours
 

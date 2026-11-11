@@ -203,6 +203,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `commons-capital.mjs` | Gives 10 lumen to the shared capital budget, builds a commons canteen entirely from it, and checks the remaining capital and save/reload. |
 | `commons-purse.mjs` | Builds two shared works, checks the levy and upkeep, verifies the shared doors close together, then tops up the purse manually and reopens them. |
 | `commons-assembly.mjs` | Lights the Beacon, checks the petition, nominates Open Beds, lets residents vote, verifies the policy applies to existing and new services, then calls a second reading and checks capacity does not stack. |
+| `visitor-referral.mjs` | Charms a visitor, checks the one-day referral and confirms one extra visitor arrives before the referral resets. |
 | `visitor-return.mjs` | Charmed but unhoused visitors are remembered up to two, return on a later day with the same name/affinity, and are marked returning in the report. |
 | `visitor-stay.mjs` | Builds a player canteen and spare bed, opens the visitor card, starts a one-day trial stay, checks the bed is held, the trial survives reload, and the guest resolves into a resident after the trial day. |
 | `visitors.mjs` | Verifies 2–3 day visitors arrive with the Contest day, get crowd agents, remain outside the resident population, use services, pay visitor fees into chapter ledgers, appear in the report, and leave when the next day starts unless invited to stay. |
