@@ -162,6 +162,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `return-menu.mjs` | Builds a Canteen, uses Save & menu, checks Continue/Export and returns to the same pending build and day. |
 | `mobile-hud.mjs` | Runs the HUD at 390×844, checks no horizontal overflow, opens the charter menu and need survey, and captures the phone layout. |
 | `reduced-motion.mjs` | Toggles reduced motion from the pause menu, checks the document class and storage, reloads and toggles it back. |
+| `onboarding-hints.mjs` | Checks the Canteen hint, the pending Canteen hint and the next Tea House hint after activation. |
 | `grid-summary.mjs` | Opens the grid summary in Contest mode, checks three isle tables, occupied cells and cell labels, then closes it. |
 | `daily-request.mjs` | Checks the daily request line and resident link, forces a Wonder request, plays the day and confirms the unmet result in the report. |
 | `resident-roster.mjs` | Pushes a resident into crisis, opens the roster, checks six rows and the red row, then opens that resident’s card. |

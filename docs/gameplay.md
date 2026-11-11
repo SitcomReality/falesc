@@ -323,6 +323,12 @@ commons and garden isles in accessible tables: free cells, shuttle gates and
 named services, with column and row coordinates. It is a planning reference for
 keyboard and assistive-tech players; it does not place anything.
 
+## Onboarding hints
+
+The HUD hint advances through the first civic needs rather than stopping after
+the first build: Canteen, Canteen opening, Tea House, Garden Dome, Clinic, then
+"every need has a door". It can be dismissed at any time and never blocks input.
+
 ## Daily request
 
 Each planning day one active resident asks for one need. Meeting it during

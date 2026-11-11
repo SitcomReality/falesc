@@ -528,15 +528,19 @@ export class GameScreen {
             : 'No works left. Open the day.');
         this.container.classList.toggle('is-out-of-actions', charter.works <= 0);
 
-        const showHint = !charter.services.activeServices.some((service) => service.programId === 'canteen')
-            && charter.works > 0
-            && !this.game.hintDismissed;
+        const activePrograms = new Set(charter.services.activeServices.map((service) => service.programId));
+        const pendingCanteen = charter.services.services.some((service) => service.programId === 'canteen' && service.state === 'PENDING');
+        let nextHint = null;
+        if (charter.works <= 0) nextHint = 'No works left. Open the day and watch where people go.';
+        else if (!charter.services.services.some((service) => service.programId === 'canteen')) nextHint = 'Build a Canteen, then open the day and watch where people go.';
+        else if (pendingCanteen) nextHint = 'The Canteen opens tomorrow. Open the day to finish the build.';
+        else if (!activePrograms.has('tea_house')) nextHint = 'Company is the next gap. Raise a Tea House and give people a table.';
+        else if (!activePrograms.has('garden_dome')) nextHint = 'Wonder is still unmet. A Garden Dome gives the shard somewhere green to look.';
+        else if (!activePrograms.has('clinic')) nextHint = 'Rest and sustenance can still fail together. A Clinic keeps the chapter on its feet.';
+        else nextHint = 'Every need has a door. Open the day, read the report and decide what the chapter needs next.';
+        const showHint = !this.game.hintDismissed;
         this.hintEl.classList.toggle('is-hidden', !showHint);
-        if (showHint) {
-            this._setText(this.hintCopy, 'hint', this.game.selectedProgramId
-                ? `Tap a free plot to raise the ${selectedName}.`
-                : 'Build a Canteen, then open the day and watch where people go.');
-        }
+        if (showHint) this._setText(this.hintCopy, 'hint', nextHint);
         this._cache.force = force;
     }
 
