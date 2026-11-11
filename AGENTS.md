@@ -85,7 +85,7 @@ after any behavioural change.
 | `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
 | `src/state/` | `GamePhase` constants and `ScreenStateMachine` |
 | `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, Confluence, stewardship, end |
-| `src/ui/` | Shared `OverlayManager`, build/service/bulletin/campaign/commons/resident modals, standings, survey chart, chatter, icons |
+| `src/ui/` | Shared `OverlayManager`, build/service/bulletin/campaign/commons/resident/visitor modals, standings, survey chart, chatter, icons |
 | `src/map/` | Seeded single-pass island generation, packing, grids, sector art, paths |
 | `src/character/`, `src/Character.js` | Procedural chibi rig and animation |
 | `src/minerals/` | Seeded static rock/crystal scenery |
@@ -183,7 +183,8 @@ after any behavioural change.
   also bring 2–3 transient visitors who use services, pay 1 lumen per visit and
   leave before the next day. A charmed visitor with a spare bed can be invited
   from the report and becomes an ordinary resident; charmed visitors who are not
-  invited may return on later days (up to two). Once the Beacon is lit, the
+  invited may return on later days (up to two). Clicking a visitor's name opens
+  their card with traits, needs, affinity and last door. Once the Beacon is lit, the
   first Commons Assembly lets residents petition, each chapter nominate and
   residents vote; the winner becomes one shared policy (`src/commons/CommonsPolicies.js`,
   `CommonsBallot.js`). An open player service can be retrofitted once for 6

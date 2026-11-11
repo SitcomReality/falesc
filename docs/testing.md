@@ -167,7 +167,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `retrofit.mjs` | Builds a canteen, waits for it to open, opens the retrofit chooser, installs the Atelier, checks +0.22 quality/+1 upkeep (capacity unchanged) and save/reload. |
 | `commons-assembly.mjs` | Lights the Beacon, checks the residents' petition, nominates Open Beds, lets all residents vote, verifies the winning policy applies to existing and newly built services, checks the HUD label and save/reload. |
 | `visitor-return.mjs` | Charmed but unhoused visitors are remembered up to two, return on a later day with the same name/affinity, and are marked returning in the report. |
-| `visitor-stay.mjs` | Builds a player canteen and spare bed, waits for a charmed visitor, invites them from the report, checks the new resident consumes a bed and survives reload. |
+| `visitor-stay.mjs` | Builds a player canteen and spare bed, opens the visitor card, invites a charmed visitor from the report, checks the new resident consumes a bed and survives reload. |
 | `visitors.mjs` | Verifies 2–3 day visitors arrive with the Contest day, get crowd agents, remain outside the resident population, use services, pay visitor fees into chapter ledgers, appear in the report, and leave when the next day starts unless invited to stay. |
 | `commons.mjs` | Verifies the reserved Beacon site, HUD fund card, contribution modal, player gifts, activation, nightly comfort report, and save/reload of the active shared project. |
 | `contest-season.mjs` | Plays all 14 medium Contest days with a deterministic player build plan, records the daily economy/population trajectory, crosses the campaign, votes in the Confluence and chooses stewardship. This is the full-season balance/regression probe. |

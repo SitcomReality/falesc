@@ -3805,3 +3805,77 @@ body.has-modal > canvas {
     font-family: var(--display);
     font-size: 16px;
 }
+
+/* Visitor card ----------------------------------------------------------- */
+
+.report__visitor-name {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+    font-family: var(--display);
+    font-size: 15px;
+    line-height: 1.1;
+    cursor: pointer;
+}
+
+.report__visitor-name:hover,
+.report__visitor-name:focus-visible {
+    color: var(--wine);
+    text-decoration: underline;
+}
+
+.visitor-card {
+    width: min(560px, calc(100vw - 32px));
+}
+
+.visitor-card__facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.visitor-card__facts > div {
+    display: grid;
+    gap: 2px;
+    padding: 8px;
+    background: var(--paper-deep);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+}
+
+.visitor-card__facts strong {
+    font-family: var(--display);
+    font-size: 22px;
+}
+
+.visitor-card__needs {
+    display: grid;
+    gap: 4px;
+    margin: 6px 0 12px;
+}
+
+.visitor-card__need {
+    display: grid;
+    grid-template-columns: 76px 1fr 28px;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+}
+
+.visitor-card__track {
+    height: 8px;
+    padding: 1px;
+    background: var(--paper-deep);
+    border: 1px solid rgba(33, 18, 37, 0.4);
+    border-radius: 999px;
+}
+
+.visitor-card__track i {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+}

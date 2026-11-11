@@ -80,7 +80,7 @@ export class ReportScreen {
                 const action = canStay
                     ? `<button type="button" class="btn btn--paper btn--tiny" data-testid="invite-visitor" data-visitor-id="${escapeHtml(visitor.id)}">Invite to stay</button>`
                     : `<span class="report__visitor-note">${charmed ? 'no spare bed' : 'still a stranger'}</span>`;
-                return `<li class="report__visitor"><span><strong>${escapeHtml(visitor.name)}</strong><small>${visitor.returned ? 'returning · ' : ''}${visitor.visits || 0} ${visitor.visits === 1 ? 'visit' : 'visits'} · ${visitor.wellbeing ?? 0} wellbeing</small></span>${action}</li>`;
+                return `<li class="report__visitor"><span><button type="button" class="report__visitor-name" data-testid="visitor-open" data-visitor-id="${escapeHtml(visitor.id)}">${escapeHtml(visitor.name)}</button><small>${visitor.returned ? 'returning · ' : ''}${visitor.visits || 0} ${visitor.visits === 1 ? 'visit' : 'visits'} · ${visitor.wellbeing ?? 0} wellbeing</small></span>${action}</li>`;
             }).join('');
         const visitorsSection = visitorRows
             ? `<h2>Visitors</h2><ul class="report__list report__visitors">${visitorRows}</ul>`
@@ -143,6 +143,9 @@ export class ReportScreen {
             if (ending) this.game.finishCharter();
             else if (confluence) this.game.showConfluence();
             else this.game.beginNextDay();
+        });
+        this.container.querySelectorAll('[data-testid=visitor-open]').forEach((button) => {
+            button.addEventListener('click', () => this.game.showVisitor(button.dataset.visitorId));
         });
         this.container.querySelectorAll('[data-testid=invite-visitor]').forEach((button) => {
             button.addEventListener('click', () => {

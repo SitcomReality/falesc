@@ -43,6 +43,14 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.ok(before.visitors.some((visitor) => visitor.affinity >= 0.15), 'at least one visitor should be charmed by the player canteen');
     const visitorId = await page.evaluate("document.querySelector('[data-testid=invite-visitor]')?.dataset.visitorId || null");
     assert.ok(visitorId, 'the report should offer a bed to a charmed visitor');
+    await page.click(`[data-testid=visitor-open][data-visitor-id="${visitorId}"]`);
+    await page.waitFor("window.__falesc.app.visitorCard.isOpen === true");
+    const cardText = await page.text('[data-testid=visitor-card]');
+    assert.ok(cardText.includes('Player affinity'));
+    assert.ok(cardText.includes('Invite to stay'));
+    await screenshot('visitor-card.png');
+    await page.click('[data-testid=visitor-close]');
+    await page.waitFor("window.__falesc.app.visitorCard.isOpen === false");
     await page.evaluate("document.querySelector('[data-testid=invite-visitor]').scrollIntoView({block:'center'})");
     await page.pause(200);
     await screenshot('visitor-stay-offer.png');

@@ -348,7 +348,8 @@ as an ordinary resident.
 
 `DaySimulator.applyNightRest()` eases every need by `BALANCE.commons.comfort`
 (3) after the home rest, and `servesNeed()` lets the six-seat Beacon answer any
-need as a shared visitable service. `CommonsModal` is the contribution and Assembly UI. `src/commons/CommonsPolicies.js`
+need as a shared visitable service. `VisitorCardModal` shows a visitor's traits, needs, affinity and last choice
+behind the report's visitor row. `CommonsModal` is the contribution and Assembly UI. `src/commons/CommonsPolicies.js`
 defines the four one-time policies (Shared Table, Open Beds, Commons Garden,
 Night Watch). `CommonsBallot.petitionFor()` records residents' petition signatures.
 `Charter.nominateCommonsPolicy()` records the player's nomination and the two

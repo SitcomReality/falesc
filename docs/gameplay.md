@@ -122,7 +122,9 @@ your services (player affinity at least **0.15**) and a **spare bed** can be
 invited to stay from the evening report; they join the resident roster, keep
 their name and memory, and can vote in the Confluence. A charmed visitor who is
 not offered a bed may return on a later day (up to two at a time), keeping their
-name, memory and affinity; the report marks them **returning**. Visitors are a
+name, memory and affinity; the report marks them **returning**. Clicking a
+visitor's name opens a **visitor card** with traits, needs, wellbeing, affinity
+and their last door; the card can send the invitation to stay. Visitors are a
 Contest feature for now; First Light remains resident-only.
 
 ## The outer commons isle

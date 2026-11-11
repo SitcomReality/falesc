@@ -17,6 +17,7 @@ import { EndScreen } from './screens/EndScreen.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { ServiceCardModal } from './ui/ServiceCardModal.js';
 import { RetrofitModal } from './ui/RetrofitModal.js';
+import { VisitorCardModal } from './ui/VisitorCardModal.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
 import { CommonsModal } from './ui/CommonsModal.js';
@@ -80,6 +81,10 @@ export class FalescGame {
             onDemolish: (service) => this.dismantleService(service),
             onReopen: (service) => this.reopenService(service),
             onRetrofit: (service) => this.openRetrofit(service),
+            overlays: this.overlays
+        });
+        this.visitorCard = new VisitorCardModal({
+            onInvite: (visitorId) => this.inviteVisitor(visitorId),
             overlays: this.overlays
         });
         this.retrofitModal = new RetrofitModal({
@@ -224,6 +229,7 @@ export class FalescGame {
         this.patronageFlow.hide();
         this.patronageFlow.setCharter(null);
         this.transitGate.clear();
+        this.visitorCard.hide();
         this.gameScreen?.setPatronageState?.(false);
         this.chatter?.clear();
         this.buildModal.hide(false);
@@ -233,6 +239,7 @@ export class FalescGame {
         this.campaignModal.hide();
         this.commonsModal.hide();
         this.retrofitModal.hide();
+        this.visitorCard.hide();
     }
 
     syncViews() {
@@ -261,6 +268,14 @@ export class FalescGame {
     showCommons() {
         if (!this.charter?.commons) return false;
         this.commonsModal.show(this.charter);
+        return true;
+    }
+
+    showVisitor(visitorId) {
+        if (!this.charter) return false;
+        const visitor = this.charter.visitors.find((entry) => entry.id === visitorId);
+        if (!visitor) return false;
+        this.visitorCard.show(visitor, { spareBeds: this.charter.spareBeds });
         return true;
     }
 
