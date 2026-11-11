@@ -72,6 +72,7 @@ export class GameScreen {
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-bulletin">Morning bulletin</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-residents">Residents</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="open-field-guide">Field guide</button>
+                <button type="button" class="btn btn--small btn--paper" data-testid="open-departures" hidden>Past residents</button>
                 <button type="button" class="btn btn--small btn--paper" data-testid="sound-toggle" aria-pressed="false">Sound: off</button>
                 <button type="button" class="btn btn--small btn--ghost charter-menu__abandon" data-testid="end-game">Abandon charter</button>
                 <div class="charter-menu__confirm" data-role="abandon-confirm" hidden>
@@ -238,6 +239,11 @@ export class GameScreen {
             this._setPauseOpen(false);
             this.game.openFieldGuide();
         });
+        this.departuresButton = this.pausePanel.querySelector('[data-testid=open-departures]');
+        this.departuresButton.addEventListener('click', () => {
+            this._setPauseOpen(false);
+            this.game.openDepartureArchive();
+        });
         this.soundButton = this.pausePanel.querySelector('[data-testid=sound-toggle]');
         this.soundButton.addEventListener('click', () => this.game.toggleAudio());
         this.abandonBtn = this.pausePanel.querySelector('[data-testid=end-game]');
@@ -379,6 +385,9 @@ export class GameScreen {
         const contest = Boolean(charter.contest);
         this.container.classList.toggle('is-contest', contest);
         this.container.classList.toggle('is-campaign', Boolean(charter.campaign?.active));
+        const departed = charter.departedResidents?.length || 0;
+        this.departuresButton.hidden = departed === 0;
+        this.departuresButton.textContent = departed ? `Past residents · ${departed}` : 'Past residents';
         this.standings.update(charter.standings(), contest, charter.campaign, charter.day, charter.commons);
         const dayLimit = charter.dayLimit || 14;
         const day = charter.day || 1;

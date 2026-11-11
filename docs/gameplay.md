@@ -54,7 +54,8 @@ Clicking a resident takes precedence over clicking the plot beneath them when
 the pointer is within about 60 px of a visible resident. Residents who are
 inside a service cannot be clicked. The resident card shows a colour-coded
 initial portrait, traits, needs, home, hearts, the last choice and the last four
-visits. The survey chart at bottom-left shows the islands, services, residents
+visits. The pause menu's **Past residents** archive keeps everyone who left,
+with the day, the reason and their last door. The survey chart at bottom-left shows the islands, services, residents
 and camera viewport; click it to move the camera.
 
 ## The charter

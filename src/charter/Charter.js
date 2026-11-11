@@ -201,6 +201,10 @@ export class Charter {
         return [...this.activeResidents, ...this.visitors, ...this.trialVisitors];
     }
 
+    get departedResidents() {
+        return this.roster.filter((resident) => !resident.active && resident.state === 'departed');
+    }
+
     get playerResidents() {
         return this.activeResidents.filter((resident) => resident.homeChapterId === 'player');
     }

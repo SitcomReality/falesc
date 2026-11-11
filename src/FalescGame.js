@@ -23,6 +23,7 @@ import { SERVICE_HOURS_BY_ID } from './services/ServicePolicies.js';
 import { VisitorCardModal } from './ui/VisitorCardModal.js';
 import { FloorPlanModal } from './ui/FloorPlanModal.js';
 import { FieldGuideModal } from './ui/FieldGuideModal.js';
+import { DepartureArchiveModal } from './ui/DepartureArchiveModal.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
 import { CommonsModal } from './ui/CommonsModal.js';
@@ -108,6 +109,7 @@ export class FalescGame {
             overlays: this.overlays
         });
         this.fieldGuide = new FieldGuideModal({ overlays: this.overlays });
+        this.departureArchive = new DepartureArchiveModal({ game: this, overlays: this.overlays });
         this.visitorCard = new VisitorCardModal({
             onInvite: (visitorId) => this.inviteVisitor(visitorId),
             overlays: this.overlays
@@ -276,6 +278,7 @@ export class FalescGame {
         this.retrofitModal.hide();
         this.floorPlan.hide();
         this.fieldGuide.hide();
+        this.departureArchive.hide();
         this.visitorCard.hide();
     }
 
@@ -712,6 +715,11 @@ export class FalescGame {
     openRetrofit(service) {
         if (!this.charter) return false;
         this.retrofitModal.show(service);
+        return true;
+    }
+
+    openDepartureArchive() {
+        this.departureArchive.show();
         return true;
     }
 

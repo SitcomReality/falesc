@@ -27,7 +27,7 @@ Severity is about impact on the slice, not effort:
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
 | 7 | Low | Save v1 is discarded and a mid-`DAY` reload loses the day; v2 has JSON export/import |
-| 8 | Low | The resident card has an initial portrait and four-visit log, but no illustrated portrait or full lifetime history |
+| 8 | Low | Residents have an initial portrait, four-visit log and departure archive, but no illustrated portrait or full lifetime log |
 | 9 | Low | Crowd movement has no local avoidance |
 | 10 | Low | Procedural audio exists, but the multiplayer button remains a disabled placeholder |
 | 11 | Low | WebGL context loss is not handled |
@@ -251,7 +251,8 @@ the charter menu for debugging and backups when the format stabilises.
 - `Resident.memory.recentVisits` keeps up to eight visits; the card renders the
   last four with day, phase and reason.
 - The card has an initial portrait, needs, traits, home, Devotion, wellbeing and
-  the why line; there is no illustrated mood portrait or full history archive.
+  the why line; departures are archived in the pause menu. There is no
+  illustrated mood portrait or full lifetime log.
 - There is no per-resident relationship view with other residents or services.
 
 **Impact**
@@ -262,8 +263,8 @@ a stronger face and a full history.
 
 **Suggested direction**
 
-Add an illustrated current-mood portrait, a departure archive and a longer
-recent-visits list while keeping the card scannable.
+Add an illustrated current-mood portrait and a longer lifetime log while keeping
+the card and the departure archive scannable.
 
 ### 9. Crowd movement has no local avoidance
 
