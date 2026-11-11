@@ -341,6 +341,17 @@ export class Charter {
         return this.campaign?.eventFor?.(this.day) || null;
     }
 
+    festivalKitchenNeed() {
+        return this.campaign?.eventsFor?.(this.day)?.[0]?.need || 'sustenance';
+    }
+
+    updateFestivalKitchenNeed() {
+        const service = this.services.services.find((entry) => entry.programId === 'festival_kitchen');
+        if (!service || !this.campaign?.active) return false;
+        service.setNeedOverride(this.festivalKitchenNeed());
+        return true;
+    }
+
     spawnFestivalKitchen() {
         if (this.services.services.some((service) => service.programId === 'festival_kitchen')) return null;
         const sector = this.homeSector;
@@ -360,6 +371,7 @@ export class Charter {
                 });
                 if (result.ok) {
                     result.service.festival = true;
+                    result.service.setNeedOverride(this.festivalKitchenNeed());
                     this.log('campaign', 'A Festival Kitchen opened for the celebration.');
                     this.refreshDerived();
                     return result.service;
@@ -1230,6 +1242,7 @@ export class Charter {
         this.clearVisitors();
         this.day += 1;
         this.works = BALANCE.worksPerDay;
+        this.updateFestivalKitchenNeed();
         this.collectCommonsLevy();
         const promoted = this.services.promoteUnderConstruction();
         for (const service of this.services.services) service.resetDaily();

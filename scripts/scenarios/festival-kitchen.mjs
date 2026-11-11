@@ -18,6 +18,7 @@ export default async function ({ page, assert, log, screenshot }) {
             capacity: service.capacity,
             upkeep: app.charter.services.upkeepFor(service),
             cells: service.cells.length,
+            need: service.program.need,
             id: service.id
         } : null;
     })()`);
@@ -28,10 +29,14 @@ export default async function ({ page, assert, log, screenshot }) {
     assert.equal(opened.capacity, 5);
     assert.equal(opened.upkeep, 0);
     assert.equal(opened.cells, 1);
+    assert.equal(opened.need, 'company');
     await page.evaluate(`window.__falesc.app.serviceCard.show(window.__falesc.app.charter.services.services.find((entry) => entry.id === ${JSON.stringify(opened.id)}))`);
     await page.pause(300);
     await screenshot('festival-kitchen.png');
     await page.evaluate("window.__falesc.app.serviceCard.hide()");
+    await page.evaluate("window.__falesc.app.charter.day = 13; window.__falesc.app.charter.updateFestivalKitchenNeed()");
+    assert.equal(await page.evaluate("window.__falesc.app.charter.services.services.find((entry) => entry.programId === 'festival_kitchen').program.need"), 'rest');
+    await page.evaluate("window.__falesc.app.charter.day = 12; window.__falesc.app.charter.updateFestivalKitchenNeed()");
     await page.evaluate("window.__falesc.openDay()");
     await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
     await page.evaluate("window.__falesc.skipDay()");

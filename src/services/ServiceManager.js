@@ -248,6 +248,7 @@ export class ServiceManager {
                 floors: entry.floors,
                 floorPlans: entry.floorPlans || [],
                 condition: entry.condition ?? 100,
+                needOverride: entry.needOverride || null,
                 fixed: entry.fixed,
                 finish: entry.finish,
                 modules: entry.modules,

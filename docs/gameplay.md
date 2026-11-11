@@ -136,7 +136,7 @@ or **saving for** followed by the service name.
 
 ## Campaign
 
-On the **last three days** of a Contest the campaign begins. A free **Festival Kitchen** opens on the home shard: five seats, hot food, no upkeep, removed when the Confluence resolves. Each day has a
+On the **last three days** of a Contest the campaign begins. A free **Festival Kitchen** opens on the home shard: five seats, no upkeep, serving the first bell's need, removed when the Confluence resolves. Each day has a
 **first bell** and a **second bell** event, so the three-day festival carries six
 events. Festival days also bring **one extra visitor** to the archipelago. A promise that matches one bell on a day gives a smaller appeal bonus;
 matching both gives the full **1.12**. A chapter's pledge also gives all of its

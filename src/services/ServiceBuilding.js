@@ -35,6 +35,7 @@ export class ServiceBuilding {
         floors = 1,
         floorPlans = [],
         condition = 100,
+        needOverride = null,
         visits = 0,
         hearts = 0,
         closed = false,
@@ -47,7 +48,9 @@ export class ServiceBuilding {
         this.chapterColour = chapter?.colour || '#FF6B5E';
         this.isPlayerService = chapter?.isPlayer ?? true;
         this.programId = programId;
-        this.program = program;
+        this.baseProgram = program;
+        this.needOverride = needOverride || null;
+        this.program = applyNeedOverride(program, this.needOverride);
         this.sectorId = sectorId;
         this.u = u;
         this.v = v;
@@ -113,6 +116,12 @@ export class ServiceBuilding {
 
     get queueLength() {
         return this.queue.length;
+    }
+
+    setNeedOverride(needId) {
+        this.needOverride = needId || null;
+        this.program = applyNeedOverride(this.baseProgram, this.needOverride);
+        return this.program;
     }
 
     setSector(sector) {
@@ -284,6 +293,7 @@ export class ServiceBuilding {
             floors: this.floors,
             floorPlans: [...this.floorPlans],
             condition: this.condition,
+            needOverride: this.needOverride,
             fixed: this.fixed,
             finish: this.finish,
             modules: [...this.modules],
@@ -299,4 +309,9 @@ export class ServiceBuilding {
     destroy() {
         this.container.destroy({ children: true });
     }
+}
+
+function applyNeedOverride(program, needId) {
+    if (!program || !needId) return program;
+    return { ...program, need: needId, secondaryNeed: null, needOverride: needId };
 }
