@@ -14,6 +14,7 @@ export default async function ({ page, assert, log, screenshot }) {
     await key('c', 'KeyC');
     await page.waitFor("window.__falesc.app.keyboardCursorActive === true");
     assert.ok(await page.evaluate("Boolean(window.__falesc.app.keyboardCursor)"));
+    assert.ok((await page.text('[data-role=cursor-live]')).includes('Build cursor on'));
     await page.pause(400);
     await screenshot('keyboard-cursor.png');
 

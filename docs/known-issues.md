@@ -24,7 +24,7 @@ Severity is about impact on the slice, not effort:
 | 2 | Medium | Home, commons and garden isles are buildable; shared works, purse and capital exist, but no fuller archipelago |
 | 3 | Medium | Floors are stacked room plans and districts are named clusters; no full loadout or shaped neighbourhoods |
 | 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
-| 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
+| 5 | Low | Keyboard build cursor works, but the canvas has only a live-cell description, not a full screen-reader grid |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
 | 7 | Low | Save v1 is discarded and a mid-`DAY` reload loses the day; v2 has JSON export/import |
 | 8 | Low | Residents have an initial portrait, four-visit log and departure archive, but no illustrated portrait or full lifetime log |
@@ -34,7 +34,7 @@ Severity is about impact on the slice, not effort:
 | 12 | Low | Visual regression is not enabled and no baseline is committed |
 | 13 | Low | Minor teardown and cleanup gaps remain |
 | 14 | Low | Visitors have an initial portrait, visit log, return arc and trial stay, but no illustrated portrait |
-| 15 | Low | The Commons Assembly has petitions and one ballot, but no second reading or debate |
+| 15 | Low | The Commons Assembly has one ballot and a single second reading, but no debate or further amendment |
 
 ## Open issues
 
@@ -175,25 +175,27 @@ effects before considering auctions. Follow
 [design/roadmap.md](design/roadmap.md). Do not add auctions or human multiplayer
 early.
 
-### 5. No keyboard build cursor
+### 5. Canvas grid semantics are minimal
 
 **Evidence**
 
-- Arm and open-day keys work (`1`–`4`, `E`, `B`, `R`, Escape).
-- The build dialog is fully keyboard-accessible (focus trap, Enter, Escape), but
-  choosing a plot requires a pointer/touch tap on the canvas.
-- The canvas is not exposed as a meaningful grid control to assistive tech; the
-  hover highlight has no keyboard equivalent.
+- A keyboard build cursor exists (`C` to enter, arrows to move, `G` to switch
+  isle, Enter to open the build dialog, Escape to leave).
+- A live region announces the current isle, cell, and whether the plot is free
+  or why it is blocked.
+- The canvas is still not a full screen-reader grid: assistive tech cannot browse
+  cells or read the whole map, only the cursor's current cell.
 
 **Impact**
 
-A keyboard-only player can open dialogs but cannot place a service. The canvas
-also lacks a screen-reader-readable grid summary.
+Keyboard placement now works, but non-visual players cannot survey the grid or
+compare distant cells without moving the cursor.
 
 **Suggested direction**
 
-Add a focused cell cursor with arrow movement, a visible highlight, Enter to open
-the build dialog, and an `aria-live` cell description. Keep the canvas out of the
+A focused cell cursor with arrow movement, a visible highlight, Enter to open the
+build dialog, and an `aria-live` cell description now exist. A fuller grid
+summary for assistive tech is still future work. Keep the canvas out of the
 tab order until that exists; route focus through a real grid control. Add a
 keyboard-only scenario once implemented.
 
@@ -356,25 +358,26 @@ A charmed visitor can return, start a trial stay, or become a resident.
 Add a small portrait and a longer relationship history after residency. Consider
 solo visitors once the First Light economy is retuned.
 
-### 15. The Commons Assembly has petitions but no second reading
+### 15. The Commons Assembly allows only one amendment
 
 **Evidence**
 
 - At the Beacon, residents sign a petition for one of the four policies. The
   top petition joins the finalists automatically.
-- Each chapter nominates one policy; every resident then votes once. The winner
-  is applied immediately and cannot be revisited.
-- There is no separate petition debate, amendment or second reading.
+- Each chapter nominates one policy; every resident then votes once.
+- One **second reading** can amend the chosen policy after a full day.
+- There is no debate phase, no multi-amendment track and no third reading.
 
 **Impact**
 
-The petition gives residents an agenda before the ballot and can add a policy
-the chapters did not nominate. The Assembly is still a single decision, not a
+The petition gives residents an agenda before the ballot, and the second reading
+allows one correction. The Assembly is still a short procedure, not a
 continuing body.
 
 **Suggested fix**
 
-Add a second reading after the first vote, with one amendment. Let a petition
+A single second reading now exists. A future body could add a debate phase and
+more than one amendment. Let a petition
 with enough signatures force a policy onto the ballot even when every chapter
 has nominated something else.
 

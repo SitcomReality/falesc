@@ -599,6 +599,7 @@ export class FalescGame {
         this.keyboardCursorActive = true;
         this.world.input.setCameraSuppressed(true);
         this.renderKeyboardCursor();
+        this.gameScreen.announceCursor('Build cursor on. Arrow keys move, G switches isle, Enter opens the build dialog, Escape leaves.');
         this.gameScreen.toast('Build cursor: arrows move, G switches isle, Enter opens, Esc leaves.', 'mint', 3200);
         return true;
     }
@@ -648,6 +649,9 @@ export class FalescGame {
             return;
         }
         this.paintPlacementPreview({ sector, u: this.keyboardCursor.u, v: this.keyboardCursor.v }, program);
+        const check = this.charter.services.canPlace(program.id, sector.id, this.keyboardCursor.u, this.keyboardCursor.v);
+        const isle = sector.garden ? 'garden isle' : sector.commons ? 'commons isle' : 'home shard';
+        this.gameScreen.announceCursor(`Build cursor on the ${isle}, cell ${this.keyboardCursor.u}, ${this.keyboardCursor.v}. ${check.ok ? 'Plot is free.' : check.reason}`);
     }
 
     confirmKeyboardCursor() {
@@ -687,6 +691,7 @@ export class FalescGame {
     }
 
     clearKeyboardCursor() {
+        this.gameScreen?.announceCursor?.('Build cursor off.');
         this.keyboardCursorActive = false;
         this.keyboardCursor = null;
         this.world.input.setCameraSuppressed(false);

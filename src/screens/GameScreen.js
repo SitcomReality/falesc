@@ -117,6 +117,11 @@ export class GameScreen {
         hint.dataset.role = 'hint';
         hint.innerHTML = '<span data-role="hint-copy">Build a Canteen, then open the day and watch where people go.</span><button type="button" class="hud__hint-close" data-role="hint-dismiss" aria-label="Dismiss hint">×</button>';
 
+        const cursorLive = document.createElement('p');
+        cursorLive.className = 'visually-hidden';
+        cursorLive.dataset.role = 'cursor-live';
+        cursorLive.setAttribute('aria-live', 'polite');
+
         const toast = document.createElement('div');
         toast.className = 'hud-toast';
         toast.dataset.role = 'toast';
@@ -189,7 +194,7 @@ export class GameScreen {
             onOpenCommons: () => this.game.showCommons(),
             onOpenChapter: (chapterId) => this.game.showChapterDossier(chapterId)
         });
-        this.container.append(top, objective, this.standings.element, hint, toast, bottom);
+        this.container.append(top, objective, this.standings.element, hint, cursorLive, toast, bottom);
         document.body.appendChild(this.container);
         this.container.style.display = 'none';
 
@@ -219,6 +224,7 @@ export class GameScreen {
             this.hintEl.classList.add('is-hidden');
         });
         this.toastEl = toast;
+        this.cursorLive = cursorLive;
         this.worksNote = dock.querySelector('[data-role=works-note]');
         this.dockNote = dock.querySelector('[data-role=dock-note]');
 
@@ -370,6 +376,10 @@ export class GameScreen {
             }
         };
         document.addEventListener('keydown', this._onKey);
+    }
+
+    announceCursor(text) {
+        if (this.cursorLive) this.cursorLive.textContent = text;
     }
 
     show() {
