@@ -7,12 +7,19 @@
 > [design-vision.md](../design-vision.md) remain the guardrail. This document
 > corrects the **world**: floating islands in a nebula void, no beach, no
 > open-air plants, and buildings that read as places with doors.
+>
+> **Status note (2026-11-11):** the First Light slice implements the correction:
+> warm nebula backdrop, floating shards with deep keels, crystal veins, cables
+> and debris, vacuum-safe dressing, a glass Garden Dome and airlocks on services.
+> The richer drift/parallax, transit and larger archipelago ideas below remain
+> targets. See [gameplay.md](../gameplay.md) and
+> [architecture.md](../architecture.md) for the built world.
 
 ---
 
 ## 1. From sea to void
 
-The current scene is a beautiful sunset sea. The correction is not "make it
+The prototype scene was a beautiful sunset sea. The correction is not "make it
 dark"; it is "remove the sea and the beach, and let the same warm light fall
 into a void."
 

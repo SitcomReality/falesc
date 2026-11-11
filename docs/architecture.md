@@ -1,11 +1,11 @@
 # Architecture
 
-This document describes how FALESC boots, updates, renders, and changes state.
-It describes the **Prism Tide prototype** as implemented today. For the refined
-design direction see [design-refinement.md](design-refinement.md) and the
-implementation plan in [design/implementation.md](design/implementation.md).
-For setup and commands see [development.md](development.md); for tests see
-[testing.md](testing.md); for the visual system see [design-vision.md](design-vision.md).
+This document describes how the **First Light vertical slice** boots, updates,
+renders and changes state as implemented today. For the refined design target
+see [design-refinement.md](design-refinement.md); for setup see
+[development.md](development.md); for tests see [testing.md](testing.md); for
+the visual system see [design-vision.md](design-vision.md) and
+[design/world.md](design/world.md).
 
 ## 1. Runtime model
 
@@ -14,9 +14,10 @@ FALESC is a static site with no build step or server-side code:
 ```text
 index.html
   ├─ local font preloads + styles/main.css
-  ├─ illustrated Glass Sea backdrop (inline SVG, CSS grain/vignette)
+  ├─ inline SVG warm-nebula void backdrop (CSS grain + vignette)
   ├─ <script type="importmap">      bare "pixi.js" → ./vendor/pixi.min.mjs
   └─ <script type="module" src="./src/App.js">
+        └─ src/App.js  →  new FalescGame()
 ```
 
 Relative imports between first-party modules use explicit `.js` extensions. The
@@ -26,343 +27,648 @@ There is no package install. Pixi 7 is vendored and served as a static file. All
 fonts are OFL woff2 files under `assets/fonts/`; no CDN is used at runtime. Other
 visual assets are inline SVG or Pixi Graphics.
 
-The Pixi application is created with `backgroundAlpha: 0`, so the sunset sea is
-a DOM backdrop behind a transparent game canvas. The canvas is fixed at
-`z-index: 1`; DOM screens sit above it.
+The Pixi application is created with `backgroundAlpha: 0`, so the DOM backdrop
+is visible past every shard. The canvas is fixed at `z-index: 1`; DOM screens
+sit above it.
+
+### Module map
+
+```text
+src/
+  App.js                     pure entrypoint
+  FalescGame.js              application coordinator
+  Camera.js                  world transform, clamp, pointer/touch input
+  Character.js               procedural chibi character container
+  constants.js               palettes, animation states, tile size, mineral palettes
+  buildings/
+    BuildingRenderer.js      illustrated service silhouettes (art only)
+  character/
+    CharacterAnimation.js    IDLE/WALK/RUN/BEND animation
+    CharacterRenderer.js     static geometry, limb posing
+  charter/
+    Charter.js               run model: day, lumen, works, roster, services, ending
+  controls/
+    InputManager.js          key bindings and modal lock
+  design/
+    balance.js               tuning table, day phases, goals, day limits
+    names.js                 seeded Tidelander name pool
+    needs.js                 four needs, urgency and wellbeing helpers
+    programs.js              service program data, buildable list, footprints
+    traits.js                temperament, standards, rhythm
+  economy/
+    LumenLedger.js           contributions, upkeep, closure order
+  map/
+    GridUtils.js             isometric projection and inverse
+    MapGenerator.js          seeded single-pass shapes, AABB packing, world rect
+    Sector.js                one island: shape, grid, graphics
+    SectorGraphics.js        void shadow, keel, top surface, grid, vacuum props
+    SeededRandom.js          deterministic RNG
+    SettlementPaths.js       curved paths from services to the square
+    ShapeGenerator.js        organic island silhouettes
+  minerals/
+    CrystalRenderer.js, RockRenderer.js, MineralRenderer.js,
+    MineralStructure.js, MineralUtils.js
+  navigation/
+    IslandNavigator.js       per-island A* to doors
+  persistence/
+    SaveManager.js           versioned localStorage save v2
+  residents/
+    Resident.js              plain model: traits, needs, affinity, memory
+    ResidentFactory.js       seeded 15-name roster, 6 founders
+    ResidentAgent.js         visual timeline: walk, queue, hide, emerge
+    ResidentCrowd.js         owns visible agents and playback timelines
+  screens/
+    MenuScreen.js, LobbyScreen.js, GameScreen.js,
+    DayScreen.js, ReportScreen.js, EndScreen.js
+  services/
+    ServiceBuilding.js       service model plus its Pixi container
+    ServiceManager.js        placement, occupancy, housing, promotion, visits
+    PlacementPolicy.js       pure footprint/door/home-shard rules
+  simulation/
+    DaySimulator.js          deterministic day: drift, choice, queues, report
+  state/
+    GamePhase.js             MENU/LOBBY/PLAYING/DAY/REPORT/END
+    ScreenStateMachine.js    screen registry and phase changes
+  ui/
+    BuildModal.js, ServiceCardModal.js, BulletinModal.js,
+    ResidentCardModal.js, Minimap.js, ChatterManager.js, icons.js
+  world/
+    World.js                 Pixi app, layers, camera/input, map and minerals
+```
+
+There is no `GameStateManager`, `TurnScheduler`, `BuildingManager`, `Building`,
+`blueprints.js`, `NPCController`, `CrowdManager`, `InterstitialScreen` or
+`StructureModal`. The Prism Tide loop they served has been removed; `Building`
+art survives only as `BuildingRenderer`, and `Character`/`character/` remain the
+visual rig.
 
 ## 2. Boot sequence
 
-`GameApp`'s constructor (`src/App.js`):
+`new FalescGame()` in `src/FalescGame.js`:
 
-1. Creates the transparent Pixi `Application` (`resizeTo: window`, WebGL,
-   antialiasing, device-pixel-ratio resolution).
-2. Creates world layers inside `worldContainer`: `mapLayer`, `shadowLayer`,
-   `characterLayer`. Only `characterLayer` has `sortableChildren`.
-3. Creates `CrowdManager` (with a reference to the game for building/map
-   queries), `InputManager`, `BuildingManager`, and `BuildModal`.
-4. Creates `GameStateManager` and `SaveManager`.
-5. Registers five DOM screens: menu, lobby, HUD, interstitial, end. The HUD gets
-   the game instance so it can read the economy.
-6. Wraps `setState` to close the build modal on every non-`PLAYING` transition,
-   cancel pending turns when leaving to `MENU`/`LOBBY`/`END`, and clear the save
-   on `END`.
-7. Installs `onTideStart`, `onTideResolve`, and `onStateSettled` callbacks on the
-   state manager. These supply the economy preview, resolution/victory check, and
-   autosave.
-8. Creates the camera and the survey chart (2D minimap).
-9. Installs the `startGame` wrapper: clear save, generate the world, start the
-   run, then save. Installs a `beforeunload` autosave.
-10. Starts on `MENU` and exposes `window.__falesc`.
-11. On the first completed ticker frame, sets `window.__APP_READY__` and
-    dispatches `app-ready`.
+1. Sets random lobby settings (seed under one million, `medium` size).
+2. Creates `World`, which:
+   - creates the transparent Pixi `Application` (`resizeTo: window`,
+     antialiasing, device-pixel-ratio resolution);
+   - appends the canvas and creates `worldContainer`;
+   - creates `mapLayer`, `pathLayer` + `pathG`, `shadowLayer`,
+     `interactionLayer` (hover cell + ghost), `objectLayer` (sortable) and
+     `overlayLayer`;
+   - creates `InputManager` and `Camera`, wires tap/hover callbacks, and sets a
+     temporary `screen × 5` world rectangle centred on camera.
+3. Creates `ResidentCrowd` bound to `objectLayer`/`shadowLayer`.
+4. Creates `SaveManager` and `ScreenStateMachine`.
+5. Creates `BuildModal`, `ServiceCardModal`, `BulletinModal` and
+   `ResidentCardModal`; each takes the input manager so camera keys are ignored
+   while a dialog is open.
+6. Creates `GameScreen`, `DayScreen`, `ReportScreen`; registers one screen per
+   phase (`MenuScreen`, `LobbyScreen`, `GameScreen`, `DayScreen`,
+   `ReportScreen`, `EndScreen`).
+7. Creates `Minimap` (mounts into the HUD chart slot) and `ChatterManager`
+   (world-space overlay).
+8. Subscribes to phase changes and starts in `MENU`.
+9. Adds the `beforeunload` autosave, exposes `window.__falesc`, and starts the
+   Pixi ticker.
+10. On the first ticker frame, sets `window.__APP_READY__ = true` and dispatches
+    `app-ready`.
 
-The game is a singleton; reloading the page resets everything. Save/continue is
-the only cross-reload state.
+### Starting a charter
+
+`FalescGame.startCharter()`:
+
+1. Reads seed and size from settings.
+2. `initializeWorld(seed, size)` disposes the old charter (playback, crowd,
+   services, modals, chatter), then `World.generate()` builds the map and
+   minerals and leaves the camera on the home shard.
+3. Creates `Charter` with the map and `world.objectLayer`.
+4. Gives the crowd the charter, syncs residents, rebuilds settlement paths and
+   updates the HUD.
+5. Arms the Canteen, clears the end result, reseeds chatter, switches to
+   `PLAYING`, shows the morning bulletin, and autosaves.
+
+### Continuing
+
+`FalescGame.continueCharter()` reads `falesc.save.v2`, restores settings,
+regenerates the seeded world, calls `Charter.fromSave()`, syncs the crowd and
+views, restores/clamps the camera, switches to `PLAYING`, toasts, and saves
+again. `initializeWorld()` calls `disposeCharter()` first, so there is no stale
+service, agent or overlay between runs.
 
 ## 3. State machine and screens
 
-`src/GameStateManager.js` defines:
+`src/state/GamePhase.js` defines:
 
-| State | Meaning | Screen |
+| Phase | Meaning | Screen |
 | --- | --- | --- |
-| `MENU` | Title over the sunset | `MenuScreen` |
+| `MENU` | Title over the void | `MenuScreen` |
 | `LOBBY` | Seed / map-size charter form | `LobbyScreen` |
-| `PLAYING` | Active world and HUD | `GameScreen` |
-| `INTERSTITIAL` | Tide resolution overlay | `InterstitialScreen` |
-| `END` | Victory / defeat / abandon record | `EndScreen` |
+| `PLAYING` | Paused planning and HUD | `GameScreen` |
+| `DAY` | Deterministic playback at 1×/2×/4× with Skip | `DayScreen` |
+| `REPORT` | Evening broadsheet / charter record | `ReportScreen` |
+| `END` | Victory, defeat or abandon | `EndScreen` |
+
+`ScreenStateMachine` is a small registry: it hides the active screen, shows the
+next, and notifies listeners. It has no guard rails beyond "same phase is a
+no-op"; transitions are the coordinator's job.
+
+```text
+MENU ──New charter──▶ LOBBY ──Sign the charter──▶ PLAYING
+  │                                                │  ▲
+  └──Continue charter──────────────────────────────┘  │
+                                                     │
+PLAYING ──Open the day──▶ DAY ──finish/skip──▶ REPORT ──Begin Day N
+  │                                             │
+  └──Abandon──▶ END ◀──charter record───────────┘
+                 │
+                 ├──Return to the drift──▶ MENU
+                 └──New charter──────────▶ LOBBY
+```
+
+- `FalescGame.openDay()` builds the day and enters `DAY`.
+- `finishDayPlayback()`/`skipDay()` enter `REPORT`.
+- `beginNextDay()` either opens the next `PLAYING` day or finishes the charter
+  when the previous day produced an ending; the report button does the same.
+- `endCharter('abandon')` enters `END` directly.
+- `onPhaseChanged()` closes every modal and clears the hover on any non-
+  `PLAYING` phase, clears the save on `END`, and drops playback when returning
+  to `MENU`/`LOBBY`.
 
 Screens are fixed-position DOM overlays created once and toggled with
 `display`. All visual styling lives in `styles/main.css`; JS adds classes and
-`data-testid` hooks. Menu/Lobby/End use z-index 1000, interstitial 500, HUD 100,
-and the build modal 2000.
+`data-testid` hooks. Layer order: HUD `100`, day strip `200`, menu/lobby/end
+`1000`, report `1100`, modal scrims `2000`. The HUD is `pointer-events: none`
+with interactive panels re-enabling it, so the canvas stays pannable.
 
-The HUD is a full-screen container with `pointer-events: none`; individual
-panels re-enable pointer events. This keeps the canvas pannable while HUD panels
-sit on top.
+## 4. The charter model
 
-### Turn flow
+`src/charter/Charter.js` is the run: plain data plus a handful of commands.
 
-`GameStateManager` owns the only turn timer, a `TurnScheduler` token. The flow:
+| Field | Meaning |
+| --- | --- |
+| `seed`, `mapSize` | World identity |
+| `day`, `dayLimit` | Current day and the map-size limit |
+| `lumen` | Civic energy in hand |
+| `works` | Works left today (starts at 2, resets on a new day) |
+| `roster` | All 15 `Resident` models, active or waiting |
+| `services` | `ServiceManager` owning every service |
+| `flourishing` | Average active-resident wellbeing |
+| `devotion` | Sum of resident affinity with the player |
+| `lastReport`, `history` | The evening report and prior reports |
+| `bulletin` | The current morning news |
+| `ending` | `{ outcome, day, title, message }` once decided |
 
-1. `endTurn()` refuses unless the state is `PLAYING` and no turn is pending.
-2. It calls `onTideStart()` to produce the income preview for the interstitial,
-   switches to `INTERSTITIAL`, and schedules resolution in 1.9 s.
-3. The scheduler callback calls `onTideResolve()` (`App.resolveTide()`), which:
-   - asks `BuildingManager.resolveTide()` to collect income from active
-     structures and advance every structure one phase;
-   - adds income to the purse;
-   - returns `{ income, active, promoted, outcome, message }`, with `outcome`
-     set to `victory` when the Beacon is active or `defeat` when the next day
-     would pass the tide limit.
-4. The state manager increments the day, restores one action, and either calls
-   `endGame(outcome)` or returns to `PLAYING`. After returning to play it calls
-   `onStateSettled()` to autosave.
+Construction-time flow: create the seeded roster, place the fixed **Welcome
+Post** near the grid centre (`housing`, capacity 6, `ACTIVE`, `fixed`), assign
+homes, refresh Flourishing/Devotion, and build the first bulletin. A roster
+resident is active only for the first six; the rest wait for spare beds.
 
-Cancelling the run, leaving to the menu/lobby, or ending the charter invalidates
-the scheduler token, so a stale timer can never force the game back to `PLAYING`.
-There are no other `setTimeout` calls in the game flow.
+Key getters: `activeResidents`, `population`, `housingCapacity`, `spareBeds`,
+`wellbeing`, `projectedContributions`, `projectedUpkeep`, `projectedNet`,
+`firstLightProgress`, `goalsMet`.
 
-## 4. Coordinate systems and camera
+Key commands:
 
-- **World pixels** — the scene graph. The world rectangle is derived from the
-  packed island cluster plus water margin; it is no longer `window size × 5`.
-- **Screen/CSS pixels** — pointer positions and DOM layout.
-- **Grid coordinates** — fractional `(u, v)` inside a sector's isometric grid,
-  `0..gridSize`. A cell is `TILE_WIDTH = 512` by `TILE_HEIGHT = 256` world
-  pixels before camera zoom.
+- `canBuild(programId)` — buildable, works remaining, affordable.
+- `build()` — placement, spend lumen and one work, assign homes, refresh.
+- `dismantle()` / `reopen()` — half-cost refund / shortfall recovery.
+- `openDay()` — run `DaySimulator`, store report, refresh derived values.
+- `beginNextDay()` — increment day, reset works, promote construction, reset
+  daily service state, assign homes, add arrivals, build the next bulletin.
+- `addArrivals()` — if flourishing ≥ 20 and beds are spare, activate up to two
+  waiting residents.
+- `evaluateEnding(report)` — population < 4, or day-limit goal check; writes
+  `report.outcome`/`message`.
+- `serialize()` / `restore()` — save v2 model data.
 
-`Camera` moves `worldContainer`:
+The charter does not own DOM or the Pixi scene. `ServiceManager` creates
+`ServiceBuilding` objects, which do own their Pixi containers; the crowd and
+screens are attached by `FalescGame`.
+
+## 5. Day simulation and playback
+
+`src/simulation/DaySimulator.js` is deterministic. Its RNG is
+`new SeededRandom(seed + day * 104729 + 17)`; it never calls `Math.random` or
+reads wall-clock time. Same seed + same actions + same day = same report.
+
+`run()`:
+
+1. Snapshot each active resident's needs for `needBefore`.
+2. For each of the four phases (`morning`, `afternoon`, `evening`, `night`):
+   - apply need drift for every resident (`baseRise × rhythmRise`);
+   - skip choice during `night`;
+   - otherwise choose and schedule one visit per resident.
+3. At night: housed residents recover Rest and gain a little affinity; homeless
+   residents take a Rest penalty and complain.
+4. Record daily unmet needs (85+), and turn three consecutive unmet days into a
+   "talking about leaving" complaint. No departure occurs.
+5. Build the report (needs at dusk, wellbeing, visits, hearts, service visits,
+   quotes, complaints).
+6. `LumenLedger.resolveDay()` applies contributions, upkeep, closures, and
+   writes the economy fields onto the report.
+7. Reset daily service counters, call `charter.evaluateEnding(report)`, and
+   return `{ report, events, navigator }`.
+
+### Choice
+
+For each resident and non-night phase, services are filtered to active, open
+services (`isOpenAt`). Needs are considered from most to least urgent; a need
+below 20 is ignored, and Rest is skipped outside the nightly at-home pass.
+Candidates are scored by:
 
 ```text
-screen = center + (world - camera.position) * zoom
- world = camera.position + (screen - center) / zoom
+urgency × need match × quality × vibe fit × standards fit × proximity
+        × availability/queue × familiarity × small seeded novelty × rhythm
 ```
 
-It supports WASD/arrow panning, wheel zoom at the cursor, middle-mouse drag, and
-touch pan/pinch. `Camera.setBounds()` receives the generated cluster bounds,
-derives a minimum zoom that lets the player see the whole archipelago, and
-clamps the camera centre so the view stays within the cluster plus a water
-margin. Clamping is applied on every `updateTransform`, including pan, zoom, and
-resize.
+The best positive score wins. A service-phase load at or above `capacity + 3`
+makes the resident give up with a complaint and a small affinity loss.
+Otherwise the simulator schedules an event inside the five-second phase window: depart,
+travel, queue, enter, use, exit, return. Travel is scaled by the A* path length
+and the whole visit is compressed to fit its phase.
 
-The isometric projection in `src/map/GridUtils.js`:
+### Effects
+
+A visit satisfies the chosen need by a primary or secondary effect scaled by
+program quality and the resident's standards. It records a service visit and a
+heart, adds affinity (more if the need was urgent), clears the unmet-day
+counter for that need, and writes the resident's `memory.lastChoice` with a
+generated **why** line.
+
+### Playback
+
+`FalescGame.openDay()` has already resolved the day when `DAY` starts:
+`charter.openDay()` returns the finished report and event list. The app builds
+`playback = { clock, duration, speed, report }` with
+`duration = 4 × BALANCE.playback.phaseSeconds` (20 seconds), hands the events to
+`ResidentCrowd.preparePlayback()`, and shows the day strip.
+
+Each ticker update during `DAY` advances `clock` by `dt × speed`, derives the
+phase from the clock, updates the crowd and service pulse, and updates the day
+strip. `Skip` sets the clock to the duration. `finishDayPlayback()` resets
+residents to their planning positions and enters `REPORT`. Playback is a
+**view**, not a second simulation: lumen, needs, visits and the report cannot
+change during it.
+
+`DAY_PHASES` are five-second visual spans in the day strip, not a real-time
+schedule. The crowd's precomputed timestamps happen to use the same phase
+window, which keeps the replay legible.
+
+## 6. Residents and navigation
+
+`Resident` (`src/residents/Resident.js`) is plain model data:
 
 ```text
-x = (u - gridSize/2 - (v - gridSize/2)) * TILE_WIDTH / 2 + sector.centerX
-y = (u - gridSize/2 + (v - gridSize/2)) * TILE_HEIGHT / 2 + sector.centerY
+id, name, traits { temperament, standards, rhythm }
+needs { sustenance, rest, company, wonder }   // 0 satisfied .. 100 urgent
+active, homeServiceId
+affinity { player }                           // 0..5, starts at 0.8
+memory { lastChoice, recentVisits, complaints, unmetDays, lastComplaint }
+paletteSeed, state, position
 ```
 
-`worldToGrid` is its inverse. `Sector.getGridCell()` returns fractional grid
-coordinates; `App.onWorldTap()` validates the range and floors the cell when
-placing a building.
+Derived: `wellbeing` (`100 − average urgency`), `favouriteNeed`, `traitSummary`,
+`isHomeless`. `recordChoice()` keeps the last choice and up to eight recent
+visits (the card currently shows only the last); `addAffinity()` clamps to 0–5;
+`updateUnmetDays()` is called once at dusk.
 
-## 5. World generation
+`ResidentFactory.createRoster(seed, 15)` shuffles the name pool with a seeded
+RNG, cycles temperament/standards/rhythm for a deliberate mix, seeds a rotating
+urgent need, and marks the first six active. The same seed produces the same
+cast.
 
-`App.initializeWorld()` clears the previous world, creates a `MapGenerator` with
-the lobby seed and size, replaces `MAP_WIDTH`/`MAP_HEIGHT` with the generator's
-world rectangle, and points the camera at the home island.
+`ResidentAgent` owns the visual `Character` for one resident: it hides the
+character inside a service, walks precomputed paths, shows a need glyph bubble
+on emergence, and idles at the home door during planning. `ResidentCrowd` creates
+agents for active residents, places them around their housing door (or the
+commons cell), prepares per-resident event timelines, and updates them during
+playback. Planning ambient movement is a tiny idle sway; it is decoration, not
+simulation.
 
-`MapGenerator` (`src/map/MapGenerator.js`) is a single-pass pipeline:
+`IslandNavigator` builds an A* grid for the home sector. Service footprints are
+blocked; doors and other free cells are walkable. `path()` snaps start/goal to
+the nearest walkable cell, returns grid cells (inclusive), and `worldPath()`
+converts them to world points. Paths are computed only when a resident chooses a
+destination. There is no inter-island travel, no crowd collision avoidance and
+no routing around other residents.
 
-1. Build each local island silhouette once with a per-sector `SeededRandom` and
-   the configured grid size. Compute its actual axis-aligned bounds.
-2. Pack islands on an Archimedean spiral against those **actual shape bounds**
-   with a 110 px gap. AABB separation guarantees the irregular polygons cannot
-   intersect. Nothing is regenerated after packing.
-3. Translate the packed cluster into a world rectangle with 520 px of water on
-   every side. Store `worldWidth`, `worldHeight`, `bounds`, and `homeSector`
-   (largest/topmost island).
-4. Construct each `Sector` once at its final position from the prebuilt local
-   silhouette. The sector draws its own art via `SectorGraphics`.
+## 7. Services, placement and the build flow
 
-| Map size | Sector grids | Minerals | Tide limit |
-| --- | --- | --- | --- |
-| `small` | 4 × `2×2` | 30 | 12 |
-| `medium` | 2 × `3×3` + 4 × `2×2` | 50 | 14 |
-| `large` | 1 × `4×4` + 2 × `3×3` + 4 × `2×2` | 70 | 16 |
+### Program data
 
-`sector.shape` is an organic, vertically squashed polygon generated by
-`ShapeGenerator` (wobble, clamping, two Chaikin passes). `SectorGraphics` draws a
-foam halo, offset water shadow, plum cliff, sun-bleached sand top, warm ink grid,
-and procedural shore dressing (palms, grass, pebbles, flowers) outside the build
-grid.
+`src/design/programs.js` is the single table behind every service:
+`housing`, `canteen`, `tea_house`, `garden_dome` (all `buildable: true`) and
+`commons_beacon` (`buildable: false`, kept as endgame art/data). Each entry has
+id, name, category, primary/secondary need, capacity, visit duration, open
+phases, footprint, cost, upkeep, quality, finish/vibe defaults, construction
+days, colour, icon and test id.
 
-Characters spawn on a random island using the entity RNG. Minerals spawn outside
-the build grid on a random island. Both use per-item seeded RNG streams.
+### ServiceBuilding
 
-## 6. Economy, blueprints, and the build flow
+`ServiceBuilding` mixes model and view: it stores program, footprint anchor,
+state, entrance, capacity, visits, hearts, closure and construction progress,
+and owns a Pixi container drawn by `BuildingRenderer`. `PENDING` services pulse
+and are ghosted; `ACTIVE` services are solid; closed services are dimmed.
+`promote()` counts down `daysRemaining` and becomes `ACTIVE` at zero.
+`recordVisit()`, `resetDaily()`, `close()`, `reopen()` and `update()` keep the
+visual and daily state aligned.
 
-`src/buildings/blueprints.js` owns the economy data:
+### ServiceManager
 
-| Blueprint | Cost | Income | Special |
-| --- | --- | --- | --- |
-| `prism_rig` | 3 | 2 | Default armed blueprint |
-| `tide_garden` | 5 | 3 | Stronger economy |
-| `lantern_house` | 4 | 1 | `beaconDiscount: 3` |
-| `aurora_beacon` | 12 | 0 | `unique`, `goal`; price floor 6 |
+- `occupancy` is a `Map` from `sectorId:u:v` to service. Footprint cells **and**
+  the door cell are occupied.
+- `canPlace()` delegates to `PlacementPolicy`.
+- `place()` validates, creates the service, registers cells, positions it and
+  adds its container.
+- `remove()` clears occupancy and destroys the container.
+- `housingCapacity()`, `housingFor()`, `spareHousing()` and `assignHome()` fill
+  houses in build order for a stable, legible report.
+- `promoteUnderConstruction()` opens `PENDING` services.
+- `upkeepFor()` only charges active, open services; `reopenCost()` is half
+  upkeep, minimum 1.
+- `serialize()`/`restore()` round-trip the model, including door, visits,
+  hearts, closure and days remaining.
 
-`effectiveCost(blueprint, buildings)` computes the dynamic Beacon cost. Starting
-lumen is 8; one action per tide; active structures pay income at resolution.
-Prism Rigs and Tide Gardens within `AFFINITY_RANGE` (460 px) of a crystal gain
-+1 lumen/tide; `Building.income` stores the base plus bonus, and the bonus is
-persisted and included in HUD/snapshot income.
+### PlacementPolicy
+
+`evaluatePlacement()` returns `{ ok, reason, cells, entrance, sector }` for the
+UI and tests. It rejects a missing map, any sector other than the home shard,
+footprints outside the grid, occupied cells, and a footprint with no free door
+cell. `findEntrance()` prefers the south-facing edge (camera-facing), then the
+left/right edges, then the top edge. `cellKey()` is shared with the navigator.
 
 ### Build interaction
 
-1. Clicking a blueprint card calls `GameApp.selectBlueprint(id)`, which rejects
-   the selection when the state/action/affordability/unique rules fail.
-2. A primary click/tap on an empty grid cell while `PLAYING`, with an action and
-   enough lumen, calls `GameApp.onWorldTap()`.
-3. `onWorldTap()` stores `pendingBuildLocation` and opens `BuildModal` with the
-   armed blueprint, current purse, and existing buildings.
-4. The modal is a real dialog: scrim, `role="dialog"`, labelled title, focus
-   trap, Escape cancels, Enter submits, focus is restored on close. It tells the
-   input manager to ignore camera keys while open.
-5. Confirm calls `GameApp.finalizeBuild(name)`, which validates state, action,
-   uniqueness, affordability, and cell occupancy. It creates the building, spends
-   lumen, spends the action, dismisses the hint, and autosaves.
-6. Cancel, Escape, a failed validation, or leaving `PLAYING` clears the pending
-   location. A failed validation keeps the dialog open with an inline reason.
-7. Clicking an occupied plot opens `StructureModal` instead. Dismantling removes
-   the building, refunds half its effective cost, rebuilds paths, updates the
-   HUD, and autosaves. It does not spend a build action.
+1. `selectProgram(id)` refuses when not `PLAYING`, not buildable, out of works,
+   or unaffordable. It clears the pending plot and hover on change.
+2. Hovering the canvas calls `onWorldHover()`: it validates the cell, draws a
+   mint/coral diamond over the footprint, and shows a ghost silhouette when
+   legal.
+3. A primary tap calls `onWorldTap()`: a nearby resident wins first (opens the
+   card); otherwise a service under the cell opens its record; otherwise the
+   armed program is checked and the build dialog opens.
+4. `finalizeBuild(name)` re-validates, calls `charter.build()`, syncs views,
+   toasts, and autosaves.
+5. The build dialog is a real dialog: scrim, `role="dialog"`, labelled title,
+   focus trap, Escape cancels, Enter submits, focus restored on close, HUD
+   marked `inert`, input manager locked.
+6. Cancel/phase change clears the pending plot. A failed build keeps the dialog
+   open with an inline reason.
+7. Service records handle dismantle (half cost, no work, not the Welcome Post)
+   and reopen (closed services only).
 
-Buildings are added to `characterLayer` so they share Y-sorted draw order with
-characters and minerals. `BuildingRenderer` draws four distinct illustrated
-silhouettes; under-construction states are ghosted and scaffolded, and `PENDING`
-pulses. A small living-crystal outcrop marks a structure with crystal affinity.
+## 8. Economy
 
-## 7. Characters, animation, and AI
+`LumenLedger` is a static data service:
 
-`Character` owns a Pixi `Container` at `(x, y)` with six child `Graphics` (legs,
-arms, body, head), a separate shadow in `shadowLayer`, an animation state, a
-palette, and procedural limb variations. It accepts an optional seeded RNG for
-palette, frame offset, and proportions.
+```text
+contributionFor(resident) = 2 if wellbeing ≥ 65
+                            1 if wellbeing ≥ 35
+                            0 otherwise
+projectedContributions = sum(active residents)
+projectedUpkeep        = sum(active, open services' program upkeep)
+projectedNet           = contributions − upkeep
+```
 
-`CharacterAnimation` blends `IDLE`, `WALK`, `RUN`, and `BEND`. `CharacterRenderer`
-draws static geometry once and positions/rotates/scales limbs every frame,
-assigning facing-dependent z-indexes and a `groundY` for depth sorting.
+`resolveDay(charter, report)`:
 
-`CrowdManager` maps each character to an `NPCController`, passing its home sector
-and the game reference. NPCs choose `IDLE`, `BEND`, or `WANDER` on seeded timers.
-`WANDER`:
+1. Compute contributions and upkeep before closure.
+2. Add contributions, subtract upkeep.
+3. If the balance is negative, close non-housing, non-fixed services in
+   `BALANCE.economy.closureOrder` (`wonder`, `company`, `sustenance`, `rest`),
+   highest upkeep first, adding each closed service's upkeep back until the
+   balance is non-negative.
+4. Recompute upkeep and net; clamp lumen at 0; write `contributions`,
+   `upkeep`, `upkeepBefore`, `net`, `lumenAfter`, `closures` onto the report.
 
-- chooses a heading and optionally curves it;
-- tests the destination against `homeSector.containsPoint()` and
-  `BuildingManager.isWorldBlocked()` before moving;
-- applies a small separation force from nearby Tidelanders;
-- steers back toward the island centre when a step is blocked.
+The report and HUD use these numbers. `flourishing` is computed by the day
+simulator as average wellbeing; `devotion` is the sum of affinity. There is no
+price per visit, no stock, and no passive harvest income.
 
-The rectangular world bounds remain only as a fallback for characters without a
-home sector. Spawns use island points and are validated by the sector shape.
+## 9. Persistence
 
-`Character.destroy()` does not unregister from `CrowdManager`; `App.clearWorld()`
-destroys all characters then clears the crowd. A future single-character removal
-path must unregister explicitly (see [known-issues.md](known-issues.md)).
+`src/persistence/SaveManager.js`:
 
-## 8. Minerals and determinism
+- key `falesc.save.v2`, version `2`;
+- `read()` removes the legacy `falesc.save.v1` key, parses the payload, rejects
+  a non-v2 version by clearing, requires `charter.seed` to be an integer;
+- `write(payload)` adds `version` and `savedAt`;
+- `clear()` removes both v2 and legacy v1.
 
-`MineralStructure` owns a container, a separate shadow, a type (`ROCK`/`CRYSTAL`),
-a palette, and seeded procedural variations. `MineralRenderer.initStructure()`
-dispatches to:
-
-- `RockRenderer` — chunky polygonal pieces with light/dark/top faces, sorted
-  inside the container;
-- `CrystalRenderer` — one container and `Graphics` per shard.
-
-All random visual choices draw from per-item `SeededRandom` streams. The map,
-character palettes/proportions, mineral variations, and NPC decisions are
-deterministic for a seed. Animation phase and NPC positions still depend on
-elapsed frame time, which is why visual regression is not enabled yet.
-
-## 9. Rendering and z-order
-
-Inside `worldContainer`:
-
-1. `mapLayer` — sector graphics (foam, cliffs, sand, grid, shore props).
-2. `pathLayer` — cream stepping-stone paths from structures to their island's
-   central square, rebuilt only when the building set changes.
-3. `shadowLayer` — character and mineral shadows.
-4. `interactionLayer` — hover cell highlight and the armed-blueprint ghost.
-5. `characterLayer` — characters, minerals, buildings; `sortableChildren` sorts
-   by `zIndex` derived from ground Y.
-6. `overlayLayer` — ambient Tidelander speech bubbles (`ChatterManager`), above
-   all world objects but below DOM chrome.
-
-The Pixi canvas is WebGL and transparent. Behind it, `index.html` renders an
-inline SVG scene (gradient sky, sun, clouds, birds, distant islands, sea,
-reflection, waves, foreground fronds) plus CSS grain and a vignette. DOM screens
-and the build modal sit above the canvas and are not part of the Pixi scene graph.
-
-A separate Canvas2D `#minimap` sits in the survey chart at bottom-left, above the
-game canvas but below the menu/end screens. It draws a deep-water chart, island
-coastlines, buildings, the Beacon halo, and the camera viewport; it updates every
-third frame even before a world exists.
-
-`--tide-progress` is updated from the game loop and drives a slow CSS filter on
-the illustrated backdrop, so the Glass Sea darkens toward dusk as the tide limit
-approaches.
-
-## 10. Persistence
-
-`src/persistence/SaveManager.js` stores a versioned JSON payload in
-`localStorage` under `falesc.save.v1`. Model data only:
+`FalescGame.saveGame()` writes only when a charter exists **and** the phase is
+`PLAYING`: after starting/continuing, after build/dismantle/reopen, after
+beginning the next day, and on `beforeunload`. It stores:
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "savedAt": 0,
   "settings": { "mapSeed": 12345, "mapSize": "medium" },
-  "turn": 3,
-  "dayLimit": 14,
-  "actionsRemaining": 1,
-  "lumen": 4,
-  "selectedBlueprint": "prism_rig",
-  "hintDismissed": true,
-  "buildings": [{ "sectorId": 0, "u": 1, "v": 2, "name": "Rig", "blueprintId": "prism_rig", "state": "RESERVED" }],
-  "camera": { "x": 0, "y": 0, "zoom": 0.4 }
+  "charter": {
+    "seed": 12345, "mapSize": "medium", "day": 3, "dayLimit": 14,
+    "lumen": 12, "works": 2, "flourishing": 63.5, "devotion": 8.3,
+    "ending": null, "residents": [], "services": []
+  },
+  "camera": { "x": 0, "y": 0, "zoom": 0.5 }
 }
 ```
 
-`continueGame()` restores settings, regenerates the seeded world, restores
-buildings through `BuildingManager.restore()`, applies state fields through
-`GameStateManager.restoreRun()`, and restores/clamps the camera. Corrupt or
-unknown-version saves are discarded.
+The world is regenerated from the seed. Residents restore traits, needs,
+activity, home, affinity and memory; services restore program, cells, state,
+door, capacity, visits, hearts and closure. Unknown or corrupt saves are
+discarded, not partially loaded. Save v1 is intentionally abandoned. There is no
+export/import. Reloading during `DAY` or `REPORT` returns to the last planning
+save, because saves are not written in those phases.
 
-Autosaves happen after builds, after resolved tides, and on `beforeunload`.
-`END` clears the save. There is no export/import yet.
+## 10. World generation
 
-## 11. Debug surface
+`World.generate({ seed, size })` clears the previous map/minerals, starts from a
+`screen × 5` world rectangle, creates `MapGenerator`, adopts its
+`worldWidth`/`worldHeight`, adds each sector graphic to `mapLayer`, and spawns
+minerals from a seeded RNG.
 
-`window.__falesc` is installed by `App.exposeDebugApi()`:
+`MapGenerator` is a single-pass pipeline:
+
+1. Build each local island silhouette once with a per-sector `SeededRandom` and
+   the configured grid size; compute its actual axis-aligned bounds.
+2. Pack islands on an Archimedean spiral against those **actual shape bounds**
+   with a 110 px gap. AABB non-overlap is conservative: separated boxes mean
+   separated irregular shapes. Nothing is regenerated after packing.
+3. Translate the packed cluster into a world rectangle with 520 px of margin on
+   every side. Store `worldWidth`, `worldHeight`, `bounds` and `homeSector`
+   (largest grid, then topmost).
+4. Construct each `Sector` once at its final position from the prebuilt
+   silhouette.
+
+| Size | Sector grids | Minerals |
+| --- | --- | --- |
+| `small` | 4 × `2×2` | 46 |
+| `medium` | 2 × `3×3` + 4 × `2×2` | 64 |
+| `large` | 1 × `5×5` + 2 × `3×3` + 4 × `2×2` | 82 |
+
+Minerals spawn outside the build grid on random islands. Their rocks/crystals
+use per-item seeded variation. The home shard is the only buildable sector.
+
+## 11. Rendering and the world
+
+### Void and shards
+
+The world is a warm nebula void, not a sea. `index.html` holds a fixed inline
+SVG backdrop: plum/wine/rose gradients, a soft bright core, aurora bands, stars,
+a ringed planet and distant shard silhouettes, plus CSS grain and vignette. The
+Pixi canvas is transparent above it.
+
+`SectorGraphics` draws each shard in the NW light / SE shadow convention:
+
+- a void shadow and a deep jagged rock keel with faceted buttresses, broken
+  shard tips, mint/lavender crystal veins, hanging cables and pipes, and
+  drifting debris;
+- a paper-bright regolith/metal deck top with rim light, a warm ink grid, corner
+  brackets and a compass mark;
+- vacuum-safe dressing outside the build grid: rocks, outcrops, void coral,
+  crates, pods, antennae, dishes, solar fins, radiators, pipes, cables, warning
+  marks, memorials and small beacons.
+
+There is no sea, no beach, no foam and no open-air planting. The Garden Dome is
+the exception: a pressurised geodesic glasshouse with beds, a tree and shrubs
+inside. All services have visible airlocks/doors on the camera-facing face.
+
+### Layers
+
+Inside `worldContainer`, in order:
+
+1. `mapLayer` — sector graphics.
+2. `pathLayer` — curved cream stepping-stone paths from each service to the
+   island's central square; rebuilt only when services change.
+3. `shadowLayer` — character and mineral shadows.
+4. `interactionLayer` — hover cell highlight and armed-service ghost.
+5. `objectLayer` — services, residents and minerals; `sortableChildren` sorts by
+   ground Y every ten frames.
+6. `overlayLayer` — ambient Tidelander speech bubbles.
+
+DOM screens and modals are not part of the Pixi scene graph. They sit above the
+canvas.
+
+### Survey chart and mood
+
+`Minimap` is a separate Canvas2D `#minimap` in the HUD chart slot. It paints a
+warm-void chart with stars, a graticule, island coastlines, services, residents
+and the camera viewport, updates every third frame, and moves the camera on
+click. It is also the surface the browser harness samples because the main
+canvas is WebGL.
+
+`FalescGame.update()` computes `--tide-progress` from day / day limit and sets it
+on the document root while `PLAYING`, `DAY`, `REPORT` or `END`. CSS uses it to
+desaturate and dim the backdrop as the charter approaches its end. Chatter (up
+to two bubbles, roughly every 20–40 seconds) is ambient only and runs during
+`PLAYING`.
+
+### Camera, coordinates and input
+
+- **World pixels** — the Pixi scene graph.
+- **Screen/CSS pixels** — pointer positions and DOM layout.
+- **Grid coordinates** — fractional `(u, v)` inside a sector, `0..gridSize`.
+  A cell is `TILE_WIDTH = 512` by `TILE_HEIGHT = 256` world pixels.
+
+```text
+screen = centre + (world − camera.position) × zoom
+world  = camera.position + (screen − centre) ÷ zoom
+
+x = (u − gridSize/2 − (v − gridSize/2)) × TILE_WIDTH/2  + sector.centerX
+y = (u − gridSize/2 + (v − gridSize/2)) × TILE_HEIGHT/2 + sector.centerY
+```
+
+`Camera.setBounds()` derives a fit zoom from the packed cluster plus a 620 px
+padding, sets a minimum zoom, and clamps the camera centre on every
+`updateTransform` (pan, zoom, resize). `World.generate()` sets an initial
+home-shard zoom clamped between 0.36 and 0.72.
+
+Input supports WASD/arrows, wheel zoom at the cursor, middle-drag pan, one-finger
+pan, two-finger pinch/pan, and a short primary-button tap. `InputManager` holds
+camera key states and clears them on blur/visibility change and while a modal is
+open. `Camera` listens for pointer release on `window` so a middle-drag cannot
+stick when released outside the canvas.
+
+## 12. Main loop and lifecycle
+
+`FalescGame.update(delta)` runs on the Pixi ticker:
+
+- `world.update(dt)` advances the camera and mineral shimmer while the tab is
+  visible.
+- `PLAYING`: services pulse, the crowd idles, chatter updates, HUD refreshes every
+  third frame, objects sort every tenth.
+- `DAY`: playback updates, services pulse faster with speed, objects sort.
+- `REPORT`/`END`/`MENU`/`LOBBY`: the world still renders; no charter simulation
+  runs.
+- Every third frame, the survey chart updates.
+- Every frame, the tide mood and frame count update; the first frame sets the
+  harness readiness flag.
+
+There is no separate pause state: when `document.hidden` is true the ticker
+passes `dt = 0`, freezing ambience and playback, and the input manager clears
+held keys. Leaving `PLAYING` still stops charter simulation immediately.
+
+`initializeWorld()` is called on every new game and on continue. It disposes
+the old playback, crowd, services, chatter and modals, regenerates the world,
+resets the armed program to the Canteen and clears the pending plot. Resident
+positions and animation are not saved; they restart from home points on
+continue. Audio and multiplayer are absent.
+
+## 13. Debug surface
+
+`window.__falesc` is installed by `FalescGame.exposeDebugApi()`:
 
 | Member | Purpose |
 | --- | --- |
-| `app` | The full `GameApp` instance |
+| `app` | The full `FalescGame` instance |
 | `ready` | Whether the first frame completed |
-| `snapshot()` | State, day, actions, lumen, income, selected blueprint, seed, counts, building states/blueprints, modal state, end result, camera |
-| `findFreeCell()` | First unoccupied grid cell plus its world position |
-| `worldToScreen(x, y)` | Convert world coordinates to CSS pixels |
-| `selectBlueprint(id)` | Arm a blueprint through the real validation path |
-| `saveGame()` / `continueGame()` | Exercise persistence from a scenario |
+| `snapshot()` | Phase, day/limit, lumen, works, population, housing, flourishing, devotion, projections, selected program, seed/size, sectors, services, residents, report, ending, modal/playback state, camera |
+| `findFreeCell(programId)` | First legal cell on the home shard with its world point |
+| `worldToScreen(x, y)` | World coordinates to CSS pixels |
+| `selectProgram(id)` / `selectBlueprint(id)` | Arm a service through real validation (legacy alias) |
+| `openDay()`, `skipDay()`, `beginNextDay()` | Drive the loop from a scenario |
+| `setPlaybackSpeed(speed)` | 1, 2 or 4 |
+| `showBulletin()`, `showResidents()`, `openResident(id)` | Open the real overlays |
+| `saveGame()`, `continueGame()`, `continueCharter()` | Exercise persistence |
+| `startCharter(seed, size)` | Start a deterministic run for tests |
+| `serviceAt(sectorId, u, v)` | Look up occupancy, including doors |
+| `endCharter(outcome)` | Abandon/end from a scenario |
+
+`snapshot()` also exposes compatibility aliases `turn`, `actionsRemaining`,
+`selectedBlueprint`, `buildings`, `buildingStates`, `buildingBlueprints` and
+service `blueprintId` = `programId`, because several scenarios were adapted
+from the previous loop. New code should use the program/service names.
 
 `window.__APP_READY__` is the harness readiness flag. Scenario files under
 `scripts/scenarios/` use these hooks plus DOM selectors.
 
-## 12. Lifecycle and reset
+## 14. Tests and extension points
 
-`initializeWorld()` is called on every new game and on continue. It clears
-characters, minerals, buildings, the map, and all layers, then regenerates
-everything from the current lobby settings. It resets the selected blueprint and
-hint but not the state manager's turn/economy fields; `startGame` or
-`restoreRun` sets those.
+`npm run check` parses every first-party `.js`/`.mjs`, resolves relative imports
+and checks the import map. `webgame.config.json` drives the main browser smoke
+test; `scripts/scenarios/` holds the resident, economy, persistence,
+determinism, engine, map, demolition, showcase, victory and mobile scenarios.
+See [testing.md](testing.md).
 
-Not reset or persisted:
+Extension points:
 
-- `players` is always empty (no multiplayer);
-- audio is absent;
-- `turnDuration` is unused (there is no turn timer);
-- NPC position/animation state is not part of the save and restarts from spawn
-  on continue.
-
-The game loop only simulates the crowd, characters, minerals, and buildings while
-`PLAYING` and `document.hidden` is false. Camera input and the survey chart keep
-working while overlays are visible.
-
-## 13. Extension points
-
-- **New screen**: add a state constant, a screen class with `show`/`hide`, and
-  register it in `App`; style it in `styles/main.css`.
-- **New blueprint**: add an entry in `src/buildings/blueprints.js`, an icon in
-  `src/ui/icons.js`, and a branch in `BuildingRenderer`; update the dock and
-  victory scenario expectations.
-- **New map size**: add a grid config in `MapGenerator`, a mineral count and tide
-  limit, and a card in `LobbyScreen`.
-- **New NPC behaviour**: extend `NPCController`; animation states live in
-  `constants.js`.
-- **New test step**: edit `webgame.config.json` or add a scenario in
-  `scripts/scenarios/`; see [testing.md](testing.md).
-- **New visual token or component**: add a custom property or component class in
+- **New service program:** add an entry to `src/design/programs.js`, an icon in
+  `src/ui/icons.js`, and a `BuildingRenderer` branch. The dock and build dialog
+  discover buildable programs from the array; check placement footprints and
+  update the resident/queue expectations.
+- **New need:** add it to `src/design/needs.js`, give services a matching
+  program, and extend `DaySimulator` only if the need needs special handling
+  (like Rest's nightly pass).
+- **New screen/phase:** add a `GamePhase`, a screen class with `show`/`hide`,
+  register it in `FalescGame`, and style it in `styles/main.css`.
+- **New map size:** add a `gridConfigs` entry in `MapGenerator`, a mineral count
+  in `World`, a day limit in `BALANCE.dayLimits`, and a card/readout in
+  `LobbyScreen`.
+- **New resident trait:** add stable ids in `src/design/traits.js`, wire the
+  effect into scoring, and surface it on the card. Trait ids are stored in
+  saves.
+- **New test step:** edit `webgame.config.json` or add a scenario in
+  `scripts/scenarios/`; keep assertions on model state or visible DOM.
+- **New visual token/component:** add a custom property or class in
   `styles/main.css`; keep the guardrails in [design-vision.md](design-vision.md).
 
 For safe-change guidance see [development.md](development.md), and for remaining

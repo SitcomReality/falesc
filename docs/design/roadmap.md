@@ -13,6 +13,48 @@
 
 ---
 
+## Current status — 2026-11-11
+
+**Phase 0 is substantially implemented.** The warm nebula backdrop, floating
+shards with deep keels, crystal veins, cables and debris, vacuum-safe props, the
+Garden Dome glasshouse and doors/airlocks on services are in the build. There is
+no sea, beach or open-air planting. `npm run check` and the smoke test pass.
+
+**Phase 1 is substantially implemented** as the **First Light vertical slice**:
+
+- one playable home shard (the other islands are scenery);
+- a seeded 15-name roster with 6 founding residents;
+- four needs (Sustenance, Rest, Company, Wonder) and four buildable services
+  (Housing, Canteen, Tea House, Garden Dome);
+- paused planning, deterministic day playback at 1×/2×/4× with Skip, and an
+  evening report;
+- lumen from resident wellbeing, daily upkeep, construction and shortfall
+  closures;
+- Devotion and Flourishing;
+- a resident card with needs, traits, home, last choice and a "why" line;
+- queues, enter/exit and post-visit feedback for the service programs;
+- save v2 under `falesc.save.v2`;
+- victory at 12 residents + flourishing 62 by the day limit, and defeat at the
+  limit or below four residents.
+
+**Remaining before Phase 1 is complete:**
+
+- **Tune the balance.** The current economy is generous and the goal is
+  reachable several days early; the budget does not yet force hard care choices.
+- **Implement actual departures.** Residents currently talk about leaving after
+  several unmet days but never leave, so the population defeat is unreachable.
+- **Run the acceptance playtest.** `resident-day.mjs` proves the mechanics; the
+  fun of watching a choice and reading the "why" still needs a human pass.
+- Decide after that pass whether the four services need more differentiation
+  before rivals, or whether the resident loop is strong enough to move on.
+
+**Not started:** Phase 2 (rivals, standings, shared commons), Phase 3 (layers,
+modules, finishes, policy, retrofit), Phase 4 (scenarios, Confluence vote,
+stewardship), Phase 5 (multiplayer, audio, accessibility polish). There are no
+rivals, standings, Confluence vote or building layers in the build today.
+
+---
+
 ## Phase 0 — Design lock and visual correction
 
 **Goal:** make the world read as FALESC before changing the game.
@@ -122,9 +164,10 @@ come from combinations the player can explain.
 - Shared commons and home isles.
 - Stewardship and petitions (D3's deferred layer).
 - The Confluence vote; shared Flourishing failure; the Commons Beacon.
-- Save v2.
-- Scenarios: First Light, The Contest, No One Left Behind, The Long Night, A
-  Garden in the Void, The Open Door.
+- Save schema expansion for chapters, layers and the Confluence (v2 landed with
+  First Light).
+- Scenarios: First Light (landed), The Contest, No One Left Behind, The Long
+  Night, A Garden in the Void, The Open Door.
 - Full 15–20 tide charters.
 
 **Acceptance:** a full scenario can be won and lost. The end vote reflects the

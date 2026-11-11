@@ -8,6 +8,11 @@
 > This is the heart of the redesign. Everything else exists to make the
 > Tidelanders' choices visible. If the resident loop is not fun, no amount of
 > buildings, rivals or art will save the game.
+>
+> **Status note (2026-11-11):** First Light implements four needs, three trait
+> axes, deterministic choice with a "why", queues, enter/exit, the resident card
+> and Devotion. Care/Purpose, relationships, portraits and the fuller schedule
+> remain target. The "current prototype" comparisons below are historical.
 
 ---
 
@@ -196,9 +201,9 @@ This is the "rabbit hole" behaviour, and it is non-negotiable.
   hearts, modules and policy. A 2D cutaway illustration is enough; do not build
   3D interiors.
 
-The current prototype does the opposite: buildings are walls
-(`NPCController.isWalkable()` → `BuildingManager.isWorldBlocked()`). The
-refinement makes them destinations.
+The prototype did the opposite: buildings were walls
+(`NPCController.isWalkable()` → `BuildingManager.isWorldBlocked()`, both since
+removed). The refinement makes them destinations.
 
 ### Queue rules
 

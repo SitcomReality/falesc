@@ -1,21 +1,26 @@
 # AGENTS.md
 
-FALESC is a zero-build, single-page isometric island city-builder: vanilla ES
-modules, Pixi.js 7 (WebGL), DOM overlays for menus, and no backend. The entry
-point is `index.html` → `src/App.js`. Dependencies are vendored under `vendor/`
-and resolved through the import map, so the game runs offline with no install or
-bundling step.
+FALESC is a zero-build, single-page isometric city-builder: vanilla ES modules,
+Pixi.js 7 (WebGL), DOM overlays for menus, and no backend. The entry point is
+`index.html` → `src/App.js` (a three-line entrypoint) → `src/FalescGame.js` (the
+application coordinator). Dependencies are vendored under `vendor/` and resolved
+through the import map, so the game runs offline with no install or bundling
+step.
 
-The game is currently styled as **FALESC: The Prism Tide** — a warm sunset
-archipelago with coral/mint/cream UI, local Fraunces/Jost/Space Mono fonts, and a
-lumen economy. Read [docs/design-vision.md](docs/design-vision.md) before making
-visual changes; it is the guardrail against generic dark-dashboard styling.
+The current build is the **First Light vertical slice** of **FALESC: The
+Confluence** — floating shards in a warm nebula void, coral/mint/cream UI, local
+Fraunces/Jost/Space Mono fonts, and a lumen economy made from residents'
+wellbeing. Read [docs/design-vision.md](docs/design-vision.md) before making
+visual changes; the palette, typography and paper/ink chrome are the guardrail
+against generic dark-dashboard styling. The sea/beach/open-air-plant imagery in
+that document is prototype-era; the current world is the void described in
+[docs/design/world.md](docs/design/world.md).
 
-**Design direction.** The current build is the **Prism Tide prototype**. The
-refined direction — resident needs, service buildings, care-based competition
-and the Confluence — is in
-[docs/design-refinement.md](docs/design-refinement.md). Read it before changing
-the game loop; the Prism Tide loop is prototype-era, not the plan.
+**Design direction.** The refined design — resident needs, service buildings,
+planning plus playback, care-based competition and the Confluence — is
+substantially implemented for one solo shard. Rivals, layers, auctions and
+multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
+and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
 ## Start here
 
@@ -27,36 +32,44 @@ npm run check        # syntax, local import resolution, import-map targets
 Browser verification from this workspace (shared harness):
 
 ```bash
-webgame_smoke                     # main menu → build → turn → end flow
-webgame_smoke --scenario scripts/scenarios/victory.mjs
+webgame_smoke
+webgame_smoke --scenario scripts/scenarios/resident-day.mjs
+webgame_smoke --scenario scripts/scenarios/economy.mjs
 webgame_smoke --scenario scripts/scenarios/persistence.mjs
-webgame_smoke --scenario scripts/scenarios/map-regression.mjs
-webgame_smoke --scenario scripts/scenarios/engine-regression.mjs
 webgame_smoke --scenario scripts/scenarios/determinism.mjs
+webgame_smoke --scenario scripts/scenarios/engine-regression.mjs
 ```
 
-The CLI equivalents are documented in [docs/testing.md](docs/testing.md). Run
-`npm run check` and the main smoke test after any behavioural change.
+The CLI equivalents and the full scenario list are in
+[docs/testing.md](docs/testing.md). Run `npm run check` and the main smoke test
+after any behavioural change.
 
 ## What lives where
 
 | Path | Responsibility |
 | --- | --- |
-| `index.html` | Import map, local font preloads, illustrated Glass Sea backdrop |
-| `styles/main.css` | Design tokens, scene, chrome, all screen/HUD styles |
+| `index.html` | Import map, local font preloads, warm nebula void backdrop |
+| `styles/main.css` | Design tokens, scene, chrome, all screen/HUD/modal styles |
 | `assets/fonts/` | OFL woff2 fonts + licenses (no runtime CDN) |
-| `src/App.js` | App bootstrap, Pixi layers, world generation, save/load, game loop, debug API |
-| `src/GameStateManager.js`, `src/game/TurnScheduler.js` | `MENU → LOBBY → PLAYING → INTERSTITIAL → END`, economy state, cancellable turn timing |
-| `src/screens/` | DOM screens (menu, lobby, HUD, interstitial, end) |
-| `src/Camera.js`, `src/controls/InputManager.js` | Camera pan/zoom/tap, world clamp, key bindings |
-| `src/map/` | Seeded single-pass island generation, packing, isometric grid math, island art |
-| `src/buildings/blueprints.js` | Blueprint costs, yields, Beacon discount, victory structure |
-| `src/buildings/` | Building model, lifecycle, placement manager, illustrated renderer |
-| `src/character/`, `src/ai/` | Procedural character rendering, seeded palettes, land-aware NPCs |
-| `src/minerals/` | Seeded rock/crystal scenery |
-| `src/ui/` | Build dialog, blueprint icons, framed survey chart, ambient chatter |
-| `src/persistence/` | Versioned localStorage saves (model data only) |
-| `scripts/scenarios/` | Browser regressions for victory, persistence, maps, NPCs, determinism |
+| `src/App.js` | Pure entrypoint: `new FalescGame()` |
+| `src/FalescGame.js` | Coordinator: charter lifecycle, screens/modals, day playback, save, debug API, ticker |
+| `src/world/World.js` | Pixi application, layered scene, camera/input, map and mineral generation |
+| `src/charter/Charter.js` | The run model: day, lumen, works, roster, services, reports, ending |
+| `src/design/` | Needs, traits, service programs, balance table, names |
+| `src/services/` | `ServiceBuilding`, `ServiceManager`, `PlacementPolicy` |
+| `src/simulation/DaySimulator.js` | Deterministic day: needs, choices, queues, visits, report |
+| `src/economy/LumenLedger.js` | Contributions from wellbeing, upkeep, closures |
+| `src/residents/` | `Resident` model, seeded factory, visual agent, crowd |
+| `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
+| `src/state/` | `GamePhase` constants and `ScreenStateMachine` |
+| `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, end |
+| `src/ui/` | Build/service/bulletin/resident modals, survey chart, chatter, icons |
+| `src/map/` | Seeded single-pass island generation, packing, grids, sector art, paths |
+| `src/character/`, `src/Character.js` | Procedural chibi rig and animation |
+| `src/minerals/` | Seeded static rock/crystal scenery |
+| `src/buildings/BuildingRenderer.js` | Service silhouettes (art only; no building model) |
+| `src/persistence/SaveManager.js` | Versioned `localStorage` save v2 (model data only) |
+| `scripts/scenarios/` | Browser regressions for the resident loop, economy, saves, maps, determinism, victory, mobile |
 | `vendor/` | Pinned Pixi.js build and license (committed; no fetch at runtime) |
 | `webgame.config.json` | Main browser smoke configuration and steps |
 
@@ -66,25 +79,38 @@ The CLI equivalents are documented in [docs/testing.md](docs/testing.md). Run
   runtime CDN imports without an explicit request. Native ES modules and the
   import map are the deployment model. There is no npm dependency at runtime.
 - **Pixi is v7.** `new PIXI.Application(...)` and `app.view` are synchronous. A
-  v8 upgrade requires changes in `App.js`/`Camera.js`; do not bump it casually.
-- **Canvas is transparent.** The sunset sea is a DOM backdrop behind the Pixi
-  canvas. Do not set an opaque renderer background without redesigning the scene.
-- **Respect the simulation model.** Screens are DOM overlays; the world keeps
-  rendering underneath. The game loop is driven by Pixi's ticker and only
-  simulates NPCs/buildings while `PLAYING` and the document is visible.
-- **Turns are state-driven.** Do not add `setTimeout` outside
-  `TurnScheduler`/`GameStateManager`. End turn resolves buildings and income,
-  then either continues or ends the charter.
+  v8 upgrade requires changes in `World.js`/`Camera.js`; do not bump it casually.
+- **Canvas is transparent.** The warm nebula void is a DOM/SVG backdrop behind
+  the Pixi canvas. Do not set an opaque renderer background without redesigning
+  the scene.
+- **Respect the model/view split.** The charter, day simulation, economy and
+  resident model are plain JavaScript; DOM screens read the charter and never
+  own the rules. `ServiceBuilding` owns its Pixi container, and `World` owns the
+  scene. The Pixi ticker drives updates; only `PLAYING` runs ambient planning
+  behaviour and only `DAY` runs playback, and updates freeze while the tab is
+  hidden (`dt = 0`).
+- **The day is precomputed, not real-time.** `FalescGame.openDay()` runs
+  `DaySimulator` once; playback at 1×/2×/4× is a view over the finished events
+  and report. Do not add wall-clock simulation or move rules into the render
+  loop.
+- **No gameplay timers.** Day timing is ticker-driven. The only `setTimeout` is
+  the HUD toast; focus moves use `requestAnimationFrame`. Do not add
+  `setTimeout`/`setInterval` for simulation.
+- **One playable shard.** Placement is home-shard only. Other islands are
+  scenery until the archipelago layer exists; do not quietly make them
+  buildable.
 - **Keep generated output out of git.** `.artifacts/`, `node_modules/`, logs and
   local env files are ignored. Scenarios are source; screenshots are not.
 - **Test after changes.** `npm run check` catches broken imports and syntax; the
-  smoke test catches the main flow. Scenario files cover the engine regressions.
+  smoke test catches the main flow. Scenario files cover the engine and design
+  regressions.
 - **Use the debug surface.** From the browser console:
-  `window.__falesc.snapshot()`, `findFreeCell()`, `worldToScreen(x, y)`,
-  `saveGame()`, `continueGame()`, `selectBlueprint(id)`. The full game object is
-  `window.__falesc.app`.
-- **Do not reintroduce dead sandbox UI.** `src/UI.js` and `lil-gui` were removed;
-  the blueprint palette is the real build UI.
+  `window.__falesc.snapshot()`, `findFreeCell(programId)`,
+  `worldToScreen(x, y)`, `saveGame()`, `continueGame()`,
+  `selectProgram(id)`, `openDay()`, `skipDay()`, `showResidents()`. The full
+  game object is `window.__falesc.app`.
+- **Do not reintroduce dead sandbox UI.** `src/UI.js` and `lil-gui` were
+  removed; the service dock is the real build UI.
 
 ## Key conventions
 
@@ -94,11 +120,22 @@ The CLI equivalents are documented in [docs/testing.md](docs/testing.md). Run
   `styles/main.css` with classes, not inline CSS. Tests rely on `data-testid`.
 - World distances are in pixels; grid cells are `TILE_WIDTH × TILE_HEIGHT`
   (512 × 256); camera zoom is clamped to the generated world.
-- One build per tide. A structure goes `PENDING → RESERVED → ACTIVE`; only
-  `ACTIVE` structures generate income.
-- Starting purse is 8 lumen; blueprints cost 3–12; each Lantern House reduces the
-  Beacon price by 3 (floor 6). Do not change the economy without updating the
-  victory scenario and [docs/gameplay.md](docs/gameplay.md).
+- Tuning lives in `src/design/balance.js`; service data in
+  `src/design/programs.js`; needs in `src/design/needs.js`; traits in
+  `src/design/traits.js`. Do not scatter balance literals through the
+  simulation.
+- A charter starts with **6 of 15 residents**, **10 lumen**, **2 works/day**,
+  and a fixed six-bed **Welcome Post**. Services cost 4–6 lumen and one work,
+  and take one day to open (`PENDING → ACTIVE`). Only `ACTIVE`, open services
+  accept visits and pay upkeep.
+- Lumen comes from resident wellbeing, not harvest tiles. Upkeep is paid at the
+  end of the day; a shortfall closes services in the order wonder → company →
+  sustenance (housing is exempt). Closed services can be reopened for lumen.
+- Do not change the economy or the First Light goals (12 residents, flourishing
+  62, day limits 12/14/16) without updating `victory.mjs`, `economy.mjs`,
+  `resident-day.mjs` and [docs/gameplay.md](docs/gameplay.md).
+- Save schema is v2 under `falesc.save.v2`. Change the version and document the
+  reset when the schema changes; never half-load an old save.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
   not remove the survey chart without adjusting `canvasSelectors` and the smoke
   test.
@@ -113,7 +150,7 @@ The CLI equivalents are documented in [docs/testing.md](docs/testing.md). Run
 - [docs/architecture.md](docs/architecture.md) — detailed runtime and system design
 - [docs/development.md](docs/development.md) — local setup, vendoring, common tasks
 - [docs/testing.md](docs/testing.md) — checks, smoke test, scenarios, manual checklist
-- [docs/gameplay.md](docs/gameplay.md) — prototype-era controls, economy, tides, victory
+- [docs/gameplay.md](docs/gameplay.md) — controls, needs, services, day loop, economy, victory
 - [docs/known-issues.md](docs/known-issues.md) — remaining limitations and risks
 
 ## Practical notes

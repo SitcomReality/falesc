@@ -1,11 +1,21 @@
 # FALESC — Design vision
 
-> **Status note:** The visual identity in this document is still the guardrail.
-> The economy and loop in §8, the sea/island/plant imagery in §7, and the
-> milestones in §11 describe the Prism Tide prototype and are prototype-era.
+> **Status note (2026-11-11):** the visual identity in this document is still
+> the guardrail. The **First Light vertical slice** now implements most of the
+> refined Phase 0 and Phase 1: warm nebula void, floating shards, service
+> buildings with doors, residents with needs, planning → playback → report, and
+> a civic-energy economy. Rivals, the Confluence vote and building layers are
+> still absent. The sea/island/plant imagery in §7 and the building silhouettes
+> there are prototype-era and superseded by the void world in
+> [design/world.md](design/world.md); the economy and loop in §8 and the
+> milestones in §11 are retained as prototype history. The Prism Tide tagline,
+> the Lampwright/Aurora Beacon pitch in §1 and the prototype structure list are
+> historical framing, not the current First Light loop. Palette, typography,
+> shape, motion and UX rules still apply.
+>
 > The refined direction — residents, service buildings, care-based competition
 > and the Confluence — is in [design-refinement.md](design-refinement.md); the
-> world-art correction is in [design/world.md](design/world.md).
+> current build is documented in [gameplay.md](gameplay.md).
 
 > **FALESC: The Prism Tide.** Raise a town at the edge of the Glass Sea before
 > the last light goes out.
@@ -132,6 +142,12 @@ Rules:
 
 ## 7. World art direction
 
+> **Status:** the sea, beach, palms and open-air planting below describe the
+> Prism Tide prototype and are no longer the world. First Light uses the warm
+> nebula void, floating shards, vacuum props and enclosed Garden Dome in
+> [design/world.md](design/world.md). Keep the palette, one-light and shadow
+> reasoning from this section.
+
 ### Sea and sky
 
 The world sits in an endless sunset sea rather than a void. The fixed backdrop
@@ -181,6 +197,11 @@ Each blueprint has a distinct roofline, colour identity, and animated detail
 (spinning crystal, swaying leaves, lantern glow).
 
 ## 8. Game loop and economy
+
+> **Status:** this was the Prism Tide prototype loop and has been replaced by
+> First Light: planning, deterministic day playback, evening report, lumen from
+> resident wellbeing, upkeep and closures. This section is retained as design
+> history; see [gameplay.md](gameplay.md) for the current rules.
 
 The smallest loop that makes the sandbox a game:
 
@@ -277,7 +298,9 @@ Charter action. Never a bare “Game Over” and a white button.
 
 ## 11. Milestones and acceptance
 
-> The milestones below are the prototype's visual/engine milestones. The refined
+> The milestones below are the prototype's visual/engine milestones. First Light
+> has landed most of 1–3 (identity, the civic loop, the engine underneath) and
+> much of 4 (living island), though no visual baseline is committed. The refined
 > build order is in [design/roadmap.md](design/roadmap.md).
 
 1. **Identity foundation** — this document, local fonts, CSS tokens/components,

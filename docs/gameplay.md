@@ -1,14 +1,16 @@
 # Gameplay and controls
 
-> **Status note:** This describes the Prism Tide prototype. The refined
-> direction — resident needs, service buildings, care-based competition and the
-> Confluence — is in [design-refinement.md](design-refinement.md) and
-> [design/](design/). The controls and technical details here remain useful;
-> the objective and economy are prototype-era.
+> **Status note:** this describes the **First Light vertical slice** as built
+> today. It is no longer the Prism Tide prototype. The wider design — rivals,
+> standings, the Confluence vote, building layers — is in
+> [design-refinement.md](design-refinement.md) and [design/](design/).
+> Gameplay facts here are the current build; the design target is elsewhere.
 
-FALESC: The Prism Tide is an isometric island city-builder. You have one build
-action per tide, a small purse of lumen, and a deadline: raise the Aurora Beacon
-before the last tide.
+FALESC: The Confluence is an isometric city-builder about caring for a small
+chapter of Tidelanders on a floating shard. You have a day limit, a shared lumen
+budget, two works per day, and a cast of people with needs. The First Light
+charter is won by reaching **12 residents and a flourishing of 62** by the day
+limit.
 
 ## Controls
 
@@ -19,115 +21,301 @@ before the last tide.
 | Middle-mouse drag | Pan |
 | One-finger drag (touch) | Pan |
 | Two-finger pinch (touch) | Zoom and pan |
-| Click a blueprint card | Arm that structure |
-| `1` `2` `3` `4` | Arm Prism Rig / Tide Garden / Lantern House / Aurora Beacon |
-| `E` | End the current tide |
-| Primary click/tap on an empty grid cell | Open the build dialog for the armed blueprint |
-| Primary click/tap on an existing structure | Open its record and dismantle it |
-| `Enter` in the build dialog | Reserve the plot |
-| `Escape` in the build dialog | Cancel |
-| `Enter` / `Escape` in the charter menu | Resume / close |
-| `Escape` while playing | Open/close the charter menu |
-| End Turn button | Resolve the tide |
-| Charter menu (☰) → Abandon charter | End the run |
+| `1` `2` `3` `4` | Arm Housing / Canteen / Tea House / Garden Dome |
+| Click/tap a dock card | Arm that service |
+| Primary click/tap a free plot | Open the build dialog for the armed service |
+| Primary click/tap a service | Open its service record |
+| Primary click/tap a resident | Open their resident card |
+| `E` | Open the day (end planning) |
+| `B` | Open the morning bulletin |
+| `R` | Open the resident roster |
+| `Escape` while planning | Open/close the charter menu |
+| `Enter` in the build dialog | Break ground |
+| `←` `→` in the resident card | Previous / next resident |
+| `Escape` in a dialog or menu | Cancel / close / return to planning |
+| Day controls | `1×` `2×` `4×` speed and **Skip** |
+| Report | **Begin Day N** (or **Read the charter record** when the run ends) |
+| Charter menu (☰) → Abandon charter | End the run voluntarily |
 
-The build dialog only opens while the game is `PLAYING`, at least one build
-action remains, the selected blueprint is affordable, and the clicked cell is
-inside a sector grid and unoccupied. The survey chart at bottom-left shows the
-islands, buildings, and camera viewport; it turns red where the camera is
-looking.
+Clicking a resident takes precedence over clicking the plot beneath them when
+the pointer is within about 60 px of a visible resident. Residents who are
+inside a service cannot be clicked. The survey chart at bottom-left shows the
+islands, services, residents and camera viewport; click it to move the camera.
 
-## The tide loop
+## The charter
 
-1. A new charter starts on **Day 1** with **8 lumen** and one build action.
-2. Arm a blueprint and place at most one structure.
-3. Click **Let the tide turn**.
-4. The interstitial shows the tide, the income due, and the structures at work.
-   During resolution:
-   - active structures pay their income into the purse;
-   - every `PENDING` structure becomes `RESERVED`;
-   - every `RESERVED` structure becomes `ACTIVE`;
-   - the day advances and one build action returns.
-5. If the Aurora Beacon is `ACTIVE`, the charter is won. If the next day would
-   pass the tide limit, the charter is lost.
+A new charter starts on **Day 1** with:
 
-A structure therefore takes two turns to finish: placed on Day 1, it is
-`RESERVED` on Day 2 and `ACTIVE` on Day 3. Income is collected from structures
-that were already active at the start of resolution, so a structure that becomes
-active this tide starts paying next tide.
+- **6 active Tidelanders** from a seeded roster of **15**;
+- a fixed **Welcome Post** with six beds (already `ACTIVE`, cannot be
+  dismantled);
+- **10 lumen**;
+- **2 works**;
+- the **Canteen** armed in the service dock.
 
-## Blueprints
+The rest of the roster waits for spare beds and a flourishing of at least 20.
+The day limit is set by map size: **12** days on small, **14** on medium, **16**
+on large.
 
-| Blueprint | Cost | Income | Role |
-| --- | --- | --- | --- |
-| **Prism Rig** | 3 lumen | +2 / tide | Cheap, reliable opening economy. +1 when built within 460 px of a crystal. |
-| **Tide Garden** | 5 lumen | +3 / tide | Stronger economy, slower payback. +1 when built within 460 px of a crystal. |
-| **Lantern House** | 4 lumen | +1 / tide | Support. Each one reduces the Aurora Beacon's price by 3 (floor 6). |
-| **Aurora Beacon** | 12 lumen (dynamic) | — | Unique charter goal. Must become `ACTIVE` to win. |
+## Planning
 
-The Beacon's displayed price is dynamic: `max(6, 12 − 3 × Lantern Houses)`. An
-armed blueprint costs nothing until the build dialog is confirmed. If the plot
-creation fails, no lumen or action is spent.
+Planning is paused. Each day gives **two works**. Building a service spends one
+work and the program's lumen cost immediately, and places the service as
+`PENDING`. At the start of the next planning day it becomes `ACTIVE` and starts
+accepting visits and drawing upkeep.
 
-**Crystal affinity.** Prism Rigs and Tide Gardens within 460 world pixels of a
-crystal gain +1 lumen per tide. The build dialog announces it, the structure
-gets a small crystal outcrop, and the bonus is stored in the save. The first
-free plot in the default seed is deliberately not within range, so a player who
-only clicks the obvious centre pays for the lesson.
+You can only build on the **home shard** — the largest, topmost island. The
+other islands are scenery for now. Placement checks the footprint, occupancy,
+and that a free door cell exists on the service edge. The door cell is reserved:
+you cannot build on it, and clicking it opens the service record.
 
-The build dock disables blueprints that are unaffordable, already unique, or
-blocked because the tide's build action is spent. Hovering a disabled card
-explains why in its tooltip.
+Hovering the grid shows a mint diamond and a ghost of the armed service when the
+plot is legal, coral when it is not. Clicking a legal plot opens the build
+dialog, where you can name the place and **Break ground**. The dialog traps
+focus, restores it on close, and marks the HUD behind it inert.
 
-Clicking an existing structure opens a **structure record** with its name,
-lifecycle state, income, and a **Dismantle** action. Dismantling refunds half the
-structure's effective cost (rounded down), frees the plot immediately, and does
-not consume a build action. It can be used to correct a mistake or re-plan the
-town; the refund is always less than the build cost, so it is not a profit loop.
+The dock disables a service when you have no works left or cannot afford it;
+its tooltip explains which. Clicking an existing service opens a record with its
+program, status, capacity, upkeep, visits, hearts, door cell and the last "why"
+line from a resident. From there:
 
-## Map and difficulty
+- **Dismantle** removes the service, refunds `max(1, floor(cost / 2))` lumen,
+  frees the plot immediately, and spends no work. The Welcome Post cannot be
+  dismantled.
+- **Reopen** appears when a service has been closed by an upkeep shortfall. It
+  costs `max(1, ceil(upkeep / 2))` lumen.
 
-| Map size | Islands | Minerals | Tide limit |
-| --- | --- | --- | --- |
-| Small | 4 | 30 | 12 days |
-| Medium | 6 | 50 | 14 days |
-| Large | 7 | 70 | 16 days |
+## Services
 
-Every map also spawns 15 Tidelanders. Islands are generated once from the seed,
-packed by their actual silhouette bounds, and placed in a world with open water
-around them. The seed determines island shapes, character palettes/proportions,
-mineral variations, and the starting NPC decisions.
+All four buildable services cost one work and finish overnight. The Commons
+Beacon is endgame art and data, not a buildable program.
+
+| Program | Serves | Cost | Upkeep/day | Capacity | Hours | Footprint |
+| --- | --- | --- | --- | --- | --- | --- |
+| **Housing** (Welcome House) | Rest | 4 | 1 | 4 beds | night, passive | 1×1 |
+| **Canteen** | Sustenance | 4 | 2 | 4 | morning, afternoon | 1×1 |
+| **Tea House** | Company, a little Sustenance | 5 | 2 | 3 | afternoon, evening | 1×1 |
+| **Garden Dome** | Wonder | 6 | 3 | 2 | afternoon, evening | 2×2 |
+| **Commons Beacon** | — | 12 | 0 | — | — | 2×2, not buildable |
+
+The starting Welcome Post is housing with a capacity override of **6** and a
+fixed flag. A normal Welcome House adds four beds. The Garden Dome is the only
+place with plants, and they are inside pressurised glass; the world outside has
+no open-air planting.
+
+Housing is the anchor. At night, a resident with a bed recovers a large amount
+of Rest and gains a little Devotion; a resident without one takes a Rest penalty
+and complains. Rest is not a daytime destination in this slice — residents do
+not visit a housing queue in the morning, and the Garden Dome's listed Rest
+secondary does not replace a bed.
+
+## Needs and choices
+
+There are four needs, each tracked from **0 (satisfied)** to **100 (urgent)**:
+
+| Need | Satisfied by | Flavour |
+| --- | --- | --- |
+| **Sustenance** | Canteen (strong), Tea House (secondary) | A hot meal at the right hour. |
+| **Rest** | A bed at night | A quiet room and enough night to use it. |
+| **Company** | Tea House | A shared table and a reason to linger. |
+| **Wonder** | Garden Dome | Something green behind glass. |
+
+Needs rise through the four day phases — morning, afternoon, evening, night —
+at rates modified by the resident's **rhythm**. A visit to a service reduces the
+chosen need: a primary match gives a large reduction, a secondary match a
+smaller one. Need satisfaction determines **wellbeing**
+(`100 − average urgency`). The chapter's **Flourishing** is the average resident
+wellbeing; **Devotion** is the sum of each resident's affinity with the chapter.
+
+Each resident has three small trait axes, all seeded and visible on their card:
+
+- **Temperament** — Cosy, Social or Curious. Changes how much they like a
+  service's vibe.
+- **Standards** — Modest, Comfortable or Exacting. Changes how welcome a finish
+  feels.
+- **Rhythm** — Early or Night. Changes how quickly needs rise in each phase.
+
+When a resident chooses where to go, the day simulator scores open services for
+the most urgent needs using urgency, primary/secondary match, quality, vibe fit,
+standards, distance from home, current load/queue, familiarity and a small
+seeded novelty term. The highest positive score wins. This is deliberately
+legible: the resident records a one-line **why**, such as
+`Canteen — I was hungry, there was no queue, I come here often.`
+
+A service holds `capacity` people at once and up to three more in its queue.
+Residents over that limit give up with a complaint and a small loss of
+affinity. A resident with no open service for a need of 62 or more complains;
+complaints feed the bulletin and the evening report. Needs of 85 or more are
+tracked as unmet days. After three consecutive unmet days the resident starts
+**talking about leaving** — currently that produces a complaint, not a
+departure.
+
+## The day loop
+
+1. **Morning bulletin** — planning is paused. Three items: the most pressing
+   need, an arrival or the latest complaint, and a line of word of mouth.
+2. **Plan** — read the room, arm a service, place one or two works, inspect
+   residents and services, decide who gets the last lumen.
+3. **Open the day** — `DaySimulator` resolves the entire day immediately:
+   needs drift, residents choose, queue, visit, recover, complain, contribute
+   lumen, and the report is written. Then the `DAY` screen replays those
+   precomputed events as a deterministic view.
+4. **Watch** — playback is four phases of five seconds each at 1× (20 seconds
+   total). `2×` and `4×` shorten it; **Skip** jumps to the end. Residents walk
+   along A* paths, wait outside the door, disappear inside while using the
+   place, and emerge with a need glyph. You cannot build or change policy during
+   playback. This is a replay, not a real-time simulation.
+5. **Evening report** — the broadsheet described below. **Begin Day N** advances
+   the day, restores two works, opens completed construction, assigns beds,
+   adds any arrivals, and shows the next bulletin.
+6. **End** — at the day limit the charter is judged; or abandon from the charter
+   menu at any time.
+
+A service built during Day 1 planning is `PENDING` through Day 1's playback and
+opens during Day 2 planning. You still have both Day 2 works available.
+
+## Economy
+
+Lumen is **civic energy**, held in common. It is not profit and there is no
+price per visit.
+
+Each active resident contributes according to their wellbeing at the end of the
+day:
+
+| Resident wellbeing | Contribution |
+| --- | --- |
+| 65 or more | 2 lumen |
+| 35 to 64 | 1 lumen |
+| below 35 | 0 lumen |
+
+Every active, open service draws its **upkeep** each day. The report shows
+contributions, upkeep, net, and the lumen left in hand. A comfortable chapter is
+usually net-positive, especially once it has housed more people; the current
+numbers are generous and not yet tuned.
+
+If contributions cannot cover upkeep, the chapter does not go into debt:
+services are closed at dusk, in the order **Wonder → Company → Sustenance**
+(housing is exempt), highest upkeep first, until the shortfall is covered. A
+closed service stops accepting visits and stops drawing upkeep. It can be
+reopened from its service record for lumen. The report names what closed.
+
+## The evening report
+
+The report is the day's story as a broadsheet:
+
+- **Visits** and **Hearts** (the chapter's total affinity, not hearts gained
+  today), **Contributions**, **Upkeep**, **Lumen**, **Flourishing**.
+- **Needs at dusk** for all four needs.
+- **Doors and visits** — every service, including those with zero visits.
+- **Word of mouth** — up to three resident quotes, or a quiet fallback.
+- **Complaints** — up to five, with the resident's own words.
+- Any closures caused by the upkeep shortfall.
+- A one-line summary of the day's rhythm.
+- If the run ended, the report becomes the charter record and its button reads
+  **Read the charter record** before the end screen.
 
 ## Victory and defeat
 
-- **Victory:** the Aurora Beacon becomes `ACTIVE`. The end screen reports tides
-  weathered, active structures, and lumen remaining.
-- **Defeat:** the tide limit passes without an active Beacon.
-- **Abandon:** the charter menu closes the run early. The end screen records it
-  as a voluntary departure.
+- **Victory:** at the day limit, the chapter has at least **12 residents** and a
+  **Flourishing of 62 or more**.
+- **Defeat:** the population falls below **4** at the end of a day, or the day
+  limit arrives without both goals.
+- **Abandon:** the charter menu ends the run early as a voluntary departure.
 
-The end screen returns to the menu (where a save may still exist for an
-in-progress run) or opens the lobby for a new charter.
+The end screen shows days weathered, residents, Devotion, Flourishing and lumen,
+plus the outcome and a quote. It offers **Return to the drift** (menu) or **New
+charter** (lobby). Ending a run clears the save.
 
-## Persistence
+Because residents do not actually depart yet, the population-below-four defeat
+is effectively unreachable in normal play today; the goal-at-the-limit defeat is
+the real one. This is listed in [known-issues.md](known-issues.md).
 
-The game autosaves to `localStorage` under `falesc.save.v1` after each build and
-each completed tide, and before the page unloads. The save stores only model data
-(seed, map size, day, lumen, actions, selected blueprint, structures, camera).
-The world is regenerated from the seed on load.
+## Map sizes
 
-The menu shows **Continue charter** when a valid save exists. Ending or
-abandoning a run clears the save. The save is versioned; unknown versions are
-discarded rather than partially loaded.
+| Size | Islands | Grids | Shards (minerals) | Day limit |
+| --- | --- | --- | --- | --- |
+| Small | 4 | four 2×2 | 46 | 12 |
+| Medium | 6 | two 3×3 + four 2×2 | 64 | 14 |
+| Large | 7 | one 5×5 + two 3×3 + four 2×2 | 82 | 16 |
+
+Only the **home shard** (largest, topmost) is playable; the rest are generated
+scenery. The seed determines island shapes and packing, the fifteen-person
+roster and their traits, character palettes and proportions, mineral variations,
+and the day's small novelty terms. The same seed and the same actions produce
+the same day.
+
+The lobby chart's "Shards" readout is the mineral count. The survey chart and
+camera fit the whole generated cluster; the camera starts on the home shard.
+
+## Save v2
+
+The game autosaves to `localStorage` under **`falesc.save.v2`** during planning
+— after starting a charter, after a build, dismantle or reopen, after beginning
+the next day, and on `beforeunload` while `PLAYING`. It does not save during
+`DAY`, `REPORT` or `END`.
+
+The payload is model data only:
+
+```json
+{
+  "version": 2,
+  "savedAt": 0,
+  "settings": { "mapSeed": 12345, "mapSize": "medium" },
+  "charter": {
+    "seed": 12345,
+    "mapSize": "medium",
+    "day": 3,
+    "dayLimit": 14,
+    "lumen": 12,
+    "works": 2,
+    "flourishing": 63.5,
+    "devotion": 8.3,
+    "ending": null,
+    "residents": [],
+    "services": []
+  },
+  "camera": { "x": 0, "y": 0, "zoom": 0.5 }
+}
+```
+
+`residents` store identity, traits, needs, active state, home service, affinity
+and memory (including the last choice); `services` store program, footprint,
+state, door, capacity, finish/policy defaults, visits, hearts and closure state.
+The world is regenerated from the seed on continue, and the camera is restored
+and clamped.
+
+The menu shows **Continue charter** when a valid save exists. Save v1 is
+intentionally removed and discarded; an unknown save version is cleared, and a
+corrupt payload is ignored rather than half-loaded. There is no export/import
+yet.
 
 ## Current limitations
 
-- No upgrades or building levels.
-- No placement restrictions around minerals, characters, or ownership; crystal
-  affinity is a positive bonus, not a blocking rule.
-- No audio.
-- No multiplayer; the menu labels it “soon”.
-- No keyboard build cursor: placement is pointer/touch only.
-- Characters avoid buildings and stay on their home island, but use steering, not
-  a full navigation graph.
+- **Balance is generous and untuned.** A careful run can bank a large lumen
+  surplus; the interesting pressure is not yet there.
+- **Residents threaten to leave but never do.** The departure path is not
+  implemented, so the population defeat is theoretical.
+- **Only the home shard is playable.** Other islands are scenery; there is no
+  transit, archipelago layer or rival chapter.
+- **No building layers, modules, finishes, policies or retrofit.** The model
+  carries default finish/policy values for future use; the player cannot choose
+  them.
+- **No rivals, standings, patronage or Confluence vote.** The bulletin has no
+  rival move.
+- **No auctions, stewardship, petitions or multiplayer.** The Multiplayer button
+  is a disabled placeholder.
+- **No audio.**
+- **No keyboard build cursor.** The dock and dialogs are keyboard-friendly, but
+  choosing a plot requires a pointer or touch.
+- **The resident card stops at the last choice.** It has needs, traits, home,
+  Devotion, wellbeing and the latest "why"; it has no portrait and no full
+  recent-history list, even though the model keeps recent visits.
+- **Save v1 is intentionally discarded.** There is no migration, export or
+  import.
+- **No visual baseline is committed.** Animation and ambient timing are not yet
+  stable enough for pixel regression.
+- **Day playback is a view over an already-resolved day,** not a live
+  simulation. There is no mid-day intervention.
+- **Crowd movement has no local avoidance.** Agents follow precomputed paths and
+  can overlap visually.
 - Some open issues remain; see [known-issues.md](known-issues.md).

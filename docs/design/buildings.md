@@ -7,6 +7,11 @@
 > Buildings are **places people enter**, not income tiles. The goal is nuanced
 > and layered customisation without a spreadsheet. Five small layers, each with
 > a clear visual and mechanical consequence, plus adjacency and footprint.
+>
+> **Status note (2026-11-11):** First Light implements the first four programs,
+> footprints, a reserved door cell, capacity, queues, enter/exit, visits and
+> demolition. Shells, modules, player-chosen finish/policy and retrofit are
+> still target. The "current prototype" comparisons below are historical.
 
 ---
 
@@ -180,8 +185,8 @@ Buildings are destinations first and obstacles second.
 - The building record card shows occupants, queue, visits, hearts, modules and
   policy. A 2D cutaway illustration is enough.
 
-The current prototype does the opposite: buildings are walls. The refinement
-inverts that relationship.
+The prototype did the opposite: buildings were walls. The refinement inverts
+that relationship.
 
 ---
 

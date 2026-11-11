@@ -1,11 +1,19 @@
 # FALESC — Refined design overview
 
-> **Status: working design.** The four key forks are decided; see
-> [decisions.md](design/decisions.md). The current build is the Prism Tide
-> prototype. This document and the component docs in `docs/design/` describe
-> the direction we are designing toward. The visual identity (palette,
-> typography, paper/ink chrome) remains the guardrail; the sea, beach and
-> open-air plants do not.
+> **Status: working design, partially built (2026-11-11).** The four key forks
+> are decided; see [decisions.md](design/decisions.md). The **First Light
+> vertical slice** now implements most of **Phase 0 and Phase 1**: the warm
+> nebula void, floating shards, four needs, four buildable service programs,
+> planning, deterministic day playback, the evening report, wellbeing-driven
+> lumen, Devotion/Flourishing, resident cards with a "why", and save v2. Rivals,
+> the shared commons, the Confluence vote, building layers and multiplayer are
+> **not** implemented. This document and the component docs in `docs/design/`
+> describe the direction; where they conflict with the source, the source wins.
+> The visual identity (palette, typography, paper/ink chrome) remains the
+> guardrail; the sea, beach and open-air plants do not.
+>
+> **Where to start:** [roadmap.md](design/roadmap.md) for what is built and what
+> remains; [gameplay.md](gameplay.md) for the current slice.
 >
 > **Short version:** FALESC is a warm, competitive city-builder about becoming
 > the most beloved administrator on a chain of floating islands. The Tidelanders
@@ -279,7 +287,8 @@ become the villain of someone else's cosy space opera.
 - **Build order:** [roadmap.md](design/roadmap.md)
 - **Decisions and scope guard:** [decisions.md](design/decisions.md)
 
-The old Prism Tide loop remains in [gameplay.md](gameplay.md) as prototype-era
-documentation. The visual identity remains in
-[design-vision.md](design-vision.md), with the world-art correction in
-[world.md](design/world.md).
+[gameplay.md](gameplay.md) now documents the First Light slice as built. The
+visual identity remains in [design-vision.md](design-vision.md), with the
+world-art correction in [world.md](design/world.md). For the implemented engine
+and tests, see [architecture.md](architecture.md) and
+[testing.md](testing.md).

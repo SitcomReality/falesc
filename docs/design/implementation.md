@@ -1,5 +1,14 @@
 # Implementation — building the refined design on the current engine
 
+> **Status note (2026-11-11):** most of this plan now exists in the First Light
+> slice: `ServiceManager`, `PlacementPolicy`, `DaySimulator`,
+> `IslandNavigator`, `Resident`/`ResidentAgent`/`ResidentCrowd`, the bulletin,
+> resident/service cards, day report and save v2. Sections 4–6 are retained as
+> the original plan and test rationale; §5's description of the "current
+> engine" and the migration order in §7 are historical. Rivals, layers,
+> scenarios, the Confluence and multiplayer remain unbuilt. For the shipped
+> architecture start at [architecture.md](../architecture.md).
+
 > Related decisions: [D1](decisions.md#d1--single-player-first-solo-vs-ai-is-the-first-competitive-build)
 > (solo first), [D2](decisions.md#d2--planning-plus-playback) (playback),
 > [D8](decisions.md#d8--no-real-time-networking-in-the-first-version) (no

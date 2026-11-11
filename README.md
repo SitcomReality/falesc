@@ -1,20 +1,25 @@
 # FALESC
 
-**FALESC: The Prism Tide** is a small isometric island city-builder with the
-warmth of a 1970s travel poster and the geometry of art deco. Raise a settlement
-on the Glass Sea, harvest lumen from living crystals, and finish the Aurora
-Beacon before the last tide.
+**FALESC: The Confluence — First Light** is a small isometric city-builder on
+floating shards in a warm nebula void. Six Tidelanders, one Welcome Post, and a
+finite reserve of civic energy: keep people fed, rested, social and curious long
+enough for the chapter to flourish.
+
+This build is the **First Light vertical slice**. One playable home shard, four
+needs, four services, a paused planning day, a deterministic playback, and an
+evening broadsheet. The shared commons, rival chapters and the Confluence vote
+are the design target — not this build.
 
 Built with vanilla ES modules and [Pixi.js](https://pixijs.com/) 7. There is no
-build step: `index.html` loads `src/App.js` directly and an import map points at
-the vendored Pixi build. Fonts and art are local; the game makes no network
-requests at runtime.
+build step: `index.html` loads `src/App.js`, which starts `src/FalescGame.js`,
+and an import map points at the vendored Pixi build. Fonts and art are local;
+the game makes no network requests at runtime.
 
-> **Design direction:** the current build is the **Prism Tide prototype**. The
-> refined design — resident needs, service buildings, care-based competition and
-> the Confluence — is in
-> [docs/design-refinement.md](docs/design-refinement.md). The "How to play"
-> section below describes the prototype; it is not the intended final loop.
+> **Status:** the First Light slice is playable end to end: plan, build, watch
+> the day, read the report, repeat. Balance is generous and not yet tuned;
+> residents talk about leaving but do not actually depart; only the home shard
+> is playable. Rivals, building layers, auctions and multiplayer are not
+> implemented. See [docs/known-issues.md](docs/known-issues.md).
 
 ## Run it locally
 
@@ -32,17 +37,29 @@ so any static file server works, but ES modules require `http://`, not `file://`
 
 ## How to play
 
-- One **tide** (turn) per day, one build action each tide.
-- Structures take two tides to finish: `PENDING → RESERVED → ACTIVE`.
-- **Prism Rig** and **Tide Garden** generate lumen each tide once active.
-  **Lantern House** generates a little and makes the Beacon cheaper.
-- Raise the **Aurora Beacon** and let it become active to win. If the tide limit
-  passes first, the charter fails.
-- `WASD`/arrows pan, wheel zooms, middle-drag pans, click an empty plot to build.
-- Progress autosaves to `localStorage`; the menu offers **Continue charter** after
-  a reload.
+- Start a charter from the lobby. Day 1 gives you **six Tidelanders**, a fixed
+  **Welcome Post** with six beds, **10 lumen**, **two works**, and the
+  **Canteen** armed.
+- Read the morning bulletin. Arm a service with `1`–`4` (or click a dock card),
+  then click a free plot on the home shard and name the place.
+- A service costs lumen and one work. It is `PENDING` for a day and opens at the
+  start of the next day. You get **two works per day**.
+- Click **Open the day** (or press `E`) to run the day. Playback moves through
+  morning, afternoon, evening and night at 1×, 2× or 4×; **Skip** jumps to the
+  report.
+- The evening report shows visits, hearts, lumen contributions and upkeep, needs
+  at dusk, complaints and a few quotes. **Begin Day N** returns to planning with
+  a fresh pair of works.
+- Spare beds plus a flourishing of at least 20 bring new residents. The run ends
+  at the day limit: **12 residents and flourishing 62** wins First Light. Fewer
+  than four residents, or missing the goal at the limit, loses.
 
-Full controls and economy: [docs/gameplay.md](docs/gameplay.md).
+`WASD`/arrows pan, wheel zooms, middle-drag pans, one-finger drag pans and a
+two-finger pinch zooms. Click a service for its record, a resident for their
+card, or the survey chart to move the camera.
+
+Full controls, needs, economy and limitations:
+[docs/gameplay.md](docs/gameplay.md).
 
 ## Checks and tests
 
@@ -53,27 +70,40 @@ npm run check    # dependency-free syntax/import/import-map checks
 With the shared browser harness available in this workspace:
 
 ```bash
-node ../webgame-tools/bin/webgame-harness.mjs smoke
-node ../webgame-tools/bin/webgame-harness.mjs smoke --scenario scripts/scenarios/victory.mjs
+webgame_smoke
+webgame_smoke --scenario scripts/scenarios/resident-day.mjs
+webgame_smoke --scenario scripts/scenarios/economy.mjs
+webgame_smoke --scenario scripts/scenarios/persistence.mjs
+webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```
 
-The main smoke test drives menu → lobby → game → build → turn → end. Scenario
-files cover a full victory, save/continue, map packing, NPC land awareness,
-camera clamping, turn cancellation, determinism, and mobile layout. See
+The main smoke test drives menu → lobby → planning → build → day playback →
+report → resident card → end. Scenarios cover the resident loop, the civic
+economy, save v2, determinism, engine/map regressions, demolition, a full
+victory, and mobile layout. The CLI equivalents and the manual checklist are in
 [docs/testing.md](docs/testing.md).
 
 ## Documentation
 
 - [AGENTS.md](AGENTS.md) — concise entry point for coding agents
-- [docs/design-vision.md](docs/design-vision.md) — visual identity, palette, type, UX rules
-- [docs/architecture.md](docs/architecture.md) — runtime, state, rendering, systems
-- [docs/development.md](docs/development.md) — setup, conventions, common tasks
-- [docs/testing.md](docs/testing.md) — static checks, smoke tests, scenarios, manual checklist
-- [docs/gameplay.md](docs/gameplay.md) — controls, tides, blueprints, victory
-- [docs/known-issues.md](docs/known-issues.md) — remaining limitations and risks
+- [docs/gameplay.md](docs/gameplay.md) — controls, planning, needs, services, economy, victory
+- [docs/architecture.md](docs/architecture.md) — runtime, modules, state, day simulation, rendering
+- [docs/development.md](docs/development.md) — setup, conventions, vendoring, common tasks
+- [docs/testing.md](docs/testing.md) — static checks, smoke test, scenarios, manual checklist
+- [docs/known-issues.md](docs/known-issues.md) — current limitations and technical debt
+- [docs/design-refinement.md](docs/design-refinement.md) — the refined design and where the build is going
+- [docs/design/roadmap.md](docs/design/roadmap.md) — phases, current status and acceptance
+- [docs/design-vision.md](docs/design-vision.md) — visual identity, palette, typography, UX guardrails
 
 ## Status
 
-Playable prototype with a complete build/turn/economy loop, victory and defeat,
-local autosave, seeded procedural world, and a hand-built HUD. Not yet present:
-audio, upgrades, multiplayer, and a fully accessible keyboard build cursor. See [docs/known-issues.md](docs/known-issues.md).
+Playable First Light vertical slice: seeded floating-shard world, a named cast
+of fifteen with six founders, four needs, four service programs, construction
+and works, wellbeing-driven lumen with upkeep and closures, deterministic day
+playback, an evening report, Devotion and Flourishing, victory/defeat, and
+local save v2.
+
+Not yet present: rivals, standings, the Confluence vote, building layers or
+retrofit, auctions, audio, multiplayer, or a keyboard build cursor. The
+Commons Beacon silhouette exists as endgame art but is not buildable. See
+[docs/known-issues.md](docs/known-issues.md).

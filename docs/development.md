@@ -94,12 +94,12 @@ offline development and fails the harness's `noExternalRequests` check.
    map is not vendored.
 3. Replace the file, update `vendor/README.md` (version, source, notes).
 4. Run `npm run check` and the browser smoke test.
-5. For a Pixi major version, update `src/App.js` and `src/Camera.js` for the
-   new application/canvas API before anything else.
+5. For a Pixi major version, update `src/world/World.js` and `src/Camera.js`
+   for the new application/canvas API before anything else.
 
 The old `src/UI.js` sandbox controller and `lil-gui` were removed during the
-Prism Tide overhaul. The blueprint palette in the HUD is the real build UI; do
-not reintroduce a hidden debug GUI without a test and a design reason.
+engine/design work. The service dock in the HUD is the real build UI; do not
+reintroduce a hidden debug GUI without a test and a design reason.
 
 ## 5. Code conventions
 
@@ -117,9 +117,10 @@ not reintroduce a hidden debug GUI without a test and a design reason.
 - Read [design-vision.md](design-vision.md) before changing colours, type,
   spacing, or screen layout. In particular: no navy/gold default, no external
   fonts, no generic glass cards.
-- Economy constants live in `src/buildings/blueprints.js`; turn timing lives in
-  `src/game/TurnScheduler.js`/`GameStateManager.js`. Do not add new
-  `setTimeout` calls for gameplay.
+- Economy and program tuning live in `src/design/balance.js` and
+  `src/design/programs.js`; needs and traits live beside them. The day loop is
+  ticker-driven (`FalescGame.update()`); do not add gameplay `setTimeout` or
+  `setInterval` calls.
 - World units are pixels. Grid constants live in `src/constants.js`
   (`TILE_WIDTH = 512`, `TILE_HEIGHT = 256`).
 - Prefer small, focused changes. Do not reformat whole files or mix a feature
@@ -127,77 +128,85 @@ not reintroduce a hidden debug GUI without a test and a design reason.
 
 ### Adding a new screen
 
-1. Add a state to `GameState` in `src/GameStateManager.js` if needed.
+1. Add a phase constant to `src/state/GamePhase.js` if needed.
 2. Create `src/screens/YourScreen.js` with `show()` and `hide()` methods and a
-   fixed-position container.
-3. Register it in `App`:
-   `stateManager.registerScreen(GameState.YOUR_STATE, new YourScreen(stateManager))`.
-4. Add a way to enter/leave it (`setState`), and decide whether the world should
-   pause while it is visible.
-5. Add a smoke step or a focused test for the new transition.
+   fixed-position container that reads the charter through `this.game`.
+3. Register it in `FalescGame`:
+   `this.screenStateMachine.registerScreen(GamePhase.YOUR_PHASE, new YourScreen(this))`.
+4. Add the transition in `FalescGame` (or `ScreenStateMachine.setState`) and
+   style the screen in `styles/main.css`.
+5. Add a smoke step or a focused scenario for the new transition. Remember that
+   `onPhaseChanged()` closes modals on any non-`PLAYING` phase.
 
 ### Adding a map size
 
 1. Add a `gridConfigs` entry in `src/map/MapGenerator.js`.
-2. Add a mineral count in `App.initializeWorld()` (`mineralCounts`).
-3. Add the tide limit to `TIDE_LIMITS` in `src/GameStateManager.js` and the
+2. Add a mineral count in `World.generate()` (`MINERAL_COUNTS`).
+3. Add the day limit to `BALANCE.dayLimits` in `src/design/balance.js` and the
    `SIZE_DATA` entry/chart copy in `src/screens/LobbyScreen.js`.
 4. Add a card to the visible size picker and keep the hidden native `<select>`
    in sync.
 5. Extend `scripts/scenarios/map-regression.mjs` to sample the new size.
 
-### Adding a blueprint
+### Adding a service program
 
-1. Add an entry to `src/buildings/blueprints.js` (id, name, cost, income,
-   special rules, blurb, accent, testid).
-2. Add an icon to `src/ui/icons.js` and a `BuildingRenderer` branch so the
-   structure is visually distinct.
-3. The build dock and build dialog discover blueprints from the array; verify
-   affordability and uniqueness behaviour.
-4. Add a case to `scripts/scenarios/victory.mjs` if the blueprint is needed to
-   win, and assert the new state in the smoke test.
+1. Add an entry to `src/design/programs.js` (id, name, need/secondaryNeed,
+   capacity, duration, open phases, footprint, cost, upkeep, quality,
+   finish/vibe, constructionDays, buildable, colour, icon, testid, blurb).
+2. Add an icon to `src/ui/icons.js` and a `BuildingRenderer` branch plus a
+   `PROGRAMS` metrics entry (footprint guide and crest) so the place is visually
+   distinct.
+3. The service dock and build dialog discover buildable programs from the array.
+   Verify affordability, the door cell and the footprint.
+4. Add/update a scenario if the program is needed for the First Light goal, and
+   assert its state in the smoke test when it is part of the main path.
 
-### Tweaking NPC behaviour
+### Tweaking resident behaviour
 
-`src/ai/NPCController.js` exports `NPC_PARAMS` at the top: durations, walk/run
-speed, turn speed, curve chance, calm factor, boundary padding, and a movement
-toggle. Change values there first; only change the state machine if the
-behaviour itself needs to change. The renderer/animation states are in
-`src/constants.js` and `src/character/CharacterAnimation.js`.
+Choice and need tuning live in `src/simulation/DaySimulator.js` and
+`src/design/balance.js`; trait effects live in `src/design/traits.js`. Change
+the balance table first. The day simulator owns drift, scoring, queues, visit
+effects, complaints and the report; `Resident` owns only model state and memory;
+`ResidentAgent`/`ResidentCrowd` own the visual timeline. There is no
+`NPCController` or steering system to tune any more.
 
 ### Tweaking building art
 
-`src/buildings/BuildingRenderer.js` dispatches on `building.blueprintId` and
-draws a flat SE shadow, then the blueprint-specific structure. Under-construction
-states are ghosted by the container alpha and scaffolded. Coordinates are
-relative to the tile centre. Keep the footprint within the tile unless you also
-update placement/occupancy. Building state transitions live in
-`src/buildings/Building.js` and `BuildingManager.resolveTide()`.
+`src/buildings/BuildingRenderer.js` dispatches on `building.programId` (with a
+legacy `blueprintId` fallback) and draws a flat SE shadow, then the
+program-specific structure. Under-construction services are ghosted by the
+container alpha and scaffolded. Coordinates are relative to the tile centre.
+Keep the footprint within its cells unless you also update
+`src/design/programs.js` and placement/occupancy. Service state transitions live
+in `ServiceBuilding` (`promote`, `close`, `reopen`) and
+`ServiceManager.promoteUnderConstruction()`.
 
 ### Opening a build prompt for testing
 
 In the browser console:
 
 ```js
-const cell = window.__falesc.findFreeCell();
+const cell = window.__falesc.findFreeCell('canteen');
 window.__falesc.app.onWorldTap(cell.x, cell.y);
 ```
 
-The normal path is a primary click/tap on the canvas after arming a blueprint.
-`findFreeCell()` is a test/debug helper; it does not place the building itself.
-Use `window.__falesc.selectBlueprint('tide_garden')` to arm a blueprint through
+The normal path is a primary click/tap on the canvas after arming a service.
+`findFreeCell(programId)` is a test/debug helper; it does not place the service
+itself. Use `window.__falesc.selectProgram('tea_house')` to arm a program through
 the real validation path, and `saveGame()`/`continueGame()` to exercise
 persistence.
 
 ## 6. Debugging
 
-- `window.__falesc.snapshot()` — compact state: mode, day, actions, lumen,
-  income, selected blueprint, counts, building states/blueprints, modal state,
-  end result, camera.
-- `window.__falesc.app` — the whole app: `map`, `camera`, `characters`,
-  `buildingManager`, `stateManager`, etc.
-- `window.__falesc.findFreeCell()` and `worldToScreen(x, y)` — placement and
-  coordinate conversion.
+- `window.__falesc.snapshot()` — compact state: phase, day/limit, lumen, works,
+  population, housing, flourishing, devotion, projections, selected program,
+  seed/size, sectors, services, residents, report, ending, modal/playback state,
+  camera. Legacy aliases (`turn`, `actionsRemaining`, `selectedBlueprint`,
+  `buildings`, `buildingStates`, `buildingBlueprints`) are kept for scenarios.
+- `window.__falesc.app` — the whole coordinator: `world` (Pixi app, map,
+  camera, minerals), `charter`, `crowd`, `screenStateMachine`, modals, etc.
+- `window.__falesc.findFreeCell(programId)` and `worldToScreen(x, y)` — placement
+  and coordinate conversion.
 - Browser devtools breakpoints work normally; the code is unminified except for
   the vendored libraries.
 - Pixi is WebGL. If the canvas is blank, check the console for WebGL/context
@@ -214,15 +223,19 @@ window.__falesc.snapshot();
 
 // Jump the camera to the world centre at the fit zoom.
 const g = window.__falesc.app;
-g.camera.zoom = g.camera.minZoom;
-g.camera.position.x = g.MAP_WIDTH / 2;
-g.camera.position.y = g.MAP_HEIGHT / 2;
-g.camera.updateTransform();
+g.world.camera.zoom = g.world.camera.minZoom;
+g.world.camera.position.x = g.world.MAP_WIDTH / 2;
+g.world.camera.position.y = g.world.MAP_HEIGHT / 2;
+g.world.camera.updateTransform();
 
-// Inspect sectors and buildings.
-window.__falesc.app.map.sectors.map(s => ({ id: s.id, x: s.centerX, y: s.centerY, size: s.gridSize }));
-window.__falesc.app.buildingManager.buildings.map(b => ({ name: b.name, state: b.state, u: b.u, v: b.v }));
+// Inspect sectors, services and residents.
+g.world.map.sectors.map(s => ({ id: s.id, x: s.centerX, y: s.centerY, size: s.gridSize }));
+g.charter.services.services.map(s => ({ name: s.name, program: s.programId, state: s.state, u: s.u, v: s.v, visits: s.visits }));
+g.charter.activeResidents.map(r => ({ name: r.name, needs: r.needs, why: r.memory.lastChoice?.reason }));
 ```
+
+The debug helpers are not gameplay shortcuts; `selectProgram`, `onWorldTap`,
+`finalizeBuild` and `openDay` all run the real validation and simulation paths.
 
 ## 7. Git workflow
 
@@ -248,6 +261,8 @@ window.__falesc.app.buildingManager.buildings.map(b => ({ name: b.name, state: b
 | Stale code after an edit | Hard reload (the dev server sends `no-store`); make sure you are on the dev-server URL, not another copy. |
 | Smoke test says `canvas has content` failed / `no 2d context` | The main Pixi canvas is WebGL and cannot be sampled with `getContext('2d')`. The config points `canvasSelectors` at `#minimap`; keep the minimap or adjust the config. |
 | Harness external-request failure | A runtime import still points at a CDN. Move it to `vendor/` or add a narrow allowlist with a reason. |
+| Reload during the day or report jumps back to planning | Expected: saves are only written during `PLAYING` to `falesc.save.v2`. Continue restores the last planning save. |
+| Continue charter is missing | A valid v2 save exists only while a run is in planning. V1 is removed on read; unknown versions are cleared and corrupt payloads are ignored. |
 | Camera keeps panning after Alt-Tab | Fixed by the blur/visibility handler; if it recurs, check that `InputManager` is still receiving `keyup`/`blur`. |
 | Middle-mouse pan stuck | Fixed by the window-level pointer release and `e.buttons` check; verify the pointer was pressed on the canvas. |
 | `npm run check` warns about a remote URL | It is a warning, not a failure. Remove the URL or add it to the ignore rules if it is a legitimate local placeholder. |
@@ -256,7 +271,7 @@ window.__falesc.app.buildingManager.buildings.map(b => ({ name: b.name, state: b
 ## 9. Project layout
 
 ```text
-index.html                  import map, favicon, module entry
+index.html                  import map, favicon, module entry, void backdrop
 favicon.svg
 package.json                scripts and Node engine
 webgame.config.json         browser smoke test
@@ -265,22 +280,29 @@ scripts/
   check.mjs                 dependency-free static checks
 vendor/                     pinned Pixi + license/provenance
 src/
-  App.js                    bootstrap, layers, loop, save/load, debug API
-  GameStateManager.js       state machine, economy state, run restore
-  game/TurnScheduler.js     cancellable single turn timer
-  Camera.js                 world transform, clamp, pointer input
-  constants.js              palettes, shapes, tile sizes
-  controls/InputManager.js  key bindings and modal lock
-  screens/                  menu, lobby, HUD, interstitial, end
+  App.js                    pure entrypoint: new FalescGame()
+  FalescGame.js             coordinator, screens, day playback, save, debug API
+  Camera.js                 world transform, clamp, pointer/touch input
+  Character.js              procedural chibi character container
+  constants.js              palettes, animation states, tile sizes, minerals
+  world/World.js            Pixi app, layers, camera/input, map and minerals
+  charter/Charter.js        run model: day, lumen, works, roster, services, ending
+  design/                   needs, traits, programs, balance, names
+  services/                 ServiceBuilding, ServiceManager, PlacementPolicy
+  simulation/DaySimulator.js deterministic day and report
+  economy/LumenLedger.js    contributions, upkeep, closures
+  residents/                Resident, ResidentFactory, ResidentAgent, ResidentCrowd
+  navigation/IslandNavigator.js  per-island A*
+  state/                    GamePhase, ScreenStateMachine
+  screens/                  menu, lobby, HUD, day, report, end
+  ui/                       build/service/bulletin/resident modals, chart, chatter, icons
   map/                      single-pass generation, packing, sectors, grid math, paths
-  buildings/                blueprints, model, manager, illustrated renderer
+  buildings/BuildingRenderer.js  illustrated service silhouettes (art only)
   character/                procedural character rendering/animation
-  ai/                       crowd manager and land-aware NPC controller
   minerals/                 seeded static rock/crystal scenery
-  ui/                       build dialog, icons, survey chart, chatter
-  persistence/              versioned localStorage save
-styles/main.css             design tokens, backdrop, all chrome
+  persistence/              versioned localStorage save v2
+styles/main.css             design tokens, void backdrop, all chrome
 assets/fonts/               OFL fonts and licenses
-scripts/scenarios/          browser regressions (victory, save, map, engine, mobile)
+scripts/scenarios/          browser regressions (resident, economy, save, map, engine, victory, mobile)
 docs/                       design vision, architecture, development, testing, gameplay, issues
 ```
