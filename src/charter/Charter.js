@@ -28,6 +28,7 @@ import * as CommonsAssembly from './CommonsAssembly.js';
 import * as CommonsPurse from './CommonsPurse.js';
 import * as CampaignRoom from './CampaignRoom.js';
 import * as ServiceCommands from './ServiceCommands.js';
+import * as CharterCast from './CharterCast.js';
 import { milestones as charterMilestones, careWatch as charterCareWatch, needSurvey as charterNeedSurvey, standings as charterStandings, historyEntry as charterHistoryEntry, stats as charterStats } from './CharterProjections.js';
 
 /**
@@ -511,127 +512,25 @@ export class Charter {
     }
 
     foundWelcomePost() {
-        const sector = this.homeSector;
-        if (!sector) return;
-        const anchor = this.findStartingAnchor(sector);
-        if (!anchor) return;
-        const result = this.services.place({
-            programId: 'housing',
-            sectorId: sector.id,
-            u: anchor.u,
-            v: anchor.v,
-            name: 'Welcome Post',
-            state: 'ACTIVE',
-            capacityOverride: (this.contest ? 4 : 6) + this.startingBedBonus,
-            fixed: true
-        });
-        this.welcomePost = result.ok ? result.service : null;
-        this.commonsCell = this.findCommonsCell(sector);
+        return CharterCast.foundWelcomePost(this);
     }
-
     findStartingAnchor(sector) {
-        const program = PROGRAM_BY_ID.housing;
-        const center = Math.floor((sector.gridSize - 1) / 2);
-        const candidates = [
-            { u: center, v: center },
-            { u: center - 1, v: center },
-            { u: center, v: center - 1 },
-            { u: center + 1, v: center },
-            { u: center, v: center + 1 }
-        ];
-        for (const candidate of candidates) {
-            const check = this.services.canPlace(program.id, sector.id, candidate.u, candidate.v);
-            if (check.ok) return candidate;
-        }
-        return null;
+        return CharterCast.findStartingAnchor(this, sector);
     }
-
     findCommonsCell(sector) {
-        const center = Math.floor(sector.gridSize / 2);
-        for (let radius = 0; radius < sector.gridSize; radius++) {
-            for (let dv = -radius; dv <= radius; dv++) {
-                for (let du = -radius; du <= radius; du++) {
-                    const u = center + du;
-                    const v = center + dv;
-                    if (u < 0 || v < 0 || u >= sector.gridSize || v >= sector.gridSize) continue;
-                    if (!this.services.isCellOccupied(sector.id, u, v)) return { u, v };
-                }
-            }
-        }
-        return { u: center, v: center };
+        return CharterCast.findCommonsCell(this, sector);
     }
-
     reconcileStaff() {
-        for (const resident of this.roster) {
-            if (!resident.workServiceId) continue;
-            const service = this.allServices.find((entry) => entry.id === resident.workServiceId);
-            if (!service || service.closed || service.state !== 'ACTIVE') {
-                if (service) service.staffId = null;
-                resident.workServiceId = null;
-            }
-        }
-        for (const service of this.allServices) {
-            if (service.staffId && !this.roster.some((resident) => resident.id === service.staffId)) service.staffId = null;
-        }
+        return CharterCast.reconcileStaff(this);
     }
-
     assignStaff(service, residentId = null) {
-        if (!service || service.chapterId !== 'player' || service.state !== 'ACTIVE' || service.closed) {
-            return { ok: false, reason: 'Open one of your own services first.' };
-        }
-        const previous = this.roster.find((resident) => resident.id === service.staffId);
-        if (previous) previous.workServiceId = null;
-        if (!residentId) {
-            service.staffId = null;
-            return { ok: true, service };
-        }
-        const resident = this.activeResidents.find((entry) => entry.id === residentId);
-        if (!resident) return { ok: false, reason: 'That resident is not here.' };
-        if (resident.workServiceId) {
-            const old = this.allServices.find((entry) => entry.staffId === resident.id);
-            if (old) old.staffId = null;
-        }
-        service.staffId = resident.id;
-        resident.workServiceId = service.id;
-        return { ok: true, service, resident };
+        return CharterCast.assignStaff(this, service, residentId);
     }
-
     moveResidentHome(residentId, serviceId) {
-        const resident = this.activeResidents.find((entry) => entry.id === residentId);
-        const target = this.services.services.find((service) => service.id === serviceId);
-        if (!resident || !target) return { ok: false, reason: 'That bed is not available.' };
-        if (target.programId !== 'housing' || target.state !== 'ACTIVE' || target.closed) {
-            return { ok: false, reason: 'That house is not open.' };
-        }
-        if (resident.homeServiceId === target.id) return { ok: false, reason: 'They already live here.' };
-        const used = this.roster.filter((entry) => entry.active && entry.homeServiceId === target.id).length;
-        if (used >= target.capacity) return { ok: false, reason: 'That house is full.' };
-        resident.homeServiceId = target.id;
-        resident.homeChapterId = target.chapterId || 'player';
-        resident.homeFloor = homeFloorFor(target, used);
-        this.assignHomes();
-        this.refreshDerived();
-        return { ok: true, service: target };
+        return CharterCast.moveResidentHome(this, residentId, serviceId);
     }
-
     assignHomes() {
-        for (const resident of this.activeResidents) {
-            const home = this.homeFor(resident);
-            if (home) continue;
-            const preferred = this.chapterById(resident.homeChapterId) || this.player;
-            if (preferred.services.assignHome(resident, this.roster)) {
-                resident.homeChapterId = preferred.id;
-                continue;
-            }
-            for (const chapter of this.chapters) {
-                if (chapter === preferred) continue;
-                if (chapter.services.assignHome(resident, this.roster)) {
-                    resident.homeChapterId = chapter.id;
-                    break;
-                }
-            }
-            if (!this.homeFor(resident)) resident.homeServiceId = null;
-        }
+        return CharterCast.assignHomes(this);
     }
 
     refreshAdjacency() {
@@ -886,49 +785,7 @@ export class Charter {
     }
 
     addArrivals() {
-        if (this.flourishing < BALANCE.arrivals.minFlourishing) return [];
-        const waiting = this.roster.filter((resident) => !resident.active && !resident.memory.departure);
-        if (waiting.length === 0) return [];
-        const devotion = this.devotionByChapter;
-        const candidates = this.chapters
-            .map((chapter) => {
-                const residents = this.activeResidents.filter((resident) => resident.homeChapterId === chapter.id);
-                return {
-                    chapter,
-                    residents: residents.length,
-                    spare: chapter.services.spareHousing(residents),
-                    devotion: devotion[chapter.id] || 0
-                };
-            })
-            .filter((entry) => entry.spare > 0)
-            .sort((a, b) => a.residents - b.residents || b.devotion - a.devotion || b.spare - a.spare);
-        if (candidates.length === 0) return [];
-        const capacity = candidates.reduce((sum, entry) => sum + entry.spare, 0);
-        const count = Math.min(BALANCE.arrivals.perDay, capacity, waiting.length);
-        const arrivals = [];
-        for (let index = 0; index < count; index++) {
-            const resident = waiting[index];
-            const target = candidates.find((entry) => entry.spare > 0);
-            if (!target) break;
-            resident.active = true;
-            resident.state = 'idle';
-            resident.homeChapterId = target.chapter.id;
-            target.chapter.services.assignHome(resident, this.roster);
-            target.spare -= 1;
-            target.residents += 1;
-            arrivals.push({
-                id: resident.id,
-                name: resident.name,
-                homeChapterId: target.chapter.id,
-                chapterName: target.chapter.name,
-                homeServiceId: resident.homeServiceId
-            });
-        }
-        if (arrivals.length > 0) {
-            this.refreshDerived();
-            this.bulletin = this.buildBulletin(arrivals);
-        }
-        return arrivals;
+        return CharterCast.addArrivals(this);
     }
 
     evaluateEnding(report) {
