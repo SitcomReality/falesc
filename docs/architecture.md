@@ -237,8 +237,9 @@ Key commands:
   build the next bulletin.
 - `addArrivals()` — if flourishing ≥ 20 and beds are spare, activate up to two
   waiting residents. Residents who already departed are never re-admitted.
-- `evaluateEnding(report)` — population < 4 (including departures), or the
-  day-limit goal check; writes `report.outcome`/`message`.
+- `evaluateEnding(report)` — population < 4 (including departures) is defeat;
+  meeting 12 housed residents + flourishing 62 is immediate victory; the day
+  limit without both goals is defeat. Writes `report.outcome`/`message`.
 - `serialize()` / `restore()` — save v2 model data.
 
 The charter does not own DOM or the Pixi scene. `ServiceManager` creates

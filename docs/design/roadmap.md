@@ -34,8 +34,8 @@ no sea, beach or open-air planting. `npm run check` and the smoke test pass.
 - a resident card with needs, traits, home, last choice and a "why" line;
 - queues, enter/exit and post-visit feedback for the service programs;
 - save v2 under `falesc.save.v2`;
-- victory at 12 residents + flourishing 62 by the day limit, and defeat at the
-  limit or below four residents.
+- victory as soon as 12 housed residents + flourishing 62 are reached at the end
+  of a day, and defeat at the day limit or below four residents.
 
 **Remaining before Phase 1 is complete:**
 

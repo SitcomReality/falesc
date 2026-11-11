@@ -50,9 +50,10 @@ so any static file server works, but ES modules require `http://`, not `file://`
 - The evening report shows visits, hearts, lumen contributions and upkeep, needs
   at dusk, complaints and a few quotes. **Begin Day N** returns to planning with
   a fresh pair of works.
-- Spare beds plus a flourishing of at least 20 bring new residents. The run ends
-  at the day limit: **12 housed residents and flourishing 62** wins First Light. Fewer
-  than four residents, or missing the goal at the limit, loses.
+- Spare beds plus a flourishing of at least 20 bring new residents. Meeting
+  **12 housed residents and flourishing 62** at the end of a day wins First Light;
+  the day limit is the deadline. Fewer than four residents, or missing both goals
+  at the limit, loses.
 
 `WASD`/arrows pan, wheel zooms, middle-drag pans, one-finger drag pans and a
 two-finger pinch zooms. Click a service for its record, a resident for their

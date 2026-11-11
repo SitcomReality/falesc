@@ -42,10 +42,13 @@ Severity is about impact on the slice, not effort:
 **Evidence**
 
 - Six residents typically contribute 6 lumen against a 1-lumen Welcome Post
-  upkeep; a recorded medium run of `victory.mjs` ended with more than 200 lumen
-  in hand.
-- Arrivals (up to two per day) and housing are usually affordable before the
-  day limit, and the First Light goal is reachable several days early.
+  upkeep; the current medium victory run closes on day 4 with 24 lumen in hand.
+- Arrivals (up to two per day) and housing are usually affordable, and the
+  opening sequence can build Canteen + housing, then housing, then Garden Dome +
+  Tea House without a hard budget choice.
+- Early victory now closes the charter as soon as the goals are met, so the
+  surplus does not accumulate across fourteen days — but the first four days
+  still do not force a sacrifice.
 - `BALANCE` centralises the numbers, but there is no tuning pass against a
   target difficulty curve, and some values (`devotion.decayTowardNeutral`,
   `devotion.maxAffinity`/`minAffinity`) are declared without being read.
@@ -58,10 +61,11 @@ than the design wants.
 
 **Suggested direction**
 
-Tune contributions, upkeep, arrivals and the day limits against recorded runs;
-decide whether the goal should be checked earlier than the limit. Remove or wire
-the unused affinity knobs. Keep `victory.mjs` as the end-to-end guard, and add a
-tighter "close run" scenario when the curve is chosen.
+Tune contributions, upkeep, construction costs, works or arrivals against
+recorded runs until at least one of the four First Light services has to be
+delayed or traded off. Remove or wire the unused affinity knobs. Keep
+`victory.mjs` as the end-to-end guard, and add a tighter "close run" scenario
+when the curve is chosen.
 
 ### 2. Only the home shard is playable
 

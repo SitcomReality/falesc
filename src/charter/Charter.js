@@ -288,22 +288,22 @@ export class Charter {
                 title: 'The chapter empties.',
                 message: 'Too few Tidelanders remain to keep the commons. The doors close one by one.'
             };
+        } else if (this.housedPopulation >= BALANCE.end.firstLightPopulation && this.flourishing >= BALANCE.end.comfortableFlourishing) {
+            // First Light is a goal, not a survival timer: meeting both targets
+            // closes the charter successfully, and the day limit is the deadline.
+            this.ending = {
+                outcome: 'victory',
+                day: this.day,
+                title: 'The commons holds.',
+                message: `${this.housedPopulation} Tidelanders housed, a full larder, and a flourishing of ${this.flourishing}. The Confluence has something to celebrate.`
+            };
         } else if (this.day >= this.dayLimit) {
-            if (this.housedPopulation >= BALANCE.end.firstLightPopulation && this.flourishing >= BALANCE.end.comfortableFlourishing) {
-                this.ending = {
-                    outcome: 'victory',
-                    day: this.day,
-                    title: 'The commons holds.',
-                    message: `${this.housedPopulation} Tidelanders housed, a full larder, and a flourishing of ${this.flourishing}. The Confluence has something to celebrate.`
-                };
-            } else {
-                this.ending = {
-                    outcome: 'defeat',
-                    day: this.day,
-                    title: 'The charter closes.',
-                    message: `The chapter weathered ${this.day} days with ${this.population} residents and a flourishing of ${this.flourishing}. It was not enough for First Light.`
-                };
-            }
+            this.ending = {
+                outcome: 'defeat',
+                day: this.day,
+                title: 'The charter closes.',
+                message: `The chapter weathered ${this.day} days with ${this.population} residents and a flourishing of ${this.flourishing}. It was not enough for First Light.`
+            };
         }
         if (this.ending) {
             report.outcome = this.ending.outcome;

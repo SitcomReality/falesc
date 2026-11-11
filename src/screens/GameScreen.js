@@ -347,7 +347,7 @@ export class GameScreen {
         this._setText(this.flourishingLabel, 'flourishingLabel', `Flourishing ${Math.round(charter.flourishing)}`);
         const goalsMet = charter.goalsMet;
         this._setText(this.goalCopy, 'goalCopy', goalsMet
-            ? 'Both goals are met. Keep the commons alive until the last day.'
+            ? 'Both goals are met. Open the day to close the charter.'
             : `and reach a flourishing of ${flourishingGoal}.`);
         this.container.classList.toggle('is-goals-met', goalsMet);
 

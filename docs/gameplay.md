@@ -171,8 +171,8 @@ residents remain, the charter is defeated.
 5. **Evening report** — the broadsheet described below. **Begin Day N** advances
    the day, restores two works, opens completed construction, assigns beds,
    adds any arrivals, and shows the next bulletin.
-6. **End** — at the day limit the charter is judged; or abandon from the charter
-   menu at any time.
+6. **End** — once both First Light goals are met the charter closes; if the day
+   limit arrives first it is judged. Abandon is always available in the menu.
 
 A service built during Day 1 planning is `PENDING` through Day 1's playback and
 opens during Day 2 planning. You still have both Day 2 works available.
@@ -219,8 +219,9 @@ The report is the day's story as a broadsheet:
 
 ## Victory and defeat
 
-- **Victory:** at the day limit, the chapter has at least **12 housed residents**
-  and a **Flourishing of 62 or more**.
+- **Victory:** at the end of any day, the chapter has at least **12 housed
+  residents** and a **Flourishing of 62 or more**. The charter closes
+  successfully immediately; the day limit is the deadline, not a survival timer.
 - **Defeat:** the population falls below **4** at the end of a day, or the day
   limit arrives without both goals.
 - **Abandon:** the charter menu asks for confirmation, then ends the run early as

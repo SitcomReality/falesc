@@ -165,7 +165,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `departure.mjs` | Removing all beds leaves six residents homeless; one night is a warning, the second removes every resident and agent, empties the population, and records a defeat. |
 | `corrupt-save.mjs` | A parseable v2 payload with the wrong service shape is discarded; Continue stays hidden and the key is removed. |
 | `abandon-confirm.mjs` | The first Abandon click asks for confirmation and keeps the run alive; cancel returns to play; the second confirm reaches the end screen. |
-| `victory.mjs` | A full, real-UI medium charter plans services across fourteen days and reaches 12 housed residents + flourishing 62; the end screen reports `victory`. |
+| `victory.mjs` | A full, real-UI medium charter plans services until it reaches 12 housed residents + flourishing 62, closes the charter, and reports `victory`. |
 | `showcase.mjs` | Visual tool: places one of each service, marks them open, and captures the illustrated shard and a day for design review. Not a pass/fail regression. |
 | `mobile.mjs` | Captures menu, lobby, HUD and build dialog at a narrow viewport; the build dialog must be visible. Run with `--width 390 --height 844`. |
 
