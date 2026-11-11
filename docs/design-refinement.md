@@ -9,10 +9,10 @@
 > **Contest preview** adds two AI rivals, shared residents/services, rival
 > housing and a per-chapter economy, recovery/need-pressure builds, Devotion
 > standings, a patronage-flow overlay, a three-day festival campaign, a
-> pledge/vote Confluence, a stewardship epilogue and a fundable shared Commons
+> pledge/vote Confluence, a stewardship promise and a legacy, a fundable shared Commons
 > Beacon, a first Commons Assembly petition/ballot, transient day visitors and a one-step
 > service retrofit. The full multi-round festival, a fully shared-commons archipelago,
-> auctions, systemic stewardship, building layers and multiplayer are **not**
+> auctions, deeper legacy effects, building layers and multiplayer are **not**
 > implemented. This document and the component docs in `docs/design/`
 > describe the direction; where they conflict with the source, the source wins.
 > The visual identity (palette, typography, paper/ink chrome) remains the

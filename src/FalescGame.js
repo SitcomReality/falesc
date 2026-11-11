@@ -13,6 +13,7 @@ import { ReportScreen } from './screens/ReportScreen.js';
 import { ConfluenceScreen } from './screens/ConfluenceScreen.js';
 import { StewardshipScreen } from './screens/StewardshipScreen.js';
 import { STEWARDSHIP_BY_ID } from './confluence/Stewardship.js';
+import { readLegacy, writeLegacy } from './confluence/StewardshipLegacy.js';
 import { EndScreen } from './screens/EndScreen.js';
 import { BuildModal } from './ui/BuildModal.js';
 import { ServiceCardModal } from './ui/ServiceCardModal.js';
@@ -149,12 +150,14 @@ export class FalescGame {
         const seed = Number.isInteger(this.settings.mapSeed) ? this.settings.mapSeed : 1;
         const size = this.settings.mapSize || 'medium';
         this.initializeWorld(seed, size);
+        const legacy = readLegacy();
         this.charter = new Charter({
             seed,
             mapSize: size,
             mode: this.settings.mode || 'first-light',
             map: this.world.map,
-            parentContainer: this.world.objectLayer
+            parentContainer: this.world.objectLayer,
+            legacy
         });
         this.crowd.setCharter(this.charter);
         this.patronageFlow.setCharter(this.charter);
@@ -652,6 +655,7 @@ export class FalescGame {
         if (!policy || !this.charter?.ending?.confluence || this.charter.ending.outcome !== 'victory') return false;
         this.charter.stewardship = { ...policy };
         this.charter.ending.stewardship = { ...policy };
+        writeLegacy({ policyId, chapterName: this.charter.player.name, day: this.charter.day });
         this.finishCharter();
         return true;
     }

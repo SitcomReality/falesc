@@ -23,7 +23,14 @@ import { PLEDGE_BY_ID } from '../confluence/Pledges.js';
  * layer listens; it never owns the rules.
  */
 export class Charter {
-    constructor({ seed, mapSize = 'medium', mode = 'first-light', map = null, parentContainer = null, saved = null }) {
+    constructor({ seed, mapSize = 'medium', mode = 'first-light', map = null, parentContainer = null, saved = null, legacy = null }) {
+        this.legacy = legacy || saved?.legacy || null;
+        this.legacyNote = null;
+        this.legacyBonus = this.legacy?.policyId === 'open_table'
+            ? { amount: 1, programs: ['canteen', 'tea_house'] }
+            : this.legacy?.policyId === 'garden_charter'
+                ? { amount: 1, programs: ['garden_dome'] }
+                : null;
         this.seed = seed;
         this.mapSize = mapSize;
         this.mode = mode;
@@ -122,9 +129,29 @@ export class Charter {
             this.setupCommons();
             this.setupTransit();
         }
+        if (this.legacy) this.applyLegacy();
         this.assignHomes();
         this.refreshDerived();
         this.bulletin = this.buildBulletin([]);
+    }
+
+    applyLegacy() {
+        const policyId = this.legacy?.policyId;
+        if (policyId === 'universal_care') {
+            const welcome = this.player.services.services.find((service) => service.programId === 'housing' && service.fixed);
+            if (welcome) welcome.capacity += 1;
+            this.legacyNote = 'Universal Care: the Welcome House keeps one more bed.';
+        } else if (policyId === 'open_table') {
+            this.legacyBonus = { amount: 1, programs: ['canteen', 'tea_house'] };
+            this.legacyNote = 'The Open Table: new canteens and tea houses keep one more seat.';
+        } else if (policyId === 'commons_assembly') {
+            this.commons.fund += 5;
+            this.commons.purse += 5;
+            this.legacyNote = 'The Commons Assembly: the Beacon fund and purse begin with 5 lumen.';
+        } else if (policyId === 'garden_charter') {
+            this.legacyBonus = { amount: 1, programs: ['garden_dome'] };
+            this.legacyNote = 'The Garden Charter: new garden domes keep one more place.';
+        }
     }
 
     static fromSave({ saved, map, parentContainer }) {
@@ -134,7 +161,8 @@ export class Charter {
             mode: saved.mode || 'first-light',
             map,
             parentContainer,
-            saved
+            saved,
+            legacy: saved.legacy || null
         });
     }
 
@@ -600,6 +628,9 @@ export class Charter {
         });
         if (!result.ok) return result;
         if (shared) result.service.builderChapterId = 'player';
+        if (!shared && this.legacyBonus?.programs.includes(programId)) {
+            result.service.capacity += this.legacyBonus.amount;
+        }
         this.lumen -= program.cost;
         this.works -= 1;
         applyCommonsPolicyToService(result.service, this.commons?.policy);
@@ -1030,6 +1061,17 @@ export class Charter {
             });
         }
 
+        if (this.legacyNote && this.day === 1) {
+            items.push({
+                kicker: 'A legacy',
+                title: this.legacy.policyId === 'universal_care' ? 'Universal Care'
+                    : this.legacy.policyId === 'open_table' ? 'The Open Table'
+                        : this.legacy.policyId === 'commons_assembly' ? 'The Commons Assembly'
+                            : 'The Garden Charter',
+                text: this.legacyNote
+            });
+        }
+
         if (this.commons.active && this.commons.activatedDay === this.day) {
             items.push({
                 kicker: 'The commons',
@@ -1095,6 +1137,7 @@ export class Charter {
             campaign: this.campaign?.toJSON() || null,
             returningVisitors: this.returningVisitors.map((visitor) => visitor.toJSON()),
             trialVisitors: this.trialVisitors.map((visitor) => visitor.toJSON()),
+            legacy: this.legacy,
             transit: {
                 home: this.transit.home ? { ...this.transit.home } : null,
                 commons: this.transit.commons ? { ...this.transit.commons } : null

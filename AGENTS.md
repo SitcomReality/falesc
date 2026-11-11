@@ -23,7 +23,7 @@ with two AI rivals, a shared lumen economy, shared residents, rival housing,
 recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
 a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
 a fundable shared Commons Beacon that becomes a six-seat all-needs civic service,
-transient day visitors who pay for service visits, and a one-step service retrofit. The full multi-round festival, auctions, systemic stewardship, deeper rival
+transient day visitors who pay for service visits, and a one-step service retrofit. The full multi-round festival, auctions, deeper legacy effects, deeper rival
 strategy, layers and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
@@ -197,8 +197,8 @@ after any behavioural change.
   services include the 2×2 Bathhouse for Rest + Company. In Contest, a second
   commons isle is buildable and residents reach it through reserved shuttle gates.
   This is a first pass; a manual commons-treasury contribution loop, a fuller archipelago,
-  a larger multi-round festival, auctions and systemic stewardship effects are
-  still missing.
+  a larger multi-round festival, auctions and deeper legacy effects are still
+  missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
   not remove the survey chart without adjusting `canvasSelectors` and the smoke
   test.

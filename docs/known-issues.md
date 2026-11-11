@@ -23,7 +23,7 @@ Severity is about impact on the slice, not effort:
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Home shard plus one commons isle are buildable; shared works and a purse exist, but no manual treasury loop or fuller archipelago |
 | 3 | Medium | No building layers or multi-slot modules; a single hours policy and one retrofit module exist |
-| 4 | Medium | The festival programme is scripted and stewardship is epilogue-only |
+| 4 | Medium | The festival programme is scripted and stewardship leaves only one small legacy |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
 | 7 | Low | Save v1 is discarded, a mid-`DAY` reload loses the day, and there is no export/import |
@@ -130,7 +130,7 @@ Add multi-slot module loadouts and access policies, then shells/floors. Keep the
 report. Hours and retrofit are the first proofs that the service record can
 carry a real trade-off.
 
-### 4. The festival programme is scripted and stewardship is epilogue-only
+### 4. The festival programme is scripted and stewardship leaves only one small legacy
 
 **Evidence**
 
@@ -147,24 +147,26 @@ carry a real trade-off.
   pressure plus doctrine, and can grow through housing. They still make one move
   per day and do not plan a long-term service mix or respond to the player's
   specific moves.
-- A player winner chooses one of four stewardship promises, but it changes only
-  the epilogue text and end record. There are no auctions, systemic stewardship
-  effects or multi-round public judgment; the Commons Beacon is a single
-  shared project, not a separate commons island with an assembly or policy.
+- A player winner chooses one of four stewardship promises. The promise now
+  writes a small legacy that the next new charter remembers (one bed, one seat,
+  a seeded commons purse, or a wider garden), but it does not reshape the wider
+  rules or stack across many runs. There are no auctions or multi-round public
+  judgment; the Commons Beacon is a single shared project, and the commons isle
+  has shared works and an assembly policy.
 - D3/D4 in [design/decisions.md](design/decisions.md) deliberately defer
   auctions and stewardship.
 
 **Impact**
 
 Competition is visible, the economy is shared and the run now has a campaign,
-a social finale and a governing promise, but the festival is still a short
-scripted programme and stewardship is an epilogue choice rather than a system.
-Rival play remains reactive rather than strategic.
+a social finale, a governing promise and a small cross-run legacy, but the
+festival is still a short scripted programme and the legacy is one starting
+bonus rather than a system. Rival play remains reactive rather than strategic.
 
 **Suggested direction**
 
-Add a small long-term rival plan and multi-round festival events before
-considering auctions or stewardship. Follow
+Add a small long-term rival plan, multi-round festival events and deeper legacy
+effects before considering auctions. Follow
 [design/roadmap.md](design/roadmap.md). Do not add auctions or human multiplayer
 early.
 
@@ -400,6 +402,7 @@ These are no longer open:
 - **Service hours.** Open services can choose As built, Round the clock, Daylight or Evening; the choice changes open phases, quality and upkeep and is saved.
 - **Service retrofit.** An active player service can install one of Sunroom, Atelier or Night Kitchen; the module trades seats, quality and upkeep and is saved. Covered by `retrofit.mjs`.
 - **Outer commons isle.** A second buildable shard in the Contest, reached by reserved shuttle gates; player services on it earn cross-island visits. Covered by `commons-isle.mjs`.
+- **Stewardship legacy.** A winning stewardship promise is saved in `falesc.legacy.v1` and grants a small starting effect to the next charter. Covered by `campaign.mjs`.
 - **Commons purse.** Every chapter gives 1 lumen when shared works stand; the purse pays shared upkeep and closes/reopens the shared doors together. Covered by `commons-purse.mjs`.
 - **Shared commons works.** Buildings raised on the Contest commons isle belong to The Commons, are usable by every resident and credit their builder. Covered by `commons-isle.mjs`.
 - **Commons Assembly ballot and petition.** A lit Beacon lets residents petition, each chapter nominate and all residents vote; existing and future services inherit the winner's capacity or comfort effect. Covered by `commons-assembly.mjs`.

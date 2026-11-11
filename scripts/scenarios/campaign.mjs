@@ -91,4 +91,14 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.evaluate("document.querySelector('[data-testid=stewardship-commons_assembly]').click()");
     await page.click('[data-testid=stewardship-confirm]');
     await page.waitFor("window.__falesc.snapshot().state === 'END'");
+    const stored = await page.evaluate("JSON.parse(localStorage.getItem('falesc.legacy.v1'))");
+    log(JSON.stringify({ stored }));
+    assert.equal(stored.policyId, 'commons_assembly');
+    await page.evaluate("window.__falesc.startCharter(777, 'medium', 'contest')");
+    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+    const legacy = await page.evaluate("({ policy: window.__falesc.app.charter.legacy?.policyId, fund: window.__falesc.app.charter.commons.fund, purse: window.__falesc.app.charter.commons.purse })");
+    log(JSON.stringify({ legacy }));
+    assert.equal(legacy.policy, 'commons_assembly');
+    assert.ok(legacy.fund >= 5);
+    assert.ok(legacy.purse >= 5);
 }

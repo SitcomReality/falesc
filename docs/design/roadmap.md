@@ -56,15 +56,16 @@ standings, patronage, a patronage-flow overlay and a most-beloved-chapter end at
 the day limit. Rivals also recover from closures and choose builds by need
 pressure, the last three days run a three-event campaign with rival promises and
 matching service appeal, and the day limit convenes a pledge/vote Confluence.
-A player winner chooses a stewardship promise, and the archipelago can fund a
-shared Commons Beacon for a nightly multi-need comfort and a first Assembly
-ballot, and 2–3 day visitors trade with the services. A fully shared-commons
-archipelago, long-term rival plan, multi-round festival events, auctions and systemic
-stewardship remain.
+A player winner chooses a stewardship promise that seeds the next charter with
+a small legacy. The archipelago can fund a shared Commons Beacon for a nightly
+multi-need comfort and a first Assembly ballot; the outer commons isle hosts
+shared works funded by a commons purse, and 2–3 day visitors trade with the
+services. A fuller commons archipelago, long-term rival plan, multi-round
+festival events, auctions and deeper legacy effects remain.
 
-**Not started:** the rest of Phase 2, Phase 3 (layers, modules, finishes,
-policy, retrofit), the shared commons treasury and assembly, deeper
-Phase 4 scenarios, and Phase 5
+**Not started:** the rest of Phase 2, Phase 3 (layers, multi-slot modules,
+finishes, access policy), a manual commons-treasury loop, deeper Phase 4
+scenarios, and Phase 5
 (multiplayer, audio, accessibility polish).
 
 ---

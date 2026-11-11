@@ -406,8 +406,12 @@ choice. The winning chapter chooses one governing promise:
 - **Garden Charter** — beauty is infrastructure.
 
 The stewardship changes the epilogue and the charter record, not the resolved
-day. A rival winner takes stewardship without a player choice and the run ends
-on the defeat record.
+day. It is also written to `falesc.legacy.v1`: the next new charter remembers
+the promise in a small way — one more bed for Universal Care, one more seat in
+new canteens and tea houses for The Open Table, 5 lumen in the Beacon fund and
+commons purse for the Commons Assembly, or one more place in new garden domes
+for the Garden Charter. A rival winner takes stewardship without a player choice
+and the run ends on the defeat record.
 
 
 The end screen shows days weathered, residents, Devotion, Flourishing and lumen,
@@ -491,15 +495,14 @@ yet.
   word-of-mouth departure yet.
 - **Only the home shard and one Contest commons isle are playable.** Other
   islands are scenery; there is no fuller archipelago layer or shared ownership.
-- **No building layers, multi-slot modules or player-set service policy.** One
-  retrofit module and one service record per building are implemented.
+- **No building layers or multi-slot modules.** One retrofit module, one hours
+  policy and one service record per building are implemented.
 - **The Contest is a preview.** Rivals build services and housing, pay upkeep,
   receive contributions, reopen lost services and react to need pressure, but
-  their planning is still one move per day. The campaign now has three festival
-  events, but it is still one promise each and a resident vote, not a larger
-  multi-round festival, auctions or stewardship.
-- **No auctions, stewardship, petitions or multiplayer.** The Multiplayer button
-  is a disabled placeholder.
+  their planning is still one move per day. The campaign has three festival
+  events, one promise each and a resident vote, not a larger multi-round
+  festival or auctions.
+- **No auctions or multiplayer.** The Multiplayer button is a disabled placeholder.
 - **No audio.**
 - **No keyboard build cursor.** The dock and dialogs are keyboard-friendly, but
   choosing a plot requires a pointer or touch.
