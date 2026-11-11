@@ -4772,3 +4772,95 @@ html.is-reduced-motion *::after {
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
+
+/* Resident roster --------------------------------------------------------- */
+.resident-roster {
+    width: min(600px, calc(100vw - 32px));
+}
+
+.resident-roster__list {
+    display: grid;
+    gap: 5px;
+    max-height: 430px;
+    overflow-y: auto;
+    margin: 12px 0;
+    padding: 0 4px 0 0;
+    list-style: none;
+}
+
+.resident-roster__row button {
+    display: grid;
+    grid-template-columns: 32px 1fr 130px 44px;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 8px;
+    background: rgba(255, 211, 110, 0.16);
+    border: 1.5px solid rgba(33, 18, 37, 0.22);
+    border-radius: var(--radius);
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+}
+
+.resident-roster__row.is-at-risk button {
+    background: rgba(255, 79, 154, 0.12);
+    border-color: var(--coral);
+}
+
+.resident-roster__row button:hover,
+.resident-roster__row button:focus-visible {
+    background: rgba(255, 211, 110, 0.3);
+}
+
+.resident-roster__avatar {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    background: var(--lavender);
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.resident-roster__name {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.resident-roster__name small {
+    display: block;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 8px;
+    font-weight: 400;
+    text-transform: uppercase;
+}
+
+.resident-roster__need {
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 9px;
+    text-align: right;
+    text-transform: uppercase;
+}
+
+.resident-roster__need strong,
+.resident-roster__well {
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: 17px;
+}
+
+.resident-roster__trial {
+    display: block;
+    padding: 6px 8px;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+}

@@ -252,7 +252,7 @@ export class GameScreen {
         });
         this.pausePanel.querySelector('[data-testid=open-residents]').addEventListener('click', () => {
             this._setPauseOpen(false);
-            this.game.showResidentRoster();
+            this.game.openResidentRoster();
         });
         this.pausePanel.querySelector('[data-testid=open-field-guide]').addEventListener('click', () => {
             this._setPauseOpen(false);

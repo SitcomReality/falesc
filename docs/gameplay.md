@@ -307,6 +307,13 @@ The winning policy applies to existing services and to every service built
 afterwards by the player or a rival. It is saved with the charter. The first
 ballot and the single second reading are the whole Assembly cycle.
 
+## Resident roster
+
+The pause menu's **Residents** opens a scannable roster: name, temperament,
+highest current need, wellbeing and a red crisis row. Clicking a row opens the
+full resident card. Trial guests are listed separately and do not yet count as
+active residents.
+
 ## Care watch
 
 When an active resident is in crisis — any need at **85+**, wellbeing below

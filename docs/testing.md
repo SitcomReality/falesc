@@ -162,6 +162,7 @@ Scenarios live in `scripts/scenarios/` and are loaded with
 | `return-menu.mjs` | Builds a Canteen, uses Save & menu, checks Continue/Export and returns to the same pending build and day. |
 | `mobile-hud.mjs` | Runs the HUD at 390×844, checks no horizontal overflow, opens the charter menu and need survey, and captures the phone layout. |
 | `reduced-motion.mjs` | Toggles reduced motion from the pause menu, checks the document class and storage, reloads and toggles it back. |
+| `resident-roster.mjs` | Pushes a resident into crisis, opens the roster, checks six rows and the red row, then opens that resident’s card. |
 | `milestones.mjs` | Seeds an all-time milestone, builds a Canteen, checks current/lifetime states and the earned marker, then closes the checklist. |
 | `charter-journal.mjs` | Builds a Canteen, checks the journal entry, opens the journal from the pause menu and confirms it survives save/reload. |
 | `care-watch.mjs` | Pushes a resident into crisis, checks the Care watch count, opens the need survey, clicks the at-risk resident and opens their card. |
