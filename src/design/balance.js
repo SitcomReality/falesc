@@ -8,6 +8,12 @@ export const BALANCE = {
     campaign: {
         days: 3
     },
+    commons: {
+        target: 20,
+        rivalDaily: 1,
+        minRivalLumen: 6,
+        comfort: 3
+    },
     contest: {
         startingLumen: 15,
         civicDividend: 1,

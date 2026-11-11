@@ -32,6 +32,7 @@ export function summarizeReport(report) {
         patronageByChapter: { ...(report.patronageByChapter || {}) },
         chapters: (report.chapters || []).map((entry) => ({ ...entry })),
         campaignEvent: report.campaignEvent ? { ...report.campaignEvent } : null,
+        commons: report.commons ? { ...report.commons } : null,
         outcome: report.outcome || null,
         message: report.message,
         ending: report.ending ? { ...report.ending } : null,

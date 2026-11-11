@@ -101,7 +101,7 @@ src/
   ui/
     BuildModal.js, ServiceCardModal.js, BulletinModal.js,
     OverlayManager.js, StandingsCard.js, ResidentCardModal.js, Minimap.js,
-    ChatterManager.js, CampaignModal.js, icons.js
+    ChatterManager.js, CampaignModal.js, CommonsModal.js, icons.js
   world/
     World.js                 Pixi app, layers, camera/input, map and minerals
     PatronageFlow.js         world-space last-choice arcs on the overlay layer
@@ -309,6 +309,15 @@ vote based on per-chapter affinity, home loyalty, last choice, the player's
 campaign promise, rival campaign promises, campaign momentum and a seeded
 tie-break. The winner becomes the charter ending; shared
 Flourishing below the survival line produces a no-winner defeat.
+
+The **Commons Beacon** is a shared project rather than a chapter service.
+`Charter.setupCommons()` reserves a 2×2 site with a PENDING service in a
+`commons`-owned `ServiceManager`; the site counts for occupancy and renders as
+a ghost. `Charter.contributeCommons()` accepts player or rival lumen, records
+contributors and flips the service to ACTIVE at 20. While active,
+`DaySimulator.applyNightRest()` eases every need by `BALANCE.commons.comfort`
+(3) after the home rest. `CommonsModal` is the contribution UI. The site,
+contributors and service persist in the `commons` save block.
 
 The **patronage-flow overlay** (`src/world/PatronageFlow.js`) is a read-only Pixi
 layer over the world. When toggled from the standings card or with `P`, it draws
@@ -556,6 +565,8 @@ It stores:
     "mode": "contest", "ending": null, "confluenceReady": true,
     "campaign": { "startedDay": 12, "dayLimit": 14, "seed": 12345,
       "rivalPledges": {}, "playerPledge": null, "events": [] },
+    "commons": { "target": 20, "fund": 12, "active": false,
+      "contributors": {}, "activatedDay": null, "serviceId": "commons-s1" },
     "pendingArrivals": [], "lastReport": {},
     "residents": [], "services": [], "rivals": []
   },

@@ -92,6 +92,11 @@ export class DaySimulator {
             resident.recordHomelessNight();
             this.complain(resident, NEED_BY_ID.rest, `I need a bed. The ${this.charter.name} has no room for me.`);
         }
+        if (this.charter.commons?.active) {
+            for (const need of NEEDS) {
+                resident.adjustNeed(need.id, -BALANCE.commons.comfort);
+            }
+        }
     }
 
     chooseAndSchedule(resident, phase, needBefore, loads) {
@@ -399,6 +404,12 @@ export class DaySimulator {
         charter.flourishing = wellbeing;
         charter.devotion = charter.devotionByChapter.player || 0;
         const campaignEvent = this.campaignEvent;
+        const commons = this.charter.commons ? {
+            active: Boolean(this.charter.commons.active),
+            fund: this.charter.commons.fund,
+            target: this.charter.commons.target,
+            comfort: BALANCE.commons.comfort
+        } : null;
         const devotionByChapter = charter.devotionByChapter;
         const patronageByChapter = Object.fromEntries(charter.chapters.map((chapter) => [chapter.id, 0]));
         for (const service of charter.allServices) {
@@ -447,6 +458,7 @@ export class DaySimulator {
             flourishing: wellbeing,
             devotion: charter.devotion,
             campaignEvent,
+            commons,
             devotionByChapter,
             patronageByChapter,
             chapters,

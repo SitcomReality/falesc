@@ -55,11 +55,15 @@ housing growth, per-chapter lumen/contributions/upkeep/closures, Devotion
 standings, patronage, a patronage-flow overlay and a most-beloved-chapter end at
 the day limit. Rivals also recover from closures and choose builds by need
 pressure, the last three days run a three-event campaign with rival promises and
-matching service appeal, and the day limit convenes a pledge/vote Confluence. A long-term rival plan, multi-round
-festival events, auctions and systemic stewardship remain.
+matching service appeal, and the day limit convenes a pledge/vote Confluence.
+A player winner chooses a stewardship promise, and the archipelago can fund a
+shared Commons Beacon for a nightly multi-need comfort. A separate shared-commons
+island, long-term rival plan, multi-round festival events, auctions and systemic
+stewardship remain.
 
 **Not started:** the rest of Phase 2, Phase 3 (layers, modules, finishes,
-policy, retrofit), Phase 4 (scenarios, Confluence vote, stewardship), Phase 5
+policy, retrofit), the separate shared-commons island and assembly, deeper
+Phase 4 scenarios, and Phase 5
 (multiplayer, audio, accessibility polish).
 
 ---

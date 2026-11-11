@@ -65,6 +65,9 @@ export class ReportScreen {
         const festival = report.campaignEvent
             ? `<p class="report__warning">Festival programme: <strong>${escapeHtml(report.campaignEvent.title)}</strong> — ${escapeHtml(report.campaignEvent.blurb)}</p>`
             : '';
+        const commonsNote = report.commons
+            ? `<p class="report__warning">${report.commons.active ? 'The Commons Beacon is lit: every need eases by ${report.commons.comfort} at night.' : `Commons Beacon fund: ${report.commons.fund} / ${report.commons.target} lumen.`}</p>`
+            : '';
 
         this.container.innerHTML = `
             <div class="report__sheet paper">
@@ -84,6 +87,7 @@ export class ReportScreen {
                     <div><span class="kicker">Flourishing</span><strong>${Math.round(report.flourishing)}</strong></div>
                 </div>
                 ${festival}
+                ${commonsNote}
                 ${closures}
                 <div class="report__columns">
                     <section>

@@ -8,9 +8,9 @@ enough for the chapter to flourish.
 This build is the **First Light vertical slice**. One playable home shard, four
 needs, four services, a paused planning day, a deterministic playback, and an
 evening broadsheet. A **Contest preview** adds two rival chapters, a shared lumen
-economy, shared residents and rival housing on the same shard, ending in a three-day campaign, a **Confluence vote** and a post-vote
-**stewardship** promise; the full multi-round festival, auctions and
-shared-commons layer are the design target beyond that.
+economy, shared residents and rival housing on the same shard, ending in a three-day campaign, a **Confluence vote**, a post-vote
+**stewardship** promise and a fundable **Commons Beacon**; the full multi-round festival, auctions and a
+separate shared-commons layer are the design target beyond that.
 
 Built with vanilla ES modules and [Pixi.js](https://pixijs.com/) 7. There is no
 build step: `index.html` loads `src/App.js`, which starts `src/FalescGame.js`,
@@ -52,6 +52,8 @@ so any static file server works, but ES modules require `http://`, not `file://`
   armed in both.
 - Read the morning bulletin. Arm a service with `1`–`4` (or click a dock card),
   then click a free plot on the home shard and name the place.
+- Fund the shared **Commons Beacon** from the HUD card; every chapter can give
+  lumen, and once lit it eases every resident's needs at night.
 - In the last three Contest days, choose a **campaign promise** from the
   standings card or the automatic campaign dialog. Rivals publish theirs, and a
   three-day festival programme makes matching services more magnetic.
@@ -98,6 +100,7 @@ webgame_smoke --scenario scripts/scenarios/contest-recovery.mjs
 webgame_smoke --scenario scripts/scenarios/confluence-defeat.mjs
 webgame_smoke --scenario scripts/scenarios/campaign.mjs
 webgame_smoke --scenario scripts/scenarios/contest-season.mjs
+webgame_smoke --scenario scripts/scenarios/commons.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```
 
@@ -135,9 +138,9 @@ appear in the HUD and report. At the day limit the archipelago convenes a
 **Campaign and Confluence**: the final three days run a three-event festival
 programme where rivals publish promises and the player chooses one; every
 resident then votes and the result becomes the charter record. Still absent: a
-larger multi-round festival, shared commons,
-auctions/stewardship and a deeper rival strategy beyond need-pressure
+larger multi-round festival, a separate shared-commons island,
+auctions/systemic stewardship and a deeper rival strategy beyond need-pressure
 builds/recovery, building layers or retrofit, audio, multiplayer, or a keyboard
-build cursor. A patronage-flow
-overlay now traces each resident's last choice from home to door. The Commons Beacon silhouette exists as endgame art but
-is not buildable. See [docs/known-issues.md](docs/known-issues.md).
+build cursor. A patronage-flow overlay traces each resident's last choice from
+home to door. The Commons Beacon is now a fundable shared project on the home
+shard. See [docs/known-issues.md](docs/known-issues.md).

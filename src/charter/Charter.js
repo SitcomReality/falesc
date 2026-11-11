@@ -46,6 +46,24 @@ export class Charter {
             idPrefix: 'player'
         });
         this.player.services = this.services;
+        this.commonsChapter = { id: 'commons', name: 'The Commons', colour: '#FFD36E', isPlayer: false };
+        this.commonsManager = mode === 'contest'
+            ? new ServiceManager({
+                map,
+                parentContainer,
+                chapter: this.commonsChapter,
+                occupancy: this.occupancy,
+                idPrefix: 'commons'
+            })
+            : null;
+        this.commons = {
+            target: BALANCE.commons.target,
+            fund: 0,
+            active: false,
+            contributors: {},
+            activatedDay: null,
+            serviceId: null
+        };
         this.rivals = [];
         this.lastRivalMoves = [];
         this.day = 1;
@@ -73,6 +91,7 @@ export class Charter {
         if (this.mode === 'contest') {
             this.createRivals();
             this.lastRivalMoves = this.rivals.map((rival) => rival.lastMove).filter(Boolean);
+            this.setupCommons();
         }
         this.assignHomes();
         this.refreshDerived();
@@ -117,7 +136,8 @@ export class Charter {
     get allServices() {
         return [
             ...this.services.services,
-            ...this.rivals.flatMap((rival) => rival.services.services)
+            ...this.rivals.flatMap((rival) => rival.services.services),
+            ...(this.commonsManager?.services || [])
         ];
     }
 
@@ -236,6 +256,56 @@ export class Charter {
         if (!PLEDGE_BY_ID[pledgeId]) return { ok: false, reason: 'That is not a campaign promise.' };
         this.campaign.setPlayerPledge(pledgeId);
         return { ok: true, campaign: this.campaign };
+    }
+
+    setupCommons() {
+        if (!this.commonsManager || !this.homeSector) return null;
+        const sector = this.homeSector;
+        for (let v = 0; v < sector.gridSize; v++) {
+            for (let u = 0; u < sector.gridSize; u++) {
+                const result = this.commonsManager.place({
+                    programId: 'commons_beacon',
+                    sectorId: sector.id,
+                    u,
+                    v,
+                    name: 'Commons Beacon',
+                    state: 'PENDING',
+                    fixed: true
+                });
+                if (result.ok) {
+                    this.commons.serviceId = result.service.id;
+                    return result.service;
+                }
+            }
+        }
+        return null;
+    }
+
+    contributeCommons(chapter, amount) {
+        if (!this.contest || !this.commonsManager || this.commons.active) return { ok: false, reason: 'The Commons is not taking contributions.' };
+        const needed = Math.max(0, this.commons.target - this.commons.fund);
+        const value = Math.max(0, Math.min(Math.trunc(amount), chapter?.lumen || 0, needed));
+        if (!value) return { ok: false, reason: 'No lumen to give.' };
+        chapter.lumen -= value;
+        this.commons.fund += value;
+        this.commons.contributors[chapter.id] = (this.commons.contributors[chapter.id] || 0) + value;
+        let activated = false;
+        if (this.commons.fund >= this.commons.target) {
+            activated = this.activateCommons();
+        }
+        return { ok: true, activated, fund: this.commons.fund, active: this.commons.active };
+    }
+
+    activateCommons() {
+        if (!this.commonsManager || this.commons.active) return false;
+        const service = this.commonsManager.findById(this.commons.serviceId);
+        if (!service) return false;
+        service.state = 'ACTIVE';
+        service.daysRemaining = 0;
+        service.refreshGraphics();
+        this.commons.active = true;
+        this.commons.activatedDay = this.day;
+        return true;
     }
 
     createRivals() {
@@ -455,6 +525,13 @@ export class Charter {
         this.pendingArrivals = arrivals;
         const rivalMoves = this.rivals.map((rival) => planRivalDay(rival, this)).filter(Boolean);
         this.lastRivalMoves = rivalMoves;
+        if (this.contest && this.commons && !this.commons.active) {
+            for (const rival of this.rivals) {
+                if (rival.lumen >= BALANCE.commons.minRivalLumen) {
+                    this.contributeCommons(rival, BALANCE.commons.rivalDaily);
+                }
+            }
+        }
         if (this.contest && !this.campaign && this.day >= this.dayLimit - BALANCE.campaign.days + 1) {
             this.startCampaign();
         }
@@ -619,6 +696,14 @@ export class Charter {
             });
         }
 
+        if (this.commons.active && this.commons.activatedDay === this.day) {
+            items.push({
+                kicker: 'The commons',
+                title: 'The Commons Beacon rises',
+                text: 'Every chapter put something in. The shared tower is lit, and the whole archipelago sleeps a little easier.'
+            });
+        }
+
         if (this.campaign?.active) {
             const event = this.campaignEvent;
             const rivalPromises = this.rivals
@@ -674,6 +759,10 @@ export class Charter {
             ending: this.ending,
             confluenceReady: this.confluenceReady,
             campaign: this.campaign?.toJSON() || null,
+            commons: {
+                ...this.commons,
+                service: this.commonsManager?.serialize() || []
+            },
             pendingArrivals: this.pendingArrivals,
             lastReport: summarizeReport(this.lastReport),
             residents: this.roster.map((resident) => resident.toJSON()),
@@ -710,6 +799,20 @@ export class Charter {
             this.createRivals();
         }
         this.lastRivalMoves = this.rivals.map((rival) => rival.lastMove).filter(Boolean);
+        if (saved.commons) {
+            const serviceEntries = Array.isArray(saved.commons.service) ? saved.commons.service : [];
+            this.commons = {
+                target: saved.commons.target || BALANCE.commons.target,
+                fund: Number(saved.commons.fund) || 0,
+                active: Boolean(saved.commons.active),
+                contributors: { ...(saved.commons.contributors || {}) },
+                activatedDay: saved.commons.activatedDay || null,
+                serviceId: saved.commons.serviceId || null
+            };
+            if (this.commonsManager) this.commonsManager.restore(serviceEntries);
+        } else if (this.contest) {
+            this.setupCommons();
+        }
         this.commonsCell = this.findCommonsCell(this.homeSector);
         this.assignHomes();
         this.refreshDerived();
@@ -735,6 +838,7 @@ export class Charter {
             mode: this.mode,
             confluenceReady: this.confluenceReady,
             campaign: this.campaign?.toJSON() || null,
+            commons: { ...this.commons },
             totalSpareBeds: this.totalSpareBeds,
             rivals: this.rivals.length,
             devotionByChapter: this.devotionByChapter

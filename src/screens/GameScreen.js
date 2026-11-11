@@ -174,7 +174,8 @@ export class GameScreen {
 
         this.standings = new StandingsCard({
             onToggleFlows: () => this.game.togglePatronage(),
-            onOpenCampaign: () => this.game.showCampaign()
+            onOpenCampaign: () => this.game.showCampaign(),
+            onOpenCommons: () => this.game.showCommons()
         });
         this.container.append(top, objective, this.standings.element, hint, toast, bottom);
         document.body.appendChild(this.container);
@@ -334,7 +335,7 @@ export class GameScreen {
         const contest = Boolean(charter.contest);
         this.container.classList.toggle('is-contest', contest);
         this.container.classList.toggle('is-campaign', Boolean(charter.campaign?.active));
-        this.standings.update(charter.standings(), contest, charter.campaign, charter.day);
+        this.standings.update(charter.standings(), contest, charter.campaign, charter.day, charter.commons);
         const dayLimit = charter.dayLimit || 14;
         const day = charter.day || 1;
         const daysLeft = Math.max(0, dayLimit - day + 1);

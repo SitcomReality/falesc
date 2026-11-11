@@ -18,7 +18,7 @@ export default async function ({ page, assert, screenshot, log }) {
     log(JSON.stringify({ mode: founded.mode, rivals: founded.rivalCount, allServices: founded.allServices, chapters: founded.chapters }));
     assert.equal(founded.mode, 'contest');
     assert.equal(founded.rivalCount, 2, 'two rival chapters should exist');
-    assert.equal(founded.allServices, 5, 'Welcome Post plus one housing and one opening service for each rival');
+    assert.equal(founded.allServices, 6, 'Welcome Post, rival housing/services and the reserved Commons Beacon');
     assert.equal(founded.chapters.length, 3);
     assert.equal(founded.chapters.find((chapter) => chapter.id === 'gardener').residents, 3, 'each chapter should start with three residents');
     assert.ok(await page.visible('[data-testid=standings-card]'), 'the Devotion standings should be visible');
@@ -116,7 +116,7 @@ export default async function ({ page, assert, screenshot, log }) {
     log(JSON.stringify({ restored: { mode: restored.mode, rivals: restored.rivalCount, allServices: restored.allServices, chapters: restored.chapters } }));
     assert.equal(restored.mode, 'contest', 'contest mode should survive a reload');
     assert.equal(restored.rivalCount, 2, 'rival chapters should restore');
-    assert.ok(restored.allServices >= 5, 'rival services should restore');
+    assert.ok(restored.allServices >= 6, 'rival services and the Commons Beacon should restore');
     assert.equal(restored.chapters.length, 3);
     assert.ok(restored.chapters.find((chapter) => chapter.id === 'host').residents > 3, 'a growing rival should win residents into its housing');
     await page.click('[data-testid=patronage-toggle]');

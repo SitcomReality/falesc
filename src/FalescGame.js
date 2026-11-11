@@ -17,6 +17,7 @@ import { BuildModal } from './ui/BuildModal.js';
 import { ServiceCardModal } from './ui/ServiceCardModal.js';
 import { BulletinModal } from './ui/BulletinModal.js';
 import { CampaignModal } from './ui/CampaignModal.js';
+import { CommonsModal } from './ui/CommonsModal.js';
 import { ResidentCardModal } from './ui/ResidentCardModal.js';
 import { OverlayManager } from './ui/OverlayManager.js';
 import { Minimap } from './ui/Minimap.js';
@@ -86,6 +87,10 @@ export class FalescGame {
         });
         this.campaignModal = new CampaignModal({
             onChoose: (pledgeId) => this.chooseCampaignPledge(pledgeId),
+            overlays: this.overlays
+        });
+        this.commonsModal = new CommonsModal({
+            onContribute: (amount) => this.contributeCommons(amount),
             overlays: this.overlays
         });
 
@@ -196,6 +201,7 @@ export class FalescGame {
         if (this.charter) {
             this.charter.services.clear();
             this.charter.rivals.forEach((rival) => rival.services.clear());
+            this.charter.commonsManager?.clear();
             this.charter = null;
         }
         this.patronageFlow.hide();
@@ -207,6 +213,7 @@ export class FalescGame {
         this.bulletinModal.hide();
         this.residentCard.hide();
         this.campaignModal.hide();
+        this.commonsModal.hide();
     }
 
     syncViews() {
@@ -229,6 +236,24 @@ export class FalescGame {
             );
         }
         return visible;
+    }
+
+    showCommons() {
+        if (!this.charter?.commons) return false;
+        this.commonsModal.show(this.charter);
+        return true;
+    }
+
+    contributeCommons(amount) {
+        if (!this.charter) return { ok: false, reason: 'No charter.' };
+        const result = this.charter.contributeCommons(this.charter.player, amount);
+        if (!result.ok) return result;
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        if (result.activated) {
+            this.gameScreen.toast('The Commons Beacon is lit — every resident rests a little easier.', 'mint', 2600);
+        }
+        return result;
     }
 
     showCampaign() {
@@ -357,7 +382,11 @@ export class FalescGame {
         const existing = this.charter.services.serviceAt(target.sector.id, target.u, target.v);
         if (existing) {
             this.world.clearHover();
-            this.serviceCard.show(existing);
+            if (existing.chapterId === 'commons') {
+                this.showCommons();
+            } else {
+                this.serviceCard.show(existing);
+            }
             return;
         }
 
@@ -586,6 +615,7 @@ export class FalescGame {
             this.bulletinModal.hide();
             this.residentCard.hide();
             this.campaignModal.hide();
+            this.commonsModal.hide();
             this.world.clearHover();
         }
         if (phase === GamePhase.CONFLUENCE) {
@@ -629,6 +659,7 @@ export class FalescGame {
         const state = this.screenStateMachine.state;
         if (state === GamePhase.PLAYING) {
             this.charter?.services.update(dt);
+            this.charter?.commonsManager?.update(dt);
             this.crowd.updateAmbient(dt);
             this.chatter.update(dt);
             if (this.frameCount % 3 === 0) this.gameScreen.updateHud();
@@ -770,6 +801,7 @@ export class FalescGame {
                         devotionByChapter: report.devotionByChapter || {},
                         chapters: report.chapters || [],
                         campaignEvent: report.campaignEvent || null,
+                        commons: report.commons || null,
                         population: report.population,
                         quotes: report.quotes,
                         outcome: report.outcome || null
@@ -778,6 +810,7 @@ export class FalescGame {
                     confluenceReady: Boolean(charter?.confluenceReady),
                     stewardship: charter?.stewardship || null,
                     campaign: charter?.campaign?.toJSON?.() || null,
+                    commons: charter?.commons || null,
                     chapters: charter?.standings?.() || [],
                     devotionByChapter: charter?.devotionByChapter || {},
                     buildModalOpen: game.buildModal.isOpen,
@@ -827,6 +860,9 @@ export class FalescGame {
             },
             showStewardship() {
                 return game.showStewardship();
+            },
+            showCommons() {
+                return game.showCommons();
             },
             showCampaign() {
                 return game.showCampaign();

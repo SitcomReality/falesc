@@ -12,8 +12,9 @@
 > contributions, upkeep and closures, Devotion standings, a patronage-flow
 > overlay, doctrine/need-pressure builds, reopen recovery and a pledge/vote Confluence
 > finale, including a three-day campaign programme of rival/player promises and a
-> post-vote stewardship promise. A long-term rival plan, a multi-round festival,
-> auctions and systemic stewardship remain target.
+> post-vote stewardship promise and a fundable shared Commons Beacon. A separate
+> shared-commons island, long-term rival plan, a multi-round festival, auctions
+> and systemic stewardship remain target.
 >
 > The competition is for **patronage and love**, not profit. Rivals win residents
 > by being better hosts. There is no price war, no landlord rent, and no cash
@@ -240,6 +241,10 @@ chapters during the final days.
   vote still decides.
 - The existing Beacon art and endgame silhouette survive; the win condition does
   not.
+
+**Current preview:** the Beacon can be funded from the start of the Contest,
+not only the final days. It gives a nightly multi-need comfort; contributor
+prestige and a final-days ritual are still target.
 
 This is the one place where the old Beacon earns its keep: a shared ritual, not
 a private victory.

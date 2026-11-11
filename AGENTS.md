@@ -21,8 +21,8 @@ planning plus playback, care-based competition and the Confluence — is
 substantially implemented for one shared shard, including a **Contest preview**
 with two AI rivals, a shared lumen economy, shared residents, rival housing,
 recovery and need-pressure builds, Devotion standings, a patronage-flow overlay,
-a final campaign, pledge and Confluence vote, and a post-vote stewardship promise.
-The full multi-round festival, auctions, systemic stewardship, deeper rival
+a final campaign, pledge and Confluence vote, a post-vote stewardship promise and
+a fundable shared Commons Beacon. The full multi-round festival, auctions, systemic stewardship, deeper rival
 strategy, layers and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
@@ -47,6 +47,7 @@ webgame_smoke --scenario scripts/scenarios/contest-recovery.mjs
 webgame_smoke --scenario scripts/scenarios/confluence-defeat.mjs
 webgame_smoke --scenario scripts/scenarios/campaign.mjs
 webgame_smoke --scenario scripts/scenarios/contest-season.mjs
+webgame_smoke --scenario scripts/scenarios/commons.mjs
 ```
 
 The CLI equivalents and the full scenario list are in
@@ -75,7 +76,7 @@ after any behavioural change.
 | `src/navigation/IslandNavigator.js` | Per-island A* to service doors |
 | `src/state/` | `GamePhase` constants and `ScreenStateMachine` |
 | `src/screens/` | DOM screens: menu, lobby, game HUD, day strip, report, Confluence, stewardship, end |
-| `src/ui/` | Shared `OverlayManager`, build/service/bulletin/campaign/resident modals, standings, survey chart, chatter, icons |
+| `src/ui/` | Shared `OverlayManager`, build/service/bulletin/campaign/commons/resident modals, standings, survey chart, chatter, icons |
 | `src/map/` | Seeded single-pass island generation, packing, grids, sector art, paths |
 | `src/character/`, `src/Character.js` | Procedural chibi rig and animation |
 | `src/minerals/` | Seeded static rock/crystal scenery |
@@ -120,7 +121,8 @@ after any behavioural change.
   `window.__falesc.snapshot()`, `findFreeCell(programId)`,
   `worldToScreen(x, y)`, `saveGame()`, `continueGame()`,
   `selectProgram(id)`, `openDay()`, `skipDay()`, `showResidents()`,
-  `togglePatronage()`, `showCampaign()`, `showConfluence()`, `showStewardship()`. The full game object is
+  `togglePatronage()`, `showCampaign()`, `showCommons()`, `showConfluence()`,
+  `showStewardship()`. The full game object is
   `window.__falesc.app`.
 - **Do not reintroduce dead sandbox UI.** `src/UI.js` and `lil-gui` were
   removed; the service dock is the real build UI.
@@ -165,9 +167,11 @@ after any behavioural change.
   days run a campaign: a seeded three-event festival programme makes matching
   promises more magnetic, rivals publish promises, the player chooses one, and
   the final vote uses both. A player victory then chooses one of four stewardship
-  promises for the epilogue; a rival winner skips that choice. This is a first
-  pass; a larger multi-round festival, auctions and systemic stewardship effects
-  are still missing.
+  promises for the epilogue; a rival winner skips that choice. A shared Commons
+  Beacon can be funded by every chapter and gives every resident a nightly
+  comfort once lit. This is a first pass; a separate shared-commons island,
+  a larger multi-round festival, auctions and systemic stewardship effects are
+  still missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
   not remove the survey chart without adjusting `canvasSelectors` and the smoke
   test.

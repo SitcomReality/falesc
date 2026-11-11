@@ -2,9 +2,10 @@
  * Live Devotion standings for the Contest preview. Hidden in First Light.
  */
 export class StandingsCard {
-    constructor({ onToggleFlows = null, onOpenCampaign = null } = {}) {
+    constructor({ onToggleFlows = null, onOpenCampaign = null, onOpenCommons = null } = {}) {
         this.onToggleFlows = onToggleFlows;
         this.onOpenCampaign = onOpenCampaign;
+        this.onOpenCommons = onOpenCommons;
         this.signature = null;
         this.element = document.createElement('aside');
         this.element.className = 'standings-card';
@@ -23,6 +24,11 @@ export class StandingsCard {
                 <button type="button" data-testid="campaign-open">Open</button>
                 <span class="standings-card__campaign-event" data-role="campaign-event" hidden></span>
             </div>
+            <div class="standings-card__commons" data-role="commons" hidden>
+                <span class="kicker">The Commons</span>
+                <strong data-role="commons-name">Beacon 0 / 20</strong>
+                <button type="button" data-testid="commons-open">Give</button>
+            </div>
             <ol class="standings-list" data-role="list"></ol>
         `;
         this.listEl = this.element.querySelector('[data-role=list]');
@@ -37,6 +43,12 @@ export class StandingsCard {
         this.campaignButton.addEventListener('click', () => {
             if (this.onOpenCampaign) this.onOpenCampaign();
         });
+        this.commonsRow = this.element.querySelector('[data-role=commons]');
+        this.commonsName = this.element.querySelector('[data-role=commons-name]');
+        this.commonsButton = this.element.querySelector('[data-testid=commons-open]');
+        this.commonsButton.addEventListener('click', () => {
+            if (this.onOpenCommons) this.onOpenCommons();
+        });
     }
 
     setFlows(visible) {
@@ -45,11 +57,18 @@ export class StandingsCard {
         this.flowButton.classList.toggle('is-on', Boolean(visible));
     }
 
-    update(chapters = [], visible = false, campaign = null, day = 1) {
+    update(chapters = [], visible = false, campaign = null, day = 1, commons = null) {
         this.element.hidden = !visible;
         if (!visible) return;
         const campaignActive = Boolean(campaign?.active);
         this.campaignRow.hidden = !campaignActive;
+        this.commonsRow.hidden = !commons;
+        if (commons) {
+            this.commonsName.textContent = commons.active
+                ? 'Beacon lit'
+                : `Beacon ${commons.fund} / ${commons.target}`;
+            this.commonsButton.textContent = commons.active ? 'View' : 'Give';
+        }
         if (campaignActive) {
             this.campaignName.textContent = campaign.playerPledgeName || 'Choose a promise';
             this.campaignButton.textContent = campaign.playerPledge ? 'View' : 'Open';
@@ -64,7 +83,8 @@ export class StandingsCard {
             ordered.map((chapter) => [chapter.id, chapter.devotion, chapter.visits, chapter.residents]),
             campaignActive,
             campaign?.playerPledge || null,
-            campaign?.eventFor?.(day)?.title || null
+            campaign?.eventFor?.(day)?.title || null,
+            commons ? [commons.active, commons.fund, commons.target] : null
         ]);
         if (signature === this.signature) return;
         this.signature = signature;

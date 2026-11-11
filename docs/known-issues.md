@@ -49,7 +49,7 @@ Severity is about impact on the slice, not effort:
   surplus does not accumulate across fourteen days — but the first four days
   still do not force a sacrifice.
 - The full 14-day `contest-season.mjs` probe reaches the Confluence with the
-  player on 11 services and an 11–4–0 vote split; the player can still coast on
+  player on 11 services and an 8–6–1 vote split; the player can still coast on
   the early lead while the Host sits on a large unspent lumen reserve.
 - `BALANCE` centralises the numbers, but there is no tuning pass against a
   target difficulty curve, and some values (`devotion.decayTowardNeutral`,
@@ -76,7 +76,9 @@ when the curve is chosen.
 - `PlacementPolicy.evaluatePlacement()` rejects any sector other than
   `map.homeSector` with "The chapter can only build on its home island for now."
 - `FalescGame.findGridTarget()` only projects into the home sector.
-- Other generated islands have scenery and minerals but no buildable grid
+- Other generated islands have scenery and minerals but no buildable grid.
+- The shared Commons Beacon is a project on the home shard, not a separate
+  common island with its own services or assembly.
   interaction, services, transit or residents.
 
 **Impact**
@@ -137,8 +139,8 @@ test: every option must show up in a resident's choice or the report. Extend
   specific moves.
 - A player winner chooses one of four stewardship promises, but it changes only
   the epilogue text and end record. There are no auctions, systemic stewardship
-  effects or multi-round public judgment; the Commons Beacon is still
-  non-buildable endgame data.
+  effects or multi-round public judgment; the Commons Beacon is a single
+  shared project, not a separate commons island with an assembly or policy.
 - D3/D4 in [design/decisions.md](design/decisions.md) deliberately defer
   auctions and stewardship.
 
@@ -338,6 +340,7 @@ These are no longer open:
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
+- **Shared Commons Beacon.** A reserved 2×2 shared civic project can be funded by the player and rivals; when lit it applies a nightly multi-need comfort. It is covered by `commons.mjs`.
 - **Contest full-season probe.** `contest-season.mjs` plays all 14 medium days, checks the campaign and Confluence, and records the economy/population trajectory for tuning.
 - **Contest economy, campaign and Confluence preview.** Two rival chapters, shared services/residents, rival housing/economy/closures, recovery and need-pressure builds, Devotion standings, the patronage-flow overlay, a three-day campaign with a festival programme and rival promises, a pledge/vote Confluence finale and a post-vote stewardship epilogue are implemented and covered by `contest.mjs`, `contest-recovery.mjs`, `campaign.mjs` and `confluence-defeat.mjs`.
 - **Safer destructive actions.** Abandoning a charter is a two-step confirmation

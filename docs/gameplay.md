@@ -110,6 +110,17 @@ weight to their chapters. The programme is shown in the campaign dialog, the
 HUD campaign card and the bulletin. The promise is carried into the Confluence
 screen and cannot be changed there.
 
+## The Commons Beacon
+
+Every Contest starts with a reserved **Commons Beacon** site and a shared fund
+of **20 lumen**. The player can give 5 or 10 lumen from the **Commons** card
+in the HUD; each rival gives 1 lumen per day when it has at least 6 in hand.
+Every chapter's contribution is recorded. When the fund fills, the Beacon
+becomes active and every resident's needs ease by **3 each night**. It is a
+shared passive, not a private service, and it cannot be bought or dismantled by
+one chapter alone. The planned shared-island institution is still future work;
+this Beacon sits on the home shard.
+
 ## Planning
 
 Planning is paused. Each day gives **two works**. Building a service spends one
