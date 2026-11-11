@@ -1,4 +1,5 @@
 import { BALANCE } from '../design/balance.js';
+import { COMMONS_POLICIES, COMMONS_POLICY_BY_ID } from '../commons/CommonsPolicies.js';
 
 /**
  * Shared Commons Beacon fund. Every chapter can put lumen into the same civic
@@ -6,8 +7,9 @@ import { BALANCE } from '../design/balance.js';
  * every resident, not a private service.
  */
 export class CommonsModal {
-    constructor({ onContribute, overlays }) {
+    constructor({ onContribute, onPolicy, overlays }) {
         this.onContribute = onContribute;
+        this.onPolicy = onPolicy;
         this.overlays = overlays;
         this.isOpen = false;
         this.charter = null;
@@ -59,15 +61,28 @@ export class CommonsModal {
         if (commons.active) {
             const service = this.charter.commonsManager?.findById(this.charter.commons.serviceId);
             const visits = service?.visits || 0;
+            const policy = COMMONS_POLICY_BY_ID[commons.policy];
+            const assembly = policy
+                ? `<div class="commons-policy-chosen"><p class="kicker">Assembly policy</p><strong>${escapeHtml(policy.name)}</strong><span>${escapeHtml(policy.detail)}</span></div>`
+                : `<p class="commons-assembly-copy">The Beacon is lit. The first assembly may choose one shared policy for every chapter.</p>
+                   <div class="commons-policies">${COMMONS_POLICIES.map((entry) => `
+                       <button type="button" class="commons-policy" data-testid="commons-policy-${entry.id}" data-policy="${entry.id}">
+                           <span class="kicker">${escapeHtml(entry.kicker)}</span>
+                           <strong>${escapeHtml(entry.name)}</strong>
+                           <span>${escapeHtml(entry.detail)}</span>
+                       </button>
+                   `).join('')}</div>`;
             this.panel.innerHTML = `
                 <div class="modal__head">
                     <div>
                         <p class="kicker" style="color:var(--wine)">The Commons · shared project</p>
-                        <h3 class="modal__title" id="commons-title">The Beacon is lit.</h3>
+                        <h3 class="modal__title" id="commons-title">${policy ? 'The assembly has spoken.' : 'The Beacon is lit.'}</h3>
                     </div>
                     <button type="button" class="modal__close" data-testid="commons-close-x" aria-label="Close commons">×</button>
                 </div>
-                <p class="modal__blurb">The fund is full. The Beacon is a shared place for every resident: it eases every need by ${BALANCE.commons.comfort} each night, and its door is open for ${visits} visits so far.</p>
+                <p class="modal__blurb">The fund is full. The Beacon is a shared place for every resident: it eases every need by ${BALANCE.commons.comfort + (policy?.comfort || 0)} each night${policy?.restRecovery ? ' and gives one more Rest back in bed' : ''}, and its door is open for ${visits} visits so far.</p>
+                ${assembly}
+                <h4 class="campaign-modal__label">Given so far</h4>
                 <ul class="commons-contributors">${contributors || '<li><span>The commons</span><strong>—</strong></li>'}</ul>
                 <div class="modal__actions">
                     <button type="button" class="btn btn--primary" data-testid="commons-close">Close</button>
@@ -102,6 +117,9 @@ export class CommonsModal {
         this.panel.querySelectorAll('[data-testid^=commons-close]').forEach((button) => button.addEventListener('click', () => this.hide()));
         this.panel.querySelector('[data-testid=commons-give-5]')?.addEventListener('click', () => this.give(5));
         this.panel.querySelector('[data-testid=commons-give-10]')?.addEventListener('click', () => this.give(10));
+        this.panel.querySelectorAll('[data-testid^=commons-policy-]').forEach((button) => {
+            button.addEventListener('click', () => this.choose(button.dataset.policy));
+        });
     }
 
     give(amount) {
@@ -111,6 +129,13 @@ export class CommonsModal {
         requestAnimationFrame(() => {
             this.panel.querySelector('[data-testid=commons-close]')?.focus({ preventScroll: true });
         });
+    }
+
+    choose(policyId) {
+        const result = this.onPolicy?.(policyId);
+        if (!result?.ok) return;
+        this.render();
+        requestAnimationFrame(() => this.panel.querySelector('[data-testid=commons-close]')?.focus({ preventScroll: true }));
     }
 
     onKeyDown(event) {

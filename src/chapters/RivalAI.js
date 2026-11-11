@@ -2,6 +2,7 @@ import { BALANCE } from '../design/balance.js';
 import { PROGRAM_BY_ID } from '../design/programs.js';
 import { PLEDGES } from '../confluence/Pledges.js';
 import { RivalChapter } from './RivalChapter.js';
+import { applyCommonsPolicyToService } from '../commons/CommonsPolicies.js';
 
 export const RIVAL_DEFINITIONS = [
     {
@@ -125,6 +126,7 @@ export function planRivalDay(rival, charter) {
             state: 'PENDING'
         });
         if (!result.ok) continue;
+        applyCommonsPolicyToService(result.service, charter.commons?.policy);
         rival.lumen -= candidate.program.cost;
         rival.works -= 1;
         rival.lastMove = {

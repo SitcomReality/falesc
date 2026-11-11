@@ -135,6 +135,22 @@ institution, not a private service, and it cannot be bought or dismantled by one
 chapter alone. The planned shared-island institution is still future work;
 this Beacon sits on the home shard.
 
+## The first Commons Assembly
+
+When the Beacon is lit, the Commons HUD changes to **assembly pending**. Opening
+it calls the first **Commons Assembly**, a one-time choice of shared policy for
+every chapter:
+
+- **Shared Table** — every Canteen and Tea House gains 2 seats.
+- **Open Beds** — every Welcome House gains 2 beds.
+- **Commons Garden** — every Garden Dome gains 2 seats.
+- **Night Watch** — the Beacon eases one more point of every need at night, and
+  beds restore one more Rest.
+
+The policy applies to existing services and to every service built afterwards
+by the player or a rival. It is saved with the charter. The assembly is called
+by the player; a resident vote and petitions are still future work.
+
 ## Planning
 
 Planning is paused. Each day gives **two works**. Building a service spends one

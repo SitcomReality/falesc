@@ -48,6 +48,8 @@ src/
   chapters/
     RivalChapter.js          rival identity, budget, works and services
     RivalAI.js               doctrine/need-pressure builds and recovery
+  commons/
+    CommonsPolicies.js       Assembly policy data and service modifiers
   confluence/
     Pledges.js               the four shared campaign promises
     Campaign.js              final-days promises and player choice
@@ -328,7 +330,12 @@ as an ordinary resident.
 
 `DaySimulator.applyNightRest()` eases every need by `BALANCE.commons.comfort`
 (3) after the home rest, and `servesNeed()` lets the six-seat Beacon answer any
-need as a shared visitable service. `CommonsModal` is the contribution UI. The site,
+need as a shared visitable service. `CommonsModal` is the contribution and Assembly UI. `src/commons/CommonsPolicies.js`
+defines the four one-time policies (Shared Table, Open Beds, Commons Garden,
+Night Watch); `Charter.chooseCommonsPolicy()` applies the
+chosen capacity/comfort modifiers to every existing service and stores the
+policy. `Charter.build()` and `RivalAI` apply it to later builds. Night Watch is
+read by `commonsComfortFor()` and `commonsRestRecoveryFor()`. The site,
 contributors and service persist in the `commons` save block.
 
 The **patronage-flow overlay** (`src/world/PatronageFlow.js`) is a read-only Pixi

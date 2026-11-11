@@ -3,6 +3,7 @@ import { NEEDS } from '../design/needs.js';
 import { PROGRAM_BY_ID, servesNeed, isOpenAt } from '../design/programs.js';
 import { ResidentFactory } from '../residents/ResidentFactory.js';
 import { VisitorFactory } from '../residents/VisitorFactory.js';
+import { COMMONS_POLICY_BY_ID, applyCommonsPolicyToService } from '../commons/CommonsPolicies.js';
 import { ServiceManager } from '../services/ServiceManager.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
@@ -65,7 +66,9 @@ export class Charter {
             active: false,
             contributors: {},
             activatedDay: null,
-            serviceId: null
+            serviceId: null,
+            policy: null,
+            chosenDay: null
         };
         this.rivals = [];
         this.lastRivalMoves = [];
@@ -303,6 +306,23 @@ export class Charter {
         return { ok: true, activated, fund: this.commons.fund, active: this.commons.active };
     }
 
+    chooseCommonsPolicy(policyId) {
+        if (!this.commons.active) return { ok: false, reason: 'Light the Beacon before calling an assembly.' };
+        if (this.commons.policy) return { ok: false, reason: 'The assembly has already chosen.' };
+        const policy = COMMONS_POLICY_BY_ID[policyId];
+        if (!policy) return { ok: false, reason: 'That is not a Commons policy.' };
+        this.commons.policy = policy.id;
+        this.commons.chosenDay = this.day;
+        for (const chapter of this.chapters) {
+            for (const service of chapter.services.services) {
+                applyCommonsPolicyToService(service, policy.id);
+            }
+        }
+        this.assignHomes();
+        this.refreshDerived();
+        return { ok: true, policy };
+    }
+
     activateCommons() {
         if (!this.commonsManager || this.commons.active) return false;
         const service = this.commonsManager.findById(this.commons.serviceId);
@@ -469,6 +489,7 @@ export class Charter {
         if (!result.ok) return result;
         this.lumen -= program.cost;
         this.works -= 1;
+        applyCommonsPolicyToService(result.service, this.commons?.policy);
         this.assignHomes();
         this.refreshDerived();
         return { ...result, cost: program.cost };
@@ -854,7 +875,9 @@ export class Charter {
                 active: Boolean(saved.commons.active),
                 contributors: { ...(saved.commons.contributors || {}) },
                 activatedDay: saved.commons.activatedDay || null,
-                serviceId: saved.commons.serviceId || null
+                serviceId: saved.commons.serviceId || null,
+                policy: saved.commons.policy || null,
+                chosenDay: saved.commons.chosenDay || null
             };
             if (this.commonsManager) this.commonsManager.restore(serviceEntries);
         } else if (this.contest) {

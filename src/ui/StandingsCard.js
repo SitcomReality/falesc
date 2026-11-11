@@ -1,3 +1,5 @@
+import { COMMONS_POLICY_BY_ID } from '../commons/CommonsPolicies.js';
+
 /**
  * Live Devotion standings for the Contest preview. Hidden in First Light.
  */
@@ -65,9 +67,9 @@ export class StandingsCard {
         this.commonsRow.hidden = !commons;
         if (commons) {
             this.commonsName.textContent = commons.active
-                ? 'Beacon lit'
+                ? `Beacon lit${commons.policy ? ` · ${COMMONS_POLICY_BY_ID[commons.policy]?.name || commons.policy}` : ' · assembly pending'}`
                 : `Beacon ${commons.fund} / ${commons.target}`;
-            this.commonsButton.textContent = commons.active ? 'View' : 'Give';
+            this.commonsButton.textContent = commons.active ? (commons.policy ? 'View' : 'Assemble') : 'Give';
         }
         if (campaignActive) {
             this.campaignName.textContent = campaign.playerPledgeName || 'Choose a promise';
@@ -84,7 +86,7 @@ export class StandingsCard {
             campaignActive,
             campaign?.playerPledge || null,
             campaign?.eventFor?.(day)?.title || null,
-            commons ? [commons.active, commons.fund, commons.target] : null
+            commons ? [commons.active, commons.fund, commons.target, commons.policy] : null
         ]);
         if (signature === this.signature) return;
         this.signature = signature;

@@ -91,6 +91,7 @@ export class FalescGame {
         });
         this.commonsModal = new CommonsModal({
             onContribute: (amount) => this.contributeCommons(amount),
+            onPolicy: (policyId) => this.chooseCommonsPolicy(policyId),
             overlays: this.overlays
         });
 
@@ -253,6 +254,17 @@ export class FalescGame {
         this.reportScreen.show();
         this.saveGame();
         this.gameScreen.toast(`${result.resident.name} has a bed of their own now.`, 'mint', 2400);
+        return result;
+    }
+
+    chooseCommonsPolicy(policyId) {
+        if (!this.charter) return { ok: false, reason: 'No charter.' };
+        const result = this.charter.chooseCommonsPolicy(policyId);
+        if (!result.ok) return result;
+        this.syncViews();
+        this.gameScreen.updateHud(true);
+        this.saveGame();
+        this.gameScreen.toast(`The Commons Assembly chooses ${result.policy.name}.`, 'mint', 2600);
         return result;
     }
 

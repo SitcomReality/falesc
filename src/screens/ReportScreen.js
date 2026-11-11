@@ -1,5 +1,6 @@
 import { NEEDS } from '../design/needs.js';
 import { BALANCE } from '../design/balance.js';
+import { COMMONS_POLICY_BY_ID } from '../commons/CommonsPolicies.js';
 
 /**
  * The evening broadsheet. This is the emotional payoff: visits, hearts,
@@ -85,8 +86,9 @@ export class ReportScreen {
             ? `<h2>Visitors</h2><ul class="report__list report__visitors">${visitorRows}</ul>`
             : '';
         const commonsVisits = report.patronageByChapter?.commons || 0;
+        const commonsPolicy = COMMONS_POLICY_BY_ID[report.commons?.policy];
         const commonsNote = report.commons
-            ? `<p class="report__warning">${report.commons.active ? `The Commons Beacon is lit: every need eases by ${report.commons.comfort} at night, and ${commonsVisits} visits found its door.` : `Commons Beacon fund: ${report.commons.fund} / ${report.commons.target} lumen.`}</p>`
+            ? `<p class="report__warning">${report.commons.active ? `The Commons Beacon is lit: every need eases by ${report.commons.comfort} at night, and ${commonsVisits} visits found its door.${commonsPolicy ? ` The assembly chose ${commonsPolicy.name}.` : ' The first assembly is waiting.'}` : `Commons Beacon fund: ${report.commons.fund} / ${report.commons.target} lumen.`}</p>`
             : '';
 
         this.container.innerHTML = `

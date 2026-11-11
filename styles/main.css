@@ -3608,3 +3608,81 @@ body.has-modal > canvas {
     text-transform: uppercase;
     white-space: nowrap;
 }
+
+/* Commons Assembly ------------------------------------------------------- */
+
+.commons-assembly-copy {
+    margin: 14px 0 10px;
+    color: var(--ink-soft);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.commons-policies {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 10px 0 14px;
+}
+
+.commons-policy {
+    display: grid;
+    gap: 3px;
+    padding: 10px;
+    text-align: left;
+    background: var(--paper-deep);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.commons-policy:hover,
+.commons-policy:focus-visible {
+    background: var(--paper);
+    transform: translateY(-1px);
+}
+
+.commons-policy .kicker {
+    color: var(--wine);
+    font-size: 8px;
+}
+
+.commons-policy strong {
+    font-family: var(--display);
+    font-size: 18px;
+    line-height: 1.05;
+}
+
+.commons-policy > span:last-child {
+    color: var(--ink-soft);
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.commons-policy-chosen {
+    display: grid;
+    gap: 3px;
+    margin: 14px 0;
+    padding: 12px;
+    background: rgba(201, 182, 255, 0.3);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+}
+
+.commons-policy-chosen strong {
+    font-family: var(--display);
+    font-size: 21px;
+}
+
+.commons-policy-chosen span {
+    color: var(--ink-soft);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+@media (max-width: 620px) {
+    .commons-policies {
+        grid-template-columns: 1fr;
+    }
+}

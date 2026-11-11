@@ -53,7 +53,8 @@ so any static file server works, but ES modules require `http://`, not `file://`
 - Read the morning bulletin. Arm a service with `1`–`4` (or click a dock card),
   then click a free plot on the home shard and name the place.
 - Fund the shared **Commons Beacon** from the HUD card; every chapter can give
-  lumen, and once lit it eases every resident's needs at night.
+  lumen; once lit it eases every resident's needs at night, and its first
+  Assembly chooses a shared policy for every chapter.
 - On Contest days, watch for 2–3 **day visitors**. They use services and pay a
   small fee to the chapter whose door they choose. A visitor who likes your
   chapter and a spare bed can be invited to stay; they then join the resident
@@ -107,6 +108,7 @@ webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 webgame_smoke --scenario scripts/scenarios/commons.mjs
 webgame_smoke --scenario scripts/scenarios/visitors.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
+webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 webgame_smoke --scenario scripts/scenarios/victory.mjs
 ```
 

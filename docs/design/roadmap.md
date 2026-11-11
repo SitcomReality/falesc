@@ -57,8 +57,8 @@ the day limit. Rivals also recover from closures and choose builds by need
 pressure, the last three days run a three-event campaign with rival promises and
 matching service appeal, and the day limit convenes a pledge/vote Confluence.
 A player winner chooses a stewardship promise, and the archipelago can fund a
-shared Commons Beacon for a nightly multi-need comfort, and 2–3 day visitors
-trade with the services. A separate shared-commons
+shared Commons Beacon for a nightly multi-need comfort and a first Assembly
+policy, and 2–3 day visitors trade with the services. A separate shared-commons
 island, long-term rival plan, multi-round festival events, auctions and systemic
 stewardship remain.
 

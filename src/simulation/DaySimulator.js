@@ -5,6 +5,7 @@ import { rhythmRise, vibeFit, standardFit } from '../design/traits.js';
 import { SeededRandom } from '../map/SeededRandom.js';
 import { IslandNavigator } from '../navigation/IslandNavigator.js';
 import { LumenLedger } from '../economy/LumenLedger.js';
+import { commonsComfortFor, commonsRestRecoveryFor } from '../commons/CommonsPolicies.js';
 
 /**
  * Deterministic day simulation. Residents wake, needs rise, they choose a
@@ -85,7 +86,7 @@ export class DaySimulator {
     applyNightRest(resident) {
         const home = this.charter.homeFor(resident);
         if (home) {
-            resident.adjustNeed('rest', -BALANCE.housing.restRecovery);
+            resident.adjustNeed('rest', -commonsRestRecoveryFor(this.charter));
             resident.addAffinity(BALANCE.housing.housedAffinity, home.chapterId);
             resident.clearUnmetDay('rest');
             resident.resetHomelessDays();
@@ -95,8 +96,9 @@ export class DaySimulator {
             this.complain(resident, NEED_BY_ID.rest, `I need a bed. The ${this.charter.name} has no room for me.`);
         }
         if (this.charter.commons?.active) {
+            const comfort = commonsComfortFor(this.charter);
             for (const need of NEEDS) {
-                resident.adjustNeed(need.id, -BALANCE.commons.comfort);
+                resident.adjustNeed(need.id, -comfort);
             }
         }
     }
@@ -423,7 +425,8 @@ export class DaySimulator {
             active: Boolean(this.charter.commons.active),
             fund: this.charter.commons.fund,
             target: this.charter.commons.target,
-            comfort: BALANCE.commons.comfort
+            comfort: commonsComfortFor(this.charter),
+            policy: this.charter.commons.policy || null
         } : null;
         const devotionByChapter = charter.devotionByChapter;
         const patronageByChapter = Object.fromEntries(charter.chapters.map((chapter) => [chapter.id, 0]));

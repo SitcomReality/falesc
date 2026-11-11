@@ -51,6 +51,7 @@ webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 webgame_smoke --scenario scripts/scenarios/commons.mjs
 webgame_smoke --scenario scripts/scenarios/visitors.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
+webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs
 ```
 
 The CLI equivalents and the full scenario list are in
@@ -71,6 +72,7 @@ after any behavioural change.
 | `src/charter/Charter.js` | The run model: day, player chapter, rivals, roster, services, reports, ending |
 | `src/chapters/` | `RivalChapter` and doctrine-driven `RivalAI` for the Contest preview |
 | `src/confluence/` | Campaign, pledges, stewardship and the deterministic Confluence vote |
+| `src/commons/` | Commons Assembly policies and shared service modifiers |
 | `src/design/` | Needs, traits, service programs, balance table, names |
 | `src/services/` | `ServiceBuilding`, `ServiceManager`, `PlacementPolicy` |
 | `src/simulation/DaySimulator.js` | Deterministic day: needs, choices, queues, visits, report |
@@ -175,7 +177,9 @@ after any behavioural change.
   nightly comfort and opens as a six-seat all-needs shared service. Contest days
   also bring 2–3 transient visitors who use services, pay 1 lumen per visit and
   leave before the next day. A charmed visitor with a spare bed can be invited
-  from the report and becomes an ordinary resident. This is a first pass; a separate shared-commons island,
+  from the report and becomes an ordinary resident. Once the Beacon is lit, the
+  first Commons Assembly chooses one shared policy (`src/commons/CommonsPolicies.js`).
+  This is a first pass; a separate shared-commons island,
   a larger multi-round festival, auctions and systemic stewardship effects are
   still missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
