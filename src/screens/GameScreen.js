@@ -110,6 +110,7 @@ export class GameScreen {
             </div>
             <p class="objective-card__goal" data-role="goal-copy">and reach a flourishing of ${BALANCE.end.comfortableFlourishing}.</p>
             <button type="button" class="care-watch" data-role="care-watch" data-testid="care-watch" hidden></button>
+            <button type="button" class="daily-request" data-role="daily-request" data-testid="daily-request" hidden></button>
         `;
 
         const hint = document.createElement('div');
@@ -217,6 +218,11 @@ export class GameScreen {
         this.goalCopy = objective.querySelector('[data-role=goal-copy]');
         this.careWatch = objective.querySelector('[data-role=care-watch]');
         this.careWatch.addEventListener('click', () => this.game.openNeedSurvey());
+        this.dailyRequest = objective.querySelector('[data-role=daily-request]');
+        this.dailyRequest.addEventListener('click', () => {
+            const request = this.game.charter?.request;
+            if (request) this.game.openResident(request.residentId);
+        });
         this.hintEl = hint;
         this.hintCopy = hint.querySelector('[data-role=hint-copy]');
         hint.querySelector('[data-role=hint-dismiss]').addEventListener('click', () => {
@@ -480,6 +486,11 @@ export class GameScreen {
         const watch = charter.careWatch();
         this.careWatch.hidden = watch.count === 0;
         this.careWatch.textContent = watch.count ? `${watch.count} resident${watch.count === 1 ? '' : 's'} need care · survey` : '';
+        const request = charter.request;
+        this.dailyRequest.hidden = !request;
+        this.dailyRequest.textContent = request
+            ? `Daily request · ${request.residentName}: ${request.needName}${request.status === 'met' ? ' · met' : request.status === 'missed' ? ' · missed' : ''}`
+            : '';
         this._setText(this.goalCopy, 'goalCopy', openCharter
             ? 'No deadline. Keep building; abandon from the charter menu when you are done.'
             : goalsMet

@@ -67,6 +67,9 @@ export class ReportScreen {
         const festival = report.campaignEvent
             ? `<p class="report__warning">Festival programme: <strong>${escapeHtml(report.campaignEvent.title)}</strong> — ${escapeHtml(report.campaignEvent.blurb)}</p>`
             : '';
+        const dailyRequest = report.request
+            ? `<p class="report__warning">Daily request: <strong>${escapeHtml(report.request.residentName)}</strong> asked for ${escapeHtml(report.request.needName)} — ${report.request.status === 'met' ? 'met.' : 'unmet.'}</p>`
+            : '';
         const stayedVisitors = report.stayedVisitors || 0;
         const visitorsNote = report.visitors
             ? `<p class="report__warning">${report.visitors} day visitors left ${report.visitorFees ?? 0} lumen across the archipelago; your chapter earned ${report.playerVisitorFees ?? 0}.${stayedVisitors ? ` Of them, ${stayedVisitors} chose a bed and stayed.` : ''}</p>`
@@ -116,6 +119,7 @@ export class ReportScreen {
                     <div><span class="kicker">Flourishing</span><strong>${Math.round(report.flourishing)}</strong></div>
                 </div>
                 ${festival}
+            ${dailyRequest}
                 ${visitorsNote}
                 ${trialNote}
                 ${commonsNote}

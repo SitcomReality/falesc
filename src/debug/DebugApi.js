@@ -98,6 +98,7 @@ export function installDebugApi(game) {
                         devotionByChapter: report.devotionByChapter || {},
                         chapters: report.chapters || [],
                         campaignEvent: report.campaignEvent || null,
+                        request: report.request || null,
                         visitors: report.visitors || 0,
                         visitorFees: report.visitorFees || 0,
                         playerVisitorFees: report.playerVisitorFees || 0,

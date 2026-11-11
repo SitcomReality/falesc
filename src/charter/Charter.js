@@ -18,6 +18,7 @@ import { LumenLedger } from '../economy/LumenLedger.js';
 import { DaySimulator } from '../simulation/DaySimulator.js';
 import { summarizeReport } from '../simulation/ReportSummary.js';
 import { RivalChapter } from '../chapters/RivalChapter.js';
+import { SeededRandom } from '../map/SeededRandom.js';
 import { chooseCampaignPledge, createRivalChapters, planRivalDay } from '../chapters/RivalAI.js';
 import { Campaign } from '../confluence/Campaign.js';
 import { PLEDGE_BY_ID } from '../confluence/Pledges.js';
@@ -125,6 +126,7 @@ export class Charter {
         this.bulletin = null;
         this.history = [];
         this.journal = [];
+        this.request = null;
         this.commonsCell = null;
         this.pendingArrivals = [];
 
@@ -149,6 +151,7 @@ export class Charter {
         this.assignHomes();
         this.refreshDerived();
         this.bulletin = this.buildBulletin([]);
+        this.request = this.buildDailyRequest();
     }
 
     applyLegacy() {
@@ -1152,6 +1155,7 @@ export class Charter {
         this.settleCommonsPurse(simulation.report);
         this.lastReport = simulation.report;
         this.report = simulation.report;
+        this.resolveDailyRequest(simulation.report);
         this.history.push(this.historyEntry(simulation.report));
         this.pendingArrivals = [];
         this.refreshDerived();
@@ -1180,6 +1184,7 @@ export class Charter {
         }
         this.refreshAdjacency();
         this.assignHomes();
+        this.request = this.buildDailyRequest();
         const arrivals = this.addArrivals();
         this.pendingArrivals = arrivals;
         const rivalMoves = this.rivals.map((rival) => planRivalDay(rival, this)).filter(Boolean);
@@ -1474,6 +1479,7 @@ export class Charter {
             lastReport: summarizeReport(this.lastReport),
             history: this.history.slice(-60),
             journal: this.journal.slice(-120),
+            request: this.request ? { ...this.request } : null,
             residents: this.roster.map((resident) => resident.toJSON()),
             services: this.services.serialize(),
             rivals: this.rivals.map((rival) => rival.toJSON())
@@ -1563,7 +1569,41 @@ export class Charter {
         this.lastReport = saved.lastReport || null;
         this.history = Array.isArray(saved.history) ? saved.history.slice(-60) : [];
         this.journal = Array.isArray(saved.journal) ? saved.journal.slice(-120) : [];
+        this.request = saved.request ? { ...saved.request } : this.buildDailyRequest();
         this.bulletin = this.buildBulletin(this.pendingArrivals, this.lastRivalMoves);
+    }
+
+    buildDailyRequest() {
+        const residents = this.activeResidents;
+        if (residents.length === 0) return null;
+        const rng = new SeededRandom(this.seed + this.day * 7919 + 31);
+        const resident = residents[Math.floor(rng.next() * residents.length)];
+        const need = NEEDS.reduce((best, entry) => ((resident.needs[entry.id] || 0) > (best?.value || -1) ? { need: entry, value: resident.needs[entry.id] || 0 } : best), null);
+        if (!need) return null;
+        return {
+            day: this.day,
+            residentId: resident.id,
+            residentName: resident.name,
+            needId: need.need.id,
+            needName: need.need.name,
+            needValue: Math.round(need.value),
+            status: 'open',
+            reward: 0
+        };
+    }
+
+    resolveDailyRequest(report) {
+        if (!this.request || this.request.status !== 'open') return;
+        const resident = this.roster.find((entry) => entry.id === this.request.residentId);
+        const met = (report.events || []).some((event) => event.residentId === this.request.residentId && event.needId === this.request.needId);
+        this.request.status = met ? 'met' : 'missed';
+        if (resident) {
+            const delta = met ? 0.04 : -0.01;
+            resident.addAffinity(delta, 'player');
+            this.request.reward = delta;
+        }
+        this.log('request', met ? `${this.request.residentName}'s ${this.request.needName} request was met.` : `${this.request.residentName}'s ${this.request.needName} request went unmet.`);
+        report.request = { ...this.request };
     }
 
     log(type, text) {

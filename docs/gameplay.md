@@ -314,6 +314,14 @@ highest current need, wellbeing and a red crisis row. Clicking a row opens the
 full resident card. Trial guests are listed separately and do not yet count as
 active residents.
 
+## Daily request
+
+Each planning day one active resident asks for one need. Meeting it during
+the day — a matching visit, not just an open service — earns **+0.04** player
+affinity; missing it costs **−0.01**. The request appears on the objective card,
+opens that resident's card when clicked, and is summarised in the evening
+report and journal.
+
 ## Care watch
 
 When an active resident is in crisis — any need at **85+**, wellbeing below

@@ -46,6 +46,7 @@ webgame_smoke --scenario scripts/scenarios/departure-archive.mjs
 webgame_smoke --scenario scripts/scenarios/return-menu.mjs
 webgame_smoke --scenario scripts/scenarios/mobile-hud.mjs
 webgame_smoke --scenario scripts/scenarios/reduced-motion.mjs
+webgame_smoke --scenario scripts/scenarios/daily-request.mjs
 webgame_smoke --scenario scripts/scenarios/resident-roster.mjs
 webgame_smoke --scenario scripts/scenarios/milestones.mjs
 webgame_smoke --scenario scripts/scenarios/charter-journal.mjs
