@@ -516,6 +516,7 @@ export class GameScreen {
         else if (pendingCanteen) nextHint = 'The Canteen opens tomorrow. Open the day to finish the build.';
         else if (!activePrograms.has('tea_house')) nextHint = 'Company is the next gap. Raise a Tea House and give people a table.';
         else if (!activePrograms.has('garden_dome')) nextHint = 'Wonder is still unmet. A Garden Dome gives the shard somewhere green to look.';
+        else if (!activePrograms.has('workshop')) nextHint = 'Purpose is a slower need. A Workshop gives people work worth doing.';
         else if (!activePrograms.has('clinic')) nextHint = 'Rest and sustenance can still fail together. A Clinic keeps the chapter on its feet.';
         else nextHint = 'Every need has a door. Open the day, read the report and decide what the chapter needs next.';
         const showHint = !this.game.hintDismissed;

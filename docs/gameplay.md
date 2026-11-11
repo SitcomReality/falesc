@@ -362,7 +362,7 @@ keyboard and assistive-tech players; it does not place anything.
 ## Onboarding hints
 
 The HUD hint advances through the first civic needs rather than stopping after
-the first build: Canteen, Canteen opening, Tea House, Garden Dome, Clinic, then
+the first build: Canteen, Canteen opening, Tea House, Garden Dome, Workshop, Clinic, then
 "every need has a door". It can be dismissed at any time and never blocks input.
 
 ## Daily request
