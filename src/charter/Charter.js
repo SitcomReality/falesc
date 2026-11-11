@@ -1092,7 +1092,8 @@ export class Charter {
         const returning = this.returningVisitors.splice(0, this.returningVisitors.length);
         for (const visitor of returning) visitor.returned = true;
         this.lastReferralVisitors = this.referrals;
-        const count = VisitorFactory.countFor(this.seed, this.day) + this.referrals;
+        this.lastFestivalVisitors = this.campaign?.active ? 1 : 0;
+        const count = VisitorFactory.countFor(this.seed, this.day) + this.referrals + this.lastFestivalVisitors;
         this.referrals = 0;
         this.visitors = [...returning, ...VisitorFactory.create(this.seed, this.day, count)];
         this.visitorCell = this.commonsCell || null;

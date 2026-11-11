@@ -132,7 +132,7 @@ or **saving for** followed by the service name.
 
 On the **last three days** of a Contest the campaign begins. Each day has a
 **first bell** and a **second bell** event, so the three-day festival carries six
-events. A promise that matches one bell on a day gives a smaller appeal bonus;
+events. Festival days also bring **one extra visitor** to the archipelago. A promise that matches one bell on a day gives a smaller appeal bonus;
 matching both gives the full **1.12**. A chapter's pledge also gives all of its
 matching services **+0.05 quality** during the campaign, so the promise is felt
 at the doors, not only at the ballot. Before choosing a promise, the player can

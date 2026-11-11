@@ -130,6 +130,7 @@ webgame_smoke --scenario scripts/scenarios/contest-season.mjs
 webgame_smoke --scenario scripts/scenarios/commons.mjs
 webgame_smoke --scenario scripts/scenarios/visitors.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-stay.mjs
+webgame_smoke --scenario scripts/scenarios/festival-surge.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-referral.mjs
 webgame_smoke --scenario scripts/scenarios/visitor-return.mjs
 webgame_smoke --scenario scripts/scenarios/commons-assembly.mjs

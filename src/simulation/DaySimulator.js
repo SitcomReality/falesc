@@ -186,7 +186,7 @@ export class DaySimulator {
         const program = service.program;
         const isPrimary = program.need === need.id || program.id === 'commons_beacon';
         const match = isPrimary ? 1 : 0.46;
-        const quality = ((program.quality || 1) + (service.qualityBonus || 0) + (service.adjacencyBonus || 0) + (service.districtBonus || 0) + serviceQualityModifier(service) + (this.charter.campaign?.qualityBonusFor(service.chapterId, program.need) || 0))
+        const quality = ((program.quality || 1) + (service.qualityBonus || 0) + (service.adjacencyBonus || 0) + (service.districtBonus || 0) + serviceQualityModifier(service) + (this.charter.campaign?.qualityBonusFor?.(service.chapterId, program.need) || 0))
             * (service.finish === 'grand' ? 1.1 : service.finish === 'humble' ? 0.9 : 1)
             * accessFitFor(service, resident)
             * (0.85 + (service.condition ?? 100) / 100 * 0.15);
