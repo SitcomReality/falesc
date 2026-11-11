@@ -57,8 +57,8 @@ so any static file server works, but ES modules require `http://`, not `file://`
   lets residents petition, each chapter nominate and every resident vote.
 - On Contest days, watch for 2–3 **day visitors**. They use services and pay a
   small fee to the chapter whose door they choose. A visitor who likes your
-  chapter and a spare bed can be invited to stay; clicking their name opens a
-  card with their needs, affinity and last door. Open a player service and choose **Retrofit** to pick Sunroom, Atelier or
+  chapter and a spare bed can begin a one-day trial stay; clicking their name
+  opens a card with their needs, affinity and last door. Open a player service and choose **Retrofit** to pick Sunroom, Atelier or
   Night Kitchen.
 - In the last three Contest days, choose a **campaign promise** from the
   standings card or the automatic campaign dialog. Rivals publish theirs, and a

@@ -182,8 +182,9 @@ after any behavioural change.
   nightly comfort and opens as a six-seat all-needs shared service. Contest days
   also bring 2–3 transient visitors who use services, pay 1 lumen per visit and
   leave before the next day. A charmed visitor with a spare bed can be invited
-  from the report and becomes an ordinary resident; charmed visitors who are not
-  invited may return on later days (up to two). Clicking a visitor's name opens
+  from the report into a one-day trial stay; a trial guest holds a bed but does
+  not contribute or vote until they pass. Charmed visitors who are not invited
+  may return on later days (up to two). Clicking a visitor's name opens
   their card with traits, needs, affinity and last door. Once the Beacon is lit, the
   first Commons Assembly lets residents petition, each chapter nominate and
   residents vote; the winner becomes one shared policy (`src/commons/CommonsPolicies.js`,

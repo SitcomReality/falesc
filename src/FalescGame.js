@@ -287,7 +287,7 @@ export class FalescGame {
         this.gameScreen.updateHud(true);
         this.reportScreen.show();
         this.saveGame();
-        this.gameScreen.toast(`${result.resident.name} has a bed of their own now.`, 'mint', 2400);
+        this.gameScreen.toast(`${result.trial.name} begins a trial stay.`, 'mint', 2400);
         return result;
     }
 
@@ -616,6 +616,9 @@ export class FalescGame {
         if (result.arrivals?.length) {
             this.gameScreen.toast(`${result.arrivals.length} new Tidelander${result.arrivals.length === 1 ? '' : 's'} at the Welcome Post.`, 'mint');
         }
+        for (const trial of result.trialResults || []) {
+            this.gameScreen.toast(trial.outcome === 'stayed' ? `${trial.name} passes the trial and stays.` : `${trial.name} leaves after the trial.`, trial.outcome === 'stayed' ? 'mint' : 'coral', 2400);
+        }
         this.saveGame();
         return true;
     }
@@ -689,7 +692,7 @@ export class FalescGame {
 
     openResident(residentId) {
         if (!this.charter) return;
-        const residents = this.charter.activeResidents;
+        const residents = [...this.charter.activeResidents, ...(this.charter.trialVisitors || [])];
         const index = residents.findIndex((resident) => resident.id === residentId);
         if (index === -1) return;
         this.residentCard.show(residents[index], index);

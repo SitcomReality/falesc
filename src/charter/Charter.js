@@ -66,6 +66,8 @@ export class Charter {
             : null;
         this.visitors = [];
         this.returningVisitors = [];
+        this.trialVisitors = [];
+        this.lastTrialResults = [];
         this.visitorCell = null;
         this.commons = {
             target: BALANCE.commons.target,
@@ -155,7 +157,7 @@ export class Charter {
     }
 
     get presentResidents() {
-        return [...this.activeResidents, ...this.visitors];
+        return [...this.activeResidents, ...this.visitors, ...this.trialVisitors];
     }
 
     get playerResidents() {
@@ -209,7 +211,8 @@ export class Charter {
     }
 
     get spareBeds() {
-        return this.services.spareHousing(this.playerResidents);
+        const trialBeds = this.trialVisitors.filter((resident) => resident.homeChapterId === 'player').length;
+        return Math.max(0, this.services.spareHousing(this.playerResidents) - trialBeds);
     }
 
     get totalSpareBeds() {
@@ -688,17 +691,46 @@ export class Charter {
         }
         this.visitors = this.visitors.filter((entry) => entry.id !== visitorId);
         visitor.visitor = false;
-        visitor.active = true;
+        visitor.trial = true;
+        visitor.active = false;
         visitor.state = 'idle';
+        visitor.memory.trialStartDay = this.day;
         visitor.homeChapterId = 'player';
         visitor.homeServiceId = null;
-        this.roster.push(visitor);
+        this.services.assignHome(visitor, this.roster);
+        if (!visitor.homeServiceId) return { ok: false, reason: 'The bed could not be assigned.' };
+        this.trialVisitors.push(visitor);
+        this.refreshDerived();
+        return { ok: true, trial: visitor };
+    }
+
+    resolveTrialStays() {
+        const results = [];
+        const pending = [];
+        for (const visitor of this.trialVisitors) {
+            if ((visitor.memory?.trialStartDay ?? 0) >= this.day) {
+                pending.push(visitor);
+                continue;
+            }
+            if (visitor.wellbeing >= BALANCE.visitors.trialWellbeing) {
+                visitor.trial = false;
+                visitor.active = true;
+                visitor.state = 'idle';
+                this.roster.push(visitor);
+                results.push({ name: visitor.name, outcome: 'stayed', wellbeing: visitor.wellbeing });
+            } else {
+                visitor.trial = false;
+                visitor.visitor = false;
+                visitor.active = false;
+                visitor.homeServiceId = null;
+                visitor.homeChapterId = 'visitor';
+                results.push({ name: visitor.name, outcome: 'left', wellbeing: visitor.wellbeing });
+            }
+        }
+        this.trialVisitors = pending;
         this.assignHomes();
         this.refreshDerived();
-        if (this.lastReport) {
-            this.lastReport.stayedVisitors = (this.lastReport.stayedVisitors || 0) + 1;
-        }
-        return { ok: true, resident: visitor };
+        return results;
     }
 
     openDay() {
@@ -716,6 +748,7 @@ export class Charter {
     beginNextDay() {
         if (this.ending) return { ended: true, ending: this.ending };
         if (this.confluenceReady) return { ended: true, confluence: true };
+        this.lastTrialResults = this.resolveTrialStays();
         this.rememberVisitors();
         this.clearVisitors();
         this.day += 1;
@@ -745,7 +778,7 @@ export class Charter {
         this.report = null;
         this.bulletin = this.buildBulletin(arrivals, rivalMoves);
         this.refreshDerived();
-        return { day: this.day, promoted, arrivals, rivalMoves, bulletin: this.bulletin };
+        return { day: this.day, promoted, arrivals, rivalMoves, trialResults: this.lastTrialResults, bulletin: this.bulletin };
     }
 
     addArrivals() {
@@ -903,6 +936,16 @@ export class Charter {
             });
         }
 
+        for (const trial of this.lastTrialResults || []) {
+            items.push({
+                kicker: 'Trial stay',
+                title: trial.outcome === 'stayed' ? `${trial.name} stays` : `${trial.name} returns to the drift`,
+                text: trial.outcome === 'stayed'
+                    ? 'The trial day was enough. A bed is theirs by right now.'
+                    : 'The trial day was not the right fit. They leave with the evening shuttle.'
+            });
+        }
+
         if (this.commons.active && this.commons.activatedDay === this.day) {
             items.push({
                 kicker: 'The commons',
@@ -967,6 +1010,7 @@ export class Charter {
             confluenceReady: this.confluenceReady,
             campaign: this.campaign?.toJSON() || null,
             returningVisitors: this.returningVisitors.map((visitor) => visitor.toJSON()),
+            trialVisitors: this.trialVisitors.map((visitor) => visitor.toJSON()),
             transit: {
                 home: this.transit.home ? { ...this.transit.home } : null,
                 commons: this.transit.commons ? { ...this.transit.commons } : null
@@ -1012,6 +1056,7 @@ export class Charter {
         }
         this.lastRivalMoves = this.rivals.map((rival) => rival.lastMove).filter(Boolean);
         this.returningVisitors = VisitorFactory.restore(saved.returningVisitors || []);
+        this.trialVisitors = VisitorFactory.restoreTrial(saved.trialVisitors || []);
         if (saved.transit?.home && saved.transit?.commons) {
             this.transit = {
                 home: { ...saved.transit.home },

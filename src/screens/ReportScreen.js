@@ -78,12 +78,16 @@ export class ReportScreen {
                 const charmed = visitor.affinity >= BALANCE.visitors.stayAffinity;
                 const canStay = charmed && (this.game.charter?.spareBeds || 0) > 0;
                 const action = canStay
-                    ? `<button type="button" class="btn btn--paper btn--tiny" data-testid="invite-visitor" data-visitor-id="${escapeHtml(visitor.id)}">Invite to stay</button>`
+                    ? `<button type="button" class="btn btn--paper btn--tiny" data-testid="invite-visitor" data-visitor-id="${escapeHtml(visitor.id)}">Offer trial</button>`
                     : `<span class="report__visitor-note">${charmed ? 'no spare bed' : 'still a stranger'}</span>`;
                 return `<li class="report__visitor"><span><button type="button" class="report__visitor-name" data-testid="visitor-open" data-visitor-id="${escapeHtml(visitor.id)}">${escapeHtml(visitor.name)}</button><small>${visitor.returned ? 'returning · ' : ''}${visitor.visits || 0} ${visitor.visits === 1 ? 'visit' : 'visits'} · ${visitor.wellbeing ?? 0} wellbeing</small></span>${action}</li>`;
             }).join('');
         const visitorsSection = visitorRows
             ? `<h2>Visitors</h2><ul class="report__list report__visitors">${visitorRows}</ul>`
+            : '';
+        const trials = this.game.charter?.trialVisitors || [];
+        const trialNote = trials.length
+            ? `<p class="report__warning">On trial: ${trials.map((visitor) => `${escapeHtml(visitor.name)} (${Math.round(visitor.wellbeing)} wellbeing)`).join(', ')}. They will stay or leave tomorrow.</p>`
             : '';
         const commonsVisits = report.patronageByChapter?.commons || 0;
         const commonsPolicy = COMMONS_POLICY_BY_ID[report.commons?.policy];
@@ -110,6 +114,7 @@ export class ReportScreen {
                 </div>
                 ${festival}
                 ${visitorsNote}
+                ${trialNote}
                 ${commonsNote}
                 ${closures}
                 <div class="report__columns">

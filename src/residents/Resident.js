@@ -17,7 +17,8 @@ export class Resident {
         affinity = 0.8,
         memory = null,
         paletteSeed = 1,
-        visitor = false
+        visitor = false,
+        trial = false
     }) {
         this.id = id;
         this.name = name;
@@ -49,6 +50,7 @@ export class Resident {
         };
         this.paletteSeed = paletteSeed;
         this.visitor = Boolean(visitor);
+        this.trial = Boolean(trial);
         this.state = active ? 'idle' : 'waiting';
         this.position = null;
     }
@@ -171,7 +173,9 @@ export class Resident {
             homeChapterId: this.homeChapterId,
             affinity: { ...this.affinity },
             memory: JSON.parse(JSON.stringify(this.memory)),
-            paletteSeed: this.paletteSeed
+            paletteSeed: this.paletteSeed,
+            visitor: this.visitor,
+            trial: this.trial
         };
     }
 

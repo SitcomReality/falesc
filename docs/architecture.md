@@ -338,9 +338,12 @@ for the phase loop and the crowd, but excluded from `activeResidents`, housing,
 arrivals, Devotion and votes. `Charter.beginNextDay()` clears them. A visitor
 visit adds `BALANCE.visitors.fee` to `DaySimulator.visitorFees`; `LumenLedger`
 adds that to the owning chapter and reports `visitorFees` separately. Visitors
-are not serialized. A charmed visitor (`affinity.player >= 0.15`) can be invited
-from the report when the player has a spare bed; otherwise they are remembered
-in `returningVisitors` (up to two) and return on a later day with the same
+are not serialized. A charmed visitor (`affinity.player >= 0.15`) can begin a one-day trial stay
+when the player has a spare bed: they occupy a bed, are present and sleep, but
+remain outside `activeResidents`, contributions, Devotion and the vote.
+`resolveTrialStays()` promotes them at the next day start if their wellbeing
+reaches `BALANCE.visitors.trialWellbeing`, otherwise they leave. Unhoused charmed
+visitors are remembered in `returningVisitors` (up to two) and return on a later day with the same
 name, memory and affinity. The returning list is serialized, then moved back
 into `visitors` by `spawnVisitors()`; `Charter.inviteVisitor()`
 clears the visitor flag, adds them to the roster, assigns a bed and saves them

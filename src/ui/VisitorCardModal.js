@@ -82,7 +82,7 @@ export class VisitorCardModal {
             <p class="modal__error" data-role="visitor-error" aria-live="polite"></p>
             <div class="modal__actions">
                 <button type="button" class="btn btn--paper" data-testid="visitor-close">Keep them as a visitor</button>
-                <button type="button" class="btn btn--primary" data-testid="visitor-invite" ${canInvite ? '' : 'disabled'}>Invite to stay</button>
+                <button type="button" class="btn btn--primary" data-testid="visitor-invite" ${canInvite ? '' : 'disabled'}>Offer a trial stay</button>
             </div>
         `;
         this.panel.querySelectorAll('[data-testid^=visitor-close]').forEach((button) => button.addEventListener('click', () => this.hide()));

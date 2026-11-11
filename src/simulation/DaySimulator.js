@@ -57,8 +57,9 @@ export class DaySimulator {
             }
         }
 
-        for (const resident of charter.activeResidents) {
+        for (const resident of [...charter.activeResidents, ...(charter.trialVisitors || [])]) {
             this.applyNightRest(resident);
+            if (resident.trial) continue;
             this.recordDailyUnmet(resident);
             const departure = this.maybeLeave(resident);
             if (departure) this.departures.push(departure);

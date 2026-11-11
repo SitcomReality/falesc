@@ -47,7 +47,7 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.waitFor("window.__falesc.app.visitorCard.isOpen === true");
     const cardText = await page.text('[data-testid=visitor-card]');
     assert.ok(cardText.includes('Player affinity'));
-    assert.ok(cardText.includes('Invite to stay'));
+    assert.ok(cardText.includes('Offer a trial stay'));
     await screenshot('visitor-card.png');
     await page.click('[data-testid=visitor-close]');
     await page.waitFor("window.__falesc.app.visitorCard.isOpen === false");
@@ -61,10 +61,12 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.click('[data-testid=invite-visitor]');
     const after = await page.evaluate("window.__falesc.snapshot()");
     log(JSON.stringify({ after: { population: after.population, visitors: after.visitors, spareBeds: after.spareBeds } }));
-    assert.equal(after.population, beforeCount + 1, 'the visitor joins the resident population');
+    const afterState = await page.evaluate("({ population: window.__falesc.app.charter.population, trial: window.__falesc.app.charter.trialVisitors.length })");
+    assert.equal(afterState.population, beforeCount, 'the trial stay does not join the population yet');
     assert.equal(after.visitors, beforeVisitors - 1, 'the visitor stops being a visitor');
     assert.equal(after.spareBeds, beforeSpare - 1, 'one spare bed is used');
-    assert.ok(await page.text('[data-testid=report-screen]').then((text) => text.includes('chose a bed and stayed')));
+    assert.equal(afterState.trial, 1, 'the visitor starts a one-day trial');
+    assert.ok(await page.text('[data-testid=report-screen]').then((text) => text.includes('On trial')));
     await page.evaluate("document.querySelector('[data-testid=report-screen] .report__sheet').scrollTop = 0");
     await page.pause(200);
     await screenshot('visitor-stay-report.png');
@@ -75,6 +77,27 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.click('[data-testid=menu-continue]');
     await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
     const restored = await page.evaluate("window.__falesc.snapshot()");
-    assert.equal(restored.population, beforeCount + 1, 'the new resident should survive a reload');
+    assert.equal(restored.population, beforeCount, 'the trial state should survive a reload');
+    const restoredTrial = await page.evaluate("window.__falesc.app.charter.trialVisitors.length");
+    assert.equal(restoredTrial, 1);
+    await page.evaluate("window.__falesc.app.beginNextDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+    await page.evaluate("window.__falesc.app.bulletinModal.hide()");
+    assert.equal(await page.evaluate("window.__falesc.app.charter.trialVisitors.length"), 1);
+
+    await page.evaluate("window.__falesc.openDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
+    await page.evaluate("window.__falesc.skipDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
+    assert.ok(await page.text('[data-testid=report-screen]').then((text) => text.includes('On trial')));
+    await page.evaluate("window.__falesc.app.beginNextDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
+    const resolved = await page.evaluate("({ population: window.__falesc.app.charter.population, trial: window.__falesc.app.charter.trialVisitors.length })");
+    log(JSON.stringify({ resolved }));
+    assert.equal(resolved.trial, 0, 'the trial resolves at the next day');
+    assert.ok(resolved.population >= beforeCount + 1, 'the trial guest joins the resident population');
+    const becameResident = await page.evaluate(`window.__falesc.app.charter.roster.some((resident) => resident.id === ${JSON.stringify(visitorId)})`);
+    assert.equal(becameResident, true, 'the trial guest is on the roster');
+    await page.pause(400);
     assert.ok(visitorId);
 }

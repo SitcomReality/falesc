@@ -119,12 +119,15 @@ pay **1 lumen per visit** to the chapter whose door they use. Their fees appear
 in the evening report and the chapter ledgers; their visits count in the
 event's totals and can crowd queues. The Commons Beacon charges no fee. A visitor who has spent time with one of
 your services (player affinity at least **0.15**) and a **spare bed** can be
-invited to stay from the evening report; they join the resident roster, keep
-their name and memory, and can vote in the Confluence. A charmed visitor who is
+offered a **one-day trial stay** from the evening report or visitor card. The
+trial guest sleeps in the bed and uses services but does not contribute, vote or
+count toward Devotion. At the next day's start, a trial guest with wellbeing at
+least **45** joins the roster; otherwise they leave. A resident keeps their name
+and memory and can vote in the Confluence. A charmed visitor who is
 not offered a bed may return on a later day (up to two at a time), keeping their
 name, memory and affinity; the report marks them **returning**. Clicking a
 visitor's name opens a **visitor card** with traits, needs, wellbeing, affinity
-and their last door; the card can send the invitation to stay. Visitors are a
+and their last door; the card can offer the trial stay. Visitors are a
 Contest feature for now; First Light remains resident-only.
 
 ## The outer commons isle

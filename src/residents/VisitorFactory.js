@@ -25,6 +25,16 @@ export class VisitorFactory {
         });
     }
 
+    static restoreTrial(entries = []) {
+        return entries.map((entry) => {
+            const resident = Resident.fromJSON(entry);
+            resident.visitor = false;
+            resident.trial = true;
+            resident.active = false;
+            return resident;
+        });
+    }
+
     static create(seed, day, count = VisitorFactory.countFor(seed, day)) {
         const rng = new SeededRandom(seed + day * 92821 + 4001);
         const names = shuffle([...TIDELANDER_NAMES], rng).slice(0, count);
