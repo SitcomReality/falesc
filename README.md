@@ -52,7 +52,8 @@ so any static file server works, but ES modules require `http://`, not `file://`
 - Read the morning bulletin. Arm a service with `1`–`4` (or click a dock card),
   then click a free plot on the home shard and name the place.
 - In the last three Contest days, choose a **campaign promise** from the
-  standings card or the automatic campaign dialog. Rivals publish theirs.
+  standings card or the automatic campaign dialog. Rivals publish theirs, and a
+  three-day festival programme makes matching services more magnetic.
 - Press `P` (or **Show flows** in the Contest standings) to trace each
   resident's last choice from their home door to the service that earned it.
 - A service costs lumen and one work. It is `PENDING` for a day and opens at the
@@ -129,9 +130,10 @@ The **Contest preview** is present: two rival chapters build services and
 housing, pay upkeep from their own residents' contributions, share the same
 residents and occupancy, and compete for Devotion; standings and patronage
 appear in the HUD and report. At the day limit the archipelago convenes a
-**Campaign and Confluence**: the final three days let rivals publish promises
-and the player choose one; every resident then votes and the result becomes the
-charter record. Still absent: a multi-round festival, shared commons,
+**Campaign and Confluence**: the final three days run a three-event festival
+programme where rivals publish promises and the player chooses one; every
+resident then votes and the result becomes the charter record. Still absent: a
+larger multi-round festival, shared commons,
 auctions/stewardship and a deeper rival strategy beyond need-pressure
 builds/recovery, building layers or retrofit, audio, multiplayer, or a keyboard
 build cursor. A patronage-flow

@@ -62,6 +62,9 @@ export class ReportScreen {
         const closures = report.closures?.length
             ? `<p class="report__warning">Closed at dusk: ${report.closures.map((closure) => escapeHtml(closure.name)).join(', ')}. The upkeep ran short.</p>`
             : '';
+        const festival = report.campaignEvent
+            ? `<p class="report__warning">Festival programme: <strong>${escapeHtml(report.campaignEvent.title)}</strong> — ${escapeHtml(report.campaignEvent.blurb)}</p>`
+            : '';
 
         this.container.innerHTML = `
             <div class="report__sheet paper">
@@ -80,6 +83,7 @@ export class ReportScreen {
                     <div><span class="kicker">${contest ? 'Your lumen' : 'Lumen'}</span><strong>${report.lumenAfter}</strong></div>
                     <div><span class="kicker">Flourishing</span><strong>${Math.round(report.flourishing)}</strong></div>
                 </div>
+                ${festival}
                 ${closures}
                 <div class="report__columns">
                     <section>

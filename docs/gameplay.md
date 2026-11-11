@@ -97,10 +97,14 @@ the same four options, and the player chooses one:
 - **The long table** — company.
 - **A garden in the void** — wonder.
 
-The player's promise is locked once chosen. It adds weight to their vote with
-residents whose most urgent need matches. Rival promises add a smaller weight
-to that rival's vote with residents whose need matches. The promise is carried
-into the Confluence screen and cannot be changed there.
+The player's promise is locked once chosen. Each campaign day has a **festival
+event** — *The Empty Larder*, *The Long Night*, *The Homecoming* or *Lanterns
+in the Void*. Services belonging to a chapter whose promise matches that day's
+need are more magnetic, and the promise adds weight to that chapter's final
+vote with residents whose urgent need matches. Rival promises add a smaller
+weight to their chapters. The programme is shown in the campaign dialog, the
+HUD campaign card and the bulletin. The promise is carried into the Confluence
+screen and cannot be changed there.
 
 ## Planning
 
@@ -364,9 +368,9 @@ yet.
   them.
 - **The Contest is a preview.** Rivals build services and housing, pay upkeep,
   receive contributions, reopen lost services and react to need pressure, but
-  their planning is still one move per day. The campaign is three days of one
-  promise each and a resident vote, not a multi-round festival, auctions or
-  stewardship.
+  their planning is still one move per day. The campaign now has three festival
+  events, but it is still one promise each and a resident vote, not a larger
+  multi-round festival, auctions or stewardship.
 - **No auctions, stewardship, petitions or multiplayer.** The Multiplayer button
   is a disabled placeholder.
 - **No audio.**

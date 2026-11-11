@@ -155,9 +155,10 @@ after any behavioural change.
 - Rival chapters pay construction costs and upkeep, receive contributions from
   their own residents, own fixed Welcome Houses, reopen services lost to
   shortfalls, and choose builds by need pressure plus doctrine. The last three
-  days run a campaign: rivals publish promises, the player chooses one, and the
-  final vote uses both. The campaign is a first pass; multi-round festival
-  events, auctions and stewardship are still missing.
+  days run a campaign: a seeded three-event festival programme makes matching
+  promises more magnetic, rivals publish promises, the player chooses one, and
+  the final vote uses both. The campaign is a first pass; a larger multi-round
+  festival, auctions and stewardship are still missing.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
   not remove the survey chart without adjusting `canvasSelectors` and the smoke
   test.

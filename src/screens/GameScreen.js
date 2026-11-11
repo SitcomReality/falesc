@@ -334,7 +334,7 @@ export class GameScreen {
         const contest = Boolean(charter.contest);
         this.container.classList.toggle('is-contest', contest);
         this.container.classList.toggle('is-campaign', Boolean(charter.campaign?.active));
-        this.standings.update(charter.standings(), contest, charter.campaign);
+        this.standings.update(charter.standings(), contest, charter.campaign, charter.day);
         const dayLimit = charter.dayLimit || 14;
         const day = charter.day || 1;
         const daysLeft = Math.max(0, dayLimit - day + 1);

@@ -19,6 +19,7 @@ export class DaySimulator {
         this.charter = charter;
         this.rng = new SeededRandom(charter.seed + charter.day * 104729 + 17);
         this.navigator = new IslandNavigator(charter.homeSector, charter.allServices);
+        this.campaignEvent = charter.campaign?.eventFor?.(charter.day) || null;
         this.events = [];
         this.complaints = [];
         this.complaintKeys = new Set();
@@ -176,9 +177,10 @@ export class DaySimulator {
         const availability = load < service.capacity ? 1 : BALANCE.services.queuePenalty;
         const familiarity = 1 + Math.min(this.residentVisits(resident, service.id), 4) * 0.012;
         const chapterBond = 1 + Math.min(resident.getAffinity(service.chapterId), 5) * 0.02;
+        const campaignAppeal = this.charter.campaign?.appealFor?.(service.chapterId, this.charter.day) || 1;
         const novelty = this.rng.next() * 0.06 + 0.97;
         const rhythm = rhythmRise(resident.traits.rhythm, phase.id);
-        return urgency * match * quality * vibe * standards * proximity * availability * familiarity * chapterBond * novelty * rhythm;
+        return urgency * match * quality * vibe * standards * proximity * availability * familiarity * chapterBond * campaignAppeal * novelty * rhythm;
     }
 
     distanceToService(resident, service) {
@@ -304,6 +306,10 @@ export class DaySimulator {
     buildReason(resident, service, need, queueIndex, phaseId) {
         const fragments = [];
         const label = this.charter.serviceLabel(service);
+        if (this.campaignEvent
+            && this.charter.campaign?.appealFor?.(service.chapterId, this.charter.day) > 1) {
+            fragments.push(`${this.campaignEvent.title} was in the air`);
+        }
         if (need.id === service.program.need) fragments.push(NEED_BY_ID[need.id].reason);
         else fragments.push(`I found ${NEED_BY_ID[need.id].short.toLowerCase()} there too`);
         const temperament = resident.traits.temperament;
@@ -392,6 +398,7 @@ export class DaySimulator {
             : 0;
         charter.flourishing = wellbeing;
         charter.devotion = charter.devotionByChapter.player || 0;
+        const campaignEvent = this.campaignEvent;
         const devotionByChapter = charter.devotionByChapter;
         const patronageByChapter = Object.fromEntries(charter.chapters.map((chapter) => [chapter.id, 0]));
         for (const service of charter.allServices) {
@@ -439,6 +446,7 @@ export class DaySimulator {
             wellbeing,
             flourishing: wellbeing,
             devotion: charter.devotion,
+            campaignEvent,
             devotionByChapter,
             patronageByChapter,
             chapters,

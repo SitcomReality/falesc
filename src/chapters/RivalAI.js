@@ -205,13 +205,14 @@ function findFreePlot(rival, programId) {
  * Rivals promise the need their doctrine and the current archipelago share.
  * The choice is deterministic: pressure first, doctrine second, pledge order.
  */
-export function chooseCampaignPledge(rival, charter) {
+export function chooseCampaignPledge(rival, charter, campaign = null) {
     const pressure = needPressure(charter);
     let best = PLEDGES[0];
     let bestScore = -Infinity;
     for (const pledge of PLEDGES) {
         const doctrineBias = rival.doctrine === pledge.id ? 14 : 0;
-        const score = (pressure[pledge.need] || 0) + doctrineBias;
+        const festivalBias = (campaign?.events?.filter((event) => event.need === pledge.need).length || 0) * 8;
+        const score = (pressure[pledge.need] || 0) + doctrineBias + festivalBias;
         if (score > bestScore) {
             best = pledge;
             bestScore = score;

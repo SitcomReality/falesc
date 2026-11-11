@@ -279,10 +279,14 @@ Contest starts with nine active residents, three per chapter. Each has a
 tries the resident's chapter first and then any chapter with a spare bed.
 `Charter.addArrivals()` prefers the most-beloved chapter with room, so a rival
 that builds housing can grow its own population. In the last three days
-`Charter.startCampaign()` creates a `Campaign`: each rival publishes a doctrine/
-need-pressure promise, and `CampaignModal` lets the player choose one of the same
-four. The promised need adds a bonus to that chapter's vote with residents whose
-urgent need matches; the player's promise is worth more than a rival's. Their `affinity` map gains
+`Charter.startCampaign()` creates a `Campaign`: it shuffles a three-day festival
+programme from the four needs, then each rival publishes a doctrine/need-pressure
+promise (also weighted by the programme), and `CampaignModal` lets the player
+choose one of the same four. On a day whose festival event matches a chapter's
+promise, `DaySimulator` gives that chapter's services a 1.12 choice-appeal
+multiplier. The promised need adds a bonus to that chapter's final vote with
+residents whose urgent need matches; the player's promise is worth more than a
+rival's, and repeated matched events add a small momentum bonus. Their `affinity` map gains
 hearts for whichever chapter owns the service they visit; housing grants
 affinity to the home chapter. `DaySimulator` offers every active service from
 `charter.allServices`, labels rival doors with their chapter name, and writes
@@ -298,7 +302,8 @@ At the day limit the contest does not pick a winner from Devotion directly:
 `Charter.evaluateEnding()` sets `confluenceReady`, and the report hands over to
 the Confluence screen. `ConfluenceVote.tally()` gives each active resident one
 vote based on per-chapter affinity, home loyalty, last choice, the player's
-campaign promise, rival campaign promises and a seeded tie-break. The winner becomes the charter ending; shared
+campaign promise, rival campaign promises, campaign momentum and a seeded
+tie-break. The winner becomes the charter ending; shared
 Flourishing below the survival line produces a no-winner defeat.
 
 The **patronage-flow overlay** (`src/world/PatronageFlow.js`) is a read-only Pixi
@@ -544,7 +549,8 @@ It stores:
     "seed": 12345, "mapSize": "medium", "day": 3, "dayLimit": 14,
     "lumen": 12, "works": 2, "flourishing": 63.5, "devotion": 8.3,
     "mode": "contest", "ending": null, "confluenceReady": true,
-    "campaign": { "startedDay": 12, "dayLimit": 14, "rivalPledges": {}, "playerPledge": null },
+    "campaign": { "startedDay": 12, "dayLimit": 14, "seed": 12345,
+      "rivalPledges": {}, "playerPledge": null, "events": [] },
     "pendingArrivals": [], "lastReport": {},
     "residents": [], "services": [], "rivals": []
   },

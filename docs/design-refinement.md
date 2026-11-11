@@ -8,8 +8,8 @@
 > lumen, Devotion/Flourishing, resident cards with a "why", and save v2. A
 > **Contest preview** adds two AI rivals, shared residents/services, rival
 > housing and a per-chapter economy, recovery/need-pressure builds, Devotion
-> standings, a patronage-flow overlay, a three-day campaign and a pledge/vote
-> Confluence at the day limit. The full multi-round festival, shared commons, auctions, stewardship,
+> standings, a patronage-flow overlay, a three-day festival campaign and a
+> pledge/vote Confluence at the day limit. The full multi-round festival, shared commons, auctions, stewardship,
 > building layers and multiplayer are **not** implemented. This document and the component docs in `docs/design/`
 > describe the direction; where they conflict with the source, the source wins.
 > The visual identity (palette, typography, paper/ink chrome) remains the

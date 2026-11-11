@@ -31,6 +31,8 @@ export class CampaignModal {
                 <button type="button" class="modal__close" data-testid="campaign-close" aria-label="Close campaign">×</button>
             </div>
             <p class="modal__blurb">The rivals have published their promises. Choose what your chapter will be known for when the archipelago votes.</p>
+            <h4 class="campaign-modal__label">Festival programme</h4>
+            <ul class="campaign-events" data-role="events" data-testid="campaign-events"></ul>
             <h4 class="campaign-modal__label">Rival promises</h4>
             <ul class="campaign-rivals" data-role="rivals"></ul>
             <h4 class="campaign-modal__label">Your promise</h4>
@@ -41,6 +43,7 @@ export class CampaignModal {
             </div>
         `;
 
+        this.eventsEl = this.panel.querySelector('[data-role=events]');
         this.rivalsEl = this.panel.querySelector('[data-role=rivals]');
         this.pledgesEl = this.panel.querySelector('[data-role=pledges]');
         this.confirmBtn = this.panel.querySelector('[data-testid=campaign-confirm]');
@@ -68,6 +71,9 @@ export class CampaignModal {
             const pledge = campaign.pledgeFor(rival.id);
             return `<li><span class="campaign-rivals__dot" style="background:${rival.colour}"></span><span>${escapeHtml(rival.name)}</span><strong>${escapeHtml(pledge?.name || 'No promise yet')}</strong></li>`;
         }).join('');
+        this.eventsEl.innerHTML = (campaign.events || []).map((event) => `
+            <li><span>Day ${event.day}</span><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.blurb)}</small></li>
+        `).join('');
         this.rivalsEl.innerHTML = rivalRows || '<li><span>No rival promises yet.</span></li>';
         const selected = campaign.playerPledge || PLEDGES[0].id;
         const locked = Boolean(campaign.playerPledge);

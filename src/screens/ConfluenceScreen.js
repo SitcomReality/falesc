@@ -28,6 +28,9 @@ export class ConfluenceScreen {
         const campaign = charter.campaign?.active ? charter.campaign : null;
         const lockedPledge = campaign?.playerPledge ? PLEDGE_BY_ID[campaign.playerPledge] : null;
         const selectedPledgeId = lockedPledge?.id || PLEDGES[0].id;
+        const festivalEvents = campaign
+            ? (campaign.events || []).map((event) => `<li><span class="confluence-standing__dot" style="background:var(--sun)"></span><span>Day ${event.day}</span><strong>${escapeHtml(event.title)}</strong></li>`).join('')
+            : '';
         const rivalPromises = campaign
             ? charter.rivals.map((rival) => {
                 const pledge = campaign.pledgeFor(rival.id);
@@ -70,6 +73,7 @@ export class ConfluenceScreen {
                         <h2>At dusk</h2>
                         <ul class="confluence-standings">${rows}</ul>
                         <p class="confluence__note">Devotion is affection. Votes are trust. A pledge can move the second without erasing the first.</p>
+                        ${festivalEvents ? `<h2>Festival programme</h2><ul class="confluence-standings">${festivalEvents}</ul>` : ''}
                         ${rivalPromises ? `<h2>Rival promises</h2><ul class="confluence-standings">${rivalPromises}</ul>` : ''}
                     </section>
                     <section>

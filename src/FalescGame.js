@@ -749,6 +749,7 @@ export class FalescGame {
                         patronageByChapter: report.patronageByChapter || {},
                         devotionByChapter: report.devotionByChapter || {},
                         chapters: report.chapters || [],
+                        campaignEvent: report.campaignEvent || null,
                         population: report.population,
                         quotes: report.quotes,
                         outcome: report.outcome || null

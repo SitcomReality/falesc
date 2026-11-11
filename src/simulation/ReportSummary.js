@@ -30,6 +30,7 @@ export function summarizeReport(report) {
         devotionByChapter: { ...(report.devotionByChapter || {}) },
         patronageByChapter: { ...(report.patronageByChapter || {}) },
         chapters: (report.chapters || []).map((entry) => ({ ...entry })),
+        campaignEvent: report.campaignEvent ? { ...report.campaignEvent } : null,
         outcome: report.outcome || null,
         message: report.message,
         ending: report.ending ? { ...report.ending } : null,

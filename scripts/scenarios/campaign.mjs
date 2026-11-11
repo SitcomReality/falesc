@@ -22,18 +22,25 @@ export default async function ({ page, assert, log, screenshot }) {
     const opened = await page.evaluate("window.__falesc.snapshot()");
     log(JSON.stringify({ opened: { day: opened.day, campaign: opened.campaign } }));
     assert.equal(opened.campaign.startedDay, 12);
+    assert.equal(opened.campaign.events.length, 3, 'the campaign should publish a three-day programme');
     assert.ok(Object.keys(opened.campaign.rivalPledges).length === 2, 'both rivals should publish a promise');
+    const firstNeed = opened.campaign.events[0].need;
+    const firstEvent = opened.campaign.events[0];
     assert.ok(await page.visible('[data-testid=campaign-modal]'));
     await screenshot('campaign-modal.png');
 
-    await page.evaluate("document.querySelector('[data-testid=campaign-pledge-wonder]').click()");
+    await page.evaluate(`document.querySelector('[data-testid=campaign-pledge-${firstNeed}]').click()`);
     await page.click('[data-testid=campaign-confirm]');
     await page.waitFor("window.__falesc.app.campaignModal.isOpen === false");
+    await page.pause(200);
     const chosen = await page.evaluate("window.__falesc.snapshot()");
-    assert.equal(chosen.campaign.playerPledge, 'wonder');
+    assert.equal(chosen.campaign.playerPledge, firstNeed);
     await page.evaluate("window.__falesc.app.bulletinModal.hide()");
-    const campaignLabel = await page.text('[data-role=campaign-name]');
-    assert.ok(campaignLabel.includes('garden'), 'the HUD should show the chosen promise');
+    const campaignLabel = await page.evaluate("document.querySelector('[data-role=campaign-name]').textContent");
+    assert.ok(campaignLabel.length > 0, 'the HUD should show the chosen promise');
+    const campaignEvent = await page.evaluate("document.querySelector('[data-role=campaign-event]').textContent");
+    assert.ok(campaignEvent.includes(firstEvent.title), 'the HUD should show the current festival event');
+    log(JSON.stringify({ hud: { promise: campaignLabel, event: campaignEvent } }));
     await screenshot('campaign.png');
     await page.evaluate("window.__falesc.app.saveGame()");
     await page.reload();
@@ -41,12 +48,23 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.click('[data-testid=menu-continue]');
     await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
     const restoredCampaign = await page.evaluate("window.__falesc.snapshot()");
-    assert.equal(restoredCampaign.campaign.playerPledge, 'wonder', 'the campaign promise should survive a reload');
+    assert.equal(restoredCampaign.campaign.playerPledge, firstNeed, 'the campaign promise should survive a reload');
 
     // The bulletin carries the campaign item.
     await page.evaluate("window.__falesc.showBulletin()");
     const bulletin = await page.text('[data-testid=bulletin-modal]');
     assert.ok(bulletin.includes('Campaign'), 'the bulletin should carry the campaign');
+    await page.evaluate("window.__falesc.app.bulletinModal.hide()");
+
+    // The event is consumed by the day simulation and appears in the report.
+    await page.evaluate("window.__falesc.openDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'DAY'");
+    await page.evaluate("window.__falesc.skipDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'REPORT'");
+    const dayTwelve = await page.evaluate("window.__falesc.snapshot()");
+    assert.equal(dayTwelve.report.campaignEvent.title, firstEvent.title);
+    await page.evaluate("window.__falesc.app.beginNextDay()");
+    await page.waitFor("window.__falesc.snapshot().state === 'PLAYING'");
     await page.evaluate("window.__falesc.app.bulletinModal.hide()");
 
     // Jump to the limit and convene the vote with the campaign promise locked.
@@ -58,14 +76,14 @@ export default async function ({ page, assert, log, screenshot }) {
     await page.evaluate("window.__falesc.app.bulletinModal.hide()");
     await page.click('[data-testid=report-continue]');
     await page.waitFor("window.__falesc.snapshot().state === 'CONFLUENCE'");
-    const locked = await page.evaluate("(() => ({ disabled: document.querySelector('[data-testid=pledge-wonder]').disabled, checked: document.querySelector('[data-testid=pledge-wonder]').checked }))()");
+    const locked = await page.evaluate(`(() => ({ disabled: document.querySelector('[data-testid=pledge-${firstNeed}]').disabled, checked: document.querySelector('[data-testid=pledge-${firstNeed}]').checked }))()`);
     assert.equal(locked.disabled, true);
     assert.equal(locked.checked, true);
     await page.click('[data-testid=confluence-vote]');
     await page.waitFor("document.querySelector('[data-testid=confluence-result]') !== null");
     const result = await page.evaluate("(() => { const app=window.__falesc.app; return { outcome: app.charter.ending.outcome, pledge: app.confluenceScreen.result.pledge.id, votes: app.confluenceScreen.result.votes.length }; })()");
     log(JSON.stringify({ result }));
-    assert.equal(result.pledge, 'wonder');
+    assert.equal(result.pledge, firstNeed);
     assert.ok(result.votes > 0);
     await screenshot('campaign-result.png');
     await page.click('[data-testid=confluence-close]');

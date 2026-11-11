@@ -21,6 +21,7 @@ export class StandingsCard {
                 <span class="kicker">Campaign</span>
                 <strong data-role="campaign-name">Choose a promise</strong>
                 <button type="button" data-testid="campaign-open">Open</button>
+                <span class="standings-card__campaign-event" data-role="campaign-event" hidden></span>
             </div>
             <ol class="standings-list" data-role="list"></ol>
         `;
@@ -32,6 +33,7 @@ export class StandingsCard {
         this.campaignRow = this.element.querySelector('[data-role=campaign]');
         this.campaignName = this.element.querySelector('[data-role=campaign-name]');
         this.campaignButton = this.element.querySelector('[data-testid=campaign-open]');
+        this.campaignEvent = this.element.querySelector('[data-role=campaign-event]');
         this.campaignButton.addEventListener('click', () => {
             if (this.onOpenCampaign) this.onOpenCampaign();
         });
@@ -43,7 +45,7 @@ export class StandingsCard {
         this.flowButton.classList.toggle('is-on', Boolean(visible));
     }
 
-    update(chapters = [], visible = false, campaign = null) {
+    update(chapters = [], visible = false, campaign = null, day = 1) {
         this.element.hidden = !visible;
         if (!visible) return;
         const campaignActive = Boolean(campaign?.active);
@@ -51,12 +53,18 @@ export class StandingsCard {
         if (campaignActive) {
             this.campaignName.textContent = campaign.playerPledgeName || 'Choose a promise';
             this.campaignButton.textContent = campaign.playerPledge ? 'View' : 'Open';
+            const event = campaign.eventFor?.(day);
+            this.campaignEvent.hidden = !event;
+            this.campaignEvent.textContent = event ? `Festival: ${event.title}` : '';
+        } else {
+            this.campaignEvent.hidden = true;
         }
         const ordered = [...chapters].sort((a, b) => b.devotion - a.devotion || b.visits - a.visits);
         const signature = JSON.stringify([
             ordered.map((chapter) => [chapter.id, chapter.devotion, chapter.visits, chapter.residents]),
             campaignActive,
-            campaign?.playerPledge || null
+            campaign?.playerPledge || null,
+            campaign?.eventFor?.(day)?.title || null
         ]);
         if (signature === this.signature) return;
         this.signature = signature;

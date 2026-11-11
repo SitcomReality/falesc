@@ -23,7 +23,7 @@ Severity is about impact on the slice, not effort:
 | 1 | Medium | Balance is generous and untuned |
 | 2 | Medium | Only the home shard is playable; there is no archipelago layer |
 | 3 | Medium | No building layers, retrofit, modules, finishes or player-set policy |
-| 4 | Medium | Contest strategy is shallow and the festival campaign is one promise |
+| 4 | Medium | Contest strategy is shallow and the festival programme is scripted |
 | 5 | Medium | No keyboard build cursor; plot choice is pointer/touch only |
 | 6 | Medium | Day playback is a replay of an already-resolved day; no mid-day decisions |
 | 7 | Low | Save v1 is discarded, a mid-`DAY` reload loses the day, and there is no export/import |
@@ -115,7 +115,7 @@ no new geometry), then modules, then shells/retrofit. Keep the "no spreadsheet"
 test: every option must show up in a resident's choice or the report. Extend
 `ServiceCardModal` and the placement preview before adding more programs.
 
-### 4. Contest strategy is shallow and the festival campaign is one promise
+### 4. Contest strategy is shallow and the festival programme is scripted
 
 **Evidence**
 
@@ -124,9 +124,10 @@ test: every option must show up in a resident's choice or the report. Extend
   contributions, upkeep and closures, a rival bulletin move, Devotion standings,
   a patronage-flow overlay, a final campaign and a pledge/vote Confluence.
 - In the last three days both rivals publish a promise and the player chooses one;
-  the promises affect the final vote. It is still a single promise each, with no
-  multi-round festival events, campaign spending or promises that change the
-  simulated services.
+  a seeded three-event programme gives a 1.12 service-appeal multiplier to a
+  chapter whose promise matches the day's need, and promises also affect the
+  final vote. It is still a single promise each, with no campaign spending,
+  player-authored events or promises that change the buildings themselves.
 - Rivals reopen services lost to a shortfall, choose builds by shared need
   pressure plus doctrine, and can grow through housing. They still make one move
   per day and do not plan a long-term service mix or respond to the player's
@@ -138,9 +139,10 @@ test: every option must show up in a resident's choice or the report. Extend
 
 **Impact**
 
-Competition is visible, the economy is shared and the run now has a campaign and
-a social finale, but the campaign is still a short promise-and-vote rather than
-the full Confluence festival. Rival play remains reactive rather than strategic.
+Competition is visible, the economy is shared and the run now has a campaign
+with festival days and a social finale, but it is still a short scripted
+programme rather than the full multi-round Confluence festival. Rival play
+remains reactive rather than strategic.
 
 **Suggested direction**
 
@@ -331,7 +333,7 @@ These are no longer open:
 - **Save round-trip hardening.** Resident affinity, departures and service ids restore correctly; structurally invalid v2 payloads are rejected instead of half-loaded.
 - **Evening report persistence.** The report is saved in `REPORT` and reopens after Continue instead of replaying the day.
 - **Shared overlay stack.** `OverlayManager` owns scrim/inert/input-lock/focus restore, stacks nested dialogs and traps Tab; the charter menu also traps focus.
-- **Contest economy, campaign and Confluence preview.** Two rival chapters, shared services/residents, rival housing/economy/closures, recovery and need-pressure builds, Devotion standings, the patronage-flow overlay, a three-day campaign with rival promises, and a pledge/vote Confluence finale are implemented and covered by `contest.mjs`, `contest-recovery.mjs`, `campaign.mjs` and `confluence-defeat.mjs`.
+- **Contest economy, campaign and Confluence preview.** Two rival chapters, shared services/residents, rival housing/economy/closures, recovery and need-pressure builds, Devotion standings, the patronage-flow overlay, a three-day campaign with a festival programme and rival promises, and a pledge/vote Confluence finale are implemented and covered by `contest.mjs`, `contest-recovery.mjs`, `campaign.mjs` and `confluence-defeat.mjs`.
 - **Safer destructive actions.** Abandoning a charter is a two-step confirmation
   and the save is cleared only after the confirmation.
 - **Truthful choice feedback.** "I come here often" is per resident, "open late"

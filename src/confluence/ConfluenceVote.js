@@ -33,6 +33,7 @@ export class ConfluenceVote {
                 if (chapter.isPlayer && need?.id === pledge.need) score += 1.45;
                 const rivalPledge = campaign?.rivalPledges?.[chapter.id];
                 if (!chapter.isPlayer && rivalPledge && PLEDGE_BY_ID[rivalPledge]?.need === need?.id) score += 0.75;
+                score += (campaign?.momentumFor?.(chapter.id) || 0) * 0.12;
                 score += rng.next() * 0.45;
                 return { chapter, score };
             });

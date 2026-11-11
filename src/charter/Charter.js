@@ -215,13 +215,20 @@ export class Charter {
 
     startCampaign() {
         if (!this.contest || this.campaign) return this.campaign;
-        const rivalPledges = Object.fromEntries(this.rivals.map((rival) => [rival.id, chooseCampaignPledge(rival, this)]));
-        this.campaign = new Campaign({
+        const campaign = new Campaign({
             startedDay: this.day,
             dayLimit: this.dayLimit,
-            rivalPledges
+            seed: this.seed
         });
+        campaign.rivalPledges = Object.fromEntries(
+            this.rivals.map((rival) => [rival.id, chooseCampaignPledge(rival, this, campaign)])
+        );
+        this.campaign = campaign;
         return this.campaign;
+    }
+
+    get campaignEvent() {
+        return this.campaign?.eventFor?.(this.day) || null;
     }
 
     setCampaignPledge(pledgeId) {
@@ -610,6 +617,7 @@ export class Charter {
         }
 
         if (this.campaign?.active) {
+            const event = this.campaignEvent;
             const rivalPromises = this.rivals
                 .map((rival) => {
                     const pledge = this.campaign.pledgeFor(rival.id);
@@ -618,10 +626,8 @@ export class Charter {
                 .filter(Boolean);
             items.push({
                 kicker: 'Campaign',
-                title: this.campaign.playerPledgeName ? `Your promise: ${this.campaign.playerPledgeName}` : 'Choose a campaign promise',
-                text: rivalPromises.length
-                    ? `The rivals are promising: ${rivalPromises.join('; ')}.`
-                    : 'The archipelago is listening for a promise.'
+                title: event ? `Campaign: ${event.title}` : this.campaign.playerPledgeName ? `Your promise: ${this.campaign.playerPledgeName}` : 'Choose a campaign promise',
+                text: `${event ? `${event.blurb} ` : ''}${rivalPromises.length ? `The rivals are promising: ${rivalPromises.join('; ')}.` : 'The archipelago is listening for a promise.'}`
             });
         }
 
@@ -681,7 +687,7 @@ export class Charter {
         this.works = Number.isFinite(saved.works) ? saved.works : BALANCE.worksPerDay;
         this.ending = saved.ending || null;
         this.confluenceReady = Boolean(saved.confluenceReady);
-        this.campaign = Campaign.fromJSON(saved.campaign);
+        this.campaign = Campaign.fromJSON(saved.campaign, this.seed);
         this.pendingArrivals = Array.isArray(saved.pendingArrivals) ? saved.pendingArrivals : [];
         this.roster = ResidentFactory.fromSave(saved.residents || []);
         if (this.roster.length === 0) this.roster = ResidentFactory.createRoster(this.seed, BALANCE.rosterSize);
