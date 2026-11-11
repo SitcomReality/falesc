@@ -5,6 +5,11 @@
 export const BALANCE = {
     startingLumen: 10,
     worksPerDay: 2,
+    contest: {
+        startingLumen: 15,
+        rivalWorksPerDay: 1,
+        startingResidentsPerChapter: 3
+    },
     rosterSize: 15,
     startingResidents: 6,
     dayLimits: { small: 12, medium: 14, large: 16 },

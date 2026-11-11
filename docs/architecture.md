@@ -262,23 +262,29 @@ screens are attached by `FalescGame`.
 ### Contest preview
 
 In `contest` mode `Charter.createRivals()` builds `RivalChapter` instances for
-The Gardener and The Host. Each rival has its own `ServiceManager`, a finite
-construction budget and one work per day. `RivalAI` seeds one signature active
-service and then, at the start of each planning day, attempts one doctrine-
-ordered build. Rival and player services share the same occupancy map, so their
-footprints and doors cannot overlap.
+The Gardener and The Host. Each rival has its own `ServiceManager`, lumen,
+works, a fixed four-bed Welcome House and one work per day. `RivalAI` seeds a
+signature active service and then, at the start of each planning day, attempts
+one doctrine-ordered build. Rival and player services share the same occupancy
+map, so their footprints and doors cannot overlap.
 
-The shared residents all live at the player's Welcome Post in this preview.
-Their `affinity` map gains hearts for whichever chapter owns the service they
-visit; housing grants affinity to the home chapter. `DaySimulator` offers every
-active service from `charter.allServices`, labels rival doors with their chapter
-name, and writes `devotionByChapter`, `patronageByChapter` and a chapter summary
-into the report. The HUD's `StandingsCard` and the report use those numbers.
+Contest starts with nine active residents, three per chapter. Each has a
+`homeChapterId`; housing is a chapter service with four beds. `Charter.assignHomes()`
+tries the resident's chapter first and then any chapter with a spare bed.
+`Charter.addArrivals()` prefers the most-beloved chapter with room, so a rival
+that builds housing can grow its own population. Their `affinity` map gains
+hearts for whichever chapter owns the service they visit; housing grants
+affinity to the home chapter. `DaySimulator` offers every active service from
+`charter.allServices`, labels rival doors with their chapter name, and writes
+`devotionByChapter`, `patronageByChapter` and a chapter summary into the report.
+The HUD's `StandingsCard` and the report use those numbers.
 
-The preview deliberately stops short of a rival economy: rivals pay construction
-costs but not upkeep, do not own housing and do not receive wellbeing
-contributions. The end at the day limit compares Devotion; shared Flourishing
-below the survival line produces a no-winner defeat.
+`LumenLedger.resolveDay()` now resolves every chapter. Each chapter pays upkeep
+from its own residents' contributions, and a shortfall closes its non-housing
+services in the usual order. Rivals therefore have a real budget, can fall short
+and can grow through housing. Their AI still does not reopen closed services or
+plan beyond its doctrine queue. The end at the day limit compares Devotion;
+shared Flourishing below the survival line produces a no-winner defeat.
 
 ## 5. Day simulation and playback
 
@@ -469,21 +475,24 @@ left/right edges, then the top edge. `cellKey()` is shared with the navigator.
 contributionFor(resident) = 2 if wellbeing ≥ 65
                             1 if wellbeing ≥ 35
                             0 otherwise
-projectedContributions = sum(active residents)
+projectedContributions = sum(active residents in the chapter)
 projectedUpkeep        = sum(active, open services' program upkeep)
 projectedNet           = contributions − upkeep
 ```
 
-`resolveDay(charter, report)`:
+`resolveDay(charter, report)` resolves each chapter through
+`resolveChapter(chapter, residents)`:
 
-1. Compute contributions and upkeep before closure.
+1. Compute that chapter's contributions and upkeep before closure.
 2. Add contributions, subtract upkeep.
 3. If the balance is negative, close non-housing, non-fixed services in
    `BALANCE.economy.closureOrder` (`wonder`, `company`, `sustenance`, `rest`),
    highest upkeep first, adding each closed service's upkeep back until the
    balance is non-negative.
-4. Recompute upkeep and net; clamp lumen at 0; write `contributions`,
-   `upkeep`, `upkeepBefore`, `net`, `lumenAfter`, `closures` onto the report.
+4. Recompute upkeep and net; clamp lumen at 0; write the chapter's
+   `contributions`, `upkeep`, `upkeepBefore`, `net`, `lumenAfter` and `closures`
+   into the report. The player fields mirror the player chapter; each entry in
+   `report.chapters` carries its own economy.
 
 The report and HUD use these numbers. `flourishing` is computed by the day
 simulator as average wellbeing; `devotion` is the sum of affinity. There is no
@@ -553,9 +562,9 @@ minerals from a seeded RNG.
 
 | Size | Sector grids | Minerals |
 | --- | --- | --- |
-| `small` | 4 × `2×2` | 46 |
-| `medium` | 2 × `3×3` + 4 × `2×2` | 64 |
-| `large` | 1 × `5×5` + 2 × `3×3` + 4 × `2×2` | 82 |
+| `small` | 1 × `5×5` + 3 × `2×2` | 46 |
+| `medium` | 1 × `5×5` + 2 × `3×3` + 3 × `2×2` | 64 |
+| `large` | 1 × `6×6` + 2 × `3×3` + 4 × `2×2` | 82 |
 
 Minerals spawn outside the build grid on random islands. Their rocks/crystals
 use per-item seeded variation. The home shard is the only buildable sector.

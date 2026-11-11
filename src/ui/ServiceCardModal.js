@@ -121,12 +121,15 @@ export class ServiceCardModal {
             ? 'Rival service'
             : `Dismantle · +${refund} lumen`;
         this.demolishBtn.disabled = Boolean(service.fixed) || rivalService;
-        this.demolishBtn.title = service.fixed
-            ? 'The Welcome Post is part of the charter.'
-            : rivalService ? "A rival chapter's service cannot be dismantled." : '';
+        this.demolishBtn.title = rivalService
+            ? "A rival chapter's service cannot be dismantled."
+            : service.fixed ? 'The Welcome Post is part of the charter.' : '';
         this.reopenBtn.hidden = !service.closed;
+        this.reopenBtn.disabled = rivalService;
         this.reopenBtn.textContent = service.closed
-            ? `Reopen · ${this.game?.charter?.services.reopenCost(service) || 1} lumen`
+            ? rivalService
+                ? 'Rival service'
+                : `Reopen · ${this.game?.charter?.services.reopenCost(service) || 1} lumen`
             : 'Reopen';
 
         this.container.style.display = 'flex';

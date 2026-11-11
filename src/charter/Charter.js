@@ -23,21 +23,31 @@ export class Charter {
         this.homeSector = map?.homeSector || null;
         this.name = 'Home Chapter';
         this.occupancy = new Map();
-        this.playerChapter = { id: 'player', name: this.name, colour: '#FF6B5E', isPlayer: true };
+        const playerLumen = mode === 'contest' ? BALANCE.contest.startingLumen : BALANCE.startingLumen;
+        this.player = {
+            id: 'player',
+            name: this.name,
+            colour: '#FF6B5E',
+            doctrine: 'balanced',
+            isPlayer: true,
+            lumen: playerLumen,
+            works: BALANCE.worksPerDay,
+            services: null,
+            lastMove: null
+        };
+        this.playerChapter = this.player;
         this.services = new ServiceManager({
             map,
             parentContainer,
-            chapter: this.playerChapter,
+            chapter: this.player,
             occupancy: this.occupancy,
             idPrefix: 'player'
         });
-        this.playerChapter.services = this.services;
+        this.player.services = this.services;
         this.rivals = [];
         this.lastRivalMoves = [];
         this.day = 1;
         this.dayLimit = BALANCE.dayLimits[mapSize] || BALANCE.dayLimits.medium;
-        this.lumen = BALANCE.startingLumen;
-        this.works = BALANCE.worksPerDay;
         this.flourishing = 0;
         this.devotion = 0;
         this.report = null;
@@ -54,6 +64,7 @@ export class Charter {
         }
 
         this.roster = ResidentFactory.createRoster(seed, BALANCE.rosterSize);
+        if (this.mode === 'contest') this.activateContestFounders();
         this.foundWelcomePost();
         if (this.mode === 'contest') {
             this.createRivals();
@@ -73,6 +84,22 @@ export class Charter {
             parentContainer,
             saved
         });
+    }
+
+    get lumen() {
+        return this.player?.lumen || 0;
+    }
+
+    set lumen(value) {
+        if (this.player) this.player.lumen = Math.max(0, Math.trunc(value || 0));
+    }
+
+    get works() {
+        return this.player?.works || 0;
+    }
+
+    set works(value) {
+        if (this.player) this.player.works = Math.max(0, Math.trunc(value || 0));
     }
 
     get activeResidents() {
@@ -132,6 +159,13 @@ export class Charter {
         return this.services.spareHousing(this.playerResidents);
     }
 
+    get totalSpareBeds() {
+        return this.chapters.reduce((sum, chapter) => {
+            const residents = this.activeResidents.filter((resident) => resident.homeChapterId === chapter.id);
+            return sum + chapter.services.spareHousing(residents);
+        }, 0);
+    }
+
     get wellbeing() {
         const residents = this.activeResidents;
         if (residents.length === 0) return 0;
@@ -164,11 +198,26 @@ export class Charter {
             && this.flourishing >= BALANCE.end.comfortableFlourishing;
     }
 
+    activateContestFounders() {
+        const target = BALANCE.contest.startingResidentsPerChapter * 3;
+        for (const resident of this.roster) {
+            if (this.activeResidents.length >= target) break;
+            if (!resident.active) {
+                resident.active = true;
+                resident.state = 'idle';
+            }
+        }
+    }
+
     createRivals() {
         this.rivals = createRivalChapters({
             map: this.map,
             parentContainer: this.services.parentContainer,
             occupancy: this.occupancy
+        });
+        const ids = this.chapters.map((chapter) => chapter.id);
+        this.activeResidents.forEach((resident, index) => {
+            resident.homeChapterId = ids[index % ids.length];
         });
     }
 
@@ -204,7 +253,10 @@ export class Charter {
             colour: chapter.colour,
             isPlayer: Boolean(chapter.isPlayer),
             devotion: devotion[chapter.id] || 0,
-            visits: patronage[chapter.id] || 0
+            visits: patronage[chapter.id] || 0,
+            residents: this.activeResidents.filter((resident) => resident.homeChapterId === chapter.id).length,
+            lumen: chapter.lumen,
+            upkeep: chapter.services.totalUpkeep()
         }));
     }
 
@@ -220,7 +272,7 @@ export class Charter {
             v: anchor.v,
             name: 'Welcome Post',
             state: 'ACTIVE',
-            capacityOverride: 6,
+            capacityOverride: this.contest ? 4 : 6,
             fixed: true
         });
         this.welcomePost = result.ok ? result.service : null;
@@ -263,8 +315,19 @@ export class Charter {
         for (const resident of this.activeResidents) {
             const home = this.homeFor(resident);
             if (home) continue;
-            resident.homeChapterId = 'player';
-            this.services.assignHome(resident, this.roster);
+            const preferred = this.chapterById(resident.homeChapterId) || this.player;
+            if (preferred.services.assignHome(resident, this.roster)) {
+                resident.homeChapterId = preferred.id;
+                continue;
+            }
+            for (const chapter of this.chapters) {
+                if (chapter === preferred) continue;
+                if (chapter.services.assignHome(resident, this.roster)) {
+                    resident.homeChapterId = chapter.id;
+                    break;
+                }
+            }
+            if (!this.homeFor(resident)) resident.homeServiceId = null;
         }
     }
 
@@ -353,7 +416,7 @@ export class Charter {
         const promoted = this.services.promoteUnderConstruction();
         for (const service of this.services.services) service.resetDaily();
         for (const rival of this.rivals) {
-            rival.works = 1;
+            rival.works = BALANCE.contest.rivalWorksPerDay;
             rival.services.promoteUnderConstruction();
             for (const service of rival.services.services) service.resetDaily();
         }
@@ -370,18 +433,39 @@ export class Charter {
 
     addArrivals() {
         if (this.flourishing < BALANCE.arrivals.minFlourishing) return [];
-        const spare = this.services.spareHousing(this.playerResidents);
-        if (spare <= 0) return [];
         const waiting = this.roster.filter((resident) => !resident.active && !resident.memory.departure);
-        const count = Math.min(BALANCE.arrivals.perDay, spare, waiting.length);
+        if (waiting.length === 0) return [];
+        const devotion = this.devotionByChapter;
+        const candidates = this.chapters
+            .map((chapter) => ({
+                chapter,
+                spare: chapter.services.spareHousing(
+                    this.activeResidents.filter((resident) => resident.homeChapterId === chapter.id)
+                ),
+                devotion: devotion[chapter.id] || 0
+            }))
+            .filter((entry) => entry.spare > 0)
+            .sort((a, b) => b.devotion - a.devotion || b.spare - a.spare);
+        if (candidates.length === 0) return [];
+        const capacity = candidates.reduce((sum, entry) => sum + entry.spare, 0);
+        const count = Math.min(BALANCE.arrivals.perDay, capacity, waiting.length);
         const arrivals = [];
         for (let index = 0; index < count; index++) {
             const resident = waiting[index];
+            const target = candidates.find((entry) => entry.spare > 0);
+            if (!target) break;
             resident.active = true;
             resident.state = 'idle';
-            resident.homeChapterId = 'player';
-            this.services.assignHome(resident, this.roster);
-            arrivals.push({ id: resident.id, name: resident.name, homeServiceId: resident.homeServiceId });
+            resident.homeChapterId = target.chapter.id;
+            target.chapter.services.assignHome(resident, this.roster);
+            target.spare -= 1;
+            arrivals.push({
+                id: resident.id,
+                name: resident.name,
+                homeChapterId: target.chapter.id,
+                chapterName: target.chapter.name,
+                homeServiceId: resident.homeServiceId
+            });
         }
         if (arrivals.length > 0) {
             this.refreshDerived();
@@ -611,6 +695,7 @@ export class Charter {
             services: this.services.services.length,
             activeServices: this.services.activeServices.length,
             mode: this.mode,
+            totalSpareBeds: this.totalSpareBeds,
             rivals: this.rivals.length,
             devotionByChapter: this.devotionByChapter
         };

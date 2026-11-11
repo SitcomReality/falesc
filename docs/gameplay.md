@@ -45,7 +45,7 @@ islands, services, residents and camera viewport; click it to move the camera.
 
 ## The charter
 
-A new charter starts on **Day 1** with:
+A new charter starts on **Day 1**. In **First Light**:
 
 - **6 active Tidelanders** from a seeded roster of **15**;
 - a fixed **Welcome Post** with six beds (already `ACTIVE`, cannot be
@@ -54,7 +54,10 @@ A new charter starts on **Day 1** with:
 - **2 works**;
 - the **Canteen** armed in the service dock.
 
-The rest of the roster waits for spare beds and a flourishing of at least 20.
+In **The Contest**, all three chapters start with **3 active Tidelanders**
+(9 total), a fixed four-bed **Welcome House**, **15 lumen** and a doctrine;
+the player has 2 works and rivals have 1. The rest of the roster waits for spare
+beds and a flourishing of at least 20.
 The day limit is set by map size: **12** days on small, **14** on medium, **16**
 on large.
 
@@ -65,15 +68,18 @@ The lobby offers two modes:
 | Mode | What it is |
 | --- | --- |
 | **First Light** | The solo tutorial slice: one chapter, one shard, the 12-resident / flourishing-62 goal. |
-| **The Contest** | A two-rival preview on the same shard. **The Gardener** and **The Host** own services and a finite construction budget; residents choose between all chapters' doors. The contest ends at the day limit, when the most-beloved chapter wins. |
+| **The Contest** | A two-rival preview on the same shard. **The Gardener** and **The Host** each start with three residents, a four-bed Welcome House, 15 lumen and a doctrine. They build, pay upkeep and receive contributions under the same rules as the player. Residents choose between all chapters' doors, and the day limit crowns the most-beloved chapter. |
 
 In Contest mode the First Light objective card is replaced by a live **Devotion**
-standings card. Rival services carry a chapter-coloured pennant, appear in the
-bulletin's rival move, and cannot be dismantled by the player. Rivals build one
-service per day from their doctrine; their services count for visits and
-patronage, but rival upkeep, rival housing and rival contribution economies are
-not implemented yet. The shared residents all live at the player's Welcome Post
-in this preview.
+standings card. Each chapter begins with a fixed Welcome House (four beds) and
+the player's home grid grows to 5×5 (6×6 on large) to fit three chapters. Rival
+services carry a chapter-coloured pennant, appear in the bulletin's rival move,
+and cannot be dismantled by the player. Rivals build one service or house per
+day from their doctrine, pay upkeep and can go short; their residents contribute
+lumen exactly like the player's. Residents are assigned to the chapter with a
+spare bed, and arrivals prefer the most-beloved chapter with room. A rival can
+win residents into its own housing, but the AI does not yet reopen a closed
+service or run a more sophisticated strategy.
 
 ## Planning
 
@@ -258,9 +264,9 @@ Departures make the population-below-four defeat reachable: demolish or fail to 
 
 | Size | Islands | Grids | Shards (minerals) | Day limit |
 | --- | --- | --- | --- | --- |
-| Small | 4 | four 2×2 | 46 | 12 |
-| Medium | 6 | two 3×3 + four 2×2 | 64 | 14 |
-| Large | 7 | one 5×5 + two 3×3 + four 2×2 | 82 | 16 |
+| Small | 4 | one 5×5 + three 2×2 | 46 | 12 |
+| Medium | 6 | one 5×5 + two 3×3 + three 2×2 | 64 | 14 |
+| Large | 7 | one 6×6 + two 3×3 + four 2×2 | 82 | 16 |
 
 Only the **home shard** (largest, topmost) is playable; the rest are generated
 scenery. The seed determines island shapes and packing, the fifteen-person
@@ -320,19 +326,20 @@ yet.
 
 ## Current limitations
 
-- **Balance is generous and untuned.** A careful run can bank a large lumen
-  surplus; the interesting pressure is not yet there.
+- **Balance is generous and untuned.** Early victory removes the long surplus
+  tail, but the opening four days still do not force a hard care choice; the
+  Contest rival economy is still being tuned.
 - **Population pressure is real but sparse.** Departures only trigger after two
   homeless nights or three days at 92+ need; there is no broader wellbeing or
   word-of-mouth departure yet.
 - **Only the home shard is playable.** Other islands are scenery; there is no
-  transit, archipelago layer or rival chapter.
+  transit or archipelago layer.
 - **No building layers, modules, finishes, policies or retrofit.** The model
   carries default finish/policy values for future use; the player cannot choose
   them.
-- **The Contest is a preview.** Rivals build services and compete for visits
-  and Devotion, but they do not pay upkeep, own housing, or manage their own
-  lumen contributions. The full Confluence vote is not implemented.
+- **The Contest is a preview.** Rivals build services and housing, pay upkeep
+  and receive contributions, but their AI does not reopen closed services or
+  plan beyond its doctrine queue. The full Confluence vote is not implemented.
 - **No auctions, stewardship, petitions or multiplayer.** The Multiplayer button
   is a disabled placeholder.
 - **No audio.**

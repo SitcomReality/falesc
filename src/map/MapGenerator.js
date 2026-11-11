@@ -22,9 +22,11 @@ export class MapGenerator {
         this.homeSector = null;
 
         const gridConfigs = {
-            small: [4, 2, 2, 2],
-            medium: [4, 3, 3, 2, 2, 2],
-            large: [5, 3, 3, 2, 2, 2, 2]
+            // Larger home grids give the Contest's three chapters room for
+            // housing, signature services and later growth.
+            small: [5, 2, 2, 2],
+            medium: [5, 3, 3, 2, 2, 2],
+            large: [6, 3, 3, 2, 2, 2, 2]
         };
 
         this.gridSizes = (gridConfigs[mapSize] || gridConfigs.medium)

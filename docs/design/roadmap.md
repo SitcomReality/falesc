@@ -50,10 +50,11 @@ no sea, beach or open-air planting. `npm run check` and the smoke test pass.
   before rivals, or whether the resident loop is strong enough to move on.
 
 **Phase 2 preview is now in the build:** two AI rival chapters, doctrine build
-moves, shared services/occupancy, shared residents, Devotion standings,
-patronage and a most-beloved-chapter end at the day limit. Rival upkeep/economy,
-rival housing competition, the survey patronage overlay and the Confluence vote
-remain.
+moves, shared services/occupancy, shared residents, rival Welcome Houses and
+housing growth, per-chapter lumen/contributions/upkeep/closures, Devotion
+standings, patronage and a most-beloved-chapter end at the day limit. Rival
+reopen/recovery, reactive strategy, the survey patronage overlay and the
+Confluence vote remain.
 
 **Not started:** the rest of Phase 2, Phase 3 (layers, modules, finishes,
 policy, retrofit), Phase 4 (scenarios, Confluence vote, stewardship), Phase 5

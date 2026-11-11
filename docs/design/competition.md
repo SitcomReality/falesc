@@ -7,6 +7,12 @@
 > [D4](decisions.md#d4--the-confluence-is-the-main-mode) (the Confluence is the
 > main mode).
 >
+> **Status:** a two-rival Contest preview now exists in code: shared services and
+> residents, rival Welcome Houses and housing growth, per-chapter lumen,
+> contributions, upkeep and closures, Devotion standings, patronage and doctrine
+> build moves. Rival reopen/reactive strategy and the Confluence vote remain
+> target.
+>
 > The competition is for **patronage and love**, not profit. Rivals win residents
 > by being better hosts. There is no price war, no landlord rent, and no cash
 > auction. The final judgment is a vote.

@@ -47,11 +47,13 @@ export class ReportScreen {
         const quotes = report.quotes?.length
             ? report.quotes.map((quote) => `<blockquote>“${escapeHtml(quote.text)}”<cite>${escapeHtml(quote.resident)}</cite></blockquote>`).join('')
             : '<blockquote>“A quiet day.”<cite>The square</cite></blockquote>';
-        const standings = report.chapters?.length > 1
-            ? `<h2>Standings</h2><ul class="report__list report__list--services">${[...report.chapters].sort((a, b) => b.devotion - a.devotion).map((chapter) => `<li><span>${escapeHtml(chapter.name)}${chapter.isPlayer ? ' (you)' : ''}</span><span>${chapter.devotion.toFixed(1)} ♥ · ${chapter.visits} visits</span></li>`).join('')}</ul>`
+        const contest = report.chapters?.length > 1;
+        const standings = contest
+            ? `<h2>Standings</h2><ul class="report__list report__list--services">${[...report.chapters].sort((a, b) => b.devotion - a.devotion).map((chapter) => `<li><span>${escapeHtml(chapter.name)}${chapter.isPlayer ? ' (you)' : ''}</span><span>${chapter.devotion.toFixed(1)} ♥ · ${chapter.visits} visits${Number.isFinite(chapter.residents) ? ` · ${chapter.residents} residents` : ''}</span></li>`).join('')}</ul>`
+                + `<h2>Chapter ledgers</h2><ul class="report__list report__list--services">${report.chapters.map((chapter) => `<li><span>${escapeHtml(chapter.name)}</span><span>+${chapter.contributions ?? 0} −${chapter.upkeep ?? 0} · ${chapter.lumen ?? 0} lumen</span></li>`).join('')}</ul>`
             : '';
         const arrivals = report.arrivals?.length
-            ? `<h2>Arrivals</h2><ul class="report__list report__list--services">${report.arrivals.map((arrival) => `<li><span>${escapeHtml(arrival.name)}</span><span>new bed</span></li>`).join('')}</ul>`
+            ? `<h2>Arrivals</h2><ul class="report__list report__list--services">${report.arrivals.map((arrival) => `<li><span>${escapeHtml(arrival.name)}</span><span>${escapeHtml(arrival.chapterName ? `${arrival.chapterName} · new bed` : 'new bed')}</span></li>`).join('')}</ul>`
             : '';
         const departures = report.departures?.length
             ? `<h2>Departures</h2><ul class="report__list">${report.departures.map((departure) => `<li><strong>${escapeHtml(departure.name)}</strong> — ${escapeHtml(departure.reason)}</li>`).join('')}</ul>`
@@ -72,9 +74,9 @@ export class ReportScreen {
                 <div class="report__numbers">
                     <div><span class="kicker">Visits</span><strong>${report.visits}</strong></div>
                     <div><span class="kicker">Hearts gained</span><strong>${(report.heartsGained ?? report.hearts ?? 0).toFixed(1)}${report.heartsLost > 0 ? ` <span class="report__loss">−${report.heartsLost.toFixed(1)}</span>` : ''}</strong></div>
-                    <div><span class="kicker">Contributions</span><strong>+${report.contributions}</strong></div>
-                    <div><span class="kicker">Upkeep</span><strong>−${report.upkeep}</strong></div>
-                    <div><span class="kicker">Lumen</span><strong>${report.lumenAfter}</strong></div>
+                    <div><span class="kicker">${contest ? 'Your contributions' : 'Contributions'}</span><strong>+${report.contributions}</strong></div>
+                    <div><span class="kicker">${contest ? 'Your upkeep' : 'Upkeep'}</span><strong>−${report.upkeep}</strong></div>
+                    <div><span class="kicker">${contest ? 'Your lumen' : 'Lumen'}</span><strong>${report.lumenAfter}</strong></div>
                     <div><span class="kicker">Flourishing</span><strong>${Math.round(report.flourishing)}</strong></div>
                 </div>
                 ${closures}

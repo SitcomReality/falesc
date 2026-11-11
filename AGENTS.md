@@ -19,8 +19,9 @@ that document is prototype-era; the current world is the void described in
 **Design direction.** The refined design — resident needs, service buildings,
 planning plus playback, care-based competition and the Confluence — is
 substantially implemented for one shared shard, including a **Contest preview**
-with two static-budget AI rivals, shared residents and Devotion standings.
-Rival upkeep/housing competition, layers, auctions and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
+with two AI rivals, a shared lumen economy, shared residents, rival housing and
+Devotion standings. The full Confluence vote, deeper rival strategy, layers,
+auctions and multiplayer are not. Read [docs/design-refinement.md](docs/design-refinement.md)
 and [docs/design/roadmap.md](docs/design/roadmap.md) before changing the loop.
 
 ## Start here
@@ -127,10 +128,12 @@ after any behavioural change.
   `src/design/programs.js`; needs in `src/design/needs.js`; traits in
   `src/design/traits.js`. Do not scatter balance literals through the
   simulation.
-- A charter starts with **6 of 15 residents**, **10 lumen**, **2 works/day**,
-  and a fixed six-bed **Welcome Post**. Services cost 4–6 lumen and one work,
-  and take one day to open (`PENDING → ACTIVE`). Only `ACTIVE`, open services
-  accept visits and pay upkeep.
+- First Light starts with **6 of 15 residents**, **10 lumen**, **2 works/day**,
+  and a fixed six-bed **Welcome Post**. The Contest starts with **9 residents**
+  (three per chapter), **15 lumen** per chapter, and a four-bed Welcome House per
+  chapter. Services cost 4–6 lumen and one work, and take one day to open
+  (`PENDING → ACTIVE`). Only `ACTIVE`, open services accept visits and pay
+  upkeep.
 - Lumen comes from resident wellbeing, not harvest tiles. Upkeep is paid at the
   end of the day; a shortfall closes services in the order wonder → company →
   sustenance (housing is exempt). Closed services can be reopened for lumen.
@@ -142,8 +145,10 @@ after any behavioural change.
   half-load an old save.
 - Placement occupancy is shared across player and rival chapters. Do not give a
   chapter its own private occupancy map or services will overlap.
-- Rival chapters currently pay construction costs but no upkeep, and do not own
-  housing. Do not describe the Contest preview as a full rival economy.
+- Rival chapters pay construction costs and upkeep, receive contributions from
+  their own residents, and own fixed Welcome Houses. Their AI does not reopen
+  closed services yet, and the Confluence vote is still missing; do not describe
+  the preview as the full competition design.
 - The main Pixi canvas is WebGL. The harness samples `#minimap` (2D) instead; do
   not remove the survey chart without adjusting `canvasSelectors` and the smoke
   test.

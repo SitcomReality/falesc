@@ -23,7 +23,7 @@ export class StandingsCard {
         this.element.hidden = !visible;
         if (!visible) return;
         const ordered = [...chapters].sort((a, b) => b.devotion - a.devotion || b.visits - a.visits);
-        const signature = JSON.stringify(ordered.map((chapter) => [chapter.id, chapter.devotion, chapter.visits]));
+        const signature = JSON.stringify(ordered.map((chapter) => [chapter.id, chapter.devotion, chapter.visits, chapter.residents]));
         if (signature === this.signature) return;
         this.signature = signature;
         this.listEl.innerHTML = ordered.map((chapter, index) => `
@@ -32,7 +32,7 @@ export class StandingsCard {
                 <span class="standings-row__dot" style="background:${chapter.colour}"></span>
                 <span class="standings-row__name">${escapeHtml(chapter.name)}${chapter.isPlayer ? ' (you)' : ''}</span>
                 <strong class="standings-row__hearts">${chapter.devotion.toFixed(1)} ♥</strong>
-                <span class="standings-row__visits">${chapter.visits} visits</span>
+                <span class="standings-row__visits">${chapter.residents} residents · ${chapter.visits} visits</span>
             </li>
         `).join('');
     }

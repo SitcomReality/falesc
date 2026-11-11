@@ -377,7 +377,8 @@ export class GameScreen {
         }
 
         const selectedName = PROGRAM_BY_ID[this.game.selectedProgramId]?.name || 'Service';
-        this._setText(this.worksNote, 'worksNote', `${charter.works} ${charter.works === 1 ? 'work' : 'works'} left · ${charter.spareBeds} spare ${charter.spareBeds === 1 ? 'bed' : 'beds'}`);
+        const spare = charter.contest ? charter.totalSpareBeds : charter.spareBeds;
+        this._setText(this.worksNote, 'worksNote', `${charter.works} ${charter.works === 1 ? 'work' : 'works'} left · ${spare} spare ${spare === 1 ? 'bed' : 'beds'}`);
         this._setText(this.dockNote, 'dockNote', charter.works > 0
             ? `${selectedName} armed${this.game.selectedProgramId ? ' · choose a plot' : ''}`
             : 'No works left. Open the day.');

@@ -8,7 +8,7 @@ export const RIVAL_DEFINITIONS = [
         colour: '#59E3C2',
         doctrine: 'wonder',
         blurb: 'Builds gardens and quiet rooms. Forgets the night kitchen.',
-        programs: ['garden_dome', 'tea_house', 'canteen'],
+        programs: ['garden_dome', 'tea_house', 'canteen', 'housing'],
         lumen: 20,
         works: 1
     },
@@ -18,7 +18,7 @@ export const RIVAL_DEFINITIONS = [
         colour: '#FF4F9A',
         doctrine: 'company',
         blurb: 'Builds tables, lamps and noise. Runs short of garden.',
-        programs: ['tea_house', 'canteen', 'garden_dome'],
+        programs: ['tea_house', 'canteen', 'garden_dome', 'housing'],
         lumen: 20,
         works: 1
     }
@@ -32,10 +32,28 @@ export function createRivalChapters({ map, parentContainer, occupancy }) {
             parentContainer,
             occupancy
         });
-        // The preview opens with one signature service already running.
+        // Every chapter starts with a small welcome house and one signature
+        // service already running.
+        seedHousing(rival);
         const opening = rival.doctrine === 'wonder' ? 'garden_dome' : 'tea_house';
         seedOpeningService(rival, opening);
         return rival;
+    });
+}
+
+function seedHousing(rival) {
+    const program = PROGRAM_BY_ID.housing;
+    const plot = findFreePlot(rival, 'housing');
+    if (!plot) return;
+    rival.services.place({
+        programId: 'housing',
+        sectorId: plot.sectorId,
+        u: plot.u,
+        v: plot.v,
+        name: 'Welcome House',
+        state: 'ACTIVE',
+        capacityOverride: 4,
+        fixed: true
     });
 }
 
@@ -77,12 +95,13 @@ export function planRivalDay(rival, charter) {
         if (rival.lumen < program.cost) continue;
         const plot = findFreePlot(rival, programId);
         if (!plot) continue;
+        const built = countProgram(rival, programId);
         const result = rival.services.place({
             programId,
             sectorId: plot.sectorId,
             u: plot.u,
             v: plot.v,
-            name: program.name,
+            name: built > 0 ? `${program.name} ${built + 1}` : program.name,
             state: 'PENDING'
         });
         if (!result.ok) continue;
@@ -105,9 +124,9 @@ function countProgram(rival, programId) {
     return rival.services.services.filter((service) => service.programId === programId).length;
 }
 
-function programLimit() {
-    // The preview gives each rival one of each program. This keeps rival
-    // buildings distinct and readable on a single shard.
+function programLimit(programId) {
+    // One of each signature service; housing can grow once more.
+    if (programId === 'housing') return 2;
     return 1;
 }
 

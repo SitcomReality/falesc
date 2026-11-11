@@ -18,8 +18,9 @@ export default async function ({ page, assert, screenshot, log }) {
     log(JSON.stringify({ mode: founded.mode, rivals: founded.rivalCount, allServices: founded.allServices, chapters: founded.chapters }));
     assert.equal(founded.mode, 'contest');
     assert.equal(founded.rivalCount, 2, 'two rival chapters should exist');
-    assert.equal(founded.allServices, 3, 'Welcome Post plus one opening service for each rival');
+    assert.equal(founded.allServices, 5, 'Welcome Post plus one housing and one opening service for each rival');
     assert.equal(founded.chapters.length, 3);
+    assert.equal(founded.chapters.find((chapter) => chapter.id === 'gardener').residents, 3, 'each chapter should start with three residents');
     assert.ok(await page.visible('[data-testid=standings-card]'), 'the Devotion standings should be visible');
 
     const rival = await page.evaluate(`(() => {
@@ -52,6 +53,7 @@ export default async function ({ page, assert, screenshot, log }) {
     log(JSON.stringify({ dayOne: dayOne.report, standings: dayOne.chapters }));
     assert.ok(dayOne.report.visits > 0, 'residents should visit the rival services');
     assert.ok((dayOne.report.patronageByChapter.host || 0) > 0, 'the Host should receive patronage');
+    assert.ok(dayOne.report.chapters.find((chapter) => chapter.id === 'gardener').upkeep >= 4, 'rivals should pay upkeep');
     assert.ok(dayOne.chapters.find((chapter) => chapter.id === 'host').devotion > 0, 'the Host should gain Devotion');
     assert.ok(await page.visible('[data-testid=report-screen]'));
     await screenshot('contest-report.png');
@@ -106,8 +108,9 @@ export default async function ({ page, assert, screenshot, log }) {
     log(JSON.stringify({ restored: { mode: restored.mode, rivals: restored.rivalCount, allServices: restored.allServices, chapters: restored.chapters } }));
     assert.equal(restored.mode, 'contest', 'contest mode should survive a reload');
     assert.equal(restored.rivalCount, 2, 'rival chapters should restore');
-    assert.ok(restored.allServices >= 3, 'rival services should restore');
+    assert.ok(restored.allServices >= 5, 'rival services should restore');
     assert.equal(restored.chapters.length, 3);
+    assert.ok(restored.chapters.find((chapter) => chapter.id === 'host').residents > 3, 'a growing rival should win residents into its housing');
 
     await page.evaluate("window.__falesc.app.charter.day = window.__falesc.app.charter.dayLimit");
     await page.evaluate("window.__falesc.openDay()");

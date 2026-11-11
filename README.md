@@ -7,9 +7,9 @@ enough for the chapter to flourish.
 
 This build is the **First Light vertical slice**. One playable home shard, four
 needs, four services, a paused planning day, a deterministic playback, and an
-evening broadsheet. A **Contest preview** adds two rival chapters and shared
-residents on the same shard; the full shared commons, rival economy and the
-Confluence vote are the design target beyond that.
+evening broadsheet. A **Contest preview** adds two rival chapters, a shared lumen
+economy, shared residents and rival housing on the same shard; the full shared
+commons and the Confluence vote are the design target beyond that.
 
 Built with vanilla ES modules and [Pixi.js](https://pixijs.com/) 7. There is no
 build step: `index.html` loads `src/App.js`, which starts `src/FalescGame.js`,
@@ -20,9 +20,9 @@ the game makes no network requests at runtime.
 > the day, read the report, repeat. Residents arrive, leave when a need or a bed
 > goes unmet for days, and can empty the chapter. Balance is generous and not yet
 > tuned; only the home shard is playable. A two-rival Contest preview is
-> available, but rival upkeep, housing competition and the Confluence vote are
-> not implemented. Building layers, auctions and multiplayer are also absent.
-> See [docs/known-issues.md](docs/known-issues.md).
+> available, with rival upkeep, contributions, housing and Devotion standings;
+> the Confluence vote, deeper rival strategy, building layers, auctions and
+> multiplayer are not implemented. See [docs/known-issues.md](docs/known-issues.md).
 
 ## Run it locally
 
@@ -41,9 +41,11 @@ so any static file server works, but ES modules require `http://`, not `file://`
 ## How to play
 
 - Start a charter from the lobby and choose **First Light** (solo) or
-  **The Contest** (two AI rivals on the same shard). Day 1 gives you six
-  Tidelanders, a fixed Welcome Post with six beds, 10 lumen, two works, and the
-  Canteen armed.
+  **The Contest** (two AI rivals on the same shard). First Light gives you six
+  Tidelanders, a fixed six-bed Welcome Post, 10 lumen and two works. The Contest
+  gives each of the three chapters three residents, a four-bed Welcome House,
+  15 lumen and two works (rivals get one build work per day). The Canteen is
+  armed in both.
 - Read the morning bulletin. Arm a service with `1`–`4` (or click a dock card),
   then click a free plot on the home shard and name the place.
 - A service costs lumen and one work. It is `PENDING` for a day and opens at the
@@ -107,15 +109,17 @@ victory, and mobile layout. The CLI equivalents and the manual checklist are in
 ## Status
 
 Playable First Light vertical slice: seeded floating-shard world, a named cast
-of fifteen with six founders, four needs, four service programs, construction
+of fifteen with six First Light founders (nine Contest founders), four needs,
+four service programs, construction
 and works, wellbeing-driven lumen with upkeep and closures, deterministic day
 playback, an evening report, Devotion and Flourishing, victory/defeat, and
 local save v2.
 
-The **Contest preview** is present: two rival chapters build services, shared
-residents choose between them, Devotion standings and patronage appear in the
-HUD and report, and the day limit crowns the most-beloved chapter. Still absent:
-rival upkeep/economy and housing competition, the full shared commons, the
-Confluence vote, building layers or retrofit, auctions, audio, multiplayer, or a
+The **Contest preview** is present: two rival chapters build services and
+housing, pay upkeep from their own residents' contributions, share the same
+residents and occupancy, and compete for Devotion; standings and patronage
+appear in the HUD and report, and the day limit crowns the most-beloved chapter.
+Still absent: the full shared commons, Confluence vote, deeper rival strategy
+and reopen logic, building layers or retrofit, auctions, audio, multiplayer, or a
 keyboard build cursor. The Commons Beacon silhouette exists as endgame art but
 is not buildable. See [docs/known-issues.md](docs/known-issues.md).
